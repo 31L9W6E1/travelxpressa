@@ -55,6 +55,7 @@ const admin_routes_1 = __importDefault(require("./routes/admin.routes"));
 const user_routes_1 = __importDefault(require("./routes/user.routes"));
 const application_routes_1 = __importDefault(require("./routes/application.routes"));
 const posts_routes_1 = __importDefault(require("./routes/posts.routes"));
+const chat_routes_1 = __importDefault(require("./routes/chat.routes"));
 const app = (0, express_1.default)();
 // Trust proxy (for rate limiting behind reverse proxy)
 app.set('trust proxy', 1);
@@ -129,6 +130,7 @@ if (config_1.config.isProduction) {
     app.use('/api', rateLimit_1.apiRateLimit, user_routes_1.default);
     app.use('/api/applications', rateLimit_1.apiRateLimit, application_routes_1.default);
     app.use('/api/posts', rateLimit_1.apiRateLimit, posts_routes_1.default);
+    app.use('/api/chat', rateLimit_1.apiRateLimit, chat_routes_1.default);
 }
 else {
     // Development - no rate limiting
@@ -138,6 +140,7 @@ else {
     app.use('/api', user_routes_1.default);
     app.use('/api/applications', application_routes_1.default);
     app.use('/api/posts', posts_routes_1.default);
+    app.use('/api/chat', chat_routes_1.default);
 }
 // 404 handler
 app.use(errorHandler_1.notFoundHandler);

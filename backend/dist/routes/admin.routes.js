@@ -106,14 +106,42 @@ router.delete('/inquiries/:id', (0, validate_1.validate)({ params: schemas_1.idP
  * Get admin dashboard statistics
  */
 router.get('/stats', (0, errorHandler_1.asyncHandler)(async (_req, res) => {
-    const [totalInquiries, pendingInquiries, approvedInquiries, rejectedInquiries, totalUsers, totalApplications, submittedApplications, recentInquiries, recentApplications,] = await Promise.all([
+    // Get current date and calculate date ranges
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+    const [
+    // Inquiry stats
+    totalInquiries, pendingInquiries, approvedInquiries, rejectedInquiries, 
+    // User stats
+    totalUsers, usersThisMonth, usersLastMonth, 
+    // Application stats - COMPREHENSIVE
+    totalApplications, draftApplications, inProgressApplications, submittedApplications, underReviewApplications, completedApplications, rejectedApplications, applicationsThisMonth, applicationsLastMonth, 
+    // Recent items
+    recentInquiries, recentApplications, recentUsers, 
+    // Monthly trends (last 6 months)
+    monthlyApplications, monthlyUsers,] = await Promise.all([
+        // Inquiry counts
         prisma_1.prisma.inquiry.count(),
         prisma_1.prisma.inquiry.count({ where: { status: 'PENDING' } }),
         prisma_1.prisma.inquiry.count({ where: { status: 'APPROVED' } }),
         prisma_1.prisma.inquiry.count({ where: { status: 'REJECTED' } }),
+        // User counts
         prisma_1.prisma.user.count(),
+        prisma_1.prisma.user.count({ where: { createdAt: { gte: startOfMonth } } }),
+        prisma_1.prisma.user.count({ where: { createdAt: { gte: startOfLastMonth, lte: endOfLastMonth } } }),
+        // Application counts by status
         prisma_1.prisma.application.count(),
+        prisma_1.prisma.application.count({ where: { status: 'DRAFT' } }),
+        prisma_1.prisma.application.count({ where: { status: 'IN_PROGRESS' } }),
         prisma_1.prisma.application.count({ where: { status: 'SUBMITTED' } }),
+        prisma_1.prisma.application.count({ where: { status: 'UNDER_REVIEW' } }),
+        prisma_1.prisma.application.count({ where: { status: 'COMPLETED' } }),
+        prisma_1.prisma.application.count({ where: { status: 'REJECTED' } }),
+        prisma_1.prisma.application.count({ where: { createdAt: { gte: startOfMonth } } }),
+        prisma_1.prisma.application.count({ where: { createdAt: { gte: startOfLastMonth, lte: endOfLastMonth } } }),
+        // Recent items
         prisma_1.prisma.inquiry.findMany({
             orderBy: { createdAt: 'desc' },
             take: 5,
@@ -130,29 +158,131 @@ router.get('/stats', (0, errorHandler_1.asyncHandler)(async (_req, res) => {
             orderBy: { updatedAt: 'desc' },
             take: 5,
             include: {
-                user: { select: { name: true, email: true } },
+                user: { select: { id: true, name: true, email: true } },
             },
         }),
+        prisma_1.prisma.user.findMany({
+            orderBy: { createdAt: 'desc' },
+            take: 5,
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                role: true,
+                createdAt: true,
+                lastLoginAt: true,
+            },
+        }),
+        // Monthly application trends (last 6 months) - using raw query for grouping
+        prisma_1.prisma.$queryRaw `
+        SELECT
+          strftime('%Y-%m', createdAt) as month,
+          COUNT(*) as total,
+          SUM(CASE WHEN status = 'SUBMITTED' THEN 1 ELSE 0 END) as submitted,
+          SUM(CASE WHEN status = 'COMPLETED' THEN 1 ELSE 0 END) as approved,
+          SUM(CASE WHEN status IN ('DRAFT', 'IN_PROGRESS', 'UNDER_REVIEW') THEN 1 ELSE 0 END) as pending,
+          SUM(CASE WHEN status = 'REJECTED' THEN 1 ELSE 0 END) as rejected
+        FROM Application
+        WHERE createdAt >= date('now', '-6 months')
+        GROUP BY strftime('%Y-%m', createdAt)
+        ORDER BY month DESC
+        LIMIT 6
+      `,
+        // Monthly user registration trends
+        prisma_1.prisma.$queryRaw `
+        SELECT
+          strftime('%Y-%m', createdAt) as month,
+          COUNT(*) as total
+        FROM User
+        WHERE createdAt >= date('now', '-6 months')
+        GROUP BY strftime('%Y-%m', createdAt)
+        ORDER BY month DESC
+        LIMIT 6
+      `,
     ]);
+    // Calculate growth percentages
+    const userGrowth = usersLastMonth > 0
+        ? Math.round(((usersThisMonth - usersLastMonth) / usersLastMonth) * 100)
+        : usersThisMonth > 0 ? 100 : 0;
+    const applicationGrowth = applicationsLastMonth > 0
+        ? Math.round(((applicationsThisMonth - applicationsLastMonth) / applicationsLastMonth) * 100)
+        : applicationsThisMonth > 0 ? 100 : 0;
+    // Calculate approval rate
+    const processedApplications = completedApplications + rejectedApplications;
+    const approvalRate = processedApplications > 0
+        ? Math.round((completedApplications / processedApplications) * 100)
+        : 0;
+    // Format monthly data for charts
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const formatMonthlyData = (data) => {
+        return data.map((item) => {
+            const [year, month] = item.month.split('-');
+            return {
+                month: monthNames[parseInt(month) - 1],
+                ...item,
+                total: Number(item.total),
+                submitted: Number(item.submitted || 0),
+                approved: Number(item.approved || 0),
+                pending: Number(item.pending || 0),
+                rejected: Number(item.rejected || 0),
+            };
+        }).reverse();
+    };
     res.json({
         success: true,
         data: {
+            // Overview stats
+            overview: {
+                totalUsers,
+                totalApplications,
+                approvedApplications: completedApplications,
+                pendingApplications: submittedApplications + underReviewApplications + inProgressApplications,
+                rejectedApplications,
+            },
+            // Detailed user stats
+            users: {
+                total: totalUsers,
+                thisMonth: usersThisMonth,
+                lastMonth: usersLastMonth,
+                growth: userGrowth,
+            },
+            // Detailed application stats
+            applications: {
+                total: totalApplications,
+                draft: draftApplications,
+                inProgress: inProgressApplications,
+                submitted: submittedApplications,
+                underReview: underReviewApplications,
+                completed: completedApplications,
+                rejected: rejectedApplications,
+                thisMonth: applicationsThisMonth,
+                lastMonth: applicationsLastMonth,
+                growth: applicationGrowth,
+                approvalRate,
+            },
+            // Inquiry stats
             inquiries: {
                 total: totalInquiries,
                 pending: pendingInquiries,
                 approved: approvedInquiries,
                 rejected: rejectedInquiries,
             },
-            users: {
-                total: totalUsers,
-            },
-            applications: {
-                total: totalApplications,
-                submitted: submittedApplications,
-            },
+            // Recent items
             recent: {
                 inquiries: recentInquiries,
                 applications: recentApplications,
+                users: recentUsers,
+            },
+            // Chart data
+            charts: {
+                monthlyApplications: formatMonthlyData(monthlyApplications),
+                monthlyUsers: monthlyUsers.map((item) => {
+                    const [year, month] = item.month.split('-');
+                    return {
+                        month: monthNames[parseInt(month) - 1],
+                        users: Number(item.total),
+                    };
+                }).reverse(),
             },
         },
     });

@@ -60,16 +60,16 @@ exports.personalInfoSchema = zod_1.z.object({
     surnames: zod_1.z.string().min(1).max(100),
     givenNames: zod_1.z.string().min(1).max(100),
     fullNameNative: zod_1.z.string().max(200).optional(),
-    otherNamesUsed: zod_1.z.boolean(),
+    otherNamesUsed: zod_1.z.boolean().optional().default(false),
     otherNames: zod_1.z.array(zod_1.z.string().max(100)).max(10).optional(),
-    telCode: zod_1.z.string().min(1).max(5),
+    telCode: zod_1.z.string().max(5).optional().default(''),
     sex: zod_1.z.enum(['M', 'F']),
     maritalStatus: zod_1.z.enum(['SINGLE', 'MARRIED', 'DIVORCED', 'WIDOWED', 'SEPARATED']),
     dateOfBirth: zod_1.z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format'),
-    cityOfBirth: zod_1.z.string().min(1).max(100),
+    cityOfBirth: zod_1.z.string().max(100).optional().default(''),
     stateOfBirth: zod_1.z.string().max(100).optional(),
-    countryOfBirth: zod_1.z.string().min(2).max(100),
-    nationality: zod_1.z.string().min(2).max(100),
+    countryOfBirth: zod_1.z.string().min(1).max(100),
+    nationality: zod_1.z.string().min(1).max(100),
 });
 exports.addressSchema = zod_1.z.object({
     street: zod_1.z.string().min(1).max(200),
@@ -89,16 +89,15 @@ exports.contactInfoSchema = zod_1.z.object({
 exports.passportInfoSchema = zod_1.z.object({
     passportType: zod_1.z.enum(['REGULAR', 'OFFICIAL', 'DIPLOMATIC', 'OTHER']),
     passportNumber: zod_1.z.string()
-        .min(5, 'Passport number must be at least 5 characters')
-        .max(20, 'Passport number must be less than 20 characters')
-        .regex(/^[A-Z0-9]+$/, 'Passport number can only contain uppercase letters and numbers'),
+        .min(1, 'Passport number is required')
+        .max(20, 'Passport number must be less than 20 characters'),
     passportBookNumber: zod_1.z.string().max(20).optional(),
-    countryOfIssuance: zod_1.z.string().min(2).max(100),
-    cityOfIssuance: zod_1.z.string().min(1).max(100),
+    countryOfIssuance: zod_1.z.string().min(1).max(100),
+    cityOfIssuance: zod_1.z.string().max(100).optional().default(''),
     stateOfIssuance: zod_1.z.string().max(100).optional(),
     issuanceDate: zod_1.z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format'),
     expirationDate: zod_1.z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format'),
-    hasOtherPassport: zod_1.z.boolean(),
+    hasOtherPassport: zod_1.z.boolean().optional().default(false),
     otherPassportInfo: zod_1.z.object({
         number: zod_1.z.string().max(20),
         country: zod_1.z.string().min(2).max(100),
@@ -108,15 +107,15 @@ exports.travelInfoSchema = zod_1.z.object({
     purposeOfTrip: zod_1.z.string().min(1).max(200),
     specificPurpose: zod_1.z.string().max(500).optional(),
     intendedArrivalDate: zod_1.z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format'),
-    intendedLengthOfStay: zod_1.z.string().min(1).max(50),
+    intendedLengthOfStay: zod_1.z.string().max(50).optional().default(''),
     addressWhileInUS: zod_1.z.object({
-        street: zod_1.z.string().min(1).max(200),
-        city: zod_1.z.string().min(1).max(100),
-        state: zod_1.z.string().min(2).max(2),
+        street: zod_1.z.string().max(200).optional().default(''),
+        city: zod_1.z.string().max(100).optional().default(''),
+        state: zod_1.z.string().max(50).optional().default(''),
         zipCode: zod_1.z.string().max(10).optional(),
     }),
-    payingForTrip: zod_1.z.string().min(1).max(200),
-    travelingWithOthers: zod_1.z.boolean(),
+    payingForTrip: zod_1.z.string().max(200).optional().default(''),
+    travelingWithOthers: zod_1.z.boolean().optional().default(false),
     companions: zod_1.z.array(zod_1.z.object({
         name: zod_1.z.string().max(200),
         relationship: zod_1.z.string().max(50),

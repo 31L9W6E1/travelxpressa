@@ -68,16 +68,16 @@ export const personalInfoSchema = z.object({
   surnames: z.string().min(1).max(100),
   givenNames: z.string().min(1).max(100),
   fullNameNative: z.string().max(200).optional(),
-  otherNamesUsed: z.boolean(),
+  otherNamesUsed: z.boolean().optional().default(false),
   otherNames: z.array(z.string().max(100)).max(10).optional(),
-  telCode: z.string().min(1).max(5),
+  telCode: z.string().max(5).optional().default(''),
   sex: z.enum(['M', 'F']),
   maritalStatus: z.enum(['SINGLE', 'MARRIED', 'DIVORCED', 'WIDOWED', 'SEPARATED']),
   dateOfBirth: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format'),
-  cityOfBirth: z.string().min(1).max(100),
+  cityOfBirth: z.string().max(100).optional().default(''),
   stateOfBirth: z.string().max(100).optional(),
-  countryOfBirth: z.string().min(2).max(100),
-  nationality: z.string().min(2).max(100),
+  countryOfBirth: z.string().min(1).max(100),
+  nationality: z.string().min(1).max(100),
 });
 
 export const addressSchema = z.object({
@@ -100,16 +100,15 @@ export const contactInfoSchema = z.object({
 export const passportInfoSchema = z.object({
   passportType: z.enum(['REGULAR', 'OFFICIAL', 'DIPLOMATIC', 'OTHER']),
   passportNumber: z.string()
-    .min(5, 'Passport number must be at least 5 characters')
-    .max(20, 'Passport number must be less than 20 characters')
-    .regex(/^[A-Z0-9]+$/, 'Passport number can only contain uppercase letters and numbers'),
+    .min(1, 'Passport number is required')
+    .max(20, 'Passport number must be less than 20 characters'),
   passportBookNumber: z.string().max(20).optional(),
-  countryOfIssuance: z.string().min(2).max(100),
-  cityOfIssuance: z.string().min(1).max(100),
+  countryOfIssuance: z.string().min(1).max(100),
+  cityOfIssuance: z.string().max(100).optional().default(''),
   stateOfIssuance: z.string().max(100).optional(),
   issuanceDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format'),
   expirationDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format'),
-  hasOtherPassport: z.boolean(),
+  hasOtherPassport: z.boolean().optional().default(false),
   otherPassportInfo: z.object({
     number: z.string().max(20),
     country: z.string().min(2).max(100),
@@ -120,15 +119,15 @@ export const travelInfoSchema = z.object({
   purposeOfTrip: z.string().min(1).max(200),
   specificPurpose: z.string().max(500).optional(),
   intendedArrivalDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format'),
-  intendedLengthOfStay: z.string().min(1).max(50),
+  intendedLengthOfStay: z.string().max(50).optional().default(''),
   addressWhileInUS: z.object({
-    street: z.string().min(1).max(200),
-    city: z.string().min(1).max(100),
-    state: z.string().min(2).max(2),
+    street: z.string().max(200).optional().default(''),
+    city: z.string().max(100).optional().default(''),
+    state: z.string().max(50).optional().default(''),
     zipCode: z.string().max(10).optional(),
   }),
-  payingForTrip: z.string().min(1).max(200),
-  travelingWithOthers: z.boolean(),
+  payingForTrip: z.string().max(200).optional().default(''),
+  travelingWithOthers: z.boolean().optional().default(false),
   companions: z.array(z.object({
     name: z.string().max(200),
     relationship: z.string().max(50),

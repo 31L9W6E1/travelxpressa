@@ -80,13 +80,13 @@ export declare const personalInfoSchema: z.ZodObject<{
     surnames: z.ZodString;
     givenNames: z.ZodString;
     fullNameNative: z.ZodOptional<z.ZodString>;
-    otherNamesUsed: z.ZodBoolean;
+    otherNamesUsed: z.ZodDefault<z.ZodOptional<z.ZodBoolean>>;
     otherNames: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
-    telCode: z.ZodString;
+    telCode: z.ZodDefault<z.ZodOptional<z.ZodString>>;
     sex: z.ZodEnum<["M", "F"]>;
     maritalStatus: z.ZodEnum<["SINGLE", "MARRIED", "DIVORCED", "WIDOWED", "SEPARATED"]>;
     dateOfBirth: z.ZodString;
-    cityOfBirth: z.ZodString;
+    cityOfBirth: z.ZodDefault<z.ZodOptional<z.ZodString>>;
     stateOfBirth: z.ZodOptional<z.ZodString>;
     countryOfBirth: z.ZodString;
     nationality: z.ZodString;
@@ -107,16 +107,16 @@ export declare const personalInfoSchema: z.ZodObject<{
 }, {
     surnames: string;
     givenNames: string;
-    otherNamesUsed: boolean;
-    telCode: string;
     sex: "M" | "F";
     maritalStatus: "SINGLE" | "MARRIED" | "DIVORCED" | "WIDOWED" | "SEPARATED";
     dateOfBirth: string;
-    cityOfBirth: string;
     countryOfBirth: string;
     nationality: string;
     fullNameNative?: string | undefined;
+    otherNamesUsed?: boolean | undefined;
     otherNames?: string[] | undefined;
+    telCode?: string | undefined;
+    cityOfBirth?: string | undefined;
     stateOfBirth?: string | undefined;
 }>;
 export declare const addressSchema: z.ZodObject<{
@@ -225,11 +225,11 @@ export declare const passportInfoSchema: z.ZodObject<{
     passportNumber: z.ZodString;
     passportBookNumber: z.ZodOptional<z.ZodString>;
     countryOfIssuance: z.ZodString;
-    cityOfIssuance: z.ZodString;
+    cityOfIssuance: z.ZodDefault<z.ZodOptional<z.ZodString>>;
     stateOfIssuance: z.ZodOptional<z.ZodString>;
     issuanceDate: z.ZodString;
     expirationDate: z.ZodString;
-    hasOtherPassport: z.ZodBoolean;
+    hasOtherPassport: z.ZodDefault<z.ZodOptional<z.ZodBoolean>>;
     otherPassportInfo: z.ZodOptional<z.ZodObject<{
         number: z.ZodString;
         country: z.ZodString;
@@ -258,12 +258,12 @@ export declare const passportInfoSchema: z.ZodObject<{
     passportType: "OTHER" | "REGULAR" | "OFFICIAL" | "DIPLOMATIC";
     passportNumber: string;
     countryOfIssuance: string;
-    cityOfIssuance: string;
     issuanceDate: string;
     expirationDate: string;
-    hasOtherPassport: boolean;
     passportBookNumber?: string | undefined;
+    cityOfIssuance?: string | undefined;
     stateOfIssuance?: string | undefined;
+    hasOtherPassport?: boolean | undefined;
     otherPassportInfo?: {
         number: string;
         country: string;
@@ -273,11 +273,11 @@ export declare const travelInfoSchema: z.ZodObject<{
     purposeOfTrip: z.ZodString;
     specificPurpose: z.ZodOptional<z.ZodString>;
     intendedArrivalDate: z.ZodString;
-    intendedLengthOfStay: z.ZodString;
+    intendedLengthOfStay: z.ZodDefault<z.ZodOptional<z.ZodString>>;
     addressWhileInUS: z.ZodObject<{
-        street: z.ZodString;
-        city: z.ZodString;
-        state: z.ZodString;
+        street: z.ZodDefault<z.ZodOptional<z.ZodString>>;
+        city: z.ZodDefault<z.ZodOptional<z.ZodString>>;
+        state: z.ZodDefault<z.ZodOptional<z.ZodString>>;
         zipCode: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
         street: string;
@@ -285,13 +285,13 @@ export declare const travelInfoSchema: z.ZodObject<{
         state: string;
         zipCode?: string | undefined;
     }, {
-        street: string;
-        city: string;
-        state: string;
+        street?: string | undefined;
+        city?: string | undefined;
+        state?: string | undefined;
         zipCode?: string | undefined;
     }>;
-    payingForTrip: z.ZodString;
-    travelingWithOthers: z.ZodBoolean;
+    payingForTrip: z.ZodDefault<z.ZodOptional<z.ZodString>>;
+    travelingWithOthers: z.ZodDefault<z.ZodOptional<z.ZodBoolean>>;
     companions: z.ZodOptional<z.ZodArray<z.ZodObject<{
         name: z.ZodString;
         relationship: z.ZodString;
@@ -322,16 +322,16 @@ export declare const travelInfoSchema: z.ZodObject<{
 }, {
     purposeOfTrip: string;
     intendedArrivalDate: string;
-    intendedLengthOfStay: string;
     addressWhileInUS: {
-        street: string;
-        city: string;
-        state: string;
+        street?: string | undefined;
+        city?: string | undefined;
+        state?: string | undefined;
         zipCode?: string | undefined;
     };
-    payingForTrip: string;
-    travelingWithOthers: boolean;
     specificPurpose?: string | undefined;
+    intendedLengthOfStay?: string | undefined;
+    payingForTrip?: string | undefined;
+    travelingWithOthers?: boolean | undefined;
     companions?: {
         name: string;
         relationship: string;
@@ -350,13 +350,13 @@ export declare const updateApplicationSchema: z.ZodObject<{
         surnames: z.ZodString;
         givenNames: z.ZodString;
         fullNameNative: z.ZodOptional<z.ZodString>;
-        otherNamesUsed: z.ZodBoolean;
+        otherNamesUsed: z.ZodDefault<z.ZodOptional<z.ZodBoolean>>;
         otherNames: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
-        telCode: z.ZodString;
+        telCode: z.ZodDefault<z.ZodOptional<z.ZodString>>;
         sex: z.ZodEnum<["M", "F"]>;
         maritalStatus: z.ZodEnum<["SINGLE", "MARRIED", "DIVORCED", "WIDOWED", "SEPARATED"]>;
         dateOfBirth: z.ZodString;
-        cityOfBirth: z.ZodString;
+        cityOfBirth: z.ZodDefault<z.ZodOptional<z.ZodString>>;
         stateOfBirth: z.ZodOptional<z.ZodString>;
         countryOfBirth: z.ZodString;
         nationality: z.ZodString;
@@ -377,16 +377,16 @@ export declare const updateApplicationSchema: z.ZodObject<{
     }, {
         surnames: string;
         givenNames: string;
-        otherNamesUsed: boolean;
-        telCode: string;
         sex: "M" | "F";
         maritalStatus: "SINGLE" | "MARRIED" | "DIVORCED" | "WIDOWED" | "SEPARATED";
         dateOfBirth: string;
-        cityOfBirth: string;
         countryOfBirth: string;
         nationality: string;
         fullNameNative?: string | undefined;
+        otherNamesUsed?: boolean | undefined;
         otherNames?: string[] | undefined;
+        telCode?: string | undefined;
+        cityOfBirth?: string | undefined;
         stateOfBirth?: string | undefined;
     }>>;
     contactInfo: z.ZodOptional<z.ZodObject<{
@@ -476,11 +476,11 @@ export declare const updateApplicationSchema: z.ZodObject<{
         passportNumber: z.ZodString;
         passportBookNumber: z.ZodOptional<z.ZodString>;
         countryOfIssuance: z.ZodString;
-        cityOfIssuance: z.ZodString;
+        cityOfIssuance: z.ZodDefault<z.ZodOptional<z.ZodString>>;
         stateOfIssuance: z.ZodOptional<z.ZodString>;
         issuanceDate: z.ZodString;
         expirationDate: z.ZodString;
-        hasOtherPassport: z.ZodBoolean;
+        hasOtherPassport: z.ZodDefault<z.ZodOptional<z.ZodBoolean>>;
         otherPassportInfo: z.ZodOptional<z.ZodObject<{
             number: z.ZodString;
             country: z.ZodString;
@@ -509,12 +509,12 @@ export declare const updateApplicationSchema: z.ZodObject<{
         passportType: "OTHER" | "REGULAR" | "OFFICIAL" | "DIPLOMATIC";
         passportNumber: string;
         countryOfIssuance: string;
-        cityOfIssuance: string;
         issuanceDate: string;
         expirationDate: string;
-        hasOtherPassport: boolean;
         passportBookNumber?: string | undefined;
+        cityOfIssuance?: string | undefined;
         stateOfIssuance?: string | undefined;
+        hasOtherPassport?: boolean | undefined;
         otherPassportInfo?: {
             number: string;
             country: string;
@@ -524,11 +524,11 @@ export declare const updateApplicationSchema: z.ZodObject<{
         purposeOfTrip: z.ZodString;
         specificPurpose: z.ZodOptional<z.ZodString>;
         intendedArrivalDate: z.ZodString;
-        intendedLengthOfStay: z.ZodString;
+        intendedLengthOfStay: z.ZodDefault<z.ZodOptional<z.ZodString>>;
         addressWhileInUS: z.ZodObject<{
-            street: z.ZodString;
-            city: z.ZodString;
-            state: z.ZodString;
+            street: z.ZodDefault<z.ZodOptional<z.ZodString>>;
+            city: z.ZodDefault<z.ZodOptional<z.ZodString>>;
+            state: z.ZodDefault<z.ZodOptional<z.ZodString>>;
             zipCode: z.ZodOptional<z.ZodString>;
         }, "strip", z.ZodTypeAny, {
             street: string;
@@ -536,13 +536,13 @@ export declare const updateApplicationSchema: z.ZodObject<{
             state: string;
             zipCode?: string | undefined;
         }, {
-            street: string;
-            city: string;
-            state: string;
+            street?: string | undefined;
+            city?: string | undefined;
+            state?: string | undefined;
             zipCode?: string | undefined;
         }>;
-        payingForTrip: z.ZodString;
-        travelingWithOthers: z.ZodBoolean;
+        payingForTrip: z.ZodDefault<z.ZodOptional<z.ZodString>>;
+        travelingWithOthers: z.ZodDefault<z.ZodOptional<z.ZodBoolean>>;
         companions: z.ZodOptional<z.ZodArray<z.ZodObject<{
             name: z.ZodString;
             relationship: z.ZodString;
@@ -573,16 +573,16 @@ export declare const updateApplicationSchema: z.ZodObject<{
     }, {
         purposeOfTrip: string;
         intendedArrivalDate: string;
-        intendedLengthOfStay: string;
         addressWhileInUS: {
-            street: string;
-            city: string;
-            state: string;
+            street?: string | undefined;
+            city?: string | undefined;
+            state?: string | undefined;
             zipCode?: string | undefined;
         };
-        payingForTrip: string;
-        travelingWithOthers: boolean;
         specificPurpose?: string | undefined;
+        intendedLengthOfStay?: string | undefined;
+        payingForTrip?: string | undefined;
+        travelingWithOthers?: boolean | undefined;
         companions?: {
             name: string;
             relationship: string;
@@ -663,16 +663,16 @@ export declare const updateApplicationSchema: z.ZodObject<{
     personalInfo?: {
         surnames: string;
         givenNames: string;
-        otherNamesUsed: boolean;
-        telCode: string;
         sex: "M" | "F";
         maritalStatus: "SINGLE" | "MARRIED" | "DIVORCED" | "WIDOWED" | "SEPARATED";
         dateOfBirth: string;
-        cityOfBirth: string;
         countryOfBirth: string;
         nationality: string;
         fullNameNative?: string | undefined;
+        otherNamesUsed?: boolean | undefined;
         otherNames?: string[] | undefined;
+        telCode?: string | undefined;
+        cityOfBirth?: string | undefined;
         stateOfBirth?: string | undefined;
     } | undefined;
     contactInfo?: {
@@ -699,12 +699,12 @@ export declare const updateApplicationSchema: z.ZodObject<{
         passportType: "OTHER" | "REGULAR" | "OFFICIAL" | "DIPLOMATIC";
         passportNumber: string;
         countryOfIssuance: string;
-        cityOfIssuance: string;
         issuanceDate: string;
         expirationDate: string;
-        hasOtherPassport: boolean;
         passportBookNumber?: string | undefined;
+        cityOfIssuance?: string | undefined;
         stateOfIssuance?: string | undefined;
+        hasOtherPassport?: boolean | undefined;
         otherPassportInfo?: {
             number: string;
             country: string;
@@ -713,16 +713,16 @@ export declare const updateApplicationSchema: z.ZodObject<{
     travelInfo?: {
         purposeOfTrip: string;
         intendedArrivalDate: string;
-        intendedLengthOfStay: string;
         addressWhileInUS: {
-            street: string;
-            city: string;
-            state: string;
+            street?: string | undefined;
+            city?: string | undefined;
+            state?: string | undefined;
             zipCode?: string | undefined;
         };
-        payingForTrip: string;
-        travelingWithOthers: boolean;
         specificPurpose?: string | undefined;
+        intendedLengthOfStay?: string | undefined;
+        payingForTrip?: string | undefined;
+        travelingWithOthers?: boolean | undefined;
         companions?: {
             name: string;
             relationship: string;

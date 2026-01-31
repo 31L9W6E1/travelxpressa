@@ -19,6 +19,7 @@ model User {
   // Profile fields
   phone         String?
   country       String?
+  avatarUrl     String?   // URL to profile picture or auto-generated avatar
 
   // Security
   lastLoginAt   DateTime?
@@ -39,6 +40,7 @@ model User {
   inquiries     Inquiry[]
   refreshTokens RefreshToken[]
   auditLogs     AuditLog[]
+  chatThreads   ChatThread[]
 }
 
 // Refresh token model for secure token rotation
@@ -181,6 +183,53 @@ model Payment {
   // Timestamps
   createdAt       DateTime @default(now())
   completedAt     DateTime?
+}
+
+// Chat Thread model for user support
+model ChatThread {
+  id              String    @id @default(cuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  applicationId   String?   // Optional link to an application
+
+  // Thread metadata
+  subject         String?
+  status          String    @default("OPEN") // OPEN, CLOSED, PENDING
+
+  // Telegram integration
+  telegramChatId  String?   @unique
+
+  // Timestamps
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  closedAt        DateTime?
+
+  // Relations
+  messages        ChatMessage[]
+}
+
+// Chat Message model
+model ChatMessage {
+  id              String     @id @default(cuid())
+  threadId        String
+  thread          ChatThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+
+  // Message content
+  content         String
+  messageType     String     @default("TEXT") // TEXT, IMAGE, FILE, SYSTEM
+
+  // Sender info
+  senderId        String?    // null for system messages
+  senderType      String     // USER, ADMIN, SYSTEM, TELEGRAM
+
+  // Telegram integration
+  telegramMessageId String?
+
+  // Read status
+  isRead          Boolean    @default(false)
+
+  // Timestamps
+  createdAt       DateTime   @default(now())
 }
 
 // CMS Post model for Blog and News content

@@ -19,6 +19,7 @@ import adminRoutes from './routes/admin.routes';
 import userRoutes from './routes/user.routes';
 import applicationRoutes from './routes/application.routes';
 import postsRoutes from './routes/posts.routes';
+import chatRoutes from './routes/chat.routes';
 
 const app = express();
 
@@ -105,6 +106,7 @@ if (config.isProduction) {
   app.use('/api', apiRateLimit, userRoutes);
   app.use('/api/applications', apiRateLimit, applicationRoutes);
   app.use('/api/posts', apiRateLimit, postsRoutes);
+  app.use('/api/chat', apiRateLimit, chatRoutes);
 } else {
   // Development - no rate limiting
   app.use('/api/auth', authRoutes);
@@ -113,6 +115,7 @@ if (config.isProduction) {
   app.use('/api', userRoutes);
   app.use('/api/applications', applicationRoutes);
   app.use('/api/posts', postsRoutes);
+  app.use('/api/chat', chatRoutes);
 }
 
 // 404 handler

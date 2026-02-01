@@ -58,5 +58,5 @@ ENV NODE_ENV=production
 ENV PORT=8080
 
 # Start the application
-# Run migrate and continue even if it fails (allows app to start and show health check)
-CMD ["sh", "-c", "npx prisma migrate deploy || echo 'Migration failed - database may not be configured' && node dist/index.js"]
+# Push schema to database (creates tables if they don't exist)
+CMD ["sh", "-c", "npx prisma db push --accept-data-loss && node dist/index.js"]

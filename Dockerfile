@@ -3,9 +3,9 @@ FROM node:20-slim AS builder
 
 WORKDIR /app
 
-# Copy package files from backend
-COPY package*.json ./
-COPY prisma ./prisma/
+# Copy backend package files
+COPY backend/package*.json ./
+COPY backend/prisma ./prisma/
 
 # Install all dependencies (including dev for build)
 RUN npm ci
@@ -13,9 +13,9 @@ RUN npm ci
 # Generate Prisma client
 RUN npx prisma generate
 
-# Copy source code
-COPY src ./src/
-COPY tsconfig.json ./
+# Copy backend source code
+COPY backend/src ./src/
+COPY backend/tsconfig.json ./
 
 # Build TypeScript
 RUN npm run build
@@ -29,8 +29,8 @@ RUN apt-get update -y && apt-get install -y openssl ca-certificates && rm -rf /v
 WORKDIR /app
 
 # Copy package files
-COPY package*.json ./
-COPY prisma ./prisma/
+COPY backend/package*.json ./
+COPY backend/prisma ./prisma/
 
 # Install production dependencies only
 RUN npm ci --omit=dev && npm cache clean --force

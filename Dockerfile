@@ -7,10 +7,13 @@ WORKDIR /app
 COPY backend/package*.json ./
 COPY backend/prisma ./prisma/
 
+# Change Prisma provider to PostgreSQL for production
+RUN sed -i 's/provider = "sqlite"/provider = "postgresql"/' prisma/schema.prisma
+
 # Install all dependencies (including dev for build)
 RUN npm ci
 
-# Generate Prisma client
+# Generate Prisma client for PostgreSQL
 RUN npx prisma generate
 
 # Copy backend source code
@@ -32,10 +35,13 @@ WORKDIR /app
 COPY backend/package*.json ./
 COPY backend/prisma ./prisma/
 
+# Change Prisma provider to PostgreSQL for production
+RUN sed -i 's/provider = "sqlite"/provider = "postgresql"/' prisma/schema.prisma
+
 # Install production dependencies only
 RUN npm ci --omit=dev && npm cache clean --force
 
-# Generate Prisma client for production
+# Generate Prisma client for PostgreSQL
 RUN npx prisma generate
 
 # Copy built files from builder

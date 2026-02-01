@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { Link } from "react-router-dom";
+import api from "../api/client";
 import {
   User,
   Calendar,
@@ -51,18 +52,11 @@ const UserProfile = () => {
 
   const fetchApplications = async () => {
     try {
-      const token = localStorage.getItem("accessToken");
-      const response = await fetch("http://localhost:3000/api/applications", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        const apps = data.data || [];
-        setApplications(apps);
-        if (apps.length > 0) {
-          setActiveApplication(apps[0]);
-        }
+      const response = await api.get("/api/applications");
+      const apps = response.data.data || [];
+      setApplications(apps);
+      if (apps.length > 0) {
+        setActiveApplication(apps[0]);
       }
     } catch (error) {
       console.error("Error fetching applications:", error);

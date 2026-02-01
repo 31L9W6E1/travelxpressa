@@ -91,6 +91,7 @@ import {
   formatPostDate,
 } from "@/api/posts";
 import { UserAvatar } from "@/components/UserAvatar";
+import api from "@/api/client";
 
 interface UserData {
   id: string;
@@ -277,34 +278,15 @@ const AdminDashboard = () => {
   const fetchDashboardData = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem("accessToken");
-
       const [statsRes, usersRes, appsRes] = await Promise.all([
-        fetch("http://localhost:3000/api/admin/stats", {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-        fetch("http://localhost:3000/api/admin/users", {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-        fetch("http://localhost:3000/api/admin/applications", {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
+        api.get("/api/admin/stats"),
+        api.get("/api/admin/users"),
+        api.get("/api/admin/applications"),
       ]);
 
-      if (statsRes.ok) {
-        const statsData = await statsRes.json();
-        setStats(statsData.data);
-      }
-
-      if (usersRes.ok) {
-        const usersData = await usersRes.json();
-        setUsers(usersData.data || []);
-      }
-
-      if (appsRes.ok) {
-        const appsData = await appsRes.json();
-        setApplications(appsData.data || []);
-      }
+      setStats(statsRes.data.data);
+      setUsers(usersRes.data.data || []);
+      setApplications(appsRes.data.data || []);
     } catch (error) {
       console.error("Error fetching dashboard data:", error);
     } finally {

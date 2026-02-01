@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
-import { getAccessToken } from "../api/client";
+import api from "../api/client";
 
 interface User {
   id: string;
@@ -17,20 +17,9 @@ const ManageUsers = () => {
 
   useEffect(() => {
     const fetchUsers = async () => {
-      const currentToken = getAccessToken();
       try {
-        const response = await fetch("http://localhost:3000/api/admin/users", {
-          headers: {
-            Authorization: `Bearer ${currentToken}`,
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch users");
-        }
-
-        const data = await response.json();
-        setUsers(data.users);
+        const response = await api.get("/api/admin/users");
+        setUsers(response.data.users || response.data.data?.users || []);
       } catch (err: unknown) {
         setError(err instanceof Error ? err.message : 'An error occurred');
       } finally {
@@ -44,21 +33,8 @@ const ManageUsers = () => {
   }, [isAuthenticated]);
 
   const handleRoleChange = async (userId: string, role: string) => {
-    const currentToken = getAccessToken();
     try {
-      const response = await fetch(`http://localhost:3000/api/admin/users/${userId}/role`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${currentToken}`,
-        },
-        body: JSON.stringify({ role }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to update role");
-      }
-
+      await api.put(`/api/admin/users/${userId}/role`, { role });
       setUsers(users.map(user => user.id === userId ? { ...user, role } : user));
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'An error occurred');

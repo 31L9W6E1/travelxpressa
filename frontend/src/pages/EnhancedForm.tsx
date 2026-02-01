@@ -1,6 +1,7 @@
 import { useAuth } from "../contexts/AuthContext";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import api from "../api/client";
 
 const EnhancedForm = () => {
   const { user } = useAuth();
@@ -81,16 +82,9 @@ const EnhancedForm = () => {
     setErrorMessage("");
 
     try {
-      const response = await fetch("http://localhost:3000/api/inquiry", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-        },
-        body: JSON.stringify(formData),
-      });
+      const response = await api.post("/api/inquiry", formData);
 
-      if (response.ok) {
+      if (response.data.success) {
         setSubmitStatus("success");
         // Reset form but keep user data
         setFormData({

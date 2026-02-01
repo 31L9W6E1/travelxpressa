@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { applicationsApi, type VisaType } from '../api/applications';
+import { applicationsApi, type VisaType, type Application } from '../api/applications';
 import { findCountryByCode, type CountryCode } from '../config/countries';
+import { toast } from 'sonner';
 import {
   ChevronRight,
   ChevronLeft,
@@ -130,8 +131,10 @@ export default function Application() {
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [isSaving, setIsSaving] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [applicationId, setApplicationId] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   // Get selected country from localStorage (set in CountrySelect page)
   const selectedCountryCode = localStorage.getItem('selectedCountry') as CountryCode || 'USA';
@@ -152,6 +155,78 @@ export default function Application() {
     };
     return visaTypeMap[countryCode] || 'OTHER';
   };
+
+  // Load existing draft application on mount
+  useEffect(() => {
+    const loadDraft = async () => {
+      try {
+        setIsLoading(true);
+        const response = await applicationsApi.getAll(1, 10);
+        // Find the most recent draft or in-progress application
+        const drafts = response.data?.filter((app: Application) =>
+          app.status === 'DRAFT' || app.status === 'IN_PROGRESS'
+        ) || [];
+
+        if (drafts.length > 0) {
+          const draft = drafts[0];
+          setApplicationId(draft.id);
+          setCurrentStep(draft.currentStep || 1);
+
+          // Load saved form data
+          if (draft.personalInfo || draft.contactInfo || draft.passportInfo || draft.travelInfo) {
+            setFormData({
+              personalInfo: draft.personalInfo ? {
+                surnames: draft.personalInfo.surnames || '',
+                givenNames: draft.personalInfo.givenNames || '',
+                fullNameNative: draft.personalInfo.fullNameNative || '',
+                sex: draft.personalInfo.sex || '',
+                maritalStatus: draft.personalInfo.maritalStatus || '',
+                dateOfBirth: draft.personalInfo.dateOfBirth || '',
+                cityOfBirth: draft.personalInfo.cityOfBirth || '',
+                stateOfBirth: draft.personalInfo.stateOfBirth || '',
+                countryOfBirth: draft.personalInfo.countryOfBirth || '',
+                nationality: draft.personalInfo.nationality || '',
+                nationalId: '',
+              } : initialFormData.personalInfo,
+              contactInfo: draft.contactInfo ? {
+                email: draft.contactInfo.email || '',
+                phone: draft.contactInfo.phone || '',
+                streetAddress: draft.contactInfo.homeAddress?.street || '',
+                city: draft.contactInfo.homeAddress?.city || '',
+                state: draft.contactInfo.homeAddress?.state || '',
+                postalCode: draft.contactInfo.homeAddress?.postalCode || '',
+                country: draft.contactInfo.homeAddress?.country || '',
+              } : initialFormData.contactInfo,
+              passportInfo: draft.passportInfo ? {
+                passportNumber: draft.passportInfo.passportNumber || '',
+                passportBookNumber: draft.passportInfo.passportBookNumber || '',
+                countryOfIssuance: draft.passportInfo.countryOfIssuance || '',
+                cityOfIssuance: draft.passportInfo.cityOfIssuance || '',
+                issuanceDate: draft.passportInfo.issuanceDate || '',
+                expirationDate: draft.passportInfo.expirationDate || '',
+              } : initialFormData.passportInfo,
+              travelInfo: draft.travelInfo ? {
+                purposeOfTrip: draft.travelInfo.purposeOfTrip || '',
+                intendedArrivalDate: draft.travelInfo.intendedArrivalDate || '',
+                intendedLengthOfStay: draft.travelInfo.intendedLengthOfStay || '',
+                usAddress: draft.travelInfo.addressWhileInUS?.street || '',
+                usCity: draft.travelInfo.addressWhileInUS?.city || '',
+                usState: draft.travelInfo.addressWhileInUS?.state || '',
+                payingForTrip: draft.travelInfo.payingForTrip || '',
+              } : initialFormData.travelInfo,
+            });
+            toast.info('Draft loaded', { description: 'Your previous progress has been restored.' });
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load draft:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadDraft();
+  }, []);
 
   const steps: FormStep[] = [
     { id: 1, name: 'Personal Info', icon: <User className="w-5 h-5" />, status: currentStep === 1 ? 'current' : currentStep > 1 ? 'completed' : 'pending' },
@@ -218,55 +293,56 @@ export default function Application() {
 
   const handleSave = async () => {
     setIsSaving(true);
+    setSaveError(null);
     try {
       // Transform form data to match API schema
       const apiData = {
         currentStep,
         personalInfo: {
-          surnames: formData.personalInfo.surnames,
-          givenNames: formData.personalInfo.givenNames,
+          surnames: formData.personalInfo.surnames || 'PENDING',
+          givenNames: formData.personalInfo.givenNames || 'PENDING',
           fullNameNative: formData.personalInfo.fullNameNative || undefined,
           otherNamesUsed: false,
           telCode: '',
           sex: (formData.personalInfo.sex || 'M') as 'M' | 'F',
           maritalStatus: (formData.personalInfo.maritalStatus || 'SINGLE') as 'SINGLE' | 'MARRIED' | 'DIVORCED' | 'WIDOWED' | 'SEPARATED',
-          dateOfBirth: formData.personalInfo.dateOfBirth,
-          cityOfBirth: formData.personalInfo.cityOfBirth,
+          dateOfBirth: formData.personalInfo.dateOfBirth || '2000-01-01',
+          cityOfBirth: formData.personalInfo.cityOfBirth || '',
           stateOfBirth: formData.personalInfo.stateOfBirth || undefined,
-          countryOfBirth: formData.personalInfo.countryOfBirth,
-          nationality: formData.personalInfo.nationality,
+          countryOfBirth: formData.personalInfo.countryOfBirth || 'Unknown',
+          nationality: formData.personalInfo.nationality || 'Unknown',
         },
         contactInfo: {
           homeAddress: {
-            street: formData.contactInfo.streetAddress,
-            city: formData.contactInfo.city,
+            street: formData.contactInfo.streetAddress || 'TBD',
+            city: formData.contactInfo.city || 'TBD',
             state: formData.contactInfo.state || undefined,
             postalCode: formData.contactInfo.postalCode || undefined,
-            country: formData.contactInfo.country,
+            country: formData.contactInfo.country || 'TBD',
           },
-          phone: formData.contactInfo.phone,
-          email: formData.contactInfo.email,
+          phone: formData.contactInfo.phone || '0000000000',
+          email: formData.contactInfo.email || user?.email || 'pending@example.com',
         },
         passportInfo: {
           passportType: 'REGULAR' as const,
-          passportNumber: formData.passportInfo.passportNumber,
+          passportNumber: formData.passportInfo.passportNumber || 'PENDING',
           passportBookNumber: formData.passportInfo.passportBookNumber || undefined,
-          countryOfIssuance: formData.passportInfo.countryOfIssuance,
-          cityOfIssuance: formData.passportInfo.cityOfIssuance,
-          issuanceDate: formData.passportInfo.issuanceDate,
-          expirationDate: formData.passportInfo.expirationDate,
+          countryOfIssuance: formData.passportInfo.countryOfIssuance || 'Unknown',
+          cityOfIssuance: formData.passportInfo.cityOfIssuance || '',
+          issuanceDate: formData.passportInfo.issuanceDate || '2020-01-01',
+          expirationDate: formData.passportInfo.expirationDate || '2030-01-01',
           hasOtherPassport: false,
         },
         travelInfo: {
-          purposeOfTrip: formData.travelInfo.purposeOfTrip,
-          intendedArrivalDate: formData.travelInfo.intendedArrivalDate,
-          intendedLengthOfStay: formData.travelInfo.intendedLengthOfStay,
+          purposeOfTrip: formData.travelInfo.purposeOfTrip || 'TOURISM',
+          intendedArrivalDate: formData.travelInfo.intendedArrivalDate || '2026-12-01',
+          intendedLengthOfStay: formData.travelInfo.intendedLengthOfStay || '',
           addressWhileInUS: {
-            street: formData.travelInfo.usAddress,
-            city: formData.travelInfo.usCity,
-            state: formData.travelInfo.usState,
+            street: formData.travelInfo.usAddress || '',
+            city: formData.travelInfo.usCity || '',
+            state: formData.travelInfo.usState || '',
           },
-          payingForTrip: formData.travelInfo.payingForTrip,
+          payingForTrip: formData.travelInfo.payingForTrip || '',
           travelingWithOthers: false,
         },
       };
@@ -280,19 +356,29 @@ export default function Application() {
         setApplicationId(newApp.id);
         await applicationsApi.update(newApp.id, apiData);
       }
-      alert('Application saved successfully!');
-    } catch (error) {
+      toast.success('Application saved!', { description: 'Your progress has been saved. You can continue later.' });
+    } catch (error: any) {
       console.error('Save error:', error);
-      alert('Failed to save application. Please try again.');
+      const errorMessage = error?.message || 'Failed to save application. Please try again.';
+      setSaveError(errorMessage);
+      toast.error('Save failed', { description: errorMessage });
     } finally {
       setIsSaving(false);
     }
   };
 
   const handleSubmit = async () => {
-    if (!validateStep(currentStep)) return;
+    // Validate all steps before submission
+    for (let step = 1; step <= 4; step++) {
+      if (!validateStep(step)) {
+        setCurrentStep(step);
+        toast.error('Incomplete information', { description: `Please complete Step ${step} before submitting.` });
+        return;
+      }
+    }
 
     setIsSubmitting(true);
+    setSaveError(null);
     try {
       // Transform form data to match API schema
       const apiData = {
@@ -361,11 +447,16 @@ export default function Application() {
       // Submit the application
       await applicationsApi.submit(appId);
 
-      alert('Application submitted successfully! You will receive a confirmation email.');
+      toast.success('Application submitted!', {
+        description: 'Your visa application has been submitted successfully. You will receive a confirmation email.',
+        duration: 5000,
+      });
       navigate('/profile');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Submit error:', error);
-      alert('Failed to submit application. Please try again.');
+      const errorMessage = error?.message || 'Failed to submit application. Please try again.';
+      setSaveError(errorMessage);
+      toast.error('Submission failed', { description: errorMessage });
     } finally {
       setIsSubmitting(false);
     }
@@ -376,132 +467,132 @@ export default function Application() {
       case 1:
         return (
           <div className="space-y-6">
-            <h3 className="text-xl font-semibold text-white mb-6">Personal Information</h3>
+            <h3 className="text-xl font-semibold text-foreground mb-6">Personal Information</h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-foreground mb-2">
                   Surname(s) / Family Name(s) *
                 </label>
                 <input
                   type="text"
                   value={formData.personalInfo.surnames}
                   onChange={(e) => updateFormData('personalInfo', 'surnames', e.target.value.toUpperCase())}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent uppercase"
+                  className="w-full px-4 py-3 bg-input border border-border rounded-lg text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-ring focus:border-transparent uppercase"
                   placeholder="SMITH"
                 />
-                {errors.surnames && <p className="mt-1 text-sm text-red-400">{errors.surnames}</p>}
+                {errors.surnames && <p className="mt-1 text-sm text-destructive">{errors.surnames}</p>}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-foreground mb-2">
                   Given Name(s) *
                 </label>
                 <input
                   type="text"
                   value={formData.personalInfo.givenNames}
                   onChange={(e) => updateFormData('personalInfo', 'givenNames', e.target.value.toUpperCase())}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent uppercase"
+                  className="w-full px-4 py-3 bg-input border border-border rounded-lg text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-ring focus:border-transparent uppercase"
                   placeholder="JOHN MICHAEL"
                 />
-                {errors.givenNames && <p className="mt-1 text-sm text-red-400">{errors.givenNames}</p>}
+                {errors.givenNames && <p className="mt-1 text-sm text-destructive">{errors.givenNames}</p>}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-foreground mb-2">
                   Full Name in Native Alphabet
                 </label>
                 <input
                   type="text"
                   value={formData.personalInfo.fullNameNative}
                   onChange={(e) => updateFormData('personalInfo', 'fullNameNative', e.target.value)}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 bg-input border border-border rounded-lg text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-ring focus:border-transparent"
                   placeholder="Enter in your native script"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Sex *</label>
+                <label className="block text-sm font-medium text-foreground mb-2">Sex *</label>
                 <select
                   value={formData.personalInfo.sex}
                   onChange={(e) => updateFormData('personalInfo', 'sex', e.target.value)}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 bg-input border border-border rounded-lg text-foreground focus:ring-2 focus:ring-ring focus:border-transparent"
                 >
-                  <option value="" className="bg-slate-800">Select</option>
-                  <option value="M" className="bg-slate-800">Male</option>
-                  <option value="F" className="bg-slate-800">Female</option>
+                  <option value="">Select</option>
+                  <option value="M">Male</option>
+                  <option value="F">Female</option>
                 </select>
-                {errors.sex && <p className="mt-1 text-sm text-red-400">{errors.sex}</p>}
+                {errors.sex && <p className="mt-1 text-sm text-destructive">{errors.sex}</p>}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Marital Status *</label>
+                <label className="block text-sm font-medium text-foreground mb-2">Marital Status *</label>
                 <select
                   value={formData.personalInfo.maritalStatus}
                   onChange={(e) => updateFormData('personalInfo', 'maritalStatus', e.target.value)}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 bg-input border border-border rounded-lg text-foreground focus:ring-2 focus:ring-ring focus:border-transparent"
                 >
-                  <option value="" className="bg-slate-800">Select</option>
-                  <option value="SINGLE" className="bg-slate-800">Single</option>
-                  <option value="MARRIED" className="bg-slate-800">Married</option>
-                  <option value="DIVORCED" className="bg-slate-800">Divorced</option>
-                  <option value="WIDOWED" className="bg-slate-800">Widowed</option>
+                  <option value="">Select</option>
+                  <option value="SINGLE">Single</option>
+                  <option value="MARRIED">Married</option>
+                  <option value="DIVORCED">Divorced</option>
+                  <option value="WIDOWED">Widowed</option>
                 </select>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Date of Birth *</label>
+                <label className="block text-sm font-medium text-foreground mb-2">Date of Birth *</label>
                 <input
                   type="date"
                   value={formData.personalInfo.dateOfBirth}
                   onChange={(e) => updateFormData('personalInfo', 'dateOfBirth', e.target.value)}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 bg-input border border-border rounded-lg text-foreground focus:ring-2 focus:ring-ring focus:border-transparent"
                 />
-                {errors.dateOfBirth && <p className="mt-1 text-sm text-red-400">{errors.dateOfBirth}</p>}
+                {errors.dateOfBirth && <p className="mt-1 text-sm text-destructive">{errors.dateOfBirth}</p>}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">City of Birth *</label>
+                <label className="block text-sm font-medium text-foreground mb-2">City of Birth *</label>
                 <input
                   type="text"
                   value={formData.personalInfo.cityOfBirth}
                   onChange={(e) => updateFormData('personalInfo', 'cityOfBirth', e.target.value)}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 bg-input border border-border rounded-lg text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-ring focus:border-transparent"
                   placeholder="Ulaanbaatar"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Country of Birth *</label>
+                <label className="block text-sm font-medium text-foreground mb-2">Country of Birth *</label>
                 <input
                   type="text"
                   value={formData.personalInfo.countryOfBirth}
                   onChange={(e) => updateFormData('personalInfo', 'countryOfBirth', e.target.value)}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 bg-input border border-border rounded-lg text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-ring focus:border-transparent"
                   placeholder="Mongolia"
                 />
-                {errors.countryOfBirth && <p className="mt-1 text-sm text-red-400">{errors.countryOfBirth}</p>}
+                {errors.countryOfBirth && <p className="mt-1 text-sm text-destructive">{errors.countryOfBirth}</p>}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Nationality *</label>
+                <label className="block text-sm font-medium text-foreground mb-2">Nationality *</label>
                 <input
                   type="text"
                   value={formData.personalInfo.nationality}
                   onChange={(e) => updateFormData('personalInfo', 'nationality', e.target.value)}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 bg-input border border-border rounded-lg text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-ring focus:border-transparent"
                   placeholder="Mongolian"
                 />
-                {errors.nationality && <p className="mt-1 text-sm text-red-400">{errors.nationality}</p>}
+                {errors.nationality && <p className="mt-1 text-sm text-destructive">{errors.nationality}</p>}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">National ID Number</label>
+                <label className="block text-sm font-medium text-foreground mb-2">National ID Number</label>
                 <input
                   type="text"
                   value={formData.personalInfo.nationalId}
                   onChange={(e) => updateFormData('personalInfo', 'nationalId', e.target.value)}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 bg-input border border-border rounded-lg text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-ring focus:border-transparent"
                   placeholder="ID Number"
                 />
               </div>
@@ -512,89 +603,89 @@ export default function Application() {
       case 2:
         return (
           <div className="space-y-6">
-            <h3 className="text-xl font-semibold text-white mb-6">Contact Information</h3>
+            <h3 className="text-xl font-semibold text-foreground mb-6">Contact Information</h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Email Address *</label>
+                <label className="block text-sm font-medium text-foreground mb-2">Email Address *</label>
                 <input
                   type="email"
                   value={formData.contactInfo.email}
                   onChange={(e) => updateFormData('contactInfo', 'email', e.target.value)}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 bg-input border border-border rounded-lg text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-ring focus:border-transparent"
                   placeholder="email@example.com"
                 />
-                {errors.email && <p className="mt-1 text-sm text-red-400">{errors.email}</p>}
+                {errors.email && <p className="mt-1 text-sm text-destructive">{errors.email}</p>}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Phone Number *</label>
+                <label className="block text-sm font-medium text-foreground mb-2">Phone Number *</label>
                 <input
                   type="tel"
                   value={formData.contactInfo.phone}
                   onChange={(e) => updateFormData('contactInfo', 'phone', e.target.value)}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 bg-input border border-border rounded-lg text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-ring focus:border-transparent"
                   placeholder="+976-9999-9999"
                 />
-                {errors.phone && <p className="mt-1 text-sm text-red-400">{errors.phone}</p>}
+                {errors.phone && <p className="mt-1 text-sm text-destructive">{errors.phone}</p>}
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-300 mb-2">Street Address *</label>
+                <label className="block text-sm font-medium text-foreground mb-2">Street Address *</label>
                 <input
                   type="text"
                   value={formData.contactInfo.streetAddress}
                   onChange={(e) => updateFormData('contactInfo', 'streetAddress', e.target.value)}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 bg-input border border-border rounded-lg text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-ring focus:border-transparent"
                   placeholder="123 Main Street, Apt 4B"
                 />
-                {errors.streetAddress && <p className="mt-1 text-sm text-red-400">{errors.streetAddress}</p>}
+                {errors.streetAddress && <p className="mt-1 text-sm text-destructive">{errors.streetAddress}</p>}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">City *</label>
+                <label className="block text-sm font-medium text-foreground mb-2">City *</label>
                 <input
                   type="text"
                   value={formData.contactInfo.city}
                   onChange={(e) => updateFormData('contactInfo', 'city', e.target.value)}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 bg-input border border-border rounded-lg text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-ring focus:border-transparent"
                   placeholder="Ulaanbaatar"
                 />
-                {errors.city && <p className="mt-1 text-sm text-red-400">{errors.city}</p>}
+                {errors.city && <p className="mt-1 text-sm text-destructive">{errors.city}</p>}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">State/Province</label>
+                <label className="block text-sm font-medium text-foreground mb-2">State/Province</label>
                 <input
                   type="text"
                   value={formData.contactInfo.state}
                   onChange={(e) => updateFormData('contactInfo', 'state', e.target.value)}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 bg-input border border-border rounded-lg text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-ring focus:border-transparent"
                   placeholder="State/Province"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Postal Code</label>
+                <label className="block text-sm font-medium text-foreground mb-2">Postal Code</label>
                 <input
                   type="text"
                   value={formData.contactInfo.postalCode}
                   onChange={(e) => updateFormData('contactInfo', 'postalCode', e.target.value)}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 bg-input border border-border rounded-lg text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-ring focus:border-transparent"
                   placeholder="12345"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Country *</label>
+                <label className="block text-sm font-medium text-foreground mb-2">Country *</label>
                 <input
                   type="text"
                   value={formData.contactInfo.country}
                   onChange={(e) => updateFormData('contactInfo', 'country', e.target.value)}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 bg-input border border-border rounded-lg text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-ring focus:border-transparent"
                   placeholder="Mongolia"
                 />
-                {errors.country && <p className="mt-1 text-sm text-red-400">{errors.country}</p>}
+                {errors.country && <p className="mt-1 text-sm text-destructive">{errors.country}</p>}
               </div>
             </div>
           </div>
@@ -603,76 +694,76 @@ export default function Application() {
       case 3:
         return (
           <div className="space-y-6">
-            <h3 className="text-xl font-semibold text-white mb-6">Passport Information</h3>
+            <h3 className="text-xl font-semibold text-foreground mb-6">Passport Information</h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Passport Number *</label>
+                <label className="block text-sm font-medium text-foreground mb-2">Passport Number *</label>
                 <input
                   type="text"
                   value={formData.passportInfo.passportNumber}
                   onChange={(e) => updateFormData('passportInfo', 'passportNumber', e.target.value.toUpperCase())}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent uppercase"
+                  className="w-full px-4 py-3 bg-input border border-border rounded-lg text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-ring focus:border-transparent uppercase"
                   placeholder="E12345678"
                 />
-                {errors.passportNumber && <p className="mt-1 text-sm text-red-400">{errors.passportNumber}</p>}
+                {errors.passportNumber && <p className="mt-1 text-sm text-destructive">{errors.passportNumber}</p>}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Passport Book Number</label>
+                <label className="block text-sm font-medium text-foreground mb-2">Passport Book Number</label>
                 <input
                   type="text"
                   value={formData.passportInfo.passportBookNumber}
                   onChange={(e) => updateFormData('passportInfo', 'passportBookNumber', e.target.value)}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 bg-input border border-border rounded-lg text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-ring focus:border-transparent"
                   placeholder="Book number (if applicable)"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Country of Issuance *</label>
+                <label className="block text-sm font-medium text-foreground mb-2">Country of Issuance *</label>
                 <input
                   type="text"
                   value={formData.passportInfo.countryOfIssuance}
                   onChange={(e) => updateFormData('passportInfo', 'countryOfIssuance', e.target.value)}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 bg-input border border-border rounded-lg text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-ring focus:border-transparent"
                   placeholder="Mongolia"
                 />
-                {errors.countryOfIssuance && <p className="mt-1 text-sm text-red-400">{errors.countryOfIssuance}</p>}
+                {errors.countryOfIssuance && <p className="mt-1 text-sm text-destructive">{errors.countryOfIssuance}</p>}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">City of Issuance</label>
+                <label className="block text-sm font-medium text-foreground mb-2">City of Issuance</label>
                 <input
                   type="text"
                   value={formData.passportInfo.cityOfIssuance}
                   onChange={(e) => updateFormData('passportInfo', 'cityOfIssuance', e.target.value)}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 bg-input border border-border rounded-lg text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-ring focus:border-transparent"
                   placeholder="Ulaanbaatar"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Issuance Date *</label>
+                <label className="block text-sm font-medium text-foreground mb-2">Issuance Date *</label>
                 <input
                   type="date"
                   value={formData.passportInfo.issuanceDate}
                   onChange={(e) => updateFormData('passportInfo', 'issuanceDate', e.target.value)}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 bg-input border border-border rounded-lg text-foreground focus:ring-2 focus:ring-ring focus:border-transparent"
                 />
-                {errors.issuanceDate && <p className="mt-1 text-sm text-red-400">{errors.issuanceDate}</p>}
+                {errors.issuanceDate && <p className="mt-1 text-sm text-destructive">{errors.issuanceDate}</p>}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Expiration Date *</label>
+                <label className="block text-sm font-medium text-foreground mb-2">Expiration Date *</label>
                 <input
                   type="date"
                   value={formData.passportInfo.expirationDate}
                   onChange={(e) => updateFormData('passportInfo', 'expirationDate', e.target.value)}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 bg-input border border-border rounded-lg text-foreground focus:ring-2 focus:ring-ring focus:border-transparent"
                 />
-                {errors.expirationDate && <p className="mt-1 text-sm text-red-400">{errors.expirationDate}</p>}
-                <p className="mt-1 text-xs text-gray-500">Must be valid for at least 6 months beyond your intended stay</p>
+                {errors.expirationDate && <p className="mt-1 text-sm text-destructive">{errors.expirationDate}</p>}
+                <p className="mt-1 text-xs text-muted-foreground">Must be valid for at least 6 months beyond your intended stay</p>
               </div>
             </div>
           </div>
@@ -681,95 +772,95 @@ export default function Application() {
       case 4:
         return (
           <div className="space-y-6">
-            <h3 className="text-xl font-semibold text-white mb-6">Travel Information</h3>
+            <h3 className="text-xl font-semibold text-foreground mb-6">Travel Information</h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-300 mb-2">Purpose of Trip *</label>
+                <label className="block text-sm font-medium text-foreground mb-2">Purpose of Trip *</label>
                 <select
                   value={formData.travelInfo.purposeOfTrip}
                   onChange={(e) => updateFormData('travelInfo', 'purposeOfTrip', e.target.value)}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 bg-input border border-border rounded-lg text-foreground focus:ring-2 focus:ring-ring focus:border-transparent"
                 >
-                  <option value="" className="bg-slate-800">Select purpose</option>
-                  <option value="TOURISM" className="bg-slate-800">Tourism/Vacation</option>
-                  <option value="BUSINESS" className="bg-slate-800">Business</option>
-                  <option value="STUDY" className="bg-slate-800">Study</option>
-                  <option value="MEDICAL" className="bg-slate-800">Medical Treatment</option>
-                  <option value="CONFERENCE" className="bg-slate-800">Conference</option>
-                  <option value="FAMILY" className="bg-slate-800">Visit Family/Friends</option>
+                  <option value="">Select purpose</option>
+                  <option value="TOURISM">Tourism/Vacation</option>
+                  <option value="BUSINESS">Business</option>
+                  <option value="STUDY">Study</option>
+                  <option value="MEDICAL">Medical Treatment</option>
+                  <option value="CONFERENCE">Conference</option>
+                  <option value="FAMILY">Visit Family/Friends</option>
                 </select>
-                {errors.purposeOfTrip && <p className="mt-1 text-sm text-red-400">{errors.purposeOfTrip}</p>}
+                {errors.purposeOfTrip && <p className="mt-1 text-sm text-destructive">{errors.purposeOfTrip}</p>}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Intended Arrival Date *</label>
+                <label className="block text-sm font-medium text-foreground mb-2">Intended Arrival Date *</label>
                 <input
                   type="date"
                   value={formData.travelInfo.intendedArrivalDate}
                   onChange={(e) => updateFormData('travelInfo', 'intendedArrivalDate', e.target.value)}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 bg-input border border-border rounded-lg text-foreground focus:ring-2 focus:ring-ring focus:border-transparent"
                 />
-                {errors.intendedArrivalDate && <p className="mt-1 text-sm text-red-400">{errors.intendedArrivalDate}</p>}
+                {errors.intendedArrivalDate && <p className="mt-1 text-sm text-destructive">{errors.intendedArrivalDate}</p>}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Length of Stay</label>
+                <label className="block text-sm font-medium text-foreground mb-2">Length of Stay</label>
                 <input
                   type="text"
                   value={formData.travelInfo.intendedLengthOfStay}
                   onChange={(e) => updateFormData('travelInfo', 'intendedLengthOfStay', e.target.value)}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 bg-input border border-border rounded-lg text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-ring focus:border-transparent"
                   placeholder="e.g., 2 weeks"
                 />
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-300 mb-2">US Address *</label>
+                <label className="block text-sm font-medium text-foreground mb-2">US Address *</label>
                 <input
                   type="text"
                   value={formData.travelInfo.usAddress}
                   onChange={(e) => updateFormData('travelInfo', 'usAddress', e.target.value)}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 bg-input border border-border rounded-lg text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-ring focus:border-transparent"
                   placeholder="Hotel or residence address in the US"
                 />
-                {errors.usAddress && <p className="mt-1 text-sm text-red-400">{errors.usAddress}</p>}
+                {errors.usAddress && <p className="mt-1 text-sm text-destructive">{errors.usAddress}</p>}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">City</label>
+                <label className="block text-sm font-medium text-foreground mb-2">City</label>
                 <input
                   type="text"
                   value={formData.travelInfo.usCity}
                   onChange={(e) => updateFormData('travelInfo', 'usCity', e.target.value)}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 bg-input border border-border rounded-lg text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-ring focus:border-transparent"
                   placeholder="New York"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">State</label>
+                <label className="block text-sm font-medium text-foreground mb-2">State</label>
                 <input
                   type="text"
                   value={formData.travelInfo.usState}
                   onChange={(e) => updateFormData('travelInfo', 'usState', e.target.value)}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 bg-input border border-border rounded-lg text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-ring focus:border-transparent"
                   placeholder="NY"
                 />
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-300 mb-2">Who is paying for your trip?</label>
+                <label className="block text-sm font-medium text-foreground mb-2">Who is paying for your trip?</label>
                 <select
                   value={formData.travelInfo.payingForTrip}
                   onChange={(e) => updateFormData('travelInfo', 'payingForTrip', e.target.value)}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 bg-input border border-border rounded-lg text-foreground focus:ring-2 focus:ring-ring focus:border-transparent"
                 >
-                  <option value="" className="bg-slate-800">Select</option>
-                  <option value="SELF" className="bg-slate-800">Self</option>
-                  <option value="EMPLOYER" className="bg-slate-800">Employer</option>
-                  <option value="FAMILY" className="bg-slate-800">Family Member</option>
-                  <option value="SPONSOR" className="bg-slate-800">Sponsor</option>
+                  <option value="">Select</option>
+                  <option value="SELF">Self</option>
+                  <option value="EMPLOYER">Employer</option>
+                  <option value="FAMILY">Family Member</option>
+                  <option value="SPONSOR">Sponsor</option>
                 </select>
               </div>
             </div>
@@ -779,70 +870,70 @@ export default function Application() {
       case 5:
         return (
           <div className="space-y-6">
-            <h3 className="text-xl font-semibold text-white mb-6">Review Your Application</h3>
+            <h3 className="text-xl font-semibold text-foreground mb-6">Review Your Application</h3>
 
             <div className="space-y-6">
               {/* Personal Info Summary */}
-              <div className="bg-white/5 border border-white/10 rounded-xl p-6">
-                <h4 className="text-lg font-medium text-white mb-4 flex items-center gap-2">
+              <div className="bg-muted/50 border border-border rounded-xl p-6">
+                <h4 className="text-lg font-medium text-foreground mb-4 flex items-center gap-2">
                   <User className="w-5 h-5" />
                   Personal Information
                 </h4>
                 <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div><span className="text-gray-400">Name:</span> <span className="text-white ml-2">{formData.personalInfo.surnames} {formData.personalInfo.givenNames}</span></div>
-                  <div><span className="text-gray-400">DOB:</span> <span className="text-white ml-2">{formData.personalInfo.dateOfBirth}</span></div>
-                  <div><span className="text-gray-400">Nationality:</span> <span className="text-white ml-2">{formData.personalInfo.nationality}</span></div>
-                  <div><span className="text-gray-400">Birth Place:</span> <span className="text-white ml-2">{formData.personalInfo.cityOfBirth}, {formData.personalInfo.countryOfBirth}</span></div>
+                  <div><span className="text-muted-foreground">Name:</span> <span className="text-foreground ml-2">{formData.personalInfo.surnames} {formData.personalInfo.givenNames}</span></div>
+                  <div><span className="text-muted-foreground">DOB:</span> <span className="text-foreground ml-2">{formData.personalInfo.dateOfBirth}</span></div>
+                  <div><span className="text-muted-foreground">Nationality:</span> <span className="text-foreground ml-2">{formData.personalInfo.nationality}</span></div>
+                  <div><span className="text-muted-foreground">Birth Place:</span> <span className="text-foreground ml-2">{formData.personalInfo.cityOfBirth}, {formData.personalInfo.countryOfBirth}</span></div>
                 </div>
               </div>
 
               {/* Contact Info Summary */}
-              <div className="bg-white/5 border border-white/10 rounded-xl p-6">
-                <h4 className="text-lg font-medium text-white mb-4 flex items-center gap-2">
+              <div className="bg-muted/50 border border-border rounded-xl p-6">
+                <h4 className="text-lg font-medium text-foreground mb-4 flex items-center gap-2">
                   <Phone className="w-5 h-5" />
                   Contact Information
                 </h4>
                 <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div><span className="text-gray-400">Email:</span> <span className="text-white ml-2">{formData.contactInfo.email}</span></div>
-                  <div><span className="text-gray-400">Phone:</span> <span className="text-white ml-2">{formData.contactInfo.phone}</span></div>
-                  <div className="col-span-2"><span className="text-gray-400">Address:</span> <span className="text-white ml-2">{formData.contactInfo.streetAddress}, {formData.contactInfo.city}, {formData.contactInfo.country}</span></div>
+                  <div><span className="text-muted-foreground">Email:</span> <span className="text-foreground ml-2">{formData.contactInfo.email}</span></div>
+                  <div><span className="text-muted-foreground">Phone:</span> <span className="text-foreground ml-2">{formData.contactInfo.phone}</span></div>
+                  <div className="col-span-2"><span className="text-muted-foreground">Address:</span> <span className="text-foreground ml-2">{formData.contactInfo.streetAddress}, {formData.contactInfo.city}, {formData.contactInfo.country}</span></div>
                 </div>
               </div>
 
               {/* Passport Summary */}
-              <div className="bg-white/5 border border-white/10 rounded-xl p-6">
-                <h4 className="text-lg font-medium text-white mb-4 flex items-center gap-2">
+              <div className="bg-muted/50 border border-border rounded-xl p-6">
+                <h4 className="text-lg font-medium text-foreground mb-4 flex items-center gap-2">
                   <FileText className="w-5 h-5" />
                   Passport Information
                 </h4>
                 <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div><span className="text-gray-400">Passport #:</span> <span className="text-white ml-2">{formData.passportInfo.passportNumber}</span></div>
-                  <div><span className="text-gray-400">Country:</span> <span className="text-white ml-2">{formData.passportInfo.countryOfIssuance}</span></div>
-                  <div><span className="text-gray-400">Issued:</span> <span className="text-white ml-2">{formData.passportInfo.issuanceDate}</span></div>
-                  <div><span className="text-gray-400">Expires:</span> <span className="text-white ml-2">{formData.passportInfo.expirationDate}</span></div>
+                  <div><span className="text-muted-foreground">Passport #:</span> <span className="text-foreground ml-2">{formData.passportInfo.passportNumber}</span></div>
+                  <div><span className="text-muted-foreground">Country:</span> <span className="text-foreground ml-2">{formData.passportInfo.countryOfIssuance}</span></div>
+                  <div><span className="text-muted-foreground">Issued:</span> <span className="text-foreground ml-2">{formData.passportInfo.issuanceDate}</span></div>
+                  <div><span className="text-muted-foreground">Expires:</span> <span className="text-foreground ml-2">{formData.passportInfo.expirationDate}</span></div>
                 </div>
               </div>
 
               {/* Travel Summary */}
-              <div className="bg-white/5 border border-white/10 rounded-xl p-6">
-                <h4 className="text-lg font-medium text-white mb-4 flex items-center gap-2">
+              <div className="bg-muted/50 border border-border rounded-xl p-6">
+                <h4 className="text-lg font-medium text-foreground mb-4 flex items-center gap-2">
                   <Plane className="w-5 h-5" />
                   Travel Plans
                 </h4>
                 <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div><span className="text-gray-400">Purpose:</span> <span className="text-white ml-2">{formData.travelInfo.purposeOfTrip}</span></div>
-                  <div><span className="text-gray-400">Arrival:</span> <span className="text-white ml-2">{formData.travelInfo.intendedArrivalDate}</span></div>
-                  <div className="col-span-2"><span className="text-gray-400">US Address:</span> <span className="text-white ml-2">{formData.travelInfo.usAddress}, {formData.travelInfo.usCity} {formData.travelInfo.usState}</span></div>
+                  <div><span className="text-muted-foreground">Purpose:</span> <span className="text-foreground ml-2">{formData.travelInfo.purposeOfTrip}</span></div>
+                  <div><span className="text-muted-foreground">Arrival:</span> <span className="text-foreground ml-2">{formData.travelInfo.intendedArrivalDate}</span></div>
+                  <div className="col-span-2"><span className="text-muted-foreground">US Address:</span> <span className="text-foreground ml-2">{formData.travelInfo.usAddress}, {formData.travelInfo.usCity} {formData.travelInfo.usState}</span></div>
                 </div>
               </div>
 
               {/* Warning */}
-              <div className="bg-white/5 border border-white/20 rounded-xl p-6">
+              <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-6">
                 <div className="flex items-start gap-3">
-                  <AlertCircle className="w-6 h-6 text-white flex-shrink-0" />
+                  <AlertCircle className="w-6 h-6 text-amber-500 flex-shrink-0" />
                   <div>
-                    <h4 className="text-white font-medium mb-1">Important Notice</h4>
-                    <p className="text-sm text-gray-400">
+                    <h4 className="text-foreground font-medium mb-1">Important Notice</h4>
+                    <p className="text-sm text-muted-foreground">
                       Please review all information carefully before submitting. Once submitted, you may need to start a new application to make changes. Providing false information may result in visa denial.
                     </p>
                   </div>
@@ -857,14 +948,35 @@ export default function Application() {
     }
   };
 
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 animate-spin text-primary mx-auto mb-4" />
+          <p className="text-muted-foreground">Loading your application...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-background">
       <div className="max-w-5xl mx-auto px-4 pt-24 pb-8">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2">DS-160 Visa Application</h1>
-          <p className="text-gray-400">Complete your nonimmigrant visa application</p>
+          <h1 className="text-3xl font-bold text-foreground mb-2">DS-160 Visa Application</h1>
+          <p className="text-muted-foreground">Complete your nonimmigrant visa application</p>
         </div>
+
+        {/* Error Banner */}
+        {saveError && (
+          <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-lg flex items-center gap-3">
+            <AlertCircle className="w-5 h-5 text-destructive flex-shrink-0" />
+            <p className="text-sm text-destructive">{saveError}</p>
+            <button onClick={() => setSaveError(null)} className="ml-auto text-destructive hover:text-destructive/80">×</button>
+          </div>
+        )}
 
         {/* Progress Steps */}
         <div className="mb-8">
@@ -873,16 +985,16 @@ export default function Application() {
               <div key={step.id} className="flex items-center">
                 <div className={`flex items-center justify-center w-12 h-12 rounded-full border-2 transition-all ${
                   step.status === 'completed'
-                    ? 'bg-white border-white text-black'
+                    ? 'bg-primary border-primary text-primary-foreground'
                     : step.status === 'current'
-                    ? 'bg-white/20 border-white text-white'
-                    : 'bg-white/5 border-white/20 text-gray-400'
+                    ? 'bg-primary/20 border-primary text-foreground'
+                    : 'bg-muted border-border text-muted-foreground'
                 }`}>
                   {step.status === 'completed' ? <Check className="w-6 h-6" /> : step.icon}
                 </div>
                 {index < steps.length - 1 && (
                   <div className={`hidden md:block w-24 h-1 mx-2 rounded ${
-                    step.status === 'completed' ? 'bg-white' : 'bg-white/10'
+                    step.status === 'completed' ? 'bg-primary' : 'bg-border'
                   }`} />
                 )}
               </div>
@@ -891,7 +1003,7 @@ export default function Application() {
           <div className="flex justify-between mt-2">
             {steps.map((step) => (
               <span key={step.id} className={`text-xs font-medium ${
-                step.status === 'current' ? 'text-white' : 'text-gray-500'
+                step.status === 'current' ? 'text-foreground' : 'text-muted-foreground'
               }`}>
                 {step.name}
               </span>
@@ -900,15 +1012,15 @@ export default function Application() {
         </div>
 
         {/* Form Content */}
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-8">
+        <div className="bg-card border border-border rounded-2xl p-8">
           {renderStepContent()}
 
           {/* Navigation Buttons */}
-          <div className="flex justify-between items-center mt-8 pt-6 border-t border-white/10">
+          <div className="flex justify-between items-center mt-8 pt-6 border-t border-border">
             <button
               onClick={handlePrev}
               disabled={currentStep === 1}
-              className="flex items-center gap-2 px-6 py-3 text-gray-300 hover:text-white hover:bg-white/10 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center gap-2 px-6 py-3 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <ChevronLeft className="w-5 h-5" />
               Previous
@@ -918,7 +1030,7 @@ export default function Application() {
               <button
                 onClick={handleSave}
                 disabled={isSaving}
-                className="flex items-center gap-2 px-6 py-3 text-blue-400 hover:bg-blue-500/10 rounded-lg transition-all"
+                className="flex items-center gap-2 px-6 py-3 text-primary hover:bg-primary/10 rounded-lg transition-all disabled:opacity-50"
               >
                 {isSaving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
                 Save Draft
@@ -927,7 +1039,7 @@ export default function Application() {
               {currentStep < 5 ? (
                 <button
                   onClick={handleNext}
-                  className="flex items-center gap-2 px-6 py-3 bg-white text-black rounded-lg font-semibold hover:bg-gray-200 transition-all"
+                  className="flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg font-semibold hover:bg-primary/90 transition-all"
                 >
                   Next
                   <ChevronRight className="w-5 h-5" />
@@ -936,7 +1048,7 @@ export default function Application() {
                 <button
                   onClick={handleSubmit}
                   disabled={isSubmitting}
-                  className="flex items-center gap-2 px-6 py-3 bg-white text-black rounded-lg font-semibold hover:bg-gray-200 transition-all disabled:opacity-50"
+                  className="flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg font-semibold hover:bg-primary/90 transition-all disabled:opacity-50"
                 >
                   {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
                   Submit Application

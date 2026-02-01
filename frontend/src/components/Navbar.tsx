@@ -1,21 +1,49 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts/ThemeContext";
-import { Menu, X, Plane, User, LogOut, Settings, FileText, CreditCard, ChevronDown, Sun, Moon } from "lucide-react";
+import { Menu, X, Plane, User, LogOut, Settings, FileText, CreditCard, ChevronDown, Sun, Moon, Globe } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
+import { UserAvatar } from "./UserAvatar";
+
+// Language options
+const languages = [
+  { code: 'en', label: 'English', flag: '🇺🇸' },
+  { code: 'mn', label: 'Монгол', flag: '🇲🇳' },
+  { code: 'ru', label: 'Русский', flag: '🇷🇺' },
+  { code: 'zh', label: '中文', flag: '🇨🇳' },
+  { code: 'fr', label: 'Français', flag: '🇫🇷' },
+  { code: 'de', label: 'Deutsch', flag: '🇩🇪' },
+];
 
 const Navbar = () => {
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
+  const [currentLang, setCurrentLang] = useState(() => {
+    return localStorage.getItem('language') || 'en';
+  });
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const langDropdownRef = useRef<HTMLDivElement>(null);
+
+  const handleLanguageChange = (langCode: string) => {
+    setCurrentLang(langCode);
+    localStorage.setItem('language', langCode);
+    setIsLangDropdownOpen(false);
+    // In production, this would trigger i18n language change
+  };
+
+  const currentLanguage = languages.find(l => l.code === currentLang) || languages[0];
 
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsDropdownOpen(false);
+      }
+      if (langDropdownRef.current && !langDropdownRef.current.contains(event.target as Node)) {
+        setIsLangDropdownOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -49,7 +77,7 @@ const Navbar = () => {
               >
                 Learn More
               </Link>
-              {user && (
+              {user && user.role !== "ADMIN" && (
                 <Link
                   to="/application"
                   className="px-4 py-2 text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2"
@@ -72,6 +100,36 @@ const Navbar = () => {
 
           {/* Desktop Auth & Theme Toggle */}
           <div className="hidden md:flex items-center space-x-4">
+            {/* Language Selector */}
+            <div className="relative" ref={langDropdownRef}>
+              <button
+                onClick={() => setIsLangDropdownOpen(!isLangDropdownOpen)}
+                className="flex items-center gap-2 px-3 py-2 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-lg transition-colors"
+                aria-label="Select language"
+              >
+                <Globe className="w-4 h-4" />
+                <span className="text-sm">{currentLanguage.flag}</span>
+                <ChevronDown className={`w-3 h-3 transition-transform ${isLangDropdownOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {isLangDropdownOpen && (
+                <div className="absolute right-0 mt-2 w-40 bg-card border border-border rounded-lg shadow-xl overflow-hidden z-50">
+                  {languages.map((lang) => (
+                    <button
+                      key={lang.code}
+                      onClick={() => handleLanguageChange(lang.code)}
+                      className={`flex items-center gap-3 w-full px-4 py-2.5 text-sm hover:bg-secondary transition-colors ${
+                        currentLang === lang.code ? 'bg-secondary text-foreground' : 'text-muted-foreground'
+                      }`}
+                    >
+                      <span>{lang.flag}</span>
+                      <span>{lang.label}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
             {/* Theme Toggle */}
             <button
               onClick={toggleTheme}
@@ -92,9 +150,7 @@ const Navbar = () => {
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                   className="flex items-center space-x-2 px-3 py-2 text-foreground hover:bg-secondary rounded-lg transition-colors"
                 >
-                  <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-semibold text-sm">
-                    {user.name?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase()}
-                  </div>
+                  <UserAvatar name={user.name} email={user.email} size="sm" />
                   <span className="text-sm font-medium">{user.name || user.email?.split('@')[0]}</span>
                   {user.role === "ADMIN" && (
                     <span className="px-2 py-0.5 text-xs bg-secondary text-secondary-foreground rounded">
@@ -219,13 +275,15 @@ const Navbar = () => {
                   >
                     Profile
                   </Link>
-                  <Link
-                    to="/application"
-                    className="px-4 py-3 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Apply Now
-                  </Link>
+                  {user.role !== "ADMIN" && (
+                    <Link
+                      to="/application"
+                      className="px-4 py-3 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      Apply Now
+                    </Link>
+                  )}
                 </>
               )}
               {user?.role === "ADMIN" && (

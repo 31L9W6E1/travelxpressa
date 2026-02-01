@@ -90,6 +90,7 @@ import {
   togglePostPublish,
   formatPostDate,
 } from "@/api/posts";
+import { UserAvatar } from "@/components/UserAvatar";
 
 interface UserData {
   id: string;
@@ -124,18 +125,46 @@ interface ApplicationData {
 }
 
 interface Stats {
+  overview: {
+    totalUsers: number;
+    totalApplications: number;
+    approvedApplications: number;
+    pendingApplications: number;
+    rejectedApplications: number;
+  };
+  users: {
+    total: number;
+    thisMonth: number;
+    lastMonth: number;
+    growth: number;
+  };
+  applications: {
+    total: number;
+    draft: number;
+    inProgress: number;
+    submitted: number;
+    underReview: number;
+    completed: number;
+    rejected: number;
+    thisMonth: number;
+    lastMonth: number;
+    growth: number;
+    approvalRate: number;
+  };
   inquiries: {
     total: number;
     pending: number;
     approved: number;
     rejected: number;
   };
-  users: {
-    total: number;
+  recent: {
+    inquiries: any[];
+    applications: any[];
+    users: any[];
   };
-  applications: {
-    total: number;
-    submitted: number;
+  charts: {
+    monthlyApplications: any[];
+    monthlyUsers: any[];
   };
 }
 
@@ -197,35 +226,43 @@ const AdminDashboard = () => {
     status: "draft",
   });
 
-  // Sample chart data
-  const monthlyApplicationData = [
-    { month: "Jan", submitted: 45, approved: 38, pending: 5, rejected: 2 },
-    { month: "Feb", submitted: 52, approved: 42, pending: 7, rejected: 3 },
-    { month: "Mar", submitted: 61, approved: 48, pending: 10, rejected: 3 },
-    { month: "Apr", submitted: 58, approved: 45, pending: 9, rejected: 4 },
-    { month: "May", submitted: 72, approved: 58, pending: 11, rejected: 3 },
-    { month: "Jun", submitted: 85, approved: 70, pending: 12, rejected: 3 },
-  ];
+  // Chart data - use real data from stats or fallback to sample data
+  const monthlyApplicationData = stats?.charts?.monthlyApplications?.length
+    ? stats.charts.monthlyApplications
+    : [
+      { month: "Jan", submitted: 0, approved: 0, pending: 0, rejected: 0 },
+      { month: "Feb", submitted: 0, approved: 0, pending: 0, rejected: 0 },
+      { month: "Mar", submitted: 0, approved: 0, pending: 0, rejected: 0 },
+      { month: "Apr", submitted: 0, approved: 0, pending: 0, rejected: 0 },
+      { month: "May", submitted: 0, approved: 0, pending: 0, rejected: 0 },
+      { month: "Jun", submitted: 0, approved: 0, pending: 0, rejected: 0 },
+    ];
 
-  const userGrowthData = [
-    { month: "Jan", users: 120 },
-    { month: "Feb", users: 156 },
-    { month: "Mar", users: 189 },
-    { month: "Apr", users: 234 },
-    { month: "May", users: 287 },
-    { month: "Jun", users: 345 },
-  ];
+  const userGrowthData = stats?.charts?.monthlyUsers?.length
+    ? stats.charts.monthlyUsers
+    : [
+      { month: "Jan", users: 0 },
+      { month: "Feb", users: 0 },
+      { month: "Mar", users: 0 },
+      { month: "Apr", users: 0 },
+      { month: "May", users: 0 },
+      { month: "Jun", users: 0 },
+    ];
 
   const statusDistributionData = [
     {
       name: "Approved",
-      value: stats?.inquiries.approved || 0,
+      value: stats?.applications?.completed || 0,
       fill: "#22c55e",
     },
-    { name: "Pending", value: stats?.inquiries.pending || 0, fill: "#eab308" },
+    {
+      name: "Pending",
+      value: (stats?.applications?.submitted || 0) + (stats?.applications?.underReview || 0) + (stats?.applications?.inProgress || 0),
+      fill: "#eab308"
+    },
     {
       name: "Rejected",
-      value: stats?.inquiries.rejected || 0,
+      value: stats?.applications?.rejected || 0,
       fill: "#ef4444",
     },
   ];
@@ -503,11 +540,13 @@ const AdminDashboard = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">
-                    {stats?.users.total || 0}
+                    {stats?.users?.total || 0}
                   </div>
                   <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                    <TrendingUp className="w-3 h-3 text-green-500" />
-                    <span className="text-green-500">+12%</span> from last month
+                    <TrendingUp className={`w-3 h-3 ${(stats?.users?.growth || 0) >= 0 ? 'text-green-500' : 'text-red-500'}`} />
+                    <span className={(stats?.users?.growth || 0) >= 0 ? 'text-green-500' : 'text-red-500'}>
+                      {(stats?.users?.growth || 0) >= 0 ? '+' : ''}{stats?.users?.growth || 0}%
+                    </span> from last month
                   </p>
                 </CardContent>
               </Card>
@@ -521,11 +560,13 @@ const AdminDashboard = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">
-                    {stats?.applications.total || 0}
+                    {stats?.applications?.total || 0}
                   </div>
                   <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                    <TrendingUp className="w-3 h-3 text-green-500" />
-                    <span className="text-green-500">+18%</span> from last month
+                    <TrendingUp className={`w-3 h-3 ${(stats?.applications?.growth || 0) >= 0 ? 'text-green-500' : 'text-red-500'}`} />
+                    <span className={(stats?.applications?.growth || 0) >= 0 ? 'text-green-500' : 'text-red-500'}>
+                      {(stats?.applications?.growth || 0) >= 0 ? '+' : ''}{stats?.applications?.growth || 0}%
+                    </span> from last month
                   </p>
                 </CardContent>
               </Card>
@@ -533,22 +574,16 @@ const AdminDashboard = () => {
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <CardTitle className="text-sm font-medium text-muted-foreground">
-                    Approved
+                    Completed
                   </CardTitle>
                   <CheckCircle className="h-4 w-4 text-green-500" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">
-                    {stats?.inquiries.approved || 0}
+                    {stats?.applications?.completed || 0}
                   </div>
                   <p className="text-xs text-muted-foreground mt-1">
-                    {stats?.inquiries.total
-                      ? Math.round(
-                          (stats.inquiries.approved / stats.inquiries.total) *
-                            100,
-                        )
-                      : 0}
-                    % approval rate
+                    {stats?.applications?.approvalRate || 0}% approval rate
                   </p>
                 </CardContent>
               </Card>
@@ -562,11 +597,11 @@ const AdminDashboard = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">
-                    {stats?.inquiries.pending || 0}
+                    {(stats?.applications?.submitted || 0) + (stats?.applications?.underReview || 0)}
                   </div>
                   <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
                     <AlertCircle className="w-3 h-3 text-yellow-500" />
-                    Needs attention
+                    {stats?.applications?.submitted || 0} submitted, {stats?.applications?.underReview || 0} under review
                   </p>
                 </CardContent>
               </Card>
@@ -714,10 +749,7 @@ const AdminDashboard = () => {
                         className="flex items-center justify-between"
                       >
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-semibold">
-                            {u.name?.[0]?.toUpperCase() ||
-                              u.email[0].toUpperCase()}
-                          </div>
+                          <UserAvatar name={u.name} email={u.email} size="md" />
                           <div>
                             <p className="text-sm font-medium">
                               {u.name || "No name"}
@@ -795,10 +827,7 @@ const AdminDashboard = () => {
                         >
                           <td className="px-4 py-3">
                             <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-semibold">
-                                {u.name?.[0]?.toUpperCase() ||
-                                  u.email[0].toUpperCase()}
-                              </div>
+                              <UserAvatar name={u.name} email={u.email} size="md" />
                               <div>
                                 <p className="font-medium">
                                   {u.name || "No name"}
@@ -954,10 +983,7 @@ const AdminDashboard = () => {
                           Applicant
                         </h3>
                         <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold">
-                            {selectedApplication.user?.name?.[0]?.toUpperCase() ||
-                              "?"}
-                          </div>
+                          <UserAvatar name={selectedApplication.user?.name} email={selectedApplication.user?.email} size="lg" />
                           <div>
                             <p className="font-medium">
                               {selectedApplication.user?.name}

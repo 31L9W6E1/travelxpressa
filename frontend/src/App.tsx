@@ -24,6 +24,7 @@ import ReadyToBegin from "./pages/ReadyToBegin";
 import UserProfile from "./pages/UserProfile";
 import LearnMore from "./pages/LearnMore";
 import CountrySelect from "./pages/CountrySelect";
+import OAuthCallback from "./pages/OAuthCallback";
 
 // Protected route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -92,6 +93,7 @@ function App() {
               No page reload happens
             */}
             <Route path="/login" element={<Login />} />
+            <Route path="/oauth/callback" element={<OAuthCallback />} />
             <Route path="/about" element={<About />} />
             <Route path="/blog" element={<Blog />} />
             <Route path="/blog/:slug" element={<BlogPost />} />

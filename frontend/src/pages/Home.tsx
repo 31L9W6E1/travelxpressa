@@ -1,11 +1,21 @@
 import { useEffect, useState } from 'react';
 import { Link } from "react-router-dom";
-import { ArrowRight, Calendar, Clock, ChevronRight, Plane, Loader2, Shield, CheckCircle, Users, Zap } from "lucide-react";
+import { ArrowRight, Calendar, Clock, ChevronRight, Plane, Loader2, Shield, CheckCircle, Users, Zap, Bell } from "lucide-react";
 import { getFeaturedContent, formatPostDate, calculateReadTime, getDefaultImage } from '@/api/posts';
 import type { PostSummary } from '@/api/posts';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+
+// News ticker items - can be fetched from API or managed via CMS
+const tickerItems = [
+  "🇺🇸 US Embassy Ulaanbaatar: Visa interview appointments now available for March 2025",
+  "📋 DS-160 Processing: Average processing time reduced to 3 business days",
+  "🎉 New Feature: Track your application status in real-time through our dashboard",
+  "⚡ Express Processing: Priority visa services now available for business travelers",
+  "📅 Reminder: Check your passport validity - must be valid for 6 months beyond travel date",
+  "🌍 Travel Advisory: Updated visa requirements for B1/B2 applicants - check our blog for details",
+];
 
 // Fallback data for when API fails or is empty
 const fallbackBlogPosts: PostSummary[] = [
@@ -86,8 +96,28 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* Hero Section */}
-      <section className="relative pt-24 pb-16 border-b border-border">
+      {/* News Ticker - Fixed at top below navbar */}
+      <div className="fixed top-16 left-0 right-0 z-40 bg-primary text-primary-foreground overflow-hidden">
+        <div className="flex items-center h-10">
+          <div className="flex-shrink-0 px-4 bg-primary-foreground/10 h-full flex items-center gap-2">
+            <Bell className="w-4 h-4" />
+            <span className="text-sm font-semibold">News</span>
+          </div>
+          <div className="flex-1 overflow-hidden">
+            <div className="animate-ticker whitespace-nowrap flex">
+              {/* Duplicate content for seamless loop */}
+              {[...tickerItems, ...tickerItems].map((item, index) => (
+                <span key={index} className="inline-block px-8 text-sm">
+                  {item}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Hero Section - adjust pt to account for navbar + ticker */}
+      <section className="relative pt-32 pb-16 border-b border-border">
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>

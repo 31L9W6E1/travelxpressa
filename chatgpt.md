@@ -249,12 +249,3 @@ TravelXpressa prioritizes **trust, reliability, and clarity** over speed.
 **Status**: Authoritative
 
 ---
-
-If you want next, I can:
-
-* 🔥 Merge everything into **one master handoff PDF**
-* 🤖 Create a **single “AI CONTINUE THIS PROJECT” prompt**
-* 🧱 Convert this into **GitHub Wiki structure**
-* 🧪 Add **acceptance criteria for each roadmap phase**
-
-Say the word and I’ll lock it.

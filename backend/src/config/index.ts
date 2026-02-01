@@ -1,6 +1,9 @@
 import dotenv from 'dotenv';
 
-dotenv.config();
+// Only load .env file in development - in production, use environment variables directly
+if (process.env.NODE_ENV !== 'production') {
+  dotenv.config();
+}
 
 function requireEnv(name: string, defaultValue?: string): string {
   const value = process.env[name] || defaultValue;

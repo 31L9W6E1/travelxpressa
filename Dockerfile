@@ -47,6 +47,9 @@ RUN npx prisma generate
 # Copy built files from builder
 COPY --from=builder /app/dist ./dist
 
+# Remove any .env file that might have been copied
+RUN rm -f .env
+
 # Expose port
 EXPOSE 8080
 

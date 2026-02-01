@@ -96,8 +96,7 @@ const EnhancedForm = () => {
         });
         setCharCount(0);
       } else {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to submit application");
+        throw new Error(response.data.error || "Failed to submit application");
       }
     } catch (error: any) {
       setSubmitStatus("error");

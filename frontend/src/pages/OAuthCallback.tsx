@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { setTokens } from '../api/client';
 import { Loader2, CheckCircle, XCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -64,9 +65,8 @@ const OAuthCallback = () => {
       }
 
       try {
-        // Store tokens
-        localStorage.setItem('accessToken', accessToken);
-        localStorage.setItem('refreshToken', refreshToken);
+        // Store tokens (use setTokens to update both localStorage and in-memory token)
+        setTokens(accessToken, refreshToken);
 
         // Refresh user data in context
         await refreshUser();

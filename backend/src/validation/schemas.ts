@@ -138,12 +138,18 @@ export const createApplicationSchema = z.object({
   visaType: z.nativeEnum(VisaType),
 });
 
+// Partial schemas for draft saving (all fields optional)
+export const personalInfoDraftSchema = personalInfoSchema.partial();
+export const contactInfoDraftSchema = contactInfoSchema.deepPartial();
+export const passportInfoDraftSchema = passportInfoSchema.partial();
+export const travelInfoDraftSchema = travelInfoSchema.deepPartial();
+
 export const updateApplicationSchema = z.object({
   currentStep: z.number().int().min(1).max(15).optional(),
-  personalInfo: personalInfoSchema.optional(),
-  contactInfo: contactInfoSchema.optional(),
-  passportInfo: passportInfoSchema.optional(),
-  travelInfo: travelInfoSchema.optional(),
+  personalInfo: personalInfoDraftSchema.optional(),
+  contactInfo: contactInfoDraftSchema.optional(),
+  passportInfo: passportInfoDraftSchema.optional(),
+  travelInfo: travelInfoDraftSchema.optional(),
 });
 
 // Pagination schema

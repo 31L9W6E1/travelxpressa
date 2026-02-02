@@ -21,21 +21,12 @@ const nameSchema = z.string()
   .max(100, 'Name must be less than 100 characters')
   .regex(/^[a-zA-Z\s\-']+$/, 'Name can only contain letters, spaces, hyphens, and apostrophes');
 
-// Draft-friendly validators (allow empty strings for partial saves)
-const optionalEmailSchema = z.string().max(255).refine(
-  (val) => val === '' || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val),
-  { message: 'Invalid email address' }
-).optional();
-
-const optionalPhoneSchema = z.string().max(20).refine(
-  (val) => val === '' || val === undefined || /^[\d\s\-\+\(\)]{10,20}$/.test(val),
-  { message: 'Invalid phone number format' }
-).optional();
-
-const optionalDateSchema = z.string().refine(
-  (val) => val === '' || val === undefined || /^\d{4}-\d{2}-\d{2}$/.test(val),
-  { message: 'Invalid date format' }
-).optional();
+// Draft-friendly validators - very permissive for partial saves
+// These accept any string value including empty strings
+const optionalEmailDraft = z.string().max(255).optional().or(z.literal(''));
+const optionalPhoneDraft = z.string().max(30).optional().or(z.literal(''));
+const optionalDateDraft = z.string().max(20).optional().or(z.literal(''));
+const optionalStringDraft = z.string().optional().or(z.literal(''));
 
 // Auth schemas
 export const registerSchema = z.object({
@@ -154,90 +145,80 @@ export const createApplicationSchema = z.object({
   visaType: z.nativeEnum(VisaType),
 });
 
-// Draft schemas for saving partial form data (allow empty strings and missing fields)
+// Draft schemas for saving partial form data (very permissive - accept anything)
+// Using z.any() for nested objects to avoid validation issues during partial saves
 export const personalInfoDraftSchema = z.object({
-  surnames: z.string().max(100).optional(),
-  givenNames: z.string().max(100).optional(),
-  fullNameNative: z.string().max(200).optional(),
+  surnames: optionalStringDraft,
+  givenNames: optionalStringDraft,
+  fullNameNative: optionalStringDraft,
   otherNamesUsed: z.boolean().optional(),
-  otherNames: z.array(z.string().max(100)).max(10).optional(),
-  telCode: z.string().max(5).optional(),
-  sex: z.enum(['M', 'F']).optional(),
-  maritalStatus: z.enum(['SINGLE', 'MARRIED', 'DIVORCED', 'WIDOWED', 'SEPARATED']).optional(),
-  dateOfBirth: optionalDateSchema,
-  cityOfBirth: z.string().max(100).optional(),
-  stateOfBirth: z.string().max(100).optional(),
-  countryOfBirth: z.string().max(100).optional(),
-  nationality: z.string().max(100).optional(),
-}).passthrough(); // Allow any extra fields
+  otherNames: z.array(z.string()).optional(),
+  telCode: optionalStringDraft,
+  sex: z.string().optional(),
+  maritalStatus: z.string().optional(),
+  dateOfBirth: optionalDateDraft,
+  cityOfBirth: optionalStringDraft,
+  stateOfBirth: optionalStringDraft,
+  countryOfBirth: optionalStringDraft,
+  nationality: optionalStringDraft,
+}).passthrough();
 
 export const addressDraftSchema = z.object({
-  street: z.string().max(200).optional(),
-  city: z.string().max(100).optional(),
-  state: z.string().max(100).optional(),
-  postalCode: z.string().max(20).optional(),
-  country: z.string().max(100).optional(),
+  street: optionalStringDraft,
+  city: optionalStringDraft,
+  state: optionalStringDraft,
+  postalCode: optionalStringDraft,
+  country: optionalStringDraft,
 }).passthrough().optional();
 
 export const contactInfoDraftSchema = z.object({
-  homeAddress: addressDraftSchema,
-  mailingAddress: addressDraftSchema,
-  phone: optionalPhoneSchema,
-  secondaryPhone: optionalPhoneSchema,
-  workPhone: optionalPhoneSchema,
-  email: optionalEmailSchema,
+  homeAddress: z.any().optional(),
+  mailingAddress: z.any().optional(),
+  phone: optionalPhoneDraft,
+  secondaryPhone: optionalPhoneDraft,
+  workPhone: optionalPhoneDraft,
+  email: optionalEmailDraft,
 }).passthrough();
 
 export const passportInfoDraftSchema = z.object({
-  passportType: z.enum(['REGULAR', 'OFFICIAL', 'DIPLOMATIC', 'OTHER']).optional(),
-  passportNumber: z.string().max(20).optional(),
-  passportBookNumber: z.string().max(20).optional(),
-  countryOfIssuance: z.string().max(100).optional(),
-  cityOfIssuance: z.string().max(100).optional(),
-  stateOfIssuance: z.string().max(100).optional(),
-  issuanceDate: optionalDateSchema,
-  expirationDate: optionalDateSchema,
+  passportType: z.string().optional(),
+  passportNumber: optionalStringDraft,
+  passportBookNumber: optionalStringDraft,
+  countryOfIssuance: optionalStringDraft,
+  cityOfIssuance: optionalStringDraft,
+  stateOfIssuance: optionalStringDraft,
+  issuanceDate: optionalDateDraft,
+  expirationDate: optionalDateDraft,
   hasOtherPassport: z.boolean().optional(),
-  otherPassportInfo: z.object({
-    number: z.string().max(20).optional(),
-    country: z.string().max(100).optional(),
-  }).optional(),
+  otherPassportInfo: z.any().optional(),
 }).passthrough();
 
 export const travelInfoDraftSchema = z.object({
-  purposeOfTrip: z.string().max(200).optional(),
-  specificPurpose: z.string().max(500).optional(),
-  intendedArrivalDate: optionalDateSchema,
-  intendedLengthOfStay: z.string().max(50).optional(),
-  addressWhileInUS: z.object({
-    street: z.string().max(200).optional(),
-    city: z.string().max(100).optional(),
-    state: z.string().max(50).optional(),
-    zipCode: z.string().max(10).optional(),
-  }).passthrough().optional(),
-  payingForTrip: z.string().max(200).optional(),
+  purposeOfTrip: optionalStringDraft,
+  specificPurpose: optionalStringDraft,
+  intendedArrivalDate: optionalDateDraft,
+  intendedLengthOfStay: optionalStringDraft,
+  addressWhileInUS: z.any().optional(),
+  payingForTrip: optionalStringDraft,
   travelingWithOthers: z.boolean().optional(),
-  companions: z.array(z.object({
-    name: z.string().max(200).optional(),
-    relationship: z.string().max(50).optional(),
-  })).max(10).optional(),
+  companions: z.array(z.any()).optional(),
 }).passthrough();
 
 // Family Info Draft Schema
 export const familyInfoDraftSchema = z.object({
   fatherSurnames: z.string().max(100).optional(),
   fatherGivenNames: z.string().max(100).optional(),
-  fatherDateOfBirth: optionalDateSchema,
+  fatherDateOfBirth: optionalDateDraft,
   isFatherInUS: z.boolean().optional(),
   fatherUSStatus: z.string().max(50).optional(),
   motherSurnames: z.string().max(100).optional(),
   motherGivenNames: z.string().max(100).optional(),
-  motherDateOfBirth: optionalDateSchema,
+  motherDateOfBirth: optionalDateDraft,
   isMotherInUS: z.boolean().optional(),
   motherUSStatus: z.string().max(50).optional(),
   hasSpouse: z.boolean().optional(),
   spouseFullName: z.string().max(200).optional(),
-  spouseDateOfBirth: optionalDateSchema,
+  spouseDateOfBirth: optionalDateDraft,
   spouseNationality: z.string().max(100).optional(),
   spouseCityOfBirth: z.string().max(100).optional(),
   spouseCountryOfBirth: z.string().max(100).optional(),
@@ -275,7 +256,7 @@ export const workEducationDraftSchema = z.object({
   presentEmployerPhone: z.string().max(30).optional(),
   monthlySalary: z.string().max(50).optional(),
   jobDuties: z.string().max(1000).optional(),
-  startDate: optionalDateSchema,
+  startDate: optionalDateDraft,
   wasPreviouslyEmployed: z.boolean().optional(),
   previousEmployment: z.array(z.object({
     employerName: z.string().max(200).optional(),

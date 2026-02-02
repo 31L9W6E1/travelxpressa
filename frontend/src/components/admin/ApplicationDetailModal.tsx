@@ -25,7 +25,7 @@ import {
 import {
   User,
   Phone,
-  Passport,
+  BookOpen,
   Plane,
   Users,
   Briefcase,
@@ -292,7 +292,7 @@ export default function ApplicationDetailModal({
                   Contact
                 </TabsTrigger>
                 <TabsTrigger value="passport" className="text-xs">
-                  <Passport className="w-3 h-3 mr-1" />
+                  <BookOpen className="w-3 h-3 mr-1" />
                   Passport
                 </TabsTrigger>
                 <TabsTrigger value="travel" className="text-xs">
@@ -410,7 +410,7 @@ export default function ApplicationDetailModal({
                 <Card>
                   <CardHeader>
                     <CardTitle className="text-base flex items-center gap-2">
-                      <Passport className="w-4 h-4" />
+                      <BookOpen className="w-4 h-4" />
                       Passport Information
                     </CardTitle>
                   </CardHeader>

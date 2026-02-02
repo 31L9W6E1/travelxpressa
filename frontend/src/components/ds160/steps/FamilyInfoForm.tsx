@@ -9,21 +9,21 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 
 export interface FamilyInfo {
   // Father
-  fatherSurnames: string;
-  fatherGivenNames: string;
-  fatherDateOfBirth: string;
-  isFatherInUS: boolean;
+  fatherSurnames?: string;
+  fatherGivenNames?: string;
+  fatherDateOfBirth?: string;
+  isFatherInUS?: boolean;
   fatherUSStatus?: string;
 
   // Mother
-  motherSurnames: string;
-  motherGivenNames: string;
-  motherDateOfBirth: string;
-  isMotherInUS: boolean;
+  motherSurnames?: string;
+  motherGivenNames?: string;
+  motherDateOfBirth?: string;
+  isMotherInUS?: boolean;
   motherUSStatus?: string;
 
   // Spouse (if married)
-  hasSpouse: boolean;
+  hasSpouse?: boolean;
   spouseFullName?: string;
   spouseDateOfBirth?: string;
   spouseNationality?: string;
@@ -33,27 +33,27 @@ export interface FamilyInfo {
   spouseAddressSameAsApplicant?: boolean;
 
   // Children
-  hasChildren: boolean;
+  hasChildren?: boolean;
   children?: Array<{
-    fullName: string;
-    dateOfBirth: string;
-    relationship: string;
+    fullName?: string;
+    dateOfBirth?: string;
+    relationship?: string;
   }>;
 
   // Immediate relatives in US
-  hasImmediateRelativesInUS: boolean;
+  hasImmediateRelativesInUS?: boolean;
   immediateRelativesInUS?: Array<{
-    fullName: string;
-    relationship: string;
-    status: string;
+    fullName?: string;
+    relationship?: string;
+    status?: string;
   }>;
 
   // Other relatives in US
-  hasOtherRelativesInUS: boolean;
+  hasOtherRelativesInUS?: boolean;
   otherRelativesInUS?: Array<{
-    fullName: string;
-    relationship: string;
-    status: string;
+    fullName?: string;
+    relationship?: string;
+    status?: string;
   }>;
 }
 

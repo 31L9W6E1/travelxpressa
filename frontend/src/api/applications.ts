@@ -74,17 +74,17 @@ export interface TravelInfo {
 }
 
 export interface FamilyInfo {
-  fatherSurnames: string;
-  fatherGivenNames: string;
+  fatherSurnames?: string;
+  fatherGivenNames?: string;
   fatherDateOfBirth?: string;
-  isFatherInUS: boolean;
+  isFatherInUS?: boolean;
   fatherUSStatus?: string;
-  motherSurnames: string;
-  motherGivenNames: string;
+  motherSurnames?: string;
+  motherGivenNames?: string;
   motherDateOfBirth?: string;
-  isMotherInUS: boolean;
+  isMotherInUS?: boolean;
   motherUSStatus?: string;
-  hasSpouse: boolean;
+  hasSpouse?: boolean;
   spouseFullName?: string;
   spouseDateOfBirth?: string;
   spouseNationality?: string;
@@ -92,28 +92,28 @@ export interface FamilyInfo {
   spouseCountryOfBirth?: string;
   spouseAddress?: string;
   spouseAddressSameAsApplicant?: boolean;
-  hasChildren: boolean;
+  hasChildren?: boolean;
   children?: Array<{
-    fullName: string;
-    dateOfBirth: string;
-    relationship: string;
+    fullName?: string;
+    dateOfBirth?: string;
+    relationship?: string;
   }>;
-  hasImmediateRelativesInUS: boolean;
+  hasImmediateRelativesInUS?: boolean;
   immediateRelativesInUS?: Array<{
-    fullName: string;
-    relationship: string;
-    status: string;
+    fullName?: string;
+    relationship?: string;
+    status?: string;
   }>;
-  hasOtherRelativesInUS: boolean;
+  hasOtherRelativesInUS?: boolean;
   otherRelativesInUS?: Array<{
-    fullName: string;
-    relationship: string;
-    status: string;
+    fullName?: string;
+    relationship?: string;
+    status?: string;
   }>;
 }
 
 export interface WorkEducationInfo {
-  primaryOccupation: string;
+  primaryOccupation?: string;
   presentEmployerName?: string;
   presentEmployerAddress?: string;
   presentEmployerCity?: string;
@@ -124,51 +124,51 @@ export interface WorkEducationInfo {
   monthlySalary?: string;
   jobDuties?: string;
   startDate?: string;
-  wasPreviouslyEmployed: boolean;
+  wasPreviouslyEmployed?: boolean;
   previousEmployment?: Array<{
-    employerName: string;
+    employerName?: string;
     employerAddress?: string;
     city?: string;
     state?: string;
     postalCode?: string;
     country?: string;
     phone?: string;
-    jobTitle: string;
+    jobTitle?: string;
     supervisorSurname?: string;
     supervisorGivenName?: string;
-    startDate: string;
-    endDate: string;
+    startDate?: string;
+    endDate?: string;
     duties?: string;
   }>;
-  hasAttendedEducation: boolean;
+  hasAttendedEducation?: boolean;
   education?: Array<{
-    institutionName: string;
+    institutionName?: string;
     institutionAddress?: string;
     city?: string;
     state?: string;
     postalCode?: string;
     country?: string;
-    courseOfStudy: string;
-    startDate: string;
-    endDate: string;
+    courseOfStudy?: string;
+    startDate?: string;
+    endDate?: string;
   }>;
-  belongsToClanOrTribe: boolean;
+  belongsToClanOrTribe?: boolean;
   clanOrTribeName?: string;
-  languages: string[];
-  hasVisitedCountriesLastFiveYears: boolean;
+  languages?: string[];
+  hasVisitedCountriesLastFiveYears?: boolean;
   countriesVisited?: string[];
-  belongsToProfessionalOrg: boolean;
+  belongsToProfessionalOrg?: boolean;
   professionalOrgs?: string[];
-  hasSpecializedSkills: boolean;
+  hasSpecializedSkills?: boolean;
   specializedSkillsDescription?: string;
-  hasServedInMilitary: boolean;
+  hasServedInMilitary?: boolean;
   militaryService?: {
-    country: string;
-    branch: string;
+    country?: string;
+    branch?: string;
     rank?: string;
     specialty?: string;
-    startDate: string;
-    endDate: string;
+    startDate?: string;
+    endDate?: string;
   };
 }
 

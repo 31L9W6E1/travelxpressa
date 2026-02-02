@@ -2,6 +2,7 @@ import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { Link } from "react-router-dom";
+import api from "../api/client";
 import { User, Calendar, FileText, CheckCircle, Clock, AlertCircle, CreditCard, ChevronRight, Edit3, Eye, Download, Shield, Loader2, QrCode, Smartphone, Building2, Wallet, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -17,17 +18,11 @@ const UserProfile = () => {
     }, []);
     const fetchApplications = async () => {
         try {
-            const token = localStorage.getItem("accessToken");
-            const response = await fetch("http://localhost:3000/api/applications", {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            if (response.ok) {
-                const data = await response.json();
-                const apps = data.data || [];
-                setApplications(apps);
-                if (apps.length > 0) {
-                    setActiveApplication(apps[0]);
-                }
+            const response = await api.get("/api/applications");
+            const apps = response.data.data || [];
+            setApplications(apps);
+            if (apps.length > 0) {
+                setActiveApplication(apps[0]);
             }
         }
         catch (error) {

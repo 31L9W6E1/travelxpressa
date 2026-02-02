@@ -6,6 +6,7 @@ import { Loader2, TrendingUp, FileText, User, HelpCircle, ChevronRight, CheckCir
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import api from "../api/client";
 const EnhancedDashboard = () => {
     const { user, logout } = useAuth();
     const [userInquiries, setUserInquiries] = useState([]);
@@ -21,20 +22,15 @@ const EnhancedDashboard = () => {
     }, []);
     const fetchUserInquiries = async () => {
         try {
-            const token = localStorage.getItem("accessToken");
-            const response = await fetch("http://localhost:3000/api/inquiries/user", {
-                headers: { Authorization: `Bearer ${token}` },
+            const response = await api.get("/api/inquiries/user");
+            const data = response.data.data || response.data || [];
+            setUserInquiries(data);
+            setStats({
+                total: data.length,
+                pending: data.filter((i) => i.status === "PENDING").length,
+                approved: data.filter((i) => i.status === "APPROVED").length,
+                rejected: data.filter((i) => i.status === "REJECTED").length,
             });
-            if (response.ok) {
-                const data = await response.json();
-                setUserInquiries(data);
-                setStats({
-                    total: data.length,
-                    pending: data.filter((i) => i.status === "PENDING").length,
-                    approved: data.filter((i) => i.status === "APPROVED").length,
-                    rejected: data.filter((i) => i.status === "REJECTED").length,
-                });
-            }
         }
         catch (err) {
             console.error("Failed to fetch user inquiries:", err);

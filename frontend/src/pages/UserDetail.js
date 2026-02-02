@@ -2,6 +2,7 @@ import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import api from "../api/client";
 import { ArrowLeft, User, Mail, Phone, Globe, Calendar, Shield, Clock, Activity, FileText, CheckCircle, XCircle, AlertCircle, Lock, Unlock, Trash2 } from "lucide-react";
 const UserDetail = () => {
     const { id } = useParams();
@@ -19,17 +20,8 @@ const UserDetail = () => {
         setLoading(true);
         setError(null);
         try {
-            const token = localStorage.getItem("accessToken");
-            const response = await fetch(`http://localhost:3000/api/admin/users/${id}`, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            if (response.ok) {
-                const data = await response.json();
-                setUserData(data.data);
-            }
-            else {
-                setError("Failed to fetch user details");
-            }
+            const response = await api.get(`/api/admin/users/${id}`);
+            setUserData(response.data.data);
         }
         catch (err) {
             setError("Error loading user details");

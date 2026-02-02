@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Check, ChevronLeft, Save, Send, AlertCircle, Loader2, User, Phone, Passport, Plane, Users, Briefcase, Shield, FileText, CheckSquare } from 'lucide-react';
+import { Check, ChevronLeft, Save, Send, AlertCircle, Loader2, User, Phone, BookOpen, Plane, Users, Briefcase, Shield, FileText, CheckSquare } from 'lucide-react';
 import { applicationsApi, type Application, type UpdateApplicationInput } from '../../api/applications';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -17,7 +17,7 @@ import DocumentUploadForm from './steps/DocumentUploadForm';
 const FORM_STEPS = [
   { id: 1, title: 'Personal Info', description: 'Basic personal details', icon: User },
   { id: 2, title: 'Contact Info', description: 'Address and contact details', icon: Phone },
-  { id: 3, title: 'Passport', description: 'Passport and travel documents', icon: Passport },
+  { id: 3, title: 'Passport', description: 'Passport and travel documents', icon: BookOpen },
   { id: 4, title: 'Travel Plans', description: 'Trip details and itinerary', icon: Plane },
   { id: 5, title: 'Family', description: 'Family information', icon: Users },
   { id: 6, title: 'Work & Education', description: 'Employment and education', icon: Briefcase },

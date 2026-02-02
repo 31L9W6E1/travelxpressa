@@ -10,76 +10,76 @@ import { Textarea } from '@/components/ui/textarea';
 
 export interface WorkEducationInfo {
   // Current Occupation
-  primaryOccupation: string;
-  presentEmployerName: string;
-  presentEmployerAddress: string;
-  presentEmployerCity: string;
-  presentEmployerState: string;
-  presentEmployerPostalCode: string;
-  presentEmployerCountry: string;
-  presentEmployerPhone: string;
-  monthlySalary: string;
-  jobDuties: string;
-  startDate: string;
+  primaryOccupation?: string;
+  presentEmployerName?: string;
+  presentEmployerAddress?: string;
+  presentEmployerCity?: string;
+  presentEmployerState?: string;
+  presentEmployerPostalCode?: string;
+  presentEmployerCountry?: string;
+  presentEmployerPhone?: string;
+  monthlySalary?: string;
+  jobDuties?: string;
+  startDate?: string;
 
   // Previous Employment
-  wasPreviouslyEmployed: boolean;
+  wasPreviouslyEmployed?: boolean;
   previousEmployment?: Array<{
-    employerName: string;
-    employerAddress: string;
-    city: string;
-    state: string;
-    postalCode: string;
-    country: string;
-    phone: string;
-    jobTitle: string;
-    supervisorSurname: string;
-    supervisorGivenName: string;
-    startDate: string;
-    endDate: string;
-    duties: string;
+    employerName?: string;
+    employerAddress?: string;
+    city?: string;
+    state?: string;
+    postalCode?: string;
+    country?: string;
+    phone?: string;
+    jobTitle?: string;
+    supervisorSurname?: string;
+    supervisorGivenName?: string;
+    startDate?: string;
+    endDate?: string;
+    duties?: string;
   }>;
 
   // Education
-  hasAttendedEducation: boolean;
+  hasAttendedEducation?: boolean;
   education?: Array<{
-    institutionName: string;
-    institutionAddress: string;
-    city: string;
-    state: string;
-    postalCode: string;
-    country: string;
-    courseOfStudy: string;
-    startDate: string;
-    endDate: string;
+    institutionName?: string;
+    institutionAddress?: string;
+    city?: string;
+    state?: string;
+    postalCode?: string;
+    country?: string;
+    courseOfStudy?: string;
+    startDate?: string;
+    endDate?: string;
   }>;
 
   // Additional Information
-  belongsToClanOrTribe: boolean;
+  belongsToClanOrTribe?: boolean;
   clanOrTribeName?: string;
-  languages: string[];
+  languages?: string[];
 
   // Countries Visited
-  hasVisitedCountriesLastFiveYears: boolean;
+  hasVisitedCountriesLastFiveYears?: boolean;
   countriesVisited?: string[];
 
   // Professional Organizations
-  belongsToProfessionalOrg: boolean;
+  belongsToProfessionalOrg?: boolean;
   professionalOrgs?: string[];
 
   // Specialized Skills
-  hasSpecializedSkills: boolean;
+  hasSpecializedSkills?: boolean;
   specializedSkillsDescription?: string;
 
   // Military Service
-  hasServedInMilitary: boolean;
+  hasServedInMilitary?: boolean;
   militaryService?: {
-    country: string;
-    branch: string;
-    rank: string;
-    specialty: string;
-    startDate: string;
-    endDate: string;
+    country?: string;
+    branch?: string;
+    rank?: string;
+    specialty?: string;
+    startDate?: string;
+    endDate?: string;
   };
 }
 

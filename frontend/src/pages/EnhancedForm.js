@@ -2,6 +2,7 @@ import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { useAuth } from "../contexts/AuthContext";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import api from "../api/client";
 const EnhancedForm = () => {
     const { user } = useAuth();
     const [formData, setFormData] = useState({
@@ -72,15 +73,8 @@ const EnhancedForm = () => {
         setSubmitStatus("idle");
         setErrorMessage("");
         try {
-            const response = await fetch("http://localhost:3000/api/inquiry", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-                },
-                body: JSON.stringify(formData),
-            });
-            if (response.ok) {
+            const response = await api.post("/api/inquiry", formData);
+            if (response.data.success) {
                 setSubmitStatus("success");
                 // Reset form but keep user data
                 setFormData({
@@ -93,8 +87,7 @@ const EnhancedForm = () => {
                 setCharCount(0);
             }
             else {
-                const errorData = await response.json();
-                throw new Error(errorData.error || "Failed to submit application");
+                throw new Error(response.data.error || "Failed to submit application");
             }
         }
         catch (error) {

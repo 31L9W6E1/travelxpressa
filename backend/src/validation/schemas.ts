@@ -21,6 +21,22 @@ const nameSchema = z.string()
   .max(100, 'Name must be less than 100 characters')
   .regex(/^[a-zA-Z\s\-']+$/, 'Name can only contain letters, spaces, hyphens, and apostrophes');
 
+// Draft-friendly validators (allow empty strings for partial saves)
+const optionalEmailSchema = z.string().max(255).refine(
+  (val) => val === '' || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val),
+  { message: 'Invalid email address' }
+).optional();
+
+const optionalPhoneSchema = z.string().max(20).refine(
+  (val) => val === '' || val === undefined || /^[\d\s\-\+\(\)]{10,20}$/.test(val),
+  { message: 'Invalid phone number format' }
+).optional();
+
+const optionalDateSchema = z.string().refine(
+  (val) => val === '' || val === undefined || /^\d{4}-\d{2}-\d{2}$/.test(val),
+  { message: 'Invalid date format' }
+).optional();
+
 // Auth schemas
 export const registerSchema = z.object({
   email: emailSchema,
@@ -138,11 +154,74 @@ export const createApplicationSchema = z.object({
   visaType: z.nativeEnum(VisaType),
 });
 
-// Partial schemas for draft saving (all fields optional)
-export const personalInfoDraftSchema = personalInfoSchema.partial();
-export const contactInfoDraftSchema = contactInfoSchema.deepPartial();
-export const passportInfoDraftSchema = passportInfoSchema.partial();
-export const travelInfoDraftSchema = travelInfoSchema.deepPartial();
+// Draft schemas for saving partial form data (allow empty strings and missing fields)
+export const personalInfoDraftSchema = z.object({
+  surnames: z.string().max(100).optional(),
+  givenNames: z.string().max(100).optional(),
+  fullNameNative: z.string().max(200).optional(),
+  otherNamesUsed: z.boolean().optional(),
+  otherNames: z.array(z.string().max(100)).max(10).optional(),
+  telCode: z.string().max(5).optional(),
+  sex: z.enum(['M', 'F']).optional(),
+  maritalStatus: z.enum(['SINGLE', 'MARRIED', 'DIVORCED', 'WIDOWED', 'SEPARATED']).optional(),
+  dateOfBirth: optionalDateSchema,
+  cityOfBirth: z.string().max(100).optional(),
+  stateOfBirth: z.string().max(100).optional(),
+  countryOfBirth: z.string().max(100).optional(),
+  nationality: z.string().max(100).optional(),
+}).passthrough(); // Allow any extra fields
+
+export const addressDraftSchema = z.object({
+  street: z.string().max(200).optional(),
+  city: z.string().max(100).optional(),
+  state: z.string().max(100).optional(),
+  postalCode: z.string().max(20).optional(),
+  country: z.string().max(100).optional(),
+}).passthrough().optional();
+
+export const contactInfoDraftSchema = z.object({
+  homeAddress: addressDraftSchema,
+  mailingAddress: addressDraftSchema,
+  phone: optionalPhoneSchema,
+  secondaryPhone: optionalPhoneSchema,
+  workPhone: optionalPhoneSchema,
+  email: optionalEmailSchema,
+}).passthrough();
+
+export const passportInfoDraftSchema = z.object({
+  passportType: z.enum(['REGULAR', 'OFFICIAL', 'DIPLOMATIC', 'OTHER']).optional(),
+  passportNumber: z.string().max(20).optional(),
+  passportBookNumber: z.string().max(20).optional(),
+  countryOfIssuance: z.string().max(100).optional(),
+  cityOfIssuance: z.string().max(100).optional(),
+  stateOfIssuance: z.string().max(100).optional(),
+  issuanceDate: optionalDateSchema,
+  expirationDate: optionalDateSchema,
+  hasOtherPassport: z.boolean().optional(),
+  otherPassportInfo: z.object({
+    number: z.string().max(20).optional(),
+    country: z.string().max(100).optional(),
+  }).optional(),
+}).passthrough();
+
+export const travelInfoDraftSchema = z.object({
+  purposeOfTrip: z.string().max(200).optional(),
+  specificPurpose: z.string().max(500).optional(),
+  intendedArrivalDate: optionalDateSchema,
+  intendedLengthOfStay: z.string().max(50).optional(),
+  addressWhileInUS: z.object({
+    street: z.string().max(200).optional(),
+    city: z.string().max(100).optional(),
+    state: z.string().max(50).optional(),
+    zipCode: z.string().max(10).optional(),
+  }).passthrough().optional(),
+  payingForTrip: z.string().max(200).optional(),
+  travelingWithOthers: z.boolean().optional(),
+  companions: z.array(z.object({
+    name: z.string().max(200).optional(),
+    relationship: z.string().max(50).optional(),
+  })).max(10).optional(),
+}).passthrough();
 
 export const updateApplicationSchema = z.object({
   currentStep: z.number().int().min(1).max(15).optional(),

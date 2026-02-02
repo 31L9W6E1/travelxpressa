@@ -5,7 +5,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.config = void 0;
 const dotenv_1 = __importDefault(require("dotenv"));
-dotenv_1.default.config();
+// Only load .env file in development - in production, use environment variables directly
+if (process.env.NODE_ENV !== 'production') {
+    dotenv_1.default.config();
+}
 function requireEnv(name, defaultValue) {
     const value = process.env[name] || defaultValue;
     if (!value && process.env.NODE_ENV === 'production') {

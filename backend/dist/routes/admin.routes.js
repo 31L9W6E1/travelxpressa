@@ -173,29 +173,29 @@ router.get('/stats', (0, errorHandler_1.asyncHandler)(async (_req, res) => {
                 lastLoginAt: true,
             },
         }),
-        // Monthly application trends (last 6 months) - using raw query for grouping
+        // Monthly application trends (last 6 months) - using raw query for grouping (PostgreSQL)
         prisma_1.prisma.$queryRaw `
         SELECT
-          strftime('%Y-%m', createdAt) as month,
-          COUNT(*) as total,
-          SUM(CASE WHEN status = 'SUBMITTED' THEN 1 ELSE 0 END) as submitted,
-          SUM(CASE WHEN status = 'COMPLETED' THEN 1 ELSE 0 END) as approved,
-          SUM(CASE WHEN status IN ('DRAFT', 'IN_PROGRESS', 'UNDER_REVIEW') THEN 1 ELSE 0 END) as pending,
-          SUM(CASE WHEN status = 'REJECTED' THEN 1 ELSE 0 END) as rejected
-        FROM Application
-        WHERE createdAt >= date('now', '-6 months')
-        GROUP BY strftime('%Y-%m', createdAt)
+          TO_CHAR("createdAt", 'YYYY-MM') as month,
+          COUNT(*)::int as total,
+          SUM(CASE WHEN status = 'SUBMITTED' THEN 1 ELSE 0 END)::int as submitted,
+          SUM(CASE WHEN status = 'COMPLETED' THEN 1 ELSE 0 END)::int as approved,
+          SUM(CASE WHEN status IN ('DRAFT', 'IN_PROGRESS', 'UNDER_REVIEW') THEN 1 ELSE 0 END)::int as pending,
+          SUM(CASE WHEN status = 'REJECTED' THEN 1 ELSE 0 END)::int as rejected
+        FROM "Application"
+        WHERE "createdAt" >= NOW() - INTERVAL '6 months'
+        GROUP BY TO_CHAR("createdAt", 'YYYY-MM')
         ORDER BY month DESC
         LIMIT 6
       `,
-        // Monthly user registration trends
+        // Monthly user registration trends (PostgreSQL)
         prisma_1.prisma.$queryRaw `
         SELECT
-          strftime('%Y-%m', createdAt) as month,
-          COUNT(*) as total
-        FROM User
-        WHERE createdAt >= date('now', '-6 months')
-        GROUP BY strftime('%Y-%m', createdAt)
+          TO_CHAR("createdAt", 'YYYY-MM') as month,
+          COUNT(*)::int as total
+        FROM "User"
+        WHERE "createdAt" >= NOW() - INTERVAL '6 months'
+        GROUP BY TO_CHAR("createdAt", 'YYYY-MM')
         ORDER BY month DESC
         LIMIT 6
       `,
@@ -452,9 +452,17 @@ router.delete('/users/:id', (0, validate_1.validate)({ params: schemas_1.idParam
  */
 router.get('/applications', (0, validate_1.validate)({ query: schemas_1.paginationSchema }), (0, errorHandler_1.asyncHandler)(async (req, res) => {
     const { page = 1, limit = 50, sortOrder = 'desc' } = req.query;
+    const status = req.query.status;
+    const visaType = req.query.visaType;
     const skip = (page - 1) * limit;
+    const whereClause = {};
+    if (status)
+        whereClause.status = status;
+    if (visaType)
+        whereClause.visaType = visaType;
     const [applications, total] = await Promise.all([
         prisma_1.prisma.application.findMany({
+            where: whereClause,
             orderBy: { createdAt: sortOrder },
             skip,
             take: limit,
@@ -464,7 +472,7 @@ router.get('/applications', (0, validate_1.validate)({ query: schemas_1.paginati
                 },
             },
         }),
-        prisma_1.prisma.application.count(),
+        prisma_1.prisma.application.count({ where: whereClause }),
     ]);
     res.json({
         success: true,
@@ -475,6 +483,66 @@ router.get('/applications', (0, validate_1.validate)({ query: schemas_1.paginati
             total,
             totalPages: Math.ceil(total / limit),
         },
+    });
+}));
+/**
+ * Get single application with full details (admin only)
+ */
+router.get('/applications/:id', (0, validate_1.validate)({ params: schemas_1.idParamSchema }), (0, errorHandler_1.asyncHandler)(async (req, res) => {
+    const id = getIdParam(req);
+    const application = await prisma_1.prisma.application.findUnique({
+        where: { id },
+        include: {
+            user: {
+                select: { id: true, name: true, email: true, phone: true, country: true },
+            },
+        },
+    });
+    if (!application) {
+        throw new errorHandler_1.NotFoundError('Application not found');
+    }
+    res.json({
+        success: true,
+        data: application,
+    });
+}));
+/**
+ * Update application status (admin only)
+ */
+router.put('/applications/:id/status', (0, validate_1.validate)({ params: schemas_1.idParamSchema }), (0, security_1.auditLog)('UPDATE_APPLICATION_STATUS'), (0, errorHandler_1.asyncHandler)(async (req, res) => {
+    const id = getIdParam(req);
+    const { status, adminNotes } = req.body;
+    const adminId = req.user.userId;
+    const application = await prisma_1.prisma.application.findUnique({
+        where: { id },
+    });
+    if (!application) {
+        throw new errorHandler_1.NotFoundError('Application not found');
+    }
+    const validStatuses = ['DRAFT', 'IN_PROGRESS', 'SUBMITTED', 'UNDER_REVIEW', 'COMPLETED', 'REJECTED'];
+    if (!validStatuses.includes(status)) {
+        throw new errorHandler_1.BadRequestError('Invalid status');
+    }
+    const updatedApplication = await prisma_1.prisma.application.update({
+        where: { id },
+        data: {
+            status,
+            adminNotes: adminNotes || application.adminNotes,
+        },
+        include: {
+            user: {
+                select: { id: true, name: true, email: true },
+            },
+        },
+    });
+    logger_1.logger.audit('Application status updated', adminId, {
+        applicationId: id,
+        oldStatus: application.status,
+        newStatus: status,
+    });
+    res.json({
+        success: true,
+        data: updatedApplication,
     });
 }));
 /**

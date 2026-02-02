@@ -285,9 +285,9 @@ const Login = () => {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Email address</FormLabel>
-                        <FormControl>
-                          <div className="relative">
-                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                        <div className="relative">
+                          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none z-10" />
+                          <FormControl>
                             <Input
                               type="email"
                               placeholder="Enter your email"
@@ -295,8 +295,8 @@ const Login = () => {
                               autoComplete="email"
                               {...field}
                             />
-                          </div>
-                        </FormControl>
+                          </FormControl>
+                        </div>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -308,9 +308,9 @@ const Login = () => {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Password</FormLabel>
-                        <FormControl>
-                          <div className="relative">
-                            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                        <div className="relative">
+                          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none z-10" />
+                          <FormControl>
                             <Input
                               type="password"
                               placeholder="Enter your password"
@@ -318,8 +318,8 @@ const Login = () => {
                               autoComplete="current-password"
                               {...field}
                             />
-                          </div>
-                        </FormControl>
+                          </FormControl>
+                        </div>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -349,9 +349,9 @@ const Login = () => {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Full Name</FormLabel>
-                        <FormControl>
-                          <div className="relative">
-                            <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                        <div className="relative">
+                          <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none z-10" />
+                          <FormControl>
                             <Input
                               type="text"
                               placeholder="Enter your name"
@@ -359,8 +359,8 @@ const Login = () => {
                               autoComplete="name"
                               {...field}
                             />
-                          </div>
-                        </FormControl>
+                          </FormControl>
+                        </div>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -372,9 +372,9 @@ const Login = () => {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Email address</FormLabel>
-                        <FormControl>
-                          <div className="relative">
-                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                        <div className="relative">
+                          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none z-10" />
+                          <FormControl>
                             <Input
                               type="email"
                               placeholder="Enter your email"
@@ -382,8 +382,8 @@ const Login = () => {
                               autoComplete="email"
                               {...field}
                             />
-                          </div>
-                        </FormControl>
+                          </FormControl>
+                        </div>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -395,9 +395,9 @@ const Login = () => {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Password</FormLabel>
-                        <FormControl>
-                          <div className="relative">
-                            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                        <div className="relative">
+                          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none z-10" />
+                          <FormControl>
                             <Input
                               type="password"
                               placeholder="Min 8 chars, uppercase, lowercase, number, special"
@@ -405,8 +405,8 @@ const Login = () => {
                               autoComplete="new-password"
                               {...field}
                             />
-                          </div>
-                        </FormControl>
+                          </FormControl>
+                        </div>
                         <FormMessage />
                       </FormItem>
                     )}

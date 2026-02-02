@@ -57,6 +57,13 @@ import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -92,6 +99,8 @@ import {
 } from "@/api/posts";
 import { UserAvatar } from "@/components/UserAvatar";
 import api from "@/api/client";
+import ApplicationDetailModal from "@/components/admin/ApplicationDetailModal";
+import VisaTypeChart from "@/components/admin/VisaTypeChart";
 
 interface UserData {
   id: string;
@@ -114,6 +123,7 @@ interface ApplicationData {
   currentStep: number;
   createdAt: string;
   updatedAt: string;
+  submittedAt?: string;
   user: {
     id: string;
     name: string;
@@ -123,6 +133,11 @@ interface ApplicationData {
   contactInfo?: string;
   passportInfo?: string;
   travelInfo?: string;
+  familyInfo?: string;
+  workEducation?: string;
+  securityInfo?: string;
+  documents?: string;
+  adminNotes?: string;
 }
 
 interface Stats {
@@ -208,6 +223,9 @@ const AdminDashboard = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedApplication, setSelectedApplication] =
     useState<ApplicationData | null>(null);
+  const [detailModalOpen, setDetailModalOpen] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<string>("");
+  const [visaTypeFilter, setVisaTypeFilter] = useState<string>("");
 
   // CMS State
   const [posts, setPosts] = useState<Post[]>([]);
@@ -400,12 +418,15 @@ const AdminDashboard = () => {
       u.email.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
-  const filteredApplications = applications.filter(
-    (app) =>
+  const filteredApplications = applications.filter((app) => {
+    const matchesSearch =
       app.user?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       app.user?.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      app.visaType?.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
+      app.visaType?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = !statusFilter || app.status === statusFilter;
+    const matchesVisaType = !visaTypeFilter || app.visaType === visaTypeFilter;
+    return matchesSearch && matchesStatus && matchesVisaType;
+  });
 
   const blogPosts = posts.filter((p) => p.category === "blog");
   const newsPosts = posts.filter((p) => p.category === "news");
@@ -882,163 +903,174 @@ const AdminDashboard = () => {
 
           {/* Applications Tab */}
           <TabsContent value="applications">
-            <div className="grid lg:grid-cols-3 gap-6">
-              <Card className="lg:col-span-2">
+            <div className="space-y-6">
+              {/* Visa Type Charts */}
+              <VisaTypeChart applications={applications} />
+
+              {/* Applications List */}
+              <Card>
                 <CardHeader>
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
                       <CardTitle>All Applications</CardTitle>
                       <CardDescription>
-                        Review and manage visa applications
+                        Review and manage visa applications ({filteredApplications.length} of {applications.length})
                       </CardDescription>
                     </div>
-                    <div className="relative">
-                      <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                      <Input
-                        placeholder="Search applications..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-10 w-64"
-                      />
+                    <div className="flex flex-wrap items-center gap-2">
+                      {/* Search */}
+                      <div className="relative">
+                        <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                        <Input
+                          placeholder="Search..."
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                          className="pl-10 w-48"
+                        />
+                      </div>
+                      {/* Status Filter */}
+                      <Select value={statusFilter} onValueChange={setStatusFilter}>
+                        <SelectTrigger className="w-[140px]">
+                          <SelectValue placeholder="All Status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="">All Status</SelectItem>
+                          <SelectItem value="DRAFT">Draft</SelectItem>
+                          <SelectItem value="IN_PROGRESS">In Progress</SelectItem>
+                          <SelectItem value="SUBMITTED">Submitted</SelectItem>
+                          <SelectItem value="UNDER_REVIEW">Under Review</SelectItem>
+                          <SelectItem value="COMPLETED">Completed</SelectItem>
+                          <SelectItem value="REJECTED">Rejected</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      {/* Visa Type Filter */}
+                      <Select value={visaTypeFilter} onValueChange={setVisaTypeFilter}>
+                        <SelectTrigger className="w-[130px]">
+                          <SelectValue placeholder="All Types" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="">All Types</SelectItem>
+                          <SelectItem value="B1_B2">B1/B2</SelectItem>
+                          <SelectItem value="F1">F1</SelectItem>
+                          <SelectItem value="J1">J1</SelectItem>
+                          <SelectItem value="H1B">H1B</SelectItem>
+                          <SelectItem value="L1">L1</SelectItem>
+                          <SelectItem value="O1">O1</SelectItem>
+                          <SelectItem value="K1">K1</SelectItem>
+                          <SelectItem value="OTHER">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-2 max-h-[600px] overflow-y-auto">
-                    {filteredApplications.length === 0 ? (
-                      <div className="p-12 text-center">
-                        <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                        <p className="text-muted-foreground">
-                          No applications found
-                        </p>
-                      </div>
-                    ) : (
-                      filteredApplications.map((app) => (
-                        <div
-                          key={app.id}
-                          onClick={() => setSelectedApplication(app)}
-                          className={`p-4 rounded-lg border cursor-pointer hover:bg-muted/50 transition-colors ${
-                            selectedApplication?.id === app.id
-                              ? "bg-muted border-primary"
-                              : ""
-                          }`}
-                        >
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-4">
-                              <div className="p-2 bg-primary/10 rounded-lg">
-                                <Plane className="w-5 h-5 text-primary" />
-                              </div>
-                              <div>
-                                <p className="font-medium">
-                                  {app.user?.name || "Unknown User"}
-                                </p>
-                                <p className="text-sm text-muted-foreground">
-                                  {app.user?.email}
-                                </p>
-                              </div>
-                            </div>
-                            <div className="text-right">
-                              <Badge className={getStatusBadge(app.status)}>
-                                {app.status}
-                              </Badge>
-                              <p className="text-xs text-muted-foreground mt-1">
-                                {new Date(app.createdAt).toLocaleDateString()}
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="border-b">
+                          <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
+                            Applicant
+                          </th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
+                            Visa Type
+                          </th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
+                            Status
+                          </th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
+                            Progress
+                          </th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
+                            Created
+                          </th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
+                            Actions
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y">
+                        {filteredApplications.length === 0 ? (
+                          <tr>
+                            <td colSpan={6} className="px-4 py-12 text-center">
+                              <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                              <p className="text-muted-foreground">
+                                No applications found
                               </p>
-                            </div>
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Application Details</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {selectedApplication ? (
-                    <div className="space-y-6">
-                      <div>
-                        <h3 className="text-sm font-medium text-muted-foreground mb-3">
-                          Applicant
-                        </h3>
-                        <div className="flex items-center gap-3">
-                          <UserAvatar name={selectedApplication.user?.name} email={selectedApplication.user?.email} size="lg" />
-                          <div>
-                            <p className="font-medium">
-                              {selectedApplication.user?.name}
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              {selectedApplication.user?.email}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div>
-                        <h3 className="text-sm font-medium text-muted-foreground mb-3">
-                          Status
-                        </h3>
-                        <Badge
-                          className={getStatusBadge(selectedApplication.status)}
-                        >
-                          {selectedApplication.status}
-                        </Badge>
-                      </div>
-
-                      {selectedApplication.personalInfo && (
-                        <div>
-                          <h3 className="text-sm font-medium text-muted-foreground mb-3">
-                            Personal Information
-                          </h3>
-                          <div className="bg-muted/50 rounded-lg p-4 space-y-2">
-                            {(() => {
-                              const data = parseFormData(
-                                selectedApplication.personalInfo,
-                              );
-                              if (!data)
-                                return (
-                                  <p className="text-sm text-muted-foreground">
-                                    No data
-                                  </p>
-                                );
-                              return Object.entries(data)
-                                .slice(0, 5)
-                                .map(([key, value]) => (
-                                  <div
-                                    key={key}
-                                    className="flex justify-between text-sm"
-                                  >
-                                    <span className="text-muted-foreground capitalize">
-                                      {key.replace(/([A-Z])/g, " $1")}
-                                    </span>
-                                    <span className="font-medium">
-                                      {String(value) || "-"}
+                            </td>
+                          </tr>
+                        ) : (
+                          filteredApplications.map((app) => {
+                            const personalInfo = parseFormData(app.personalInfo);
+                            return (
+                              <tr
+                                key={app.id}
+                                className="hover:bg-muted/50 transition-colors cursor-pointer"
+                                onClick={() => {
+                                  setSelectedApplication(app);
+                                  setDetailModalOpen(true);
+                                }}
+                              >
+                                <td className="px-4 py-3">
+                                  <div className="flex items-center gap-3">
+                                    <UserAvatar name={app.user?.name} email={app.user?.email} size="md" />
+                                    <div>
+                                      <p className="font-medium">
+                                        {personalInfo?.givenNames || app.user?.name || "Unknown"}
+                                        {personalInfo?.surnames ? ` ${personalInfo.surnames}` : ""}
+                                      </p>
+                                      <p className="text-sm text-muted-foreground">
+                                        {app.user?.email}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </td>
+                                <td className="px-4 py-3">
+                                  <Badge variant="outline" className="font-mono">
+                                    {app.visaType}
+                                  </Badge>
+                                </td>
+                                <td className="px-4 py-3">
+                                  <Badge className={getStatusBadge(app.status)}>
+                                    {app.status.replace(/_/g, " ")}
+                                  </Badge>
+                                </td>
+                                <td className="px-4 py-3">
+                                  <div className="flex items-center gap-2">
+                                    <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
+                                      <div
+                                        className="h-full bg-primary transition-all"
+                                        style={{ width: `${Math.round((app.currentStep / 9) * 100)}%` }}
+                                      />
+                                    </div>
+                                    <span className="text-xs text-muted-foreground">
+                                      {app.currentStep}/9
                                     </span>
                                   </div>
-                                ));
-                            })()}
-                          </div>
-                        </div>
-                      )}
-
-                      <div className="flex gap-3 pt-4 border-t">
-                        <Button className="flex-1">Approve</Button>
-                        <Button variant="outline" className="flex-1">
-                          Reject
-                        </Button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="p-12 text-center">
-                      <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                      <p className="text-muted-foreground">
-                        Select an application to view details
-                      </p>
-                    </div>
-                  )}
+                                </td>
+                                <td className="px-4 py-3 text-sm text-muted-foreground">
+                                  {new Date(app.createdAt).toLocaleDateString()}
+                                </td>
+                                <td className="px-4 py-3">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setSelectedApplication(app);
+                                      setDetailModalOpen(true);
+                                    }}
+                                  >
+                                    <Eye className="w-4 h-4 mr-1" />
+                                    View
+                                  </Button>
+                                </td>
+                              </tr>
+                            );
+                          })
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
                 </CardContent>
               </Card>
             </div>
@@ -1566,6 +1598,20 @@ const AdminDashboard = () => {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+
+        {/* Application Detail Modal */}
+        <ApplicationDetailModal
+          application={selectedApplication}
+          open={detailModalOpen}
+          onOpenChange={setDetailModalOpen}
+          onStatusUpdate={(updatedApp) => {
+            setApplications((prev) =>
+              prev.map((app) => (app.id === updatedApp.id ? updatedApp : app))
+            );
+            setSelectedApplication(updatedApp);
+            fetchDashboardData(); // Refresh stats
+          }}
+        />
       </div>
     </div>
   );

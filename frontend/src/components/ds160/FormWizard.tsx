@@ -1,19 +1,29 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Check, ChevronLeft, Save, Send, AlertCircle, Loader2 } from 'lucide-react';
+import { Check, ChevronLeft, Save, Send, AlertCircle, Loader2, User, Phone, Passport, Plane, Users, Briefcase, Shield, FileText, CheckSquare } from 'lucide-react';
 import { applicationsApi, type Application, type UpdateApplicationInput } from '../../api/applications';
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
 import PersonalInfoForm from './steps/PersonalInfoForm';
 import ContactInfoForm from './steps/ContactInfoForm';
 import PassportInfoForm from './steps/PassportInfoForm';
 import TravelInfoForm from './steps/TravelInfoForm';
+import FamilyInfoForm from './steps/FamilyInfoForm';
+import WorkEducationForm from './steps/WorkEducationForm';
+import SecurityQuestionsForm from './steps/SecurityQuestionsForm';
+import DocumentUploadForm from './steps/DocumentUploadForm';
 
-// Form steps configuration
+// Form steps configuration with icons
 const FORM_STEPS = [
-  { id: 1, title: 'Personal Information', description: 'Basic personal details' },
-  { id: 2, title: 'Contact Information', description: 'Address and contact details' },
-  { id: 3, title: 'Passport Information', description: 'Passport and travel document details' },
-  { id: 4, title: 'Travel Information', description: 'Trip details and itinerary' },
-  { id: 5, title: 'Review & Submit', description: 'Review your application' },
+  { id: 1, title: 'Personal Info', description: 'Basic personal details', icon: User },
+  { id: 2, title: 'Contact Info', description: 'Address and contact details', icon: Phone },
+  { id: 3, title: 'Passport', description: 'Passport and travel documents', icon: Passport },
+  { id: 4, title: 'Travel Plans', description: 'Trip details and itinerary', icon: Plane },
+  { id: 5, title: 'Family', description: 'Family information', icon: Users },
+  { id: 6, title: 'Work & Education', description: 'Employment and education', icon: Briefcase },
+  { id: 7, title: 'Security', description: 'Security questions', icon: Shield },
+  { id: 8, title: 'Documents', description: 'Upload required documents', icon: FileText },
+  { id: 9, title: 'Review', description: 'Review and submit', icon: CheckSquare },
 ];
 
 interface FormWizardProps {
@@ -107,9 +117,12 @@ export default function FormWizard({ applicationId: propId }: FormWizardProps) {
     }
   };
 
+  // Calculate progress
+  const progressPercentage = Math.round((currentStep / FORM_STEPS.length) * 100);
+
   // Render step content
   const renderStepContent = () => {
-    if (!application && currentStep !== 5) {
+    if (!application && currentStep !== FORM_STEPS.length) {
       return (
         <div className="text-center py-12">
           <p className="text-gray-500">Please save your application first to continue.</p>
@@ -155,11 +168,48 @@ export default function FormWizard({ applicationId: propId }: FormWizardProps) {
         );
       case 5:
         return (
+          <FamilyInfoForm
+            data={application?.familyInfo}
+            onSave={(data) => saveProgress({ familyInfo: data })}
+            onNext={nextStep}
+            onPrev={prevStep}
+          />
+        );
+      case 6:
+        return (
+          <WorkEducationForm
+            data={application?.workEducation}
+            onSave={(data) => saveProgress({ workEducation: data })}
+            onNext={nextStep}
+            onPrev={prevStep}
+          />
+        );
+      case 7:
+        return (
+          <SecurityQuestionsForm
+            data={application?.securityInfo}
+            onSave={(data) => saveProgress({ securityInfo: data })}
+            onNext={nextStep}
+            onPrev={prevStep}
+          />
+        );
+      case 8:
+        return (
+          <DocumentUploadForm
+            data={application?.documents}
+            onSave={(data) => saveProgress({ documents: data })}
+            onNext={nextStep}
+            onPrev={prevStep}
+          />
+        );
+      case 9:
+        return (
           <ReviewStep
             application={application}
             onPrev={prevStep}
             onSubmit={handleSubmit}
             isSubmitting={isSaving}
+            onGoToStep={goToStep}
           />
         );
       default:
@@ -170,73 +220,91 @@ export default function FormWizard({ applicationId: propId }: FormWizardProps) {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto">
-      {/* Progress Steps */}
+    <div className="max-w-5xl mx-auto px-4">
+      {/* Progress Bar */}
       <div className="mb-8">
-        <nav aria-label="Progress">
-          <ol className="flex items-center">
-            {FORM_STEPS.map((step, index) => (
-              <li key={step.id} className={`relative ${index !== FORM_STEPS.length - 1 ? 'pr-8 sm:pr-20 flex-1' : ''}`}>
-                <div className="flex items-center">
+        <div className="flex justify-between items-center mb-2">
+          <span className="text-sm font-medium text-muted-foreground">Application Progress</span>
+          <span className="text-sm font-medium">{progressPercentage}% Complete</span>
+        </div>
+        <Progress value={progressPercentage} className="h-2" />
+      </div>
+
+      {/* Step Indicators - Horizontal scrollable on mobile */}
+      <div className="mb-8 overflow-x-auto pb-4">
+        <nav aria-label="Progress" className="min-w-max">
+          <ol className="flex items-center gap-2">
+            {FORM_STEPS.map((step, index) => {
+              const Icon = step.icon;
+              const isCompleted = step.id < currentStep;
+              const isCurrent = step.id === currentStep;
+              const isAccessible = step.id <= (application?.currentStep || 1) + 1;
+
+              return (
+                <li key={step.id} className="flex items-center">
                   <button
-                    onClick={() => step.id <= (application?.currentStep || 1) && goToStep(step.id)}
-                    disabled={step.id > (application?.currentStep || 1) + 1}
-                    className={`relative flex h-8 w-8 items-center justify-center rounded-full ${
-                      step.id < currentStep
-                        ? 'bg-blue-600 hover:bg-blue-700'
-                        : step.id === currentStep
-                        ? 'bg-blue-600'
-                        : 'bg-gray-200'
-                    } ${step.id <= (application?.currentStep || 1) ? 'cursor-pointer' : 'cursor-not-allowed'}`}
+                    onClick={() => isAccessible && goToStep(step.id)}
+                    disabled={!isAccessible}
+                    className={`
+                      flex items-center gap-2 px-3 py-2 rounded-lg transition-all
+                      ${isCurrent ? 'bg-primary text-primary-foreground shadow-lg scale-105' : ''}
+                      ${isCompleted ? 'bg-primary/10 text-primary hover:bg-primary/20' : ''}
+                      ${!isCompleted && !isCurrent ? 'bg-muted text-muted-foreground' : ''}
+                      ${isAccessible ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}
+                    `}
                   >
-                    {step.id < currentStep ? (
-                      <Check className="h-5 w-5 text-white" />
-                    ) : (
-                      <span className={`text-sm font-medium ${step.id === currentStep ? 'text-white' : 'text-gray-500'}`}>
-                        {step.id}
-                      </span>
-                    )}
+                    <div className={`
+                      flex items-center justify-center w-8 h-8 rounded-full
+                      ${isCurrent ? 'bg-primary-foreground/20' : ''}
+                      ${isCompleted ? 'bg-primary/20' : 'bg-muted-foreground/20'}
+                    `}>
+                      {isCompleted ? (
+                        <Check className="w-4 h-4" />
+                      ) : (
+                        <Icon className="w-4 h-4" />
+                      )}
+                    </div>
+                    <span className="text-xs font-medium hidden md:inline">{step.title}</span>
                   </button>
-                  {index !== FORM_STEPS.length - 1 && (
-                    <div className={`absolute top-4 left-8 -ml-px h-0.5 w-full sm:w-20 ${
-                      step.id < currentStep ? 'bg-blue-600' : 'bg-gray-200'
-                    }`} />
+                  {index < FORM_STEPS.length - 1 && (
+                    <div className={`w-8 h-0.5 mx-1 ${isCompleted ? 'bg-primary' : 'bg-muted'}`} />
                   )}
-                </div>
-                <div className="mt-2 hidden sm:block">
-                  <span className={`text-xs font-medium ${step.id === currentStep ? 'text-blue-600' : 'text-gray-500'}`}>
-                    {step.title}
-                  </span>
-                </div>
-              </li>
-            ))}
+                </li>
+              );
+            })}
           </ol>
         </nav>
       </div>
 
       {/* Current Step Info */}
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">{FORM_STEPS[currentStep - 1].title}</h2>
-        <p className="text-gray-600">{FORM_STEPS[currentStep - 1].description}</p>
+        <div className="flex items-center gap-3 mb-2">
+          {(() => {
+            const Icon = FORM_STEPS[currentStep - 1].icon;
+            return <Icon className="w-6 h-6 text-primary" />;
+          })()}
+          <h2 className="text-2xl font-bold text-foreground">{FORM_STEPS[currentStep - 1].title}</h2>
+        </div>
+        <p className="text-muted-foreground">{FORM_STEPS[currentStep - 1].description}</p>
       </div>
 
       {/* Error Message */}
       {error && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3">
-          <AlertCircle className="w-5 h-5 text-red-600" />
-          <p className="text-red-700">{error}</p>
+        <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-lg flex items-center gap-3">
+          <AlertCircle className="w-5 h-5 text-destructive" />
+          <p className="text-destructive">{error}</p>
         </div>
       )}
 
       {/* Save Status */}
       {(isSaving || lastSaved) && (
-        <div className="mb-4 flex items-center gap-2 text-sm text-gray-500">
+        <div className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
           {isSaving ? (
             <>
               <Loader2 className="w-4 h-4 animate-spin" />
@@ -252,7 +320,7 @@ export default function FormWizard({ applicationId: propId }: FormWizardProps) {
       )}
 
       {/* Form Content */}
-      <div className="bg-white rounded-lg shadow-lg p-6">
+      <div className="bg-card rounded-xl shadow-lg border p-6 md:p-8">
         {renderStepContent()}
       </div>
     </div>
@@ -265,84 +333,83 @@ function ReviewStep({
   onPrev,
   onSubmit,
   isSubmitting,
+  onGoToStep,
 }: {
   application: Application | null;
   onPrev: () => void;
   onSubmit: () => void;
   isSubmitting: boolean;
+  onGoToStep: (step: number) => void;
 }) {
   if (!application) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-500">No application data to review.</p>
+        <p className="text-muted-foreground">No application data to review.</p>
       </div>
     );
   }
 
-  const isComplete = application.personalInfo && application.contactInfo &&
-                     application.passportInfo && application.travelInfo;
+  const sections = [
+    { id: 1, title: 'Personal Information', data: application.personalInfo, step: 1 },
+    { id: 2, title: 'Contact Information', data: application.contactInfo, step: 2 },
+    { id: 3, title: 'Passport Information', data: application.passportInfo, step: 3 },
+    { id: 4, title: 'Travel Information', data: application.travelInfo, step: 4 },
+    { id: 5, title: 'Family Information', data: application.familyInfo, step: 5 },
+    { id: 6, title: 'Work & Education', data: application.workEducation, step: 6 },
+    { id: 7, title: 'Security Questions', data: application.securityInfo, step: 7 },
+    { id: 8, title: 'Documents', data: application.documents, step: 8 },
+  ];
+
+  const completedSections = sections.filter(s => s.data).length;
+  const isComplete = completedSections >= 4; // Minimum required sections
 
   return (
     <div className="space-y-6">
-      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-        <h3 className="font-semibold text-yellow-800">Important Notice</h3>
-        <p className="text-yellow-700 text-sm mt-1">
+      <div className="bg-yellow-50 dark:bg-yellow-950/30 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+        <h3 className="font-semibold text-yellow-800 dark:text-yellow-200">Important Notice</h3>
+        <p className="text-yellow-700 dark:text-yellow-300 text-sm mt-1">
           Please review all information carefully before submitting. Once submitted, you cannot make changes.
+          You have completed {completedSections} of {sections.length} sections.
         </p>
       </div>
 
       {/* Summary Sections */}
-      <div className="space-y-4">
-        <ReviewSection
-          title="Personal Information"
-          isComplete={!!application.personalInfo}
-          data={application.personalInfo}
-        />
-        <ReviewSection
-          title="Contact Information"
-          isComplete={!!application.contactInfo}
-          data={application.contactInfo}
-        />
-        <ReviewSection
-          title="Passport Information"
-          isComplete={!!application.passportInfo}
-          data={application.passportInfo}
-        />
-        <ReviewSection
-          title="Travel Information"
-          isComplete={!!application.travelInfo}
-          data={application.travelInfo}
-        />
+      <div className="grid gap-4 md:grid-cols-2">
+        {sections.map((section) => (
+          <ReviewSection
+            key={section.id}
+            title={section.title}
+            isComplete={!!section.data}
+            data={section.data}
+            onEdit={() => onGoToStep(section.step)}
+          />
+        ))}
       </div>
 
       {/* Navigation */}
       <div className="flex justify-between pt-6 border-t">
-        <button
-          type="button"
-          onClick={onPrev}
-          className="flex items-center gap-2 px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
-        >
-          <ChevronLeft className="w-4 h-4" />
+        <Button type="button" variant="outline" onClick={onPrev}>
+          <ChevronLeft className="w-4 h-4 mr-2" />
           Previous
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
           onClick={onSubmit}
           disabled={!isComplete || isSubmitting}
-          className="flex items-center gap-2 px-6 py-2 text-white bg-green-600 rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="bg-green-600 hover:bg-green-700"
         >
           {isSubmitting ? (
             <>
-              <Loader2 className="w-4 h-4 animate-spin" />
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
               Submitting...
             </>
           ) : (
             <>
-              <Send className="w-4 h-4" />
+              <Send className="w-4 h-4 mr-2" />
               Submit Application
             </>
           )}
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -352,43 +419,61 @@ function ReviewSection({
   title,
   isComplete,
   data,
+  onEdit,
 }: {
   title: string;
   isComplete: boolean;
   data: any;
+  onEdit: () => void;
 }) {
+  const getSummary = () => {
+    if (!data) return null;
+
+    switch (title) {
+      case 'Personal Information':
+        return data.givenNames ? `${data.givenNames} ${data.surnames}` : null;
+      case 'Contact Information':
+        return data.email || null;
+      case 'Passport Information':
+        return data.passportNumber || null;
+      case 'Travel Information':
+        return data.purposeOfTrip || null;
+      case 'Family Information':
+        return data.fatherGivenNames ? `Father: ${data.fatherGivenNames} ${data.fatherSurnames}` : null;
+      case 'Work & Education':
+        return data.primaryOccupation || null;
+      case 'Security Questions':
+        return 'Completed';
+      case 'Documents':
+        return data.photo ? 'Photo uploaded' : null;
+      default:
+        return null;
+    }
+  };
+
   return (
-    <div className="border rounded-lg p-4">
+    <div className={`border rounded-lg p-4 transition-colors ${isComplete ? 'border-green-200 bg-green-50/50 dark:border-green-800 dark:bg-green-950/20' : 'border-muted'}`}>
       <div className="flex items-center justify-between mb-2">
-        <h4 className="font-medium text-gray-900">{title}</h4>
-        {isComplete ? (
-          <span className="flex items-center gap-1 text-green-600 text-sm">
-            <Check className="w-4 h-4" />
-            Complete
-          </span>
-        ) : (
-          <span className="flex items-center gap-1 text-red-600 text-sm">
-            <AlertCircle className="w-4 h-4" />
-            Incomplete
-          </span>
-        )}
-      </div>
-      {data && (
-        <div className="text-sm text-gray-600">
-          {/* Show a brief summary based on the section */}
-          {title === 'Personal Information' && data.givenNames && (
-            <p>Name: {data.givenNames} {data.surnames}</p>
+        <h4 className="font-medium text-foreground">{title}</h4>
+        <div className="flex items-center gap-2">
+          {isComplete ? (
+            <span className="flex items-center gap-1 text-green-600 text-sm">
+              <Check className="w-4 h-4" />
+              Complete
+            </span>
+          ) : (
+            <span className="flex items-center gap-1 text-destructive text-sm">
+              <AlertCircle className="w-4 h-4" />
+              Incomplete
+            </span>
           )}
-          {title === 'Contact Information' && data.email && (
-            <p>Email: {data.email}</p>
-          )}
-          {title === 'Passport Information' && data.passportNumber && (
-            <p>Passport: {data.passportNumber}</p>
-          )}
-          {title === 'Travel Information' && data.purposeOfTrip && (
-            <p>Purpose: {data.purposeOfTrip}</p>
-          )}
+          <Button variant="ghost" size="sm" onClick={onEdit}>
+            Edit
+          </Button>
         </div>
+      </div>
+      {getSummary() && (
+        <p className="text-sm text-muted-foreground truncate">{getSummary()}</p>
       )}
     </div>
   );

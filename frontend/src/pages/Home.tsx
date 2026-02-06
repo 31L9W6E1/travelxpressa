@@ -11,8 +11,8 @@ import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 // News ticker items - can be fetched from API or managed via CMS
 const tickerItems = [
-  "🇺🇸 US Embassy Ulaanbaatar: Visa interview appointments now available for March 2025",
   "📋 DS-160 Processing: Average processing time reduced to 3 business days",
+  "🇺🇸 US Embassy Ulaanbaatar: Visa interview appointments now available for March 2025",
   "🎉 New Feature: Track your application status in real-time through our dashboard",
   "⚡ Express Processing: Priority visa services now available for business travelers",
   "📅 Reminder: Check your passport validity - must be valid for 6 months beyond travel date",

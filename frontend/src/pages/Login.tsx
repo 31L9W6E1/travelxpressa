@@ -6,6 +6,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -79,6 +81,7 @@ const FacebookIcon = () => (
 );
 
 const Login = () => {
+  const { t } = useTranslation();
   // Rename to avoid conflict with react-hook-form's register
   const { login: authLogin, register: authRegister } = useAuth();
   const navigate = useNavigate();
@@ -201,6 +204,11 @@ const Login = () => {
 
   return (
     <main className="min-h-screen bg-background flex items-center justify-center px-4 pt-24 pb-12 theme-transition">
+      {/* Language Switcher - Top Right */}
+      <div className="fixed top-4 right-4 z-50">
+        <LanguageSwitcher />
+      </div>
+
       <div className="max-w-md w-full space-y-8">
         {/* Logo */}
         <div className="text-center">
@@ -211,12 +219,12 @@ const Login = () => {
             </span>
           </Link>
           <h2 className="text-3xl font-bold text-foreground">
-            {isLogin ? "Welcome back" : "Create your account"}
+            {isLogin ? t('auth.welcomeBack') : t('auth.createAccount')}
           </h2>
           <p className="mt-2 text-muted-foreground">
             {isLogin
-              ? "Sign in to continue your visa application"
-              : "Start your visa application journey today"}
+              ? t('auth.signInContinue')
+              : t('auth.startJourney')}
           </p>
         </div>
 
@@ -249,7 +257,7 @@ const Login = () => {
                 ) : (
                   <GoogleIcon />
                 )}
-                <span className="ml-2">Continue with Google</span>
+                <span className="ml-2">{t('auth.continueWithGoogle')}</span>
               </Button>
 
               <Button
@@ -264,7 +272,7 @@ const Login = () => {
                 ) : (
                   <FacebookIcon />
                 )}
-                <span className="ml-2">Continue with Facebook</span>
+                <span className="ml-2">{t('auth.continueWithFacebook')}</span>
               </Button>
             </div>
 
@@ -272,7 +280,7 @@ const Login = () => {
             <div className="relative my-6">
               <Separator />
               <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-card px-2 text-xs text-muted-foreground">
-                or continue with email
+                {t('auth.orContinueWithEmail')}
               </span>
             </div>
 
@@ -284,13 +292,13 @@ const Login = () => {
                     name="email"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Email address</FormLabel>
+                        <FormLabel>{t('auth.emailAddress')}</FormLabel>
                         <div className="relative">
                           <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none z-10" />
                           <FormControl>
                             <Input
                               type="email"
-                              placeholder="Enter your email"
+                              placeholder={t('auth.enterEmail')}
                               className="pl-10"
                               autoComplete="email"
                               {...field}
@@ -307,13 +315,13 @@ const Login = () => {
                     name="password"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Password</FormLabel>
+                        <FormLabel>{t('auth.password')}</FormLabel>
                         <div className="relative">
                           <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none z-10" />
                           <FormControl>
                             <Input
                               type="password"
-                              placeholder="Enter your password"
+                              placeholder={t('auth.enterPassword')}
                               className="pl-10"
                               autoComplete="current-password"
                               {...field}
@@ -329,11 +337,11 @@ const Login = () => {
                     {isLoading ? (
                       <>
                         <Loader2 className="w-5 h-5 animate-spin mr-2" />
-                        Signing in...
+                        {t('auth.signingIn')}
                       </>
                     ) : (
                       <>
-                        Sign in
+                        {t('auth.signIn')}
                         <ArrowRight className="w-5 h-5 ml-2" />
                       </>
                     )}
@@ -348,13 +356,13 @@ const Login = () => {
                     name="name"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Full Name</FormLabel>
+                        <FormLabel>{t('auth.fullName')}</FormLabel>
                         <div className="relative">
                           <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none z-10" />
                           <FormControl>
                             <Input
                               type="text"
-                              placeholder="Enter your name"
+                              placeholder={t('auth.enterName')}
                               className="pl-10"
                               autoComplete="name"
                               {...field}
@@ -371,13 +379,13 @@ const Login = () => {
                     name="email"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Email address</FormLabel>
+                        <FormLabel>{t('auth.emailAddress')}</FormLabel>
                         <div className="relative">
                           <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none z-10" />
                           <FormControl>
                             <Input
                               type="email"
-                              placeholder="Enter your email"
+                              placeholder={t('auth.enterEmail')}
                               className="pl-10"
                               autoComplete="email"
                               {...field}
@@ -394,13 +402,13 @@ const Login = () => {
                     name="password"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Password</FormLabel>
+                        <FormLabel>{t('auth.password')}</FormLabel>
                         <div className="relative">
                           <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none z-10" />
                           <FormControl>
                             <Input
                               type="password"
-                              placeholder="Min 8 chars, uppercase, lowercase, number, special"
+                              placeholder={t('auth.passwordRequirements')}
                               className="pl-10"
                               autoComplete="new-password"
                               {...field}
@@ -416,11 +424,11 @@ const Login = () => {
                     {isLoading ? (
                       <>
                         <Loader2 className="w-5 h-5 animate-spin mr-2" />
-                        Creating account...
+                        {t('auth.creatingAccount')}
                       </>
                     ) : (
                       <>
-                        Create account
+                        {t('auth.createAccountBtn')}
                         <ArrowRight className="w-5 h-5 ml-2" />
                       </>
                     )}
@@ -437,8 +445,8 @@ const Login = () => {
                 className="text-muted-foreground hover:text-foreground"
               >
                 {isLogin
-                  ? "Don't have an account? Sign up"
-                  : "Already have an account? Sign in"}
+                  ? t('auth.noAccount')
+                  : t('auth.haveAccount')}
               </Button>
             </div>
           </CardContent>
@@ -446,13 +454,13 @@ const Login = () => {
 
         {/* Footer */}
         <p className="text-center text-muted-foreground text-sm">
-          By signing in, you agree to our{" "}
+          {t('auth.agreementPrefix')}{" "}
           <Link to="/terms" className="hover:text-foreground transition-colors underline underline-offset-4">
-            Terms of Service
+            {t('auth.termsOfService')}
           </Link>{" "}
-          and{" "}
+          {t('auth.and')}{" "}
           <Link to="/privacy" className="hover:text-foreground transition-colors underline underline-offset-4">
-            Privacy Policy
+            {t('auth.privacyPolicy')}
           </Link>
         </p>
       </div>

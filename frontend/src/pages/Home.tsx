@@ -6,6 +6,8 @@ import type { PostSummary } from '@/api/posts';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useTranslation } from 'react-i18next';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 // News ticker items - can be fetched from API or managed via CMS
 const tickerItems = [
@@ -49,6 +51,7 @@ const fallbackNewsItems: PostSummary[] = [
 ];
 
 const Home = () => {
+  const { t } = useTranslation();
   const [blogPosts, setBlogPosts] = useState<PostSummary[]>([]);
   const [newsItems, setNewsItems] = useState<PostSummary[]>([]);
   const [loading, setLoading] = useState(true);
@@ -74,34 +77,39 @@ const Home = () => {
   const features = [
     {
       icon: Shield,
-      title: "Secure & Private",
-      description: "Your data is encrypted and never shared with third parties"
+      title: t('home.features.secure.title'),
+      description: t('home.features.secure.description')
     },
     {
       icon: Zap,
-      title: "Fast Processing",
-      description: "Complete your DS-160 form in under 30 minutes"
+      title: t('home.features.fast.title'),
+      description: t('home.features.fast.description')
     },
     {
       icon: CheckCircle,
-      title: "Error Prevention",
-      description: "Built-in validation catches mistakes before submission"
+      title: t('home.features.errorPrevention.title'),
+      description: t('home.features.errorPrevention.description')
     },
     {
       icon: Users,
-      title: "Expert Support",
-      description: "24/7 assistance from visa application specialists"
+      title: t('home.features.support.title'),
+      description: t('home.features.support.description')
     }
   ];
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+      {/* Language Switcher - Top Right */}
+      <div className="fixed top-20 right-4 z-50">
+        <LanguageSwitcher />
+      </div>
+
       {/* News Ticker - Fixed at top below navbar */}
       <div className="fixed top-16 left-0 right-0 z-40 bg-primary text-primary-foreground overflow-hidden">
         <div className="flex items-center h-10">
           <div className="flex-shrink-0 px-4 bg-primary-foreground/10 h-full flex items-center gap-2">
             <Bell className="w-4 h-4" />
-            <span className="text-sm font-semibold">News</span>
+            <span className="text-sm font-semibold">{t('home.news')}</span>
           </div>
           <div className="flex-1 overflow-hidden">
             <div className="animate-ticker whitespace-nowrap flex">
@@ -122,27 +130,26 @@ const Home = () => {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
               <Badge variant="secondary" className="mb-6">
-                Trusted by 10,000+ Travelers
+                {t('home.hero.trusted')}
               </Badge>
               <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">
-                Your Journey to the
-                <span className="block text-muted-foreground">United States</span>
-                Starts Here
+                {t('home.hero.titleLine1')}
+                <span className="block text-muted-foreground">{t('home.hero.titleLine2')}</span>
+                {t('home.hero.titleLine3')}
               </h1>
               <p className="text-xl text-muted-foreground mb-8 max-w-xl">
-                TravelXpressa simplifies the DS-160 visa application process. Expert guidance,
-                real-time support, and a seamless experience from start to finish.
+                {t('home.hero.subtitle')}
               </p>
               <div className="flex flex-wrap gap-4">
                 <Button asChild size="lg">
                   <Link to="/login" className="gap-2">
-                    Start Your Application
+                    {t('home.hero.cta')}
                     <ArrowRight className="w-5 h-5" />
                   </Link>
                 </Button>
                 <Button asChild variant="outline" size="lg">
                   <Link to="/learn-more">
-                    Learn More
+                    {t('home.hero.learnMore')}
                   </Link>
                 </Button>
               </div>
@@ -154,19 +161,19 @@ const Home = () => {
                 <div className="grid grid-cols-2 gap-6">
                   <div className="text-center p-4">
                     <div className="text-4xl font-bold text-foreground mb-1">50K+</div>
-                    <div className="text-sm text-muted-foreground">Applications Completed</div>
+                    <div className="text-sm text-muted-foreground">{t('home.stats.applicationsCompleted')}</div>
                   </div>
                   <div className="text-center p-4">
                     <div className="text-4xl font-bold text-foreground mb-1">98%</div>
-                    <div className="text-sm text-muted-foreground">Success Rate</div>
+                    <div className="text-sm text-muted-foreground">{t('home.stats.successRate')}</div>
                   </div>
                   <div className="text-center p-4">
                     <div className="text-4xl font-bold text-foreground mb-1">24/7</div>
-                    <div className="text-sm text-muted-foreground">Support Available</div>
+                    <div className="text-sm text-muted-foreground">{t('home.stats.supportAvailable')}</div>
                   </div>
                   <div className="text-center p-4">
                     <div className="text-4xl font-bold text-foreground mb-1">4.9</div>
-                    <div className="text-sm text-muted-foreground">Customer Rating</div>
+                    <div className="text-sm text-muted-foreground">{t('home.stats.customerRating')}</div>
                   </div>
                 </div>
               </CardContent>
@@ -179,9 +186,9 @@ const Home = () => {
       <section className="py-16 border-b border-border">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">Why Choose TravelXpressa</h2>
+            <h2 className="text-3xl font-bold mb-4">{t('home.features.title')}</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              We've helped thousands of travelers successfully complete their visa applications
+              {t('home.features.subtitle')}
             </p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -205,12 +212,12 @@ const Home = () => {
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h2 className="text-3xl font-bold mb-2">Featured Articles</h2>
-              <p className="text-muted-foreground">Stay informed with our latest visa guides and updates</p>
+              <h2 className="text-3xl font-bold mb-2">{t('home.featuredArticles.title')}</h2>
+              <p className="text-muted-foreground">{t('home.featuredArticles.subtitle')}</p>
             </div>
             <Button asChild variant="ghost" className="hidden md:flex">
               <Link to="/blog" className="gap-2">
-                View All
+                {t('common.viewAll')}
                 <ChevronRight className="w-4 h-4" />
               </Link>
             </Button>
@@ -287,9 +294,9 @@ const Home = () => {
                 ))}
                 {blogPosts.length === 1 && (
                   <Card className="p-8 text-center">
-                    <p className="text-muted-foreground mb-4">More articles coming soon</p>
+                    <p className="text-muted-foreground mb-4">{t('home.featuredArticles.moreComingSoon')}</p>
                     <Button asChild variant="outline">
-                      <Link to="/blog">Browse All Articles</Link>
+                      <Link to="/blog">{t('home.featuredArticles.browseAll')}</Link>
                     </Button>
                   </Card>
                 )}
@@ -297,7 +304,7 @@ const Home = () => {
             </div>
           ) : (
             <Card className="p-12 text-center">
-              <p className="text-muted-foreground">No blog posts available yet. Check back soon!</p>
+              <p className="text-muted-foreground">{t('home.featuredArticles.noPosts')}</p>
             </Card>
           )}
         </div>
@@ -308,12 +315,12 @@ const Home = () => {
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h2 className="text-3xl font-bold mb-2">Latest News</h2>
-              <p className="text-muted-foreground">Updates from the US Embassy and immigration services</p>
+              <h2 className="text-3xl font-bold mb-2">{t('home.latestNews.title')}</h2>
+              <p className="text-muted-foreground">{t('home.latestNews.subtitle')}</p>
             </div>
             <Button asChild variant="ghost" className="hidden md:flex">
               <Link to="/news" className="gap-2">
-                View All
+                {t('common.viewAll')}
                 <ChevronRight className="w-4 h-4" />
               </Link>
             </Button>
@@ -352,7 +359,7 @@ const Home = () => {
             </div>
           ) : (
             <Card className="p-12 text-center">
-              <p className="text-muted-foreground">No news available yet. Check back soon!</p>
+              <p className="text-muted-foreground">{t('home.latestNews.noNews')}</p>
             </Card>
           )}
         </div>
@@ -363,13 +370,13 @@ const Home = () => {
         <div className="max-w-7xl mx-auto px-6">
           <Card className="bg-secondary">
             <CardContent className="p-12 text-center">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to Start Your Visa Journey?</h2>
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">{t('home.cta.title')}</h2>
               <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-                Join thousands of satisfied travelers who have successfully obtained their US visa through TravelXpressa.
+                {t('home.cta.subtitle')}
               </p>
               <Button asChild size="lg">
                 <Link to="/login" className="gap-2">
-                  Get Started Today
+                  {t('home.cta.button')}
                   <ArrowRight className="w-5 h-5" />
                 </Link>
               </Button>
@@ -384,18 +391,18 @@ const Home = () => {
           <div className="flex flex-col md:flex-row justify-between items-center gap-6">
             <div className="flex items-center gap-2">
               <Plane className="w-6 h-6" />
-              <span className="text-xl font-bold">TravelXpressa</span>
+              <span className="text-xl font-bold">{t('footer.company')}</span>
             </div>
             <div className="flex flex-wrap justify-center gap-6 text-sm text-muted-foreground">
-              <Link to="/about" className="hover:text-foreground transition-colors">About</Link>
-              <Link to="/blog" className="hover:text-foreground transition-colors">Blog</Link>
-              <Link to="/news" className="hover:text-foreground transition-colors">News</Link>
-              <Link to="/learn-more" className="hover:text-foreground transition-colors">Learn More</Link>
-              <Link to="/privacy" className="hover:text-foreground transition-colors">Privacy Policy</Link>
-              <Link to="/terms" className="hover:text-foreground transition-colors">Terms of Service</Link>
+              <Link to="/about" className="hover:text-foreground transition-colors">{t('footer.links.about')}</Link>
+              <Link to="/blog" className="hover:text-foreground transition-colors">{t('nav.blog')}</Link>
+              <Link to="/news" className="hover:text-foreground transition-colors">{t('home.news')}</Link>
+              <Link to="/learn-more" className="hover:text-foreground transition-colors">{t('home.hero.learnMore')}</Link>
+              <Link to="/privacy" className="hover:text-foreground transition-colors">{t('footer.links.privacy')}</Link>
+              <Link to="/terms" className="hover:text-foreground transition-colors">{t('footer.links.terms')}</Link>
             </div>
             <p className="text-sm text-muted-foreground">
-              &copy; 2024 TravelXpressa. All rights reserved.
+              &copy; 2024 {t('footer.company')}. {t('footer.copyright')}
             </p>
           </div>
         </div>

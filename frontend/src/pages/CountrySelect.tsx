@@ -2,8 +2,11 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plane, ArrowRight, Globe, Check } from 'lucide-react';
 import { countryList, type CountryCode } from '../config/countries';
+import { useTranslation } from 'react-i18next';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 const CountrySelect = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [selectedCountry, setSelectedCountry] = useState<CountryCode | null>(null);
   const [hoveredCountry, setHoveredCountry] = useState<string | null>(null);
@@ -18,16 +21,20 @@ const CountrySelect = () => {
 
   return (
     <main className="min-h-screen bg-background text-foreground pt-24 pb-12 theme-transition">
+      {/* Language Switcher */}
+      <div className="fixed top-4 right-4 z-50">
+        <LanguageSwitcher />
+      </div>
+
       <div className="max-w-4xl mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-secondary rounded-full mb-6">
             <Globe className="w-8 h-8 text-foreground" />
           </div>
-          <h1 className="text-4xl font-bold mb-4">Select Your Destination</h1>
+          <h1 className="text-4xl font-bold mb-4">{t('selectCountry.title')}</h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Choose the country you're applying to visit. We'll customize your application form
-            based on that country's specific visa requirements.
+            {t('selectCountry.subtitle')}
           </p>
         </div>
 
@@ -71,7 +78,7 @@ const CountrySelect = () => {
                   text-sm text-muted-foreground mt-1 transition-opacity duration-200
                   ${isHovered || isSelected ? 'opacity-100' : 'opacity-0'}
                 `}>
-                  Click to select
+                  {t('selectCountry.clickToSelect')}
                 </p>
               </button>
             );
@@ -94,17 +101,17 @@ const CountrySelect = () => {
           >
             {selectedCountry ? (
               <>
-                Continue to Application
+                {t('selectCountry.continueToApplication')}
                 <ArrowRight className="w-5 h-5" />
               </>
             ) : (
-              'Select a country to continue'
+              t('selectCountry.selectToContinue')
             )}
           </button>
 
           {selectedCountry && (
             <p className="text-sm text-muted-foreground">
-              You selected: <span className="font-medium text-foreground">
+              {t('selectCountry.youSelected')}: <span className="font-medium text-foreground">
                 {countryList.find(c => c.code === selectedCountry)?.flag}{' '}
                 {countryList.find(c => c.code === selectedCountry)?.name}
               </span>
@@ -119,27 +126,26 @@ const CountrySelect = () => {
               <Plane className="w-6 h-6 text-foreground" />
             </div>
             <div>
-              <h3 className="font-semibold text-lg mb-2">Why does country selection matter?</h3>
+              <h3 className="font-semibold text-lg mb-2">{t('selectCountry.whyMatters')}</h3>
               <p className="text-muted-foreground">
-                Each country has different visa requirements, document checklists, and application forms.
-                By selecting your destination country upfront, we can:
+                {t('selectCountry.whyMattersDescription')}
               </p>
               <ul className="mt-4 space-y-2 text-muted-foreground">
                 <li className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-primary" />
-                  Show you the exact documents you'll need
+                  {t('selectCountry.benefit1')}
                 </li>
                 <li className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-primary" />
-                  Guide you through country-specific form sections
+                  {t('selectCountry.benefit2')}
                 </li>
                 <li className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-primary" />
-                  Provide accurate processing time estimates
+                  {t('selectCountry.benefit3')}
                 </li>
                 <li className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-primary" />
-                  Calculate the correct visa fees
+                  {t('selectCountry.benefit4')}
                 </li>
               </ul>
             </div>

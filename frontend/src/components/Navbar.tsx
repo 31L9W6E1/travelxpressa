@@ -15,8 +15,6 @@ const Navbar = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const langDropdownRef = useRef<HTMLDivElement>(null);
-  const mobileLangDropdownRef = useRef<HTMLDivElement>(null);
 
   const handleLanguageChange = (langCode: string) => {
     i18n.changeLanguage(langCode);
@@ -27,53 +25,28 @@ const Navbar = () => {
   const normalizedLang = i18n.language?.split('-')[0] || 'en';
   const currentLanguage = languages.find(l => l.code === normalizedLang) || languages[0];
 
-  // Close language dropdown when clicking outside (only when open)
+  // Close dropdowns when clicking outside
   useEffect(() => {
-    if (!isLangDropdownOpen) return;
-
     const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as Node;
-      // Check both desktop and mobile refs
-      const isOutsideDesktop = langDropdownRef.current && !langDropdownRef.current.contains(target);
-      const isOutsideMobile = mobileLangDropdownRef.current && !mobileLangDropdownRef.current.contains(target);
+      const target = event.target as Element;
 
-      // Close if click is outside both containers (or if one doesn't exist)
-      if ((isOutsideDesktop || !langDropdownRef.current) &&
-          (isOutsideMobile || !mobileLangDropdownRef.current)) {
-        setIsLangDropdownOpen(false);
+      // Close language dropdown if clicking outside any language button/dropdown
+      if (isLangDropdownOpen) {
+        const isLangElement = target.closest('[data-lang-dropdown]');
+        if (!isLangElement) {
+          setIsLangDropdownOpen(false);
+        }
       }
-    };
 
-    // Add listener with a small delay to avoid capturing the opening click
-    const timeoutId = setTimeout(() => {
-      document.addEventListener("click", handleClickOutside);
-    }, 0);
-
-    return () => {
-      clearTimeout(timeoutId);
-      document.removeEventListener("click", handleClickOutside);
-    };
-  }, [isLangDropdownOpen]);
-
-  // Close user dropdown when clicking outside (only when open)
-  useEffect(() => {
-    if (!isDropdownOpen) return;
-
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      // Close user dropdown if clicking outside
+      if (isDropdownOpen && dropdownRef.current && !dropdownRef.current.contains(target)) {
         setIsDropdownOpen(false);
       }
     };
 
-    const timeoutId = setTimeout(() => {
-      document.addEventListener("click", handleClickOutside);
-    }, 0);
-
-    return () => {
-      clearTimeout(timeoutId);
-      document.removeEventListener("click", handleClickOutside);
-    };
-  }, [isDropdownOpen]);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isLangDropdownOpen, isDropdownOpen]);
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border theme-transition">
@@ -126,7 +99,7 @@ const Navbar = () => {
           {/* Desktop Auth & Theme Toggle */}
           <div className="hidden md:flex items-center space-x-4">
             {/* Language Selector */}
-            <div className="relative" ref={langDropdownRef}>
+            <div className="relative" data-lang-dropdown>
               <button
                 onClick={() => setIsLangDropdownOpen(!isLangDropdownOpen)}
                 className="flex items-center gap-2 px-3 py-2 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-lg transition-colors"
@@ -255,7 +228,7 @@ const Navbar = () => {
           {/* Mobile: Language + Theme Toggle + Menu button */}
           <div className="md:hidden flex items-center space-x-1">
             {/* Mobile Language Selector */}
-            <div className="relative" ref={mobileLangDropdownRef}>
+            <div className="relative" data-lang-dropdown>
               <button
                 onClick={() => setIsLangDropdownOpen(!isLangDropdownOpen)}
                 className="p-2 text-foreground hover:bg-secondary rounded-lg transition-colors"

@@ -99,7 +99,10 @@ const Navbar = () => {
             {/* Language Selector */}
             <div className="relative" ref={langDropdownRef}>
               <button
-                onClick={() => setIsLangDropdownOpen(!isLangDropdownOpen)}
+                onClick={() => {
+                  console.log('Button clicked, current state:', isLangDropdownOpen);
+                  setIsLangDropdownOpen(prev => !prev);
+                }}
                 className="flex items-center gap-2 px-3 py-2 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-lg transition-colors"
                 aria-label="Select language"
               >

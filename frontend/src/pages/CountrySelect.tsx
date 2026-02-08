@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { Plane, ArrowRight, Globe, Check } from 'lucide-react';
 import { countryList, type CountryCode } from '../config/countries';
 import { useTranslation } from 'react-i18next';
-import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 const CountrySelect = () => {
   const { t } = useTranslation();
@@ -21,11 +20,6 @@ const CountrySelect = () => {
 
   return (
     <main className="min-h-screen bg-background text-foreground pt-24 pb-12 theme-transition">
-      {/* Language Switcher */}
-      <div className="fixed top-4 right-4 z-50">
-        <LanguageSwitcher />
-      </div>
-
       <div className="max-w-4xl mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-12">

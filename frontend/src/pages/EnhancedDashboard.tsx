@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import api from "../api/client";
 import { useTranslation } from 'react-i18next';
-import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 interface Inquiry {
   id: string;
@@ -102,11 +101,6 @@ const EnhancedDashboard = () => {
 
   return (
     <div className="min-h-screen bg-background pt-20">
-      {/* Language Switcher */}
-      <div className="fixed top-20 right-4 z-50">
-        <LanguageSwitcher />
-      </div>
-
       <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-8">

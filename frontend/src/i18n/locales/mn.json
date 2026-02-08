@@ -35,7 +35,14 @@
     "dashboard": "Хяналтын самбар",
     "admin": "Админ",
     "profile": "Профайл",
-    "settings": "Тохиргоо"
+    "settings": "Тохиргоо",
+    "learnMore": "Дэлгэрэнгүй",
+    "apply": "Өргөдөл гаргах",
+    "applications": "Өргөдлүүд",
+    "payments": "Төлбөрүүд",
+    "signIn": "Нэвтрэх",
+    "getStarted": "Эхлэх",
+    "signedInAs": "Нэвтэрсэн:"
   },
   "auth": {
     "welcomeBack": "Тавтай морил",

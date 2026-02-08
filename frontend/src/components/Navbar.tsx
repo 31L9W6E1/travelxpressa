@@ -4,37 +4,25 @@ import { useTheme } from "../contexts/ThemeContext";
 import { Menu, X, Plane, User, LogOut, Settings, FileText, CreditCard, ChevronDown, Sun, Moon, Globe } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { UserAvatar } from "./UserAvatar";
-
-// Language options
-const languages = [
-  { code: 'en', label: 'English', flag: '🇺🇸' },
-  { code: 'mn', label: 'Монгол', flag: '🇲🇳' },
-  { code: 'ru', label: 'Русский', flag: '🇷🇺' },
-  { code: 'zh', label: '中文', flag: '🇨🇳' },
-  { code: 'fr', label: 'Français', flag: '🇫🇷' },
-  { code: 'de', label: 'Deutsch', flag: '🇩🇪' },
-];
+import { useTranslation } from 'react-i18next';
+import { languages } from '@/i18n';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const { t, i18n } = useTranslation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
-  const [currentLang, setCurrentLang] = useState(() => {
-    return localStorage.getItem('language') || 'en';
-  });
   const dropdownRef = useRef<HTMLDivElement>(null);
   const langDropdownRef = useRef<HTMLDivElement>(null);
 
   const handleLanguageChange = (langCode: string) => {
-    setCurrentLang(langCode);
-    localStorage.setItem('language', langCode);
+    i18n.changeLanguage(langCode);
     setIsLangDropdownOpen(false);
-    // In production, this would trigger i18n language change
   };
 
-  const currentLanguage = languages.find(l => l.code === currentLang) || languages[0];
+  const currentLanguage = languages.find(l => l.code === i18n.language) || languages[0];
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -69,13 +57,13 @@ const Navbar = () => {
                 to="/about"
                 className="px-4 py-2 text-muted-foreground hover:text-foreground transition-colors"
               >
-                About
+                {t('nav.about')}
               </Link>
               <Link
                 to="/learn-more"
                 className="px-4 py-2 text-muted-foreground hover:text-foreground transition-colors"
               >
-                Learn More
+                {t('nav.learnMore')}
               </Link>
               {user && user.role !== "ADMIN" && (
                 <Link
@@ -83,7 +71,7 @@ const Navbar = () => {
                   className="px-4 py-2 text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2"
                 >
                   <FileText className="w-4 h-4" />
-                  Apply
+                  {t('nav.apply')}
                 </Link>
               )}
               {user?.role === "ADMIN" && (
@@ -92,7 +80,7 @@ const Navbar = () => {
                   className="px-4 py-2 text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2"
                 >
                   <Settings className="w-4 h-4" />
-                  Admin
+                  {t('nav.admin')}
                 </Link>
               )}
             </div>
@@ -119,11 +107,11 @@ const Navbar = () => {
                       key={lang.code}
                       onClick={() => handleLanguageChange(lang.code)}
                       className={`flex items-center gap-3 w-full px-4 py-2.5 text-sm hover:bg-secondary transition-colors ${
-                        currentLang === lang.code ? 'bg-secondary text-foreground' : 'text-muted-foreground'
+                        i18n.language === lang.code ? 'bg-secondary text-foreground' : 'text-muted-foreground'
                       }`}
                     >
                       <span>{lang.flag}</span>
-                      <span>{lang.label}</span>
+                      <span>{lang.name}</span>
                     </button>
                   ))}
                 </div>
@@ -154,7 +142,7 @@ const Navbar = () => {
                   <span className="text-sm font-medium">{user.name || user.email?.split('@')[0]}</span>
                   {user.role === "ADMIN" && (
                     <span className="px-2 py-0.5 text-xs bg-secondary text-secondary-foreground rounded">
-                      Admin
+                      {t('nav.admin')}
                     </span>
                   )}
                   <ChevronDown className={`w-4 h-4 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
@@ -174,7 +162,7 @@ const Navbar = () => {
                         className="flex items-center gap-3 px-4 py-2.5 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
                       >
                         <User className="w-4 h-4" />
-                        Profile
+                        {t('nav.profile')}
                       </Link>
                       <Link
                         to="/profile"
@@ -182,7 +170,7 @@ const Navbar = () => {
                         className="flex items-center gap-3 px-4 py-2.5 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
                       >
                         <FileText className="w-4 h-4" />
-                        Applications
+                        {t('nav.applications')}
                       </Link>
                       <Link
                         to="/profile"
@@ -190,7 +178,7 @@ const Navbar = () => {
                         className="flex items-center gap-3 px-4 py-2.5 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
                       >
                         <CreditCard className="w-4 h-4" />
-                        Payments
+                        {t('nav.payments')}
                       </Link>
                     </div>
                     <div className="border-t border-border py-1">
@@ -202,7 +190,7 @@ const Navbar = () => {
                         className="flex items-center gap-3 w-full px-4 py-2.5 text-destructive hover:bg-secondary transition-colors"
                       >
                         <LogOut className="w-4 h-4" />
-                        Logout
+                        {t('nav.logout')}
                       </button>
                     </div>
                   </div>
@@ -214,20 +202,46 @@ const Navbar = () => {
                   to="/login"
                   className="px-4 py-2 text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  Sign In
+                  {t('nav.signIn')}
                 </Link>
                 <Link
                   to="/login"
                   className="px-5 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:opacity-90 transition-opacity"
                 >
-                  Get Started
+                  {t('nav.getStarted')}
                 </Link>
               </div>
             )}
           </div>
 
-          {/* Mobile: Theme Toggle + Menu button */}
-          <div className="md:hidden flex items-center space-x-2">
+          {/* Mobile: Language + Theme Toggle + Menu button */}
+          <div className="md:hidden flex items-center space-x-1">
+            {/* Mobile Language Selector */}
+            <div className="relative" ref={langDropdownRef}>
+              <button
+                onClick={() => setIsLangDropdownOpen(!isLangDropdownOpen)}
+                className="p-2 text-foreground hover:bg-secondary rounded-lg transition-colors"
+                aria-label="Select language"
+              >
+                <span className="text-lg">{currentLanguage.flag}</span>
+              </button>
+              {isLangDropdownOpen && (
+                <div className="absolute right-0 mt-2 w-40 bg-card border border-border rounded-lg shadow-xl overflow-hidden z-50">
+                  {languages.map((lang) => (
+                    <button
+                      key={lang.code}
+                      onClick={() => handleLanguageChange(lang.code)}
+                      className={`flex items-center gap-3 w-full px-4 py-2.5 text-sm hover:bg-secondary transition-colors ${
+                        i18n.language === lang.code ? 'bg-secondary text-foreground' : 'text-muted-foreground'
+                      }`}
+                    >
+                      <span>{lang.flag}</span>
+                      <span>{lang.name}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
             <button
               onClick={toggleTheme}
               className="p-2 text-foreground hover:bg-secondary rounded-lg transition-colors"
@@ -257,14 +271,14 @@ const Navbar = () => {
                 className="px-4 py-3 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
-                About
+                {t('nav.about')}
               </Link>
               <Link
                 to="/learn-more"
                 className="px-4 py-3 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
-                Learn More
+                {t('nav.learnMore')}
               </Link>
               {user && (
                 <>
@@ -273,7 +287,7 @@ const Navbar = () => {
                     className="px-4 py-3 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    Profile
+                    {t('nav.profile')}
                   </Link>
                   {user.role !== "ADMIN" && (
                     <Link
@@ -281,7 +295,7 @@ const Navbar = () => {
                       className="px-4 py-3 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
                       onClick={() => setIsMenuOpen(false)}
                     >
-                      Apply Now
+                      {t('nav.apply')}
                     </Link>
                   )}
                 </>
@@ -292,14 +306,14 @@ const Navbar = () => {
                   className="px-4 py-3 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  Admin Panel
+                  {t('nav.admin')}
                 </Link>
               )}
               <div className="border-t border-border pt-4 mt-2">
                 {user ? (
                   <div className="space-y-2">
                     <div className="px-4 py-2 text-muted-foreground text-sm">
-                      Signed in as {user.name}
+                      {t('nav.signedInAs')} {user.name}
                     </div>
                     <button
                       onClick={() => {
@@ -308,7 +322,7 @@ const Navbar = () => {
                       }}
                       className="w-full px-4 py-3 text-destructive hover:bg-secondary transition-colors text-left"
                     >
-                      Logout
+                      {t('nav.logout')}
                     </button>
                   </div>
                 ) : (
@@ -318,14 +332,14 @@ const Navbar = () => {
                       className="block py-3 text-muted-foreground hover:text-foreground transition-colors"
                       onClick={() => setIsMenuOpen(false)}
                     >
-                      Sign In
+                      {t('nav.signIn')}
                     </Link>
                     <Link
                       to="/login"
                       className="block py-3 bg-primary text-primary-foreground rounded-lg font-medium text-center"
                       onClick={() => setIsMenuOpen(false)}
                     >
-                      Get Started
+                      {t('nav.getStarted')}
                     </Link>
                   </div>
                 )}

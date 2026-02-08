@@ -7,7 +7,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
-import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -204,11 +203,6 @@ const Login = () => {
 
   return (
     <main className="min-h-screen bg-background flex items-center justify-center px-4 pt-24 pb-12 theme-transition">
-      {/* Language Switcher - Top Right */}
-      <div className="fixed top-4 right-4 z-50">
-        <LanguageSwitcher />
-      </div>
-
       <div className="max-w-md w-full space-y-8">
         {/* Logo */}
         <div className="text-center">

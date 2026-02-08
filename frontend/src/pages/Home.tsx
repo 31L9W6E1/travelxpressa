@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useTranslation } from 'react-i18next';
-import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 // News ticker items - can be fetched from API or managed via CMS
 const tickerItems = [
@@ -99,11 +98,6 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* Language Switcher - Top Right */}
-      <div className="fixed top-20 right-4 z-50">
-        <LanguageSwitcher />
-      </div>
-
       {/* News Ticker - Fixed at top below navbar */}
       <div className="fixed top-16 left-0 right-0 z-40 bg-primary text-primary-foreground overflow-hidden">
         <div className="flex items-center h-10">

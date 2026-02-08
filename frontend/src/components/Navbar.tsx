@@ -36,8 +36,8 @@ const Navbar = () => {
         setIsLangDropdownOpen(false);
       }
     };
-    document.addEventListener("click", handleClickOutside);
-    return () => document.removeEventListener("click", handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   return (
@@ -107,11 +107,8 @@ const Navbar = () => {
                   {languages.map((lang) => (
                     <button
                       key={lang.code}
-                      onMouseDown={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        handleLanguageChange(lang.code);
-                      }}
+                      type="button"
+                      onClick={() => handleLanguageChange(lang.code)}
                       className={`flex items-center gap-3 w-full px-4 py-2.5 text-sm hover:bg-secondary transition-colors ${
                         normalizedLang === lang.code ? 'bg-secondary text-foreground' : 'text-muted-foreground'
                       }`}
@@ -236,11 +233,8 @@ const Navbar = () => {
                   {languages.map((lang) => (
                     <button
                       key={lang.code}
-                      onMouseDown={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        handleLanguageChange(lang.code);
-                      }}
+                      type="button"
+                      onClick={() => handleLanguageChange(lang.code)}
                       className={`flex items-center gap-3 w-full px-4 py-2.5 text-sm hover:bg-secondary transition-colors ${
                         normalizedLang === lang.code ? 'bg-secondary text-foreground' : 'text-muted-foreground'
                       }`}

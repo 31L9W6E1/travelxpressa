@@ -16,6 +16,7 @@ const Navbar = () => {
   const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const langDropdownRef = useRef<HTMLDivElement>(null);
+  const mobileLangDropdownRef = useRef<HTMLDivElement>(null);
 
   const handleLanguageChange = (langCode: string) => {
     i18n.changeLanguage(langCode);
@@ -31,7 +32,14 @@ const Navbar = () => {
     if (!isLangDropdownOpen) return;
 
     const handleClickOutside = (event: MouseEvent) => {
-      if (langDropdownRef.current && !langDropdownRef.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+      // Check both desktop and mobile refs
+      const isOutsideDesktop = langDropdownRef.current && !langDropdownRef.current.contains(target);
+      const isOutsideMobile = mobileLangDropdownRef.current && !mobileLangDropdownRef.current.contains(target);
+
+      // Close if click is outside both containers (or if one doesn't exist)
+      if ((isOutsideDesktop || !langDropdownRef.current) &&
+          (isOutsideMobile || !mobileLangDropdownRef.current)) {
         setIsLangDropdownOpen(false);
       }
     };
@@ -247,7 +255,7 @@ const Navbar = () => {
           {/* Mobile: Language + Theme Toggle + Menu button */}
           <div className="md:hidden flex items-center space-x-1">
             {/* Mobile Language Selector */}
-            <div className="relative" ref={langDropdownRef}>
+            <div className="relative" ref={mobileLangDropdownRef}>
               <button
                 onClick={() => setIsLangDropdownOpen(!isLangDropdownOpen)}
                 className="p-2 text-foreground hover:bg-secondary rounded-lg transition-colors"

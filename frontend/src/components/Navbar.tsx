@@ -26,20 +26,25 @@ const Navbar = () => {
   const normalizedLang = i18n.language?.split('-')[0] || 'en';
   const currentLanguage = languages.find(l => l.code === normalizedLang) || languages[0];
 
-  // Close dropdown when clicking outside
+  // Close dropdown when clicking outside - only when dropdown is open
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Node;
-      if (dropdownRef.current && !dropdownRef.current.contains(target)) {
+
+      // Only close user dropdown if it's open and click is outside
+      if (isDropdownOpen && dropdownRef.current && !dropdownRef.current.contains(target)) {
         setIsDropdownOpen(false);
       }
-      if (langDropdownRef.current && !langDropdownRef.current.contains(target)) {
+
+      // Only close language dropdown if it's open and click is outside
+      if (isLangDropdownOpen && langDropdownRef.current && !langDropdownRef.current.contains(target)) {
         setIsLangDropdownOpen(false);
       }
     };
-    document.addEventListener("click", handleClickOutside);
-    return () => document.removeEventListener("click", handleClickOutside);
-  }, []);
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isDropdownOpen, isLangDropdownOpen]);
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border theme-transition">

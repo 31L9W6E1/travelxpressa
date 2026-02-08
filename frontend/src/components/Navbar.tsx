@@ -107,9 +107,12 @@ const Navbar = () => {
                   {languages.map((lang) => (
                     <button
                       key={lang.code}
-                      onClick={() => handleLanguageChange(lang.code)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleLanguageChange(lang.code);
+                      }}
                       className={`flex items-center gap-3 w-full px-4 py-2.5 text-sm hover:bg-secondary transition-colors ${
-                        i18n.language === lang.code ? 'bg-secondary text-foreground' : 'text-muted-foreground'
+                        normalizedLang === lang.code ? 'bg-secondary text-foreground' : 'text-muted-foreground'
                       }`}
                     >
                       <span>{lang.flag}</span>
@@ -232,9 +235,12 @@ const Navbar = () => {
                   {languages.map((lang) => (
                     <button
                       key={lang.code}
-                      onClick={() => handleLanguageChange(lang.code)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleLanguageChange(lang.code);
+                      }}
                       className={`flex items-center gap-3 w-full px-4 py-2.5 text-sm hover:bg-secondary transition-colors ${
-                        i18n.language === lang.code ? 'bg-secondary text-foreground' : 'text-muted-foreground'
+                        normalizedLang === lang.code ? 'bg-secondary text-foreground' : 'text-muted-foreground'
                       }`}
                     >
                       <span>{lang.flag}</span>

@@ -15,6 +15,7 @@ const Navbar = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const langDropdownRef = useRef<HTMLDivElement>(null);
 
   const handleLanguageChange = (langCode: string) => {
     i18n.changeLanguage(langCode);
@@ -28,14 +29,11 @@ const Navbar = () => {
   // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as Element;
+      const target = event.target as Node;
 
-      // Close language dropdown if clicking outside any language button/dropdown
-      if (isLangDropdownOpen) {
-        const isLangElement = target.closest('[data-lang-dropdown]');
-        if (!isLangElement) {
-          setIsLangDropdownOpen(false);
-        }
+      // Close language dropdown if clicking outside
+      if (isLangDropdownOpen && langDropdownRef.current && !langDropdownRef.current.contains(target)) {
+        setIsLangDropdownOpen(false);
       }
 
       // Close user dropdown if clicking outside
@@ -99,7 +97,7 @@ const Navbar = () => {
           {/* Desktop Auth & Theme Toggle */}
           <div className="hidden md:flex items-center space-x-4">
             {/* Language Selector */}
-            <div className="relative" data-lang-dropdown>
+            <div className="relative" ref={langDropdownRef}>
               <button
                 onClick={() => setIsLangDropdownOpen(!isLangDropdownOpen)}
                 className="flex items-center gap-2 px-3 py-2 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-lg transition-colors"
@@ -225,35 +223,8 @@ const Navbar = () => {
             )}
           </div>
 
-          {/* Mobile: Language + Theme Toggle + Menu button */}
+          {/* Mobile: Theme Toggle + Menu button */}
           <div className="md:hidden flex items-center space-x-1">
-            {/* Mobile Language Selector */}
-            <div className="relative" data-lang-dropdown>
-              <button
-                onClick={() => setIsLangDropdownOpen(!isLangDropdownOpen)}
-                className="p-2 text-foreground hover:bg-secondary rounded-lg transition-colors"
-                aria-label="Select language"
-              >
-                <span className="text-lg">{currentLanguage.flag}</span>
-              </button>
-              {isLangDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-40 bg-card border border-border rounded-lg shadow-xl overflow-hidden z-50">
-                  {languages.map((lang) => (
-                    <button
-                      key={lang.code}
-                      type="button"
-                      onClick={() => handleLanguageChange(lang.code)}
-                      className={`flex items-center gap-3 w-full px-4 py-2.5 text-sm hover:bg-secondary transition-colors ${
-                        normalizedLang === lang.code ? 'bg-secondary text-foreground' : 'text-muted-foreground'
-                      }`}
-                    >
-                      <span>{lang.flag}</span>
-                      <span>{lang.name}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
             <button
               onClick={toggleTheme}
               className="p-2 text-foreground hover:bg-secondary rounded-lg transition-colors"

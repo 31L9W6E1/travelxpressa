@@ -107,7 +107,8 @@ const Navbar = () => {
                   {languages.map((lang) => (
                     <button
                       key={lang.code}
-                      onClick={(e) => {
+                      onMouseDown={(e) => {
+                        e.preventDefault();
                         e.stopPropagation();
                         handleLanguageChange(lang.code);
                       }}
@@ -235,7 +236,8 @@ const Navbar = () => {
                   {languages.map((lang) => (
                     <button
                       key={lang.code}
-                      onClick={(e) => {
+                      onMouseDown={(e) => {
+                        e.preventDefault();
                         e.stopPropagation();
                         handleLanguageChange(lang.code);
                       }}

@@ -29,15 +29,16 @@ const Navbar = () => {
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+      if (dropdownRef.current && !dropdownRef.current.contains(target)) {
         setIsDropdownOpen(false);
       }
-      if (langDropdownRef.current && !langDropdownRef.current.contains(event.target as Node)) {
+      if (langDropdownRef.current && !langDropdownRef.current.contains(target)) {
         setIsLangDropdownOpen(false);
       }
     };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
   }, []);
 
   return (
@@ -93,7 +94,10 @@ const Navbar = () => {
             {/* Language Selector */}
             <div className="relative" ref={langDropdownRef}>
               <button
-                onClick={() => setIsLangDropdownOpen(!isLangDropdownOpen)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsLangDropdownOpen(!isLangDropdownOpen);
+                }}
                 className="flex items-center gap-2 px-3 py-2 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-lg transition-colors"
                 aria-label="Select language"
               >
@@ -222,7 +226,10 @@ const Navbar = () => {
             {/* Mobile Language Selector */}
             <div className="relative" ref={langDropdownRef}>
               <button
-                onClick={() => setIsLangDropdownOpen(!isLangDropdownOpen)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsLangDropdownOpen(!isLangDropdownOpen);
+                }}
                 className="p-2 text-foreground hover:bg-secondary rounded-lg transition-colors"
                 aria-label="Select language"
               >

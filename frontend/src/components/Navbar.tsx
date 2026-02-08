@@ -22,7 +22,9 @@ const Navbar = () => {
     setIsLangDropdownOpen(false);
   };
 
-  const currentLanguage = languages.find(l => l.code === i18n.language) || languages[0];
+  // Handle language codes like 'en-US' by extracting base code 'en'
+  const normalizedLang = i18n.language?.split('-')[0] || 'en';
+  const currentLanguage = languages.find(l => l.code === normalizedLang) || languages[0];
 
   // Close dropdown when clicking outside
   useEffect(() => {

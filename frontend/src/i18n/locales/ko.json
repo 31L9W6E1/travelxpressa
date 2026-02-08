@@ -1,0 +1,470 @@
+{
+  "common": {
+    "loading": "로딩 중...",
+    "save": "저장",
+    "cancel": "취소",
+    "delete": "삭제",
+    "edit": "편집",
+    "view": "보기",
+    "submit": "제출",
+    "next": "다음",
+    "previous": "이전",
+    "back": "뒤로",
+    "search": "검색",
+    "filter": "필터",
+    "all": "전체",
+    "yes": "예",
+    "no": "아니오",
+    "required": "필수",
+    "optional": "선택",
+    "success": "성공",
+    "error": "오류",
+    "warning": "경고",
+    "info": "정보",
+    "viewAll": "전체 보기"
+  },
+  "nav": {
+    "home": "홈",
+    "services": "서비스",
+    "about": "소개",
+    "contact": "연락처",
+    "blog": "블로그",
+    "login": "로그인",
+    "register": "회원가입",
+    "logout": "로그아웃",
+    "dashboard": "대시보드",
+    "admin": "관리자",
+    "profile": "프로필",
+    "settings": "설정"
+  },
+  "auth": {
+    "welcomeBack": "다시 오신 것을 환영합니다",
+    "createAccount": "계정 만들기",
+    "signInContinue": "비자 신청을 계속하려면 로그인하세요",
+    "startJourney": "오늘 비자 신청 여정을 시작하세요",
+    "signIn": "로그인",
+    "signUp": "회원가입",
+    "signingIn": "로그인 중...",
+    "creatingAccount": "계정 생성 중...",
+    "createAccountBtn": "계정 만들기",
+    "fullName": "전체 이름",
+    "enterName": "이름을 입력하세요",
+    "email": "이메일",
+    "emailAddress": "이메일 주소",
+    "enterEmail": "이메일을 입력하세요",
+    "password": "비밀번호",
+    "enterPassword": "비밀번호를 입력하세요",
+    "passwordRequirements": "최소 8자, 대문자, 소문자, 숫자, 특수문자 포함",
+    "continueWithGoogle": "Google로 계속하기",
+    "continueWithFacebook": "Facebook으로 계속하기",
+    "orContinueWithEmail": "또는 이메일로 계속하기",
+    "noAccount": "계정이 없으신가요? 회원가입",
+    "haveAccount": "이미 계정이 있으신가요? 로그인",
+    "agreementPrefix": "로그인하면 다음에 동의하는 것입니다",
+    "termsAgree": "로그인하면 다음에 동의하는 것입니다",
+    "termsOfService": "서비스 약관",
+    "and": "및",
+    "privacyPolicy": "개인정보 보호정책",
+    "forgotPassword": "비밀번호를 잊으셨나요?",
+    "rememberMe": "로그인 상태 유지"
+  },
+  "home": {
+    "news": "뉴스",
+    "hero": {
+      "trusted": "10,000명 이상의 여행자가 신뢰합니다",
+      "titleLine1": "미국으로의 여정이",
+      "titleLine2": "미국",
+      "titleLine3": "여기서 시작됩니다",
+      "title": "미국으로의 여정이 여기서 시작됩니다",
+      "subtitle": "TravelXpressa는 DS-160 비자 신청 과정을 간소화합니다. 전문가 안내, 실시간 지원, 처음부터 끝까지 매끄러운 경험.",
+      "cta": "신청 시작하기",
+      "learnMore": "자세히 알아보기"
+    },
+    "stats": {
+      "applicationsCompleted": "완료된 신청서",
+      "successRate": "성공률",
+      "supportAvailable": "연중무휴 지원",
+      "customerRating": "고객 평점"
+    },
+    "features": {
+      "title": "왜 TravelXpressa를 선택해야 할까요",
+      "subtitle": "수천 명의 여행자가 비자 신청을 성공적으로 완료하도록 도왔습니다",
+      "expert": {
+        "title": "전문가 안내",
+        "description": "경험 많은 팀이 DS-160 신청의 모든 단계를 안내해 드립니다"
+      },
+      "fast": {
+        "title": "빠른 처리",
+        "description": "30분 이내에 DS-160 양식 작성 완료"
+      },
+      "secure": {
+        "title": "안전 & 개인정보 보호",
+        "description": "귀하의 데이터는 암호화되며 제3자와 공유되지 않습니다"
+      },
+      "support": {
+        "title": "전문가 지원",
+        "description": "비자 신청 전문가의 24/7 지원"
+      },
+      "errorPrevention": {
+        "title": "오류 방지",
+        "description": "내장된 검증 기능이 제출 전에 실수를 발견합니다"
+      }
+    },
+    "featuredArticles": {
+      "title": "추천 기사",
+      "subtitle": "최신 비자 가이드 및 업데이트로 정보를 얻으세요",
+      "moreComingSoon": "더 많은 기사가 곧 공개됩니다",
+      "browseAll": "모든 기사 보기",
+      "noPosts": "아직 블로그 게시물이 없습니다. 곧 다시 확인해 주세요!"
+    },
+    "latestNews": {
+      "title": "최신 뉴스",
+      "subtitle": "미국 대사관 및 이민 서비스의 업데이트",
+      "noNews": "아직 뉴스가 없습니다. 곧 다시 확인해 주세요!"
+    },
+    "visaTypes": {
+      "title": "지원하는 비자 유형",
+      "subtitle": "다양한 미국 비이민 비자 카테고리를 지원합니다",
+      "b1b2": {
+        "title": "B1/B2 관광 비자",
+        "description": "관광, 비즈니스 방문 및 의료 목적"
+      },
+      "f1": {
+        "title": "F1 학생 비자",
+        "description": "미국 교육기관에서의 학업용"
+      },
+      "h1b": {
+        "title": "H1B 취업 비자",
+        "description": "전문 직종 근로자용"
+      },
+      "j1": {
+        "title": "J1 교환 비자",
+        "description": "교환 방문자 및 학자용"
+      }
+    },
+    "cta": {
+      "title": "비자 여정을 시작할 준비가 되셨나요?",
+      "subtitle": "TravelXpressa를 통해 성공적으로 미국 비자를 취득한 수천 명의 만족한 여행자와 함께하세요.",
+      "button": "오늘 시작하기"
+    }
+  },
+  "dashboard": {
+    "title": "대시보드",
+    "welcome": "다시 오신 것을 환영합니다",
+    "welcomeBack": "다시 오신 것을 환영합니다",
+    "loadingDashboard": "대시보드를 로딩 중...",
+    "manageApplications": "여행 신청서를 관리하세요",
+    "myApplications": "내 신청서",
+    "newApplication": "새 신청",
+    "noApplications": "신청서가 없습니다",
+    "startFirst": "첫 여행 신청서를 제출하세요",
+    "submitApplication": "신청서 제출",
+    "totalApplications": "총 신청서",
+    "allSubmissions": "모든 제출물",
+    "pendingReview": "검토 대기 중",
+    "awaitingResponse": "응답 대기 중",
+    "successfullyProcessed": "성공적으로 처리됨",
+    "successRate": "성공률",
+    "approvalRate": "승인율",
+    "recentApplications": "최근 신청서",
+    "submittedApplications": "제출한 신청서",
+    "service": "서비스",
+    "date": "날짜",
+    "message": "메시지",
+    "quickActions": "빠른 작업",
+    "profileSettings": "프로필 설정",
+    "documents": "문서",
+    "support": "지원",
+    "status": {
+      "title": "상태",
+      "draft": "초안",
+      "inProgress": "진행 중",
+      "submitted": "제출됨",
+      "underReview": "검토 중",
+      "completed": "완료됨",
+      "rejected": "거부됨",
+      "approved": "승인됨",
+      "pending": "대기 중"
+    },
+    "proTips": {
+      "title": "전문가 팁",
+      "completeProfile": "프로필을 완성하세요",
+      "fasterProcessing": "빠른 처리를 위해",
+      "uploadDocuments": "필수 문서를 모두 업로드하세요",
+      "upfrontSubmission": "선제적 제출",
+      "checkEmail": "이메일 업데이트를 확인하세요",
+      "statusNotifications": "상태 알림"
+    },
+    "progress": "진행률",
+    "lastUpdated": "최근 업데이트",
+    "created": "생성일",
+    "continueApplication": "신청 계속하기",
+    "viewDetails": "상세 보기"
+  },
+  "form": {
+    "steps": {
+      "personal": "개인 정보",
+      "contact": "연락처",
+      "passport": "여권",
+      "travel": "여행 계획",
+      "family": "가족",
+      "work": "직업 & 학력",
+      "security": "보안",
+      "documents": "서류",
+      "review": "검토"
+    },
+    "personal": {
+      "title": "개인 정보",
+      "description": "기본 개인 정보를 입력하세요",
+      "surnames": "성",
+      "givenNames": "이름",
+      "fullNameNative": "모국어 전체 이름",
+      "otherNames": "다른 이름을 사용한 적이 있습니까?",
+      "sex": "성별",
+      "male": "남성",
+      "female": "여성",
+      "maritalStatus": "결혼 상태",
+      "single": "미혼",
+      "married": "기혼",
+      "divorced": "이혼",
+      "widowed": "사별",
+      "separated": "별거",
+      "dateOfBirth": "생년월일",
+      "cityOfBirth": "출생 도시",
+      "stateOfBirth": "출생 주/도",
+      "countryOfBirth": "출생 국가",
+      "nationality": "국적"
+    },
+    "contact": {
+      "title": "연락처 정보",
+      "description": "주소와 연락처를 입력하세요",
+      "homeAddress": "집 주소",
+      "mailingAddress": "우편 주소",
+      "sameAsHome": "집 주소와 동일",
+      "street": "도로명 주소",
+      "city": "도시",
+      "state": "주/도",
+      "postalCode": "우편번호",
+      "country": "국가",
+      "phone": "전화번호",
+      "secondaryPhone": "보조 전화번호",
+      "workPhone": "직장 전화번호",
+      "email": "이메일 주소"
+    },
+    "passport": {
+      "title": "여권 정보",
+      "description": "여권 세부 정보를 입력하세요",
+      "passportType": "여권 유형",
+      "regular": "일반",
+      "official": "관용",
+      "diplomatic": "외교관",
+      "other": "기타",
+      "passportNumber": "여권 번호",
+      "bookNumber": "여권책 번호",
+      "countryOfIssuance": "발급 국가",
+      "cityOfIssuance": "발급 도시",
+      "stateOfIssuance": "발급 주",
+      "issuanceDate": "발급일",
+      "expirationDate": "만료일",
+      "hasOtherPassport": "다른 여권이 있습니까?"
+    },
+    "travel": {
+      "title": "여행 정보",
+      "description": "여행 계획에 대해 알려주세요",
+      "purposeOfTrip": "여행 목적",
+      "specificPurpose": "구체적 목적",
+      "intendedArrival": "예정 도착일",
+      "lengthOfStay": "예정 체류 기간",
+      "usAddress": "미국 내 주소",
+      "payingForTrip": "여행 비용 부담자",
+      "travelingWithOthers": "다른 사람과 함께 여행합니까?",
+      "companions": "동반자"
+    },
+    "family": {
+      "title": "가족 정보",
+      "description": "가족 정보를 제공하세요",
+      "father": "아버지 정보",
+      "mother": "어머니 정보",
+      "spouse": "배우자 정보",
+      "children": "자녀",
+      "relativesInUS": "미국 내 친척",
+      "inUS": "현재 미국에 있습니까?",
+      "usStatus": "미국 이민 신분"
+    },
+    "work": {
+      "title": "직업 & 학력",
+      "description": "경력 및 학력",
+      "currentEmployment": "현재 직장",
+      "occupation": "주요 직업",
+      "employerName": "고용주 이름",
+      "employerAddress": "고용주 주소",
+      "salary": "월급",
+      "startDate": "시작일",
+      "duties": "직무",
+      "previousEmployment": "이전 직장",
+      "education": "학력",
+      "languages": "사용 언어",
+      "militaryService": "군복무"
+    },
+    "security": {
+      "title": "보안 질문",
+      "description": "필수 보안 질문에 답하세요",
+      "previousUSTravel": "이전 미국 여행",
+      "visaHistory": "비자 이력",
+      "hasBeenInUS": "미국에 방문한 적이 있습니까?",
+      "hasUSVisa": "미국 비자를 받은 적이 있습니까?",
+      "visaRefused": "미국 비자가 거부된 적이 있습니까?"
+    },
+    "documents": {
+      "title": "서류 업로드",
+      "description": "필요한 서류를 업로드하세요",
+      "photo": "여권 사진",
+      "photoRequirements": "사진은 2x2인치, 흰색 배경, 6개월 이내 촬영",
+      "invitationLetter": "초청장",
+      "additionalDocs": "추가 서류",
+      "dragDrop": "파일을 여기에 드래그하거나 클릭하여 선택",
+      "maxSize": "최대 파일 크기: 5MB"
+    },
+    "review": {
+      "title": "검토 & 제출",
+      "description": "제출 전 신청서를 검토하세요",
+      "confirmAccuracy": "제공된 모든 정보가 정확함을 확인합니다",
+      "submitApplication": "신청서 제출"
+    },
+    "validation": {
+      "required": "이 필드는 필수입니다",
+      "invalidEmail": "유효한 이메일을 입력하세요",
+      "invalidPhone": "유효한 전화번호를 입력하세요",
+      "invalidDate": "유효한 날짜를 입력하세요",
+      "minLength": "최소 {{min}}자 이상이어야 합니다",
+      "maxLength": "{{max}}자 이하여야 합니다"
+    },
+    "actions": {
+      "saveDraft": "초안 저장",
+      "saving": "저장 중...",
+      "saved": "저장됨",
+      "saveError": "저장 실패"
+    }
+  },
+  "admin": {
+    "title": "관리자 대시보드",
+    "welcome": "다시 오신 것을 환영합니다",
+    "systemOnline": "시스템 온라인",
+    "tabs": {
+      "overview": "개요",
+      "users": "사용자",
+      "applications": "신청서",
+      "cms": "CMS"
+    },
+    "stats": {
+      "totalUsers": "전체 사용자",
+      "applications": "신청서",
+      "completed": "완료됨",
+      "pending": "대기 중",
+      "approvalRate": "승인율",
+      "fromLastMonth": "지난달 대비"
+    },
+    "charts": {
+      "applicationsOverview": "신청 개요",
+      "monthlyTrends": "월별 신청 동향",
+      "userGrowth": "사용자 성장",
+      "newRegistrations": "신규 사용자 등록 추이",
+      "statusDistribution": "상태 분포",
+      "statusBreakdown": "현재 신청 상태 분포",
+      "visaTypeDistribution": "비자 유형 분포",
+      "byVisaCategory": "비자 카테고리별 분포"
+    },
+    "users": {
+      "title": "사용자 관리",
+      "description": "모든 등록된 사용자 관리",
+      "user": "사용자",
+      "role": "역할",
+      "status": "상태",
+      "verified": "인증됨",
+      "unverified": "미인증",
+      "apps": "신청",
+      "lastActive": "최근 활동",
+      "actions": "작업",
+      "never": "없음"
+    },
+    "applications": {
+      "title": "모든 신청서",
+      "description": "비자 신청서 검토 및 관리",
+      "applicant": "신청자",
+      "visaType": "비자 유형",
+      "status": "상태",
+      "progress": "진행률",
+      "created": "생성일",
+      "actions": "작업",
+      "noApplications": "신청서를 찾을 수 없습니다",
+      "filters": {
+        "allStatus": "모든 상태",
+        "allTypes": "모든 유형"
+      }
+    },
+    "cms": {
+      "title": "콘텐츠 관리",
+      "description": "블로그 게시물 및 뉴스 기사 관리",
+      "blogPosts": "블로그 게시물",
+      "newsArticles": "뉴스 기사",
+      "published": "게시됨",
+      "drafts": "초안",
+      "newBlog": "새 블로그",
+      "newNews": "새 뉴스",
+      "createPost": "게시물 생성",
+      "editPost": "게시물 편집",
+      "deletePost": "게시물 삭제",
+      "postTitle": "제목",
+      "postContent": "내용",
+      "postExcerpt": "간략 설명",
+      "postImage": "대표 이미지 URL",
+      "postTags": "태그",
+      "publishImmediately": "즉시 게시"
+    },
+    "applicationDetail": {
+      "title": "신청 상세",
+      "applicant": "신청자",
+      "status": "상태",
+      "adminNotes": "관리자 메모",
+      "updateStatus": "상태 업데이트",
+      "exportPdf": "PDF 내보내기",
+      "approve": "승인",
+      "reject": "거부"
+    }
+  },
+  "selectCountry": {
+    "title": "목적지 선택",
+    "subtitle": "방문 신청할 국가를 선택하세요. 해당 국가의 특정 비자 요건에 맞게 신청서 양식을 맞춤 설정해 드립니다.",
+    "searchPlaceholder": "국가 검색...",
+    "continue": "계속",
+    "clickToSelect": "클릭하여 선택",
+    "continueToApplication": "신청으로 계속",
+    "selectToContinue": "계속하려면 국가를 선택하세요",
+    "youSelected": "선택하셨습니다",
+    "whyMatters": "국가 선택이 왜 중요한가요?",
+    "whyMattersDescription": "각 국가마다 비자 요건, 서류 체크리스트, 신청서 양식이 다릅니다. 목적지 국가를 미리 선택하면:",
+    "benefit1": "필요한 정확한 서류를 보여드립니다",
+    "benefit2": "국가별 양식 섹션을 안내해 드립니다",
+    "benefit3": "정확한 처리 시간 예상을 제공합니다",
+    "benefit4": "정확한 비자 수수료를 계산합니다"
+  },
+  "errors": {
+    "notFound": "페이지를 찾을 수 없습니다",
+    "unauthorized": "권한이 없습니다",
+    "serverError": "서버 오류",
+    "networkError": "네트워크 오류",
+    "tryAgain": "다시 시도",
+    "goHome": "홈으로 이동"
+  },
+  "footer": {
+    "copyright": "모든 권리 보유",
+    "company": "TravelXpressa",
+    "links": {
+      "about": "소개",
+      "contact": "연락처",
+      "privacy": "개인정보 보호정책",
+      "terms": "서비스 약관",
+      "faq": "자주 묻는 질문"
+    }
+  }
+}

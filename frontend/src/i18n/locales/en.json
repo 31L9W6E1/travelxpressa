@@ -1,0 +1,470 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "view": "View",
+    "submit": "Submit",
+    "next": "Next",
+    "previous": "Previous",
+    "back": "Back",
+    "search": "Search",
+    "filter": "Filter",
+    "all": "All",
+    "yes": "Yes",
+    "no": "No",
+    "required": "Required",
+    "optional": "Optional",
+    "success": "Success",
+    "error": "Error",
+    "warning": "Warning",
+    "info": "Info",
+    "viewAll": "View All"
+  },
+  "nav": {
+    "home": "Home",
+    "services": "Services",
+    "about": "About",
+    "contact": "Contact",
+    "blog": "Blog",
+    "login": "Login",
+    "register": "Register",
+    "logout": "Logout",
+    "dashboard": "Dashboard",
+    "admin": "Admin",
+    "profile": "Profile",
+    "settings": "Settings"
+  },
+  "auth": {
+    "welcomeBack": "Welcome back",
+    "createAccount": "Create your account",
+    "signInContinue": "Sign in to continue your visa application",
+    "startJourney": "Start your visa application journey today",
+    "signIn": "Sign in",
+    "signUp": "Sign up",
+    "signingIn": "Signing in...",
+    "creatingAccount": "Creating account...",
+    "createAccountBtn": "Create account",
+    "fullName": "Full Name",
+    "enterName": "Enter your name",
+    "email": "Email",
+    "emailAddress": "Email address",
+    "enterEmail": "Enter your email",
+    "password": "Password",
+    "enterPassword": "Enter your password",
+    "passwordRequirements": "Min 8 chars, uppercase, lowercase, number, special",
+    "continueWithGoogle": "Continue with Google",
+    "continueWithFacebook": "Continue with Facebook",
+    "orContinueWithEmail": "or continue with email",
+    "noAccount": "Don't have an account? Sign up",
+    "haveAccount": "Already have an account? Sign in",
+    "agreementPrefix": "By signing in, you agree to our",
+    "termsAgree": "By signing in, you agree to our",
+    "termsOfService": "Terms of Service",
+    "and": "and",
+    "privacyPolicy": "Privacy Policy",
+    "forgotPassword": "Forgot password?",
+    "rememberMe": "Remember me"
+  },
+  "home": {
+    "news": "News",
+    "hero": {
+      "trusted": "Trusted by 10,000+ Travelers",
+      "titleLine1": "Your Journey to the",
+      "titleLine2": "United States",
+      "titleLine3": "Starts Here",
+      "title": "Your Journey to America Starts Here",
+      "subtitle": "TravelXpressa simplifies the DS-160 visa application process. Expert guidance, real-time support, and a seamless experience from start to finish.",
+      "cta": "Start Your Application",
+      "learnMore": "Learn More"
+    },
+    "stats": {
+      "applicationsCompleted": "Applications Completed",
+      "successRate": "Success Rate",
+      "supportAvailable": "Support Available",
+      "customerRating": "Customer Rating"
+    },
+    "features": {
+      "title": "Why Choose TravelXpressa",
+      "subtitle": "We've helped thousands of travelers successfully complete their visa applications",
+      "expert": {
+        "title": "Expert Guidance",
+        "description": "Our experienced team guides you through every step of the DS-160 application"
+      },
+      "fast": {
+        "title": "Fast Processing",
+        "description": "Complete your DS-160 form in under 30 minutes"
+      },
+      "secure": {
+        "title": "Secure & Private",
+        "description": "Your data is encrypted and never shared with third parties"
+      },
+      "support": {
+        "title": "Expert Support",
+        "description": "24/7 assistance from visa application specialists"
+      },
+      "errorPrevention": {
+        "title": "Error Prevention",
+        "description": "Built-in validation catches mistakes before submission"
+      }
+    },
+    "featuredArticles": {
+      "title": "Featured Articles",
+      "subtitle": "Stay informed with our latest visa guides and updates",
+      "moreComingSoon": "More articles coming soon",
+      "browseAll": "Browse All Articles",
+      "noPosts": "No blog posts available yet. Check back soon!"
+    },
+    "latestNews": {
+      "title": "Latest News",
+      "subtitle": "Updates from the US Embassy and immigration services",
+      "noNews": "No news available yet. Check back soon!"
+    },
+    "visaTypes": {
+      "title": "Visa Types We Support",
+      "subtitle": "We assist with various US non-immigrant visa categories",
+      "b1b2": {
+        "title": "B1/B2 Tourist Visa",
+        "description": "For tourism, business visits, and medical treatment"
+      },
+      "f1": {
+        "title": "F1 Student Visa",
+        "description": "For academic studies at US institutions"
+      },
+      "h1b": {
+        "title": "H1B Work Visa",
+        "description": "For specialty occupation workers"
+      },
+      "j1": {
+        "title": "J1 Exchange Visa",
+        "description": "For exchange visitors and scholars"
+      }
+    },
+    "cta": {
+      "title": "Ready to Start Your Visa Journey?",
+      "subtitle": "Join thousands of satisfied travelers who have successfully obtained their US visa through TravelXpressa.",
+      "button": "Get Started Today"
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome back",
+    "welcomeBack": "Welcome back",
+    "loadingDashboard": "Loading your dashboard...",
+    "manageApplications": "Manage your travel applications",
+    "myApplications": "My Applications",
+    "newApplication": "New Application",
+    "noApplications": "No applications yet",
+    "startFirst": "Start by submitting your first travel application",
+    "submitApplication": "Submit Application",
+    "totalApplications": "Total Applications",
+    "allSubmissions": "All submissions",
+    "pendingReview": "Pending Review",
+    "awaitingResponse": "Awaiting response",
+    "successfullyProcessed": "Successfully processed",
+    "successRate": "Success Rate",
+    "approvalRate": "Approval rate",
+    "recentApplications": "Recent Applications",
+    "submittedApplications": "Your submitted applications",
+    "service": "Service",
+    "date": "Date",
+    "message": "Message",
+    "quickActions": "Quick Actions",
+    "profileSettings": "Profile Settings",
+    "documents": "Documents",
+    "support": "Support",
+    "status": {
+      "title": "Status",
+      "draft": "Draft",
+      "inProgress": "In Progress",
+      "submitted": "Submitted",
+      "underReview": "Under Review",
+      "completed": "Completed",
+      "rejected": "Rejected",
+      "approved": "Approved",
+      "pending": "Pending"
+    },
+    "proTips": {
+      "title": "Pro Tips",
+      "completeProfile": "Complete your profile",
+      "fasterProcessing": "For faster processing",
+      "uploadDocuments": "Upload all required documents",
+      "upfrontSubmission": "Upfront submission",
+      "checkEmail": "Check your email updates",
+      "statusNotifications": "Status notifications"
+    },
+    "progress": "Progress",
+    "lastUpdated": "Last updated",
+    "created": "Created",
+    "continueApplication": "Continue Application",
+    "viewDetails": "View Details"
+  },
+  "form": {
+    "steps": {
+      "personal": "Personal Info",
+      "contact": "Contact Info",
+      "passport": "Passport",
+      "travel": "Travel Plans",
+      "family": "Family",
+      "work": "Work & Education",
+      "security": "Security",
+      "documents": "Documents",
+      "review": "Review"
+    },
+    "personal": {
+      "title": "Personal Information",
+      "description": "Enter your basic personal details",
+      "surnames": "Surnames",
+      "givenNames": "Given Names",
+      "fullNameNative": "Full Name in Native Language",
+      "otherNames": "Have you used other names?",
+      "sex": "Sex",
+      "male": "Male",
+      "female": "Female",
+      "maritalStatus": "Marital Status",
+      "single": "Single",
+      "married": "Married",
+      "divorced": "Divorced",
+      "widowed": "Widowed",
+      "separated": "Separated",
+      "dateOfBirth": "Date of Birth",
+      "cityOfBirth": "City of Birth",
+      "stateOfBirth": "State/Province of Birth",
+      "countryOfBirth": "Country of Birth",
+      "nationality": "Nationality"
+    },
+    "contact": {
+      "title": "Contact Information",
+      "description": "Provide your address and contact details",
+      "homeAddress": "Home Address",
+      "mailingAddress": "Mailing Address",
+      "sameAsHome": "Same as home address",
+      "street": "Street Address",
+      "city": "City",
+      "state": "State/Province",
+      "postalCode": "Postal Code",
+      "country": "Country",
+      "phone": "Phone Number",
+      "secondaryPhone": "Secondary Phone",
+      "workPhone": "Work Phone",
+      "email": "Email Address"
+    },
+    "passport": {
+      "title": "Passport Information",
+      "description": "Enter your passport details",
+      "passportType": "Passport Type",
+      "regular": "Regular",
+      "official": "Official",
+      "diplomatic": "Diplomatic",
+      "other": "Other",
+      "passportNumber": "Passport Number",
+      "bookNumber": "Passport Book Number",
+      "countryOfIssuance": "Country of Issuance",
+      "cityOfIssuance": "City of Issuance",
+      "stateOfIssuance": "State of Issuance",
+      "issuanceDate": "Issuance Date",
+      "expirationDate": "Expiration Date",
+      "hasOtherPassport": "Do you have another passport?"
+    },
+    "travel": {
+      "title": "Travel Information",
+      "description": "Tell us about your travel plans",
+      "purposeOfTrip": "Purpose of Trip",
+      "specificPurpose": "Specific Purpose",
+      "intendedArrival": "Intended Arrival Date",
+      "lengthOfStay": "Intended Length of Stay",
+      "usAddress": "Address While in US",
+      "payingForTrip": "Who is Paying for the Trip?",
+      "travelingWithOthers": "Are you traveling with others?",
+      "companions": "Travel Companions"
+    },
+    "family": {
+      "title": "Family Information",
+      "description": "Provide information about your family",
+      "father": "Father's Information",
+      "mother": "Mother's Information",
+      "spouse": "Spouse Information",
+      "children": "Children",
+      "relativesInUS": "Relatives in the US",
+      "inUS": "Currently in US?",
+      "usStatus": "US Immigration Status"
+    },
+    "work": {
+      "title": "Work & Education",
+      "description": "Your employment and education history",
+      "currentEmployment": "Current Employment",
+      "occupation": "Primary Occupation",
+      "employerName": "Employer Name",
+      "employerAddress": "Employer Address",
+      "salary": "Monthly Salary",
+      "startDate": "Start Date",
+      "duties": "Job Duties",
+      "previousEmployment": "Previous Employment",
+      "education": "Education History",
+      "languages": "Languages Spoken",
+      "militaryService": "Military Service"
+    },
+    "security": {
+      "title": "Security Questions",
+      "description": "Answer the required security questions",
+      "previousUSTravel": "Previous US Travel",
+      "visaHistory": "Visa History",
+      "hasBeenInUS": "Have you ever been in the US?",
+      "hasUSVisa": "Have you been issued a US visa?",
+      "visaRefused": "Have you been refused a US visa?"
+    },
+    "documents": {
+      "title": "Document Upload",
+      "description": "Upload required documents",
+      "photo": "Passport Photo",
+      "photoRequirements": "Photo must be 2x2 inches, white background, taken within 6 months",
+      "invitationLetter": "Invitation Letter",
+      "additionalDocs": "Additional Documents",
+      "dragDrop": "Drag and drop files here, or click to select",
+      "maxSize": "Maximum file size: 5MB"
+    },
+    "review": {
+      "title": "Review & Submit",
+      "description": "Review your application before submitting",
+      "confirmAccuracy": "I confirm that all information provided is accurate",
+      "submitApplication": "Submit Application"
+    },
+    "validation": {
+      "required": "This field is required",
+      "invalidEmail": "Please enter a valid email",
+      "invalidPhone": "Please enter a valid phone number",
+      "invalidDate": "Please enter a valid date",
+      "minLength": "Must be at least {{min}} characters",
+      "maxLength": "Must be less than {{max}} characters"
+    },
+    "actions": {
+      "saveDraft": "Save Draft",
+      "saving": "Saving...",
+      "saved": "Saved",
+      "saveError": "Save failed"
+    }
+  },
+  "admin": {
+    "title": "Admin Dashboard",
+    "welcome": "Welcome back",
+    "systemOnline": "System Online",
+    "tabs": {
+      "overview": "Overview",
+      "users": "Users",
+      "applications": "Applications",
+      "cms": "CMS"
+    },
+    "stats": {
+      "totalUsers": "Total Users",
+      "applications": "Applications",
+      "completed": "Completed",
+      "pending": "Pending",
+      "approvalRate": "approval rate",
+      "fromLastMonth": "from last month"
+    },
+    "charts": {
+      "applicationsOverview": "Applications Overview",
+      "monthlyTrends": "Monthly application trends",
+      "userGrowth": "User Growth",
+      "newRegistrations": "New user registrations over time",
+      "statusDistribution": "Status Distribution",
+      "statusBreakdown": "Current application status breakdown",
+      "visaTypeDistribution": "Visa Type Distribution",
+      "byVisaCategory": "Breakdown by visa category"
+    },
+    "users": {
+      "title": "User Management",
+      "description": "Manage all registered users",
+      "user": "User",
+      "role": "Role",
+      "status": "Status",
+      "verified": "Verified",
+      "unverified": "Unverified",
+      "apps": "Apps",
+      "lastActive": "Last Active",
+      "actions": "Actions",
+      "never": "Never"
+    },
+    "applications": {
+      "title": "All Applications",
+      "description": "Review and manage visa applications",
+      "applicant": "Applicant",
+      "visaType": "Visa Type",
+      "status": "Status",
+      "progress": "Progress",
+      "created": "Created",
+      "actions": "Actions",
+      "noApplications": "No applications found",
+      "filters": {
+        "allStatus": "All Status",
+        "allTypes": "All Types"
+      }
+    },
+    "cms": {
+      "title": "Content Management",
+      "description": "Manage blog posts and news articles",
+      "blogPosts": "Blog Posts",
+      "newsArticles": "News Articles",
+      "published": "Published",
+      "drafts": "Drafts",
+      "newBlog": "New Blog Post",
+      "newNews": "New News",
+      "createPost": "Create Post",
+      "editPost": "Edit Post",
+      "deletePost": "Delete Post",
+      "postTitle": "Title",
+      "postContent": "Content",
+      "postExcerpt": "Short Description",
+      "postImage": "Featured Image URL",
+      "postTags": "Tags",
+      "publishImmediately": "Publish immediately"
+    },
+    "applicationDetail": {
+      "title": "Application Details",
+      "applicant": "Applicant",
+      "status": "Status",
+      "adminNotes": "Admin Notes",
+      "updateStatus": "Update Status",
+      "exportPdf": "Export PDF",
+      "approve": "Approve",
+      "reject": "Reject"
+    }
+  },
+  "selectCountry": {
+    "title": "Select Your Destination",
+    "subtitle": "Choose the country you're applying to visit. We'll customize your application form based on that country's specific visa requirements.",
+    "searchPlaceholder": "Search countries...",
+    "continue": "Continue",
+    "clickToSelect": "Click to select",
+    "continueToApplication": "Continue to Application",
+    "selectToContinue": "Select a country to continue",
+    "youSelected": "You selected",
+    "whyMatters": "Why does country selection matter?",
+    "whyMattersDescription": "Each country has different visa requirements, document checklists, and application forms. By selecting your destination country upfront, we can:",
+    "benefit1": "Show you the exact documents you'll need",
+    "benefit2": "Guide you through country-specific form sections",
+    "benefit3": "Provide accurate processing time estimates",
+    "benefit4": "Calculate the correct visa fees"
+  },
+  "errors": {
+    "notFound": "Page not found",
+    "unauthorized": "Unauthorized access",
+    "serverError": "Server error",
+    "networkError": "Network error",
+    "tryAgain": "Try again",
+    "goHome": "Go Home"
+  },
+  "footer": {
+    "copyright": "All rights reserved",
+    "company": "TravelXpressa",
+    "links": {
+      "about": "About Us",
+      "contact": "Contact",
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Service",
+      "faq": "FAQ"
+    }
+  }
+}

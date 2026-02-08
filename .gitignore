@@ -5,3 +5,16 @@ dist
 .prisma
 *.log
 .DS_Store
+
+# Compiled output in source (Vite compiles during build)
+frontend/src/**/*.js
+frontend/src/**/*.d.ts
+!frontend/src/vite-env.d.ts
+
+# IDE/Editor
+.claude/
+.vscode/
+.idea/
+
+# Vercel
+.vercel/

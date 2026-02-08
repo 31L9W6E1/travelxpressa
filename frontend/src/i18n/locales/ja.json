@@ -1,0 +1,470 @@
+{
+  "common": {
+    "loading": "読み込み中...",
+    "save": "保存",
+    "cancel": "キャンセル",
+    "delete": "削除",
+    "edit": "編集",
+    "view": "表示",
+    "submit": "送信",
+    "next": "次へ",
+    "previous": "前へ",
+    "back": "戻る",
+    "search": "検索",
+    "filter": "フィルター",
+    "all": "すべて",
+    "yes": "はい",
+    "no": "いいえ",
+    "required": "必須",
+    "optional": "任意",
+    "success": "成功",
+    "error": "エラー",
+    "warning": "警告",
+    "info": "情報",
+    "viewAll": "すべて見る"
+  },
+  "nav": {
+    "home": "ホーム",
+    "services": "サービス",
+    "about": "会社概要",
+    "contact": "お問い合わせ",
+    "blog": "ブログ",
+    "login": "ログイン",
+    "register": "登録",
+    "logout": "ログアウト",
+    "dashboard": "ダッシュボード",
+    "admin": "管理者",
+    "profile": "プロフィール",
+    "settings": "設定"
+  },
+  "auth": {
+    "welcomeBack": "お帰りなさい",
+    "createAccount": "アカウントを作成",
+    "signInContinue": "ビザ申請を続けるにはログインしてください",
+    "startJourney": "今日からビザ申請の旅を始めましょう",
+    "signIn": "ログイン",
+    "signUp": "登録",
+    "signingIn": "ログイン中...",
+    "creatingAccount": "アカウント作成中...",
+    "createAccountBtn": "アカウントを作成",
+    "fullName": "氏名",
+    "enterName": "お名前を入力してください",
+    "email": "メール",
+    "emailAddress": "メールアドレス",
+    "enterEmail": "メールアドレスを入力してください",
+    "password": "パスワード",
+    "enterPassword": "パスワードを入力してください",
+    "passwordRequirements": "8文字以上、大文字、小文字、数字、特殊文字を含む",
+    "continueWithGoogle": "Googleで続ける",
+    "continueWithFacebook": "Facebookで続ける",
+    "orContinueWithEmail": "またはメールで続ける",
+    "noAccount": "アカウントをお持ちでないですか？登録",
+    "haveAccount": "すでにアカウントをお持ちですか？ログイン",
+    "agreementPrefix": "ログインすることで、以下に同意したことになります",
+    "termsAgree": "ログインすることで、以下に同意したことになります",
+    "termsOfService": "利用規約",
+    "and": "および",
+    "privacyPolicy": "プライバシーポリシー",
+    "forgotPassword": "パスワードをお忘れですか？",
+    "rememberMe": "ログイン状態を維持"
+  },
+  "home": {
+    "news": "ニュース",
+    "hero": {
+      "trusted": "10,000人以上の旅行者に信頼されています",
+      "titleLine1": "アメリカへの旅は",
+      "titleLine2": "アメリカ",
+      "titleLine3": "ここから始まります",
+      "title": "アメリカへの旅はここから始まります",
+      "subtitle": "TravelXpressaはDS-160ビザ申請プロセスを簡素化します。専門家のガイダンス、リアルタイムサポート、最初から最後までシームレスな体験。",
+      "cta": "申請を開始",
+      "learnMore": "詳細を見る"
+    },
+    "stats": {
+      "applicationsCompleted": "完了した申請",
+      "successRate": "成功率",
+      "supportAvailable": "24時間サポート",
+      "customerRating": "顧客評価"
+    },
+    "features": {
+      "title": "なぜTravelXpressaを選ぶのか",
+      "subtitle": "数千人の旅行者がビザ申請を成功裏に完了するお手伝いをしてきました",
+      "expert": {
+        "title": "専門家のガイダンス",
+        "description": "経験豊富なチームがDS-160申請のすべてのステップをサポートします"
+      },
+      "fast": {
+        "title": "迅速な処理",
+        "description": "30分以内にDS-160フォームを完成"
+      },
+      "secure": {
+        "title": "安全＆プライバシー保護",
+        "description": "お客様のデータは暗号化され、第三者と共有されることはありません"
+      },
+      "support": {
+        "title": "専門家サポート",
+        "description": "ビザ申請専門家による24時間年中無休のサポート"
+      },
+      "errorPrevention": {
+        "title": "エラー防止",
+        "description": "組み込みの検証機能が送信前にミスを発見します"
+      }
+    },
+    "featuredArticles": {
+      "title": "注目の記事",
+      "subtitle": "最新のビザガイドとアップデートで情報を得ましょう",
+      "moreComingSoon": "近日公開予定の記事があります",
+      "browseAll": "すべての記事を見る",
+      "noPosts": "まだブログ記事がありません。もうすぐ更新されます！"
+    },
+    "latestNews": {
+      "title": "最新ニュース",
+      "subtitle": "米国大使館と移民サービスからの最新情報",
+      "noNews": "まだニュースがありません。もうすぐ更新されます！"
+    },
+    "visaTypes": {
+      "title": "対応ビザの種類",
+      "subtitle": "様々な米国非移民ビザカテゴリーをサポートしています",
+      "b1b2": {
+        "title": "B1/B2観光ビザ",
+        "description": "観光、ビジネス訪問、医療目的"
+      },
+      "f1": {
+        "title": "F1学生ビザ",
+        "description": "米国の教育機関での学業用"
+      },
+      "h1b": {
+        "title": "H1B就労ビザ",
+        "description": "専門職労働者向け"
+      },
+      "j1": {
+        "title": "J1交流訪問者ビザ",
+        "description": "交流訪問者および研究者向け"
+      }
+    },
+    "cta": {
+      "title": "ビザの旅を始める準備はできましたか？",
+      "subtitle": "TravelXpressaを通じて米国ビザを取得した数千人の満足した旅行者に加わりましょう。",
+      "button": "今日から始める"
+    }
+  },
+  "dashboard": {
+    "title": "ダッシュボード",
+    "welcome": "お帰りなさい",
+    "welcomeBack": "お帰りなさい",
+    "loadingDashboard": "ダッシュボードを読み込み中...",
+    "manageApplications": "旅行申請を管理する",
+    "myApplications": "マイ申請",
+    "newApplication": "新規申請",
+    "noApplications": "申請がありません",
+    "startFirst": "最初の旅行申請を提出してください",
+    "submitApplication": "申請を提出",
+    "totalApplications": "総申請数",
+    "allSubmissions": "すべての提出",
+    "pendingReview": "審査待ち",
+    "awaitingResponse": "回答待ち",
+    "successfullyProcessed": "正常に処理されました",
+    "successRate": "成功率",
+    "approvalRate": "承認率",
+    "recentApplications": "最近の申請",
+    "submittedApplications": "提出済みの申請",
+    "service": "サービス",
+    "date": "日付",
+    "message": "メッセージ",
+    "quickActions": "クイックアクション",
+    "profileSettings": "プロフィール設定",
+    "documents": "書類",
+    "support": "サポート",
+    "status": {
+      "title": "ステータス",
+      "draft": "下書き",
+      "inProgress": "進行中",
+      "submitted": "提出済み",
+      "underReview": "審査中",
+      "completed": "完了",
+      "rejected": "却下",
+      "approved": "承認済み",
+      "pending": "保留中"
+    },
+    "proTips": {
+      "title": "プロのヒント",
+      "completeProfile": "プロフィールを完成させてください",
+      "fasterProcessing": "より速い処理のために",
+      "uploadDocuments": "必要な書類をすべてアップロードしてください",
+      "upfrontSubmission": "事前提出",
+      "checkEmail": "メールの更新を確認してください",
+      "statusNotifications": "ステータス通知"
+    },
+    "progress": "進捗",
+    "lastUpdated": "最終更新",
+    "created": "作成日",
+    "continueApplication": "申請を続ける",
+    "viewDetails": "詳細を見る"
+  },
+  "form": {
+    "steps": {
+      "personal": "個人情報",
+      "contact": "連絡先",
+      "passport": "パスポート",
+      "travel": "旅行計画",
+      "family": "家族",
+      "work": "職業＆学歴",
+      "security": "セキュリティ",
+      "documents": "書類",
+      "review": "確認"
+    },
+    "personal": {
+      "title": "個人情報",
+      "description": "基本的な個人情報を入力してください",
+      "surnames": "姓",
+      "givenNames": "名",
+      "fullNameNative": "母国語での氏名",
+      "otherNames": "他の名前を使用したことがありますか？",
+      "sex": "性別",
+      "male": "男性",
+      "female": "女性",
+      "maritalStatus": "婚姻状況",
+      "single": "独身",
+      "married": "既婚",
+      "divorced": "離婚",
+      "widowed": "死別",
+      "separated": "別居",
+      "dateOfBirth": "生年月日",
+      "cityOfBirth": "出生都市",
+      "stateOfBirth": "出生州/県",
+      "countryOfBirth": "出生国",
+      "nationality": "国籍"
+    },
+    "contact": {
+      "title": "連絡先情報",
+      "description": "住所と連絡先を入力してください",
+      "homeAddress": "自宅住所",
+      "mailingAddress": "郵送先住所",
+      "sameAsHome": "自宅住所と同じ",
+      "street": "住所",
+      "city": "市区町村",
+      "state": "都道府県",
+      "postalCode": "郵便番号",
+      "country": "国",
+      "phone": "電話番号",
+      "secondaryPhone": "予備の電話番号",
+      "workPhone": "勤務先電話番号",
+      "email": "メールアドレス"
+    },
+    "passport": {
+      "title": "パスポート情報",
+      "description": "パスポートの詳細を入力してください",
+      "passportType": "パスポートの種類",
+      "regular": "一般",
+      "official": "公用",
+      "diplomatic": "外交",
+      "other": "その他",
+      "passportNumber": "パスポート番号",
+      "bookNumber": "パスポートブック番号",
+      "countryOfIssuance": "発行国",
+      "cityOfIssuance": "発行都市",
+      "stateOfIssuance": "発行州",
+      "issuanceDate": "発行日",
+      "expirationDate": "有効期限",
+      "hasOtherPassport": "他のパスポートをお持ちですか？"
+    },
+    "travel": {
+      "title": "旅行情報",
+      "description": "旅行計画についてお聞かせください",
+      "purposeOfTrip": "旅行の目的",
+      "specificPurpose": "具体的な目的",
+      "intendedArrival": "到着予定日",
+      "lengthOfStay": "滞在予定期間",
+      "usAddress": "米国での住所",
+      "payingForTrip": "旅費の支払者",
+      "travelingWithOthers": "他の人と一緒に旅行しますか？",
+      "companions": "同行者"
+    },
+    "family": {
+      "title": "家族情報",
+      "description": "家族の情報を提供してください",
+      "father": "父親の情報",
+      "mother": "母親の情報",
+      "spouse": "配偶者の情報",
+      "children": "子供",
+      "relativesInUS": "米国在住の親族",
+      "inUS": "現在米国にいますか？",
+      "usStatus": "米国移民ステータス"
+    },
+    "work": {
+      "title": "職業＆学歴",
+      "description": "職歴と学歴",
+      "currentEmployment": "現在の職業",
+      "occupation": "主な職業",
+      "employerName": "雇用主名",
+      "employerAddress": "雇用主住所",
+      "salary": "月給",
+      "startDate": "開始日",
+      "duties": "職務内容",
+      "previousEmployment": "以前の職業",
+      "education": "学歴",
+      "languages": "使用言語",
+      "militaryService": "兵役"
+    },
+    "security": {
+      "title": "セキュリティ質問",
+      "description": "必要なセキュリティ質問にお答えください",
+      "previousUSTravel": "以前の米国渡航",
+      "visaHistory": "ビザ履歴",
+      "hasBeenInUS": "米国に行ったことがありますか？",
+      "hasUSVisa": "米国ビザを取得したことがありますか？",
+      "visaRefused": "米国ビザを拒否されたことがありますか？"
+    },
+    "documents": {
+      "title": "書類アップロード",
+      "description": "必要な書類をアップロードしてください",
+      "photo": "パスポート写真",
+      "photoRequirements": "写真は2x2インチ、白背景、6ヶ月以内撮影",
+      "invitationLetter": "招待状",
+      "additionalDocs": "追加書類",
+      "dragDrop": "ファイルをここにドラッグするか、クリックして選択",
+      "maxSize": "最大ファイルサイズ：5MB"
+    },
+    "review": {
+      "title": "確認＆送信",
+      "description": "送信前に申請内容を確認してください",
+      "confirmAccuracy": "提供された情報がすべて正確であることを確認します",
+      "submitApplication": "申請を送信"
+    },
+    "validation": {
+      "required": "この項目は必須です",
+      "invalidEmail": "有効なメールアドレスを入力してください",
+      "invalidPhone": "有効な電話番号を入力してください",
+      "invalidDate": "有効な日付を入力してください",
+      "minLength": "{{min}}文字以上必要です",
+      "maxLength": "{{max}}文字以下にしてください"
+    },
+    "actions": {
+      "saveDraft": "下書き保存",
+      "saving": "保存中...",
+      "saved": "保存済み",
+      "saveError": "保存失敗"
+    }
+  },
+  "admin": {
+    "title": "管理者ダッシュボード",
+    "welcome": "お帰りなさい",
+    "systemOnline": "システムオンライン",
+    "tabs": {
+      "overview": "概要",
+      "users": "ユーザー",
+      "applications": "申請",
+      "cms": "CMS"
+    },
+    "stats": {
+      "totalUsers": "総ユーザー数",
+      "applications": "申請数",
+      "completed": "完了",
+      "pending": "保留中",
+      "approvalRate": "承認率",
+      "fromLastMonth": "先月比"
+    },
+    "charts": {
+      "applicationsOverview": "申請概要",
+      "monthlyTrends": "月別申請トレンド",
+      "userGrowth": "ユーザー成長",
+      "newRegistrations": "新規ユーザー登録推移",
+      "statusDistribution": "ステータス分布",
+      "statusBreakdown": "現在の申請ステータス内訳",
+      "visaTypeDistribution": "ビザ種類分布",
+      "byVisaCategory": "ビザカテゴリー別内訳"
+    },
+    "users": {
+      "title": "ユーザー管理",
+      "description": "登録ユーザーの管理",
+      "user": "ユーザー",
+      "role": "役割",
+      "status": "ステータス",
+      "verified": "認証済み",
+      "unverified": "未認証",
+      "apps": "申請",
+      "lastActive": "最終活動",
+      "actions": "アクション",
+      "never": "なし"
+    },
+    "applications": {
+      "title": "すべての申請",
+      "description": "ビザ申請の確認と管理",
+      "applicant": "申請者",
+      "visaType": "ビザ種類",
+      "status": "ステータス",
+      "progress": "進捗",
+      "created": "作成日",
+      "actions": "アクション",
+      "noApplications": "申請が見つかりません",
+      "filters": {
+        "allStatus": "すべてのステータス",
+        "allTypes": "すべての種類"
+      }
+    },
+    "cms": {
+      "title": "コンテンツ管理",
+      "description": "ブログ投稿とニュース記事の管理",
+      "blogPosts": "ブログ投稿",
+      "newsArticles": "ニュース記事",
+      "published": "公開済み",
+      "drafts": "下書き",
+      "newBlog": "新規ブログ",
+      "newNews": "新規ニュース",
+      "createPost": "投稿作成",
+      "editPost": "投稿編集",
+      "deletePost": "投稿削除",
+      "postTitle": "タイトル",
+      "postContent": "内容",
+      "postExcerpt": "概要",
+      "postImage": "アイキャッチ画像URL",
+      "postTags": "タグ",
+      "publishImmediately": "すぐに公開"
+    },
+    "applicationDetail": {
+      "title": "申請詳細",
+      "applicant": "申請者",
+      "status": "ステータス",
+      "adminNotes": "管理者メモ",
+      "updateStatus": "ステータス更新",
+      "exportPdf": "PDFエクスポート",
+      "approve": "承認",
+      "reject": "却下"
+    }
+  },
+  "selectCountry": {
+    "title": "目的地を選択",
+    "subtitle": "訪問を申請する国を選択してください。その国の特定のビザ要件に基づいて申請フォームをカスタマイズします。",
+    "searchPlaceholder": "国を検索...",
+    "continue": "続ける",
+    "clickToSelect": "クリックして選択",
+    "continueToApplication": "申請に進む",
+    "selectToContinue": "続けるには国を選択してください",
+    "youSelected": "選択しました",
+    "whyMatters": "国の選択が重要な理由は？",
+    "whyMattersDescription": "各国にはビザ要件、書類チェックリスト、申請フォームが異なります。目的地の国を事前に選択することで：",
+    "benefit1": "必要な正確な書類をお見せします",
+    "benefit2": "国別のフォームセクションをご案内します",
+    "benefit3": "正確な処理時間の見積もりを提供します",
+    "benefit4": "正確なビザ料金を計算します"
+  },
+  "errors": {
+    "notFound": "ページが見つかりません",
+    "unauthorized": "権限がありません",
+    "serverError": "サーバーエラー",
+    "networkError": "ネットワークエラー",
+    "tryAgain": "再試行",
+    "goHome": "ホームへ戻る"
+  },
+  "footer": {
+    "copyright": "全著作権所有",
+    "company": "TravelXpressa",
+    "links": {
+      "about": "会社概要",
+      "contact": "お問い合わせ",
+      "privacy": "プライバシーポリシー",
+      "terms": "利用規約",
+      "faq": "よくある質問"
+    }
+  }
+}

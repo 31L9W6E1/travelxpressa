@@ -12,6 +12,8 @@ const resolveApiUrl = (): string => {
       return runtimeApiUrl.trim().replace(/\/+$/, '');
     }
     const { hostname, port, protocol, origin } = window.location;
+    const isTravelxpressaDomain =
+      hostname === 'travelxpressa.com' || hostname === 'www.travelxpressa.com';
     const isLocalHost =
       hostname === 'localhost' ||
       hostname === '127.0.0.1' ||
@@ -20,6 +22,11 @@ const resolveApiUrl = (): string => {
     // Local Vite dev fallback
     if (isLocalHost && port === '5173') {
       return `${protocol}//${hostname}:3000`;
+    }
+
+    // Production fallback for custom domain when proxy rewrites are missing.
+    if (isTravelxpressaDomain) {
+      return 'https://travelxpressa-backend-production.up.railway.app';
     }
 
     // Production/default same-origin fallback

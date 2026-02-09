@@ -9,6 +9,8 @@ import ko from './locales/ko.json';
 import ja from './locales/ja.json';
 import ru from './locales/ru.json';
 
+import { detectLanguageByLocation, hasGeoDetectionRun, resetGeoDetection } from './geoDetector';
+
 export const languages = [
   { code: 'en', name: 'English', flag: '🇺🇸' },
   { code: 'mn', name: 'Монгол', flag: '🇲🇳' },
@@ -27,6 +29,7 @@ const resources = {
   ru: { translation: ru },
 };
 
+// Initialize i18n synchronously first with browser detection
 i18n
   .use(LanguageDetector)
   .use(initReactI18next)
@@ -41,5 +44,28 @@ i18n
       caches: ['localStorage'],
     },
   });
+
+/**
+ * Initialize geolocation-based language detection
+ * Should be called after app mounts to avoid blocking initial render
+ */
+export async function initGeoLanguageDetection(): Promise<void> {
+  // Only run geo detection if:
+  // 1. User hasn't manually selected a language (check localStorage)
+  // 2. Geo detection hasn't run before
+  const storedLanguage = localStorage.getItem('i18nextLng');
+  const isFirstVisit = !storedLanguage || !hasGeoDetectionRun();
+
+  if (isFirstVisit) {
+    const geoLanguage = await detectLanguageByLocation();
+    if (geoLanguage && geoLanguage !== i18n.language) {
+      await i18n.changeLanguage(geoLanguage);
+      console.log(`[i18n] Language set to ${geoLanguage} based on location`);
+    }
+  }
+}
+
+// Export geo detection utilities for testing/debugging
+export { resetGeoDetection, hasGeoDetectionRun };
 
 export default i18n;

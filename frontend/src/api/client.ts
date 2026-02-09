@@ -7,6 +7,10 @@ const resolveApiUrl = (): string => {
   }
 
   if (typeof window !== 'undefined') {
+    const runtimeApiUrl = (window as any).__API_URL__ as string | undefined;
+    if (runtimeApiUrl && runtimeApiUrl.trim()) {
+      return runtimeApiUrl.trim().replace(/\/+$/, '');
+    }
     const { hostname, port, protocol, origin } = window.location;
     const isLocalHost =
       hostname === 'localhost' ||
@@ -26,6 +30,7 @@ const resolveApiUrl = (): string => {
 };
 
 const API_URL = resolveApiUrl();
+export const getApiBaseUrl = () => API_URL;
 
 // Token storage
 let accessToken: string | null = null;

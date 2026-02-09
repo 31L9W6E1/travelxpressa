@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
+import { getApiBaseUrl } from "@/api/client";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -164,9 +165,7 @@ const Login = () => {
     setError("");
 
     try {
-      // In production, this would redirect to your backend OAuth endpoint
-      // For now, we'll show a message that this feature is coming soon
-      const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+      const backendUrl = getApiBaseUrl();
       window.location.href = `${backendUrl}/api/auth/google`;
     } catch (err: any) {
       setError("Google login is not available yet");
@@ -182,8 +181,7 @@ const Login = () => {
     setError("");
 
     try {
-      // In production, this would redirect to your backend OAuth endpoint
-      const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+      const backendUrl = getApiBaseUrl();
       window.location.href = `${backendUrl}/api/auth/facebook`;
     } catch (err: any) {
       setError("Facebook login is not available yet");

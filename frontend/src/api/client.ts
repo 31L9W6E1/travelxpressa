@@ -1,6 +1,31 @@
 import axios, { type AxiosInstance, type AxiosError, type InternalAxiosRequestConfig } from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const resolveApiUrl = (): string => {
+  const configuredApiUrl = (import.meta.env.VITE_API_URL as string | undefined)?.trim();
+  if (configuredApiUrl) {
+    return configuredApiUrl.replace(/\/+$/, '');
+  }
+
+  if (typeof window !== 'undefined') {
+    const { hostname, port, protocol, origin } = window.location;
+    const isLocalHost =
+      hostname === 'localhost' ||
+      hostname === '127.0.0.1' ||
+      hostname === '0.0.0.0';
+
+    // Local Vite dev fallback
+    if (isLocalHost && port === '5173') {
+      return `${protocol}//${hostname}:3000`;
+    }
+
+    // Production/default same-origin fallback
+    return origin;
+  }
+
+  return 'http://localhost:3000';
+};
+
+const API_URL = resolveApiUrl();
 
 // Token storage
 let accessToken: string | null = null;

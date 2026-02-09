@@ -20,7 +20,7 @@ exports.config = {
     env: process.env.NODE_ENV || 'development',
     port: parseInt(process.env.PORT || '3000', 10),
     // Database
-    databaseUrl: requireEnv('DATABASE_URL', 'file:./dev.db'),
+    databaseUrl: requireEnv('DATABASE_URL', 'postgresql://ds160user:ds160pass@localhost:5432/ds160_db?schema=public'),
     // JWT
     jwt: {
         secret: requireEnv('JWT_SECRET', 'dev-secret-change-in-production'),

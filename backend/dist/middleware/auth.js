@@ -9,6 +9,7 @@ exports.generateAccessToken = generateAccessToken;
 exports.generateRefreshToken = generateRefreshToken;
 exports.verifyRefreshToken = verifyRefreshToken;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const crypto_1 = __importDefault(require("crypto"));
 const config_1 = require("../config");
 const types_1 = require("../types");
 const errorHandler_1 = require("./errorHandler");
@@ -125,6 +126,8 @@ function generateAccessToken(payload) {
 function generateRefreshToken(payload) {
     return jsonwebtoken_1.default.sign(payload, config_1.config.jwt.refreshSecret, {
         expiresIn: config_1.config.jwt.refreshExpiresIn,
+        // Ensure refresh tokens are unique even when issued in the same second.
+        jwtid: crypto_1.default.randomUUID(),
     });
 }
 /**

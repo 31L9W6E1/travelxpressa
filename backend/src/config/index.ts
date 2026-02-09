@@ -18,7 +18,10 @@ export const config = {
   port: parseInt(process.env.PORT || '3000', 10),
 
   // Database
-  databaseUrl: requireEnv('DATABASE_URL', 'file:./dev.db'),
+  databaseUrl: requireEnv(
+    'DATABASE_URL',
+    'postgresql://ds160user:ds160pass@localhost:5432/ds160_db?schema=public'
+  ),
 
   // JWT
   jwt: {

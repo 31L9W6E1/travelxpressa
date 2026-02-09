@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 import { config } from '../config';
 import { JWTPayload, UserRole, AuthenticatedRequest } from '../types';
 import { UnauthorizedError, ForbiddenError } from './errorHandler';
@@ -141,6 +142,8 @@ export function generateAccessToken(payload: Omit<JWTPayload, 'iat' | 'exp'>): s
 export function generateRefreshToken(payload: Omit<JWTPayload, 'iat' | 'exp'>): string {
   return jwt.sign(payload, config.jwt.refreshSecret, {
     expiresIn: config.jwt.refreshExpiresIn as string | number,
+    // Ensure refresh tokens are unique even when issued in the same second.
+    jwtid: crypto.randomUUID(),
   } as jwt.SignOptions);
 }
 

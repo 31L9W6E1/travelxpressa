@@ -296,17 +296,58 @@ const AdminDashboard = () => {
   const fetchDashboardData = async () => {
     setLoading(true);
     try {
-      const [statsRes, usersRes, appsRes] = await Promise.all([
+      const [statsResult, usersResult, appsResult] = await Promise.allSettled([
         api.get("/api/admin/stats"),
         api.get("/api/admin/users"),
         api.get("/api/admin/applications"),
       ]);
 
-      setStats(statsRes.data.data);
-      setUsers(usersRes.data.data || []);
-      setApplications(appsRes.data.data || []);
+      if (statsResult.status === "fulfilled") {
+        const statsPayload = statsResult.value.data;
+        setStats(statsPayload?.data || statsPayload || null);
+      } else {
+        console.error("Failed to fetch admin stats:", statsResult.reason);
+      }
+
+      if (usersResult.status === "fulfilled") {
+        const usersPayload = usersResult.value.data;
+        setUsers(
+          usersPayload?.data ||
+            usersPayload?.users ||
+            usersPayload?.data?.users ||
+            [],
+        );
+      } else {
+        console.error("Failed to fetch admin users:", usersResult.reason);
+        setUsers([]);
+      }
+
+      if (appsResult.status === "fulfilled") {
+        const appsPayload = appsResult.value.data;
+        setApplications(
+          appsPayload?.data ||
+            appsPayload?.applications ||
+            appsPayload?.data?.applications ||
+            [],
+        );
+      } else {
+        console.error(
+          "Failed to fetch admin applications:",
+          appsResult.reason,
+        );
+        setApplications([]);
+      }
+
+      if (
+        statsResult.status === "rejected" &&
+        usersResult.status === "rejected" &&
+        appsResult.status === "rejected"
+      ) {
+        toast.error("Failed to load admin dashboard data");
+      }
     } catch (error) {
       console.error("Error fetching dashboard data:", error);
+      toast.error("Failed to load admin dashboard data");
     } finally {
       setLoading(false);
     }

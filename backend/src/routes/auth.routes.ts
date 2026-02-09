@@ -28,11 +28,116 @@ const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '';
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || '';
 const FACEBOOK_APP_ID = process.env.FACEBOOK_APP_ID || '';
 const FACEBOOK_APP_SECRET = process.env.FACEBOOK_APP_SECRET || '';
-const OAUTH_REDIRECT_BASE = process.env.FRONTEND_URL || 'http://localhost:5173';
 
 const BCRYPT_ROUNDS = 12;
 const MAX_FAILED_LOGINS = 100; // Increased for development
 const LOCKOUT_DURATION_MS = 1 * 60 * 1000; // 1 minute in development
+
+function toOrigin(url: string): string | null {
+  try {
+    return new URL(url).origin;
+  } catch {
+    return null;
+  }
+}
+
+function getAllowedFrontendOrigins(): Set<string> {
+  const origins = new Set<string>();
+
+  if (process.env.FRONTEND_URL) {
+    const frontendOrigin = toOrigin(process.env.FRONTEND_URL);
+    if (frontendOrigin) origins.add(frontendOrigin);
+  }
+
+  config.corsOrigin
+    .split(',')
+    .map((value) => value.trim())
+    .filter(Boolean)
+    .forEach((value) => {
+      const corsOrigin = toOrigin(value);
+      if (corsOrigin) origins.add(corsOrigin);
+    });
+
+  return origins;
+}
+
+function getFrontendBaseUrl(req: Request): string {
+  if (process.env.FRONTEND_URL) {
+    return process.env.FRONTEND_URL.replace(/\/+$/, '');
+  }
+
+  const origin = req.get('origin');
+  if (origin) {
+    return origin.replace(/\/+$/, '');
+  }
+
+  const referer = req.get('referer');
+  if (referer) {
+    try {
+      return new URL(referer).origin;
+    } catch {
+      // Ignore malformed referer and continue to fallback.
+    }
+  }
+
+  const firstCorsOrigin = config.corsOrigin
+    .split(',')
+    .map((value) => value.trim())
+    .find(Boolean);
+
+  if (firstCorsOrigin) {
+    return firstCorsOrigin.replace(/\/+$/, '');
+  }
+
+  return 'http://localhost:5173';
+}
+
+function encodeOAuthState(frontendBaseUrl: string): string {
+  return Buffer.from(
+    JSON.stringify({
+      nonce: crypto.randomBytes(16).toString('hex'),
+      frontendBaseUrl,
+    })
+  ).toString('base64url');
+}
+
+function getFrontendBaseUrlFromState(state: unknown, req: Request): string {
+  const stateValue = Array.isArray(state) ? state[0] : state;
+
+  if (typeof stateValue === 'string' && stateValue.length > 0) {
+    try {
+      const decoded = JSON.parse(Buffer.from(stateValue, 'base64url').toString('utf8')) as {
+        frontendBaseUrl?: string;
+      };
+
+      if (decoded.frontendBaseUrl) {
+        const redirectOrigin = toOrigin(decoded.frontendBaseUrl);
+        if (redirectOrigin && getAllowedFrontendOrigins().has(redirectOrigin)) {
+          return redirectOrigin;
+        }
+      }
+    } catch {
+      // Ignore state parsing errors and use fallback.
+    }
+  }
+
+  return getFrontendBaseUrl(req);
+}
+
+function getBackendBaseUrl(req: Request): string {
+  if (process.env.BACKEND_URL) {
+    return process.env.BACKEND_URL.replace(/\/+$/, '');
+  }
+
+  const forwardedProto = req.get('x-forwarded-proto')?.split(',')[0]?.trim();
+  const forwardedHost = req.get('x-forwarded-host')?.split(',')[0]?.trim();
+
+  if (forwardedProto && forwardedHost) {
+    return `${forwardedProto}://${forwardedHost}`;
+  }
+
+  return `${req.protocol}://${req.get('host')}`;
+}
 
 /**
  * Register a new user
@@ -528,12 +633,13 @@ router.post(
  * Google OAuth - Initiate
  */
 router.get('/google', (req: Request, res: Response) => {
+  const frontendBaseUrl = getFrontendBaseUrl(req);
   if (!GOOGLE_CLIENT_ID) {
-    return res.redirect(`${OAUTH_REDIRECT_BASE}/login?error=google_not_configured`);
+    return res.redirect(`${frontendBaseUrl}/oauth/callback?error=google_not_configured`);
   }
 
-  const state = crypto.randomBytes(32).toString('hex');
-  const redirectUri = `${req.protocol}://${req.get('host')}/api/auth/google/callback`;
+  const state = encodeOAuthState(frontendBaseUrl);
+  const redirectUri = `${getBackendBaseUrl(req)}/api/auth/google/callback`;
 
   const params = new URLSearchParams({
     client_id: GOOGLE_CLIENT_ID,
@@ -555,13 +661,14 @@ router.get(
   '/google/callback',
   asyncHandler(async (req: Request, res: Response) => {
     const { code, error } = req.query;
+    const frontendBaseUrl = getFrontendBaseUrlFromState(req.query.state, req);
 
     if (error || !code) {
-      return res.redirect(`${OAUTH_REDIRECT_BASE}/login?error=google_auth_failed`);
+      return res.redirect(`${frontendBaseUrl}/oauth/callback?error=google_auth_failed`);
     }
 
     try {
-      const redirectUri = `${req.protocol}://${req.get('host')}/api/auth/google/callback`;
+      const redirectUri = `${getBackendBaseUrl(req)}/api/auth/google/callback`;
 
       // Exchange code for tokens
       const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
@@ -652,10 +759,10 @@ router.get(
         role: user.role,
       });
 
-      res.redirect(`${OAUTH_REDIRECT_BASE}/oauth/callback?${params}`);
+      res.redirect(`${frontendBaseUrl}/oauth/callback?${params}`);
     } catch (err) {
       logger.error('Google OAuth error', { error: err });
-      res.redirect(`${OAUTH_REDIRECT_BASE}/login?error=google_auth_failed`);
+      res.redirect(`${frontendBaseUrl}/oauth/callback?error=google_auth_failed`);
     }
   })
 );
@@ -664,12 +771,13 @@ router.get(
  * Facebook OAuth - Initiate
  */
 router.get('/facebook', (req: Request, res: Response) => {
+  const frontendBaseUrl = getFrontendBaseUrl(req);
   if (!FACEBOOK_APP_ID) {
-    return res.redirect(`${OAUTH_REDIRECT_BASE}/login?error=facebook_not_configured`);
+    return res.redirect(`${frontendBaseUrl}/oauth/callback?error=facebook_not_configured`);
   }
 
-  const state = crypto.randomBytes(32).toString('hex');
-  const redirectUri = `${req.protocol}://${req.get('host')}/api/auth/facebook/callback`;
+  const state = encodeOAuthState(frontendBaseUrl);
+  const redirectUri = `${getBackendBaseUrl(req)}/api/auth/facebook/callback`;
 
   const params = new URLSearchParams({
     client_id: FACEBOOK_APP_ID,
@@ -689,13 +797,14 @@ router.get(
   '/facebook/callback',
   asyncHandler(async (req: Request, res: Response) => {
     const { code, error } = req.query;
+    const frontendBaseUrl = getFrontendBaseUrlFromState(req.query.state, req);
 
     if (error || !code) {
-      return res.redirect(`${OAUTH_REDIRECT_BASE}/login?error=facebook_auth_failed`);
+      return res.redirect(`${frontendBaseUrl}/oauth/callback?error=facebook_auth_failed`);
     }
 
     try {
-      const redirectUri = `${req.protocol}://${req.get('host')}/api/auth/facebook/callback`;
+      const redirectUri = `${getBackendBaseUrl(req)}/api/auth/facebook/callback`;
 
       // Exchange code for tokens
       const tokenParams = new URLSearchParams({
@@ -720,7 +829,7 @@ router.get(
 
       if (!userInfo.email) {
         // Facebook doesn't always provide email
-        return res.redirect(`${OAUTH_REDIRECT_BASE}/login?error=facebook_no_email`);
+        return res.redirect(`${frontendBaseUrl}/oauth/callback?error=facebook_no_email`);
       }
 
       // Find or create user
@@ -782,10 +891,10 @@ router.get(
         role: user.role,
       });
 
-      res.redirect(`${OAUTH_REDIRECT_BASE}/oauth/callback?${params}`);
+      res.redirect(`${frontendBaseUrl}/oauth/callback?${params}`);
     } catch (err) {
       logger.error('Facebook OAuth error', { error: err });
-      res.redirect(`${OAUTH_REDIRECT_BASE}/login?error=facebook_auth_failed`);
+      res.redirect(`${frontendBaseUrl}/oauth/callback?error=facebook_auth_failed`);
     }
   })
 );

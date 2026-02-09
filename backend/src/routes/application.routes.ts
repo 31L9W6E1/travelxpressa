@@ -13,6 +13,8 @@ import {
 import { AuthenticatedRequest, ApplicationStatus } from '../types';
 import { encrypt, decrypt } from '../utils/encryption';
 import { logger } from '../utils/logger';
+import { sendTelegramMessage } from '../utils/telegram';
+import { config } from '../config';
 
 // Helper to safely extract string param
 const getIdParam = (req: Request): string => {
@@ -253,6 +255,30 @@ router.post(
     });
 
     logger.info('Application submitted', { applicationId: id, userId });
+
+    const adminUrl = `${config.frontendUrl.replace(/\/+$/, '')}/admin`;
+    const submittedAt = updatedApplication.submittedAt
+      ? updatedApplication.submittedAt.toISOString()
+      : new Date().toISOString();
+    const userEmail = (req as AuthenticatedRequest).user.email;
+
+    const telegramMessage = [
+      'New DS-160 application submitted',
+      `Application ID: ${updatedApplication.id}`,
+      `User ID: ${userId}`,
+      `User Email: ${userEmail}`,
+      `Visa Type: ${updatedApplication.visaType}`,
+      `Submitted At: ${submittedAt}`,
+      `Admin Panel: ${adminUrl}`,
+    ].join('\n');
+
+    // Notification should never block submission success.
+    void sendTelegramMessage(telegramMessage).catch((notificationError) => {
+      logger.error('Failed to send Telegram notification for submitted application', notificationError, {
+        applicationId: updatedApplication.id,
+        userId,
+      });
+    });
 
     res.json({
       success: true,

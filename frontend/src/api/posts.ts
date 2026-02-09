@@ -1,4 +1,4 @@
-import api from './client';
+import api, { handleApiError } from './client';
 
 // Types
 export interface Post {
@@ -71,28 +71,40 @@ export const getPosts = async (params?: {
   page?: number;
   limit?: number;
 }): Promise<PaginatedResponse<PostSummary>> => {
-  const searchParams = new URLSearchParams();
-  if (params?.category) searchParams.append('category', params.category);
-  if (params?.page) searchParams.append('page', params.page.toString());
-  if (params?.limit) searchParams.append('limit', params.limit.toString());
+  try {
+    const searchParams = new URLSearchParams();
+    if (params?.category) searchParams.append('category', params.category);
+    if (params?.page) searchParams.append('page', params.page.toString());
+    if (params?.limit) searchParams.append('limit', params.limit.toString());
 
-  const queryString = searchParams.toString();
-  const url = queryString ? `/api/posts?${queryString}` : '/api/posts';
+    const queryString = searchParams.toString();
+    const url = queryString ? `/api/posts?${queryString}` : '/api/posts';
 
-  const response = await api.get(url);
-  return response.data;
+    const response = await api.get(url);
+    return response.data;
+  } catch (error) {
+    throw handleApiError(error);
+  }
 };
 
 // Get featured content for homepage (public)
 export const getFeaturedContent = async (): Promise<FeaturedContent> => {
-  const response = await api.get('/api/posts/featured');
-  return response.data.data;
+  try {
+    const response = await api.get('/api/posts/featured');
+    return response.data.data;
+  } catch (error) {
+    throw handleApiError(error);
+  }
 };
 
 // Get single post by slug (public)
 export const getPostBySlug = async (slug: string): Promise<{ success: boolean; data: Post }> => {
-  const response = await api.get(`/api/posts/${slug}`);
-  return response.data;
+  try {
+    const response = await api.get(`/api/posts/${slug}`);
+    return response.data;
+  } catch (error) {
+    throw handleApiError(error);
+  }
 };
 
 // ==================== ADMIN API ====================
@@ -102,54 +114,59 @@ export const getAdminPosts = async (params?: {
   category?: 'blog' | 'news';
   status?: 'draft' | 'published';
 }): Promise<{ success: boolean; data: Post[] }> => {
-  const token = localStorage.getItem('accessToken');
-  const searchParams = new URLSearchParams();
-  if (params?.category) searchParams.append('category', params.category);
-  if (params?.status) searchParams.append('status', params.status);
+  try {
+    const searchParams = new URLSearchParams();
+    if (params?.category) searchParams.append('category', params.category);
+    if (params?.status) searchParams.append('status', params.status);
 
-  const queryString = searchParams.toString();
-  const url = queryString ? `/api/posts/admin/all?${queryString}` : '/api/posts/admin/all';
+    const queryString = searchParams.toString();
+    const url = queryString ? `/api/posts/admin/all?${queryString}` : '/api/posts/admin/all';
 
-  const response = await api.get(url, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  return response.data;
+    const response = await api.get(url);
+    return response.data;
+  } catch (error) {
+    throw handleApiError(error);
+  }
 };
 
 // Create new post (admin only)
 export const createPost = async (data: CreatePostInput): Promise<{ success: boolean; data: Post; message: string }> => {
-  const token = localStorage.getItem('accessToken');
-  const response = await api.post('/api/posts/admin', data, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  return response.data;
+  try {
+    const response = await api.post('/api/posts/admin', data);
+    return response.data;
+  } catch (error) {
+    throw handleApiError(error);
+  }
 };
 
 // Update post (admin only)
 export const updatePost = async (id: string, data: Partial<CreatePostInput>): Promise<{ success: boolean; data: Post; message: string }> => {
-  const token = localStorage.getItem('accessToken');
-  const response = await api.put(`/api/posts/admin/${id}`, data, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  return response.data;
+  try {
+    const response = await api.put(`/api/posts/admin/${id}`, data);
+    return response.data;
+  } catch (error) {
+    throw handleApiError(error);
+  }
 };
 
 // Delete post (admin only)
 export const deletePost = async (id: string): Promise<{ success: boolean; message: string }> => {
-  const token = localStorage.getItem('accessToken');
-  const response = await api.delete(`/api/posts/admin/${id}`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  return response.data;
+  try {
+    const response = await api.delete(`/api/posts/admin/${id}`);
+    return response.data;
+  } catch (error) {
+    throw handleApiError(error);
+  }
 };
 
 // Toggle publish status (admin only)
 export const togglePostPublish = async (id: string): Promise<{ success: boolean; data: Post; message: string }> => {
-  const token = localStorage.getItem('accessToken');
-  const response = await api.patch(`/api/posts/admin/${id}/publish`, {}, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  return response.data;
+  try {
+    const response = await api.patch(`/api/posts/admin/${id}/publish`, {});
+    return response.data;
+  } catch (error) {
+    throw handleApiError(error);
+  }
 };
 
 // ==================== UTILITY ====================

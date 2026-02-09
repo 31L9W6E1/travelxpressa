@@ -164,6 +164,7 @@ export function errorHandler(
   const response: Record<string, unknown> = {
     success: false,
     error: appError.message,
+    message: appError.message,
     code: appError.code,
   };
 

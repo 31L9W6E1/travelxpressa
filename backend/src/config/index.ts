@@ -13,6 +13,12 @@ function requireEnv(name: string, defaultValue?: string): string {
   return value || '';
 }
 
+function parseOptionalInt(value: string | undefined): number | undefined {
+  if (!value) return undefined;
+  const parsed = parseInt(value, 10);
+  return Number.isFinite(parsed) ? parsed : undefined;
+}
+
 export const config = {
   env: process.env.NODE_ENV || 'development',
   port: parseInt(process.env.PORT || '3000', 10),
@@ -73,6 +79,16 @@ export const config = {
 
   // Monitoring
   sentryDsn: process.env.SENTRY_DSN,
+
+  // Frontend URL
+  frontendUrl: process.env.FRONTEND_URL || 'http://localhost:5173',
+
+  // Telegram Notifications
+  telegram: {
+    botToken: process.env.TELEGRAM_BOT_TOKEN || '',
+    chatId: process.env.TELEGRAM_CHAT_ID || '',
+    messageThreadId: parseOptionalInt(process.env.TELEGRAM_MESSAGE_THREAD_ID),
+  },
 
   // Feature Flags
   features: {

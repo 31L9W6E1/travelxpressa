@@ -422,7 +422,12 @@ const AdminDashboard = () => {
         status: "draft",
       });
     } catch (error: any) {
-      toast.error(error.response?.data?.message || "Failed to save post");
+      const message =
+        error?.response?.data?.message ||
+        error?.response?.data?.error ||
+        error?.message ||
+        "Failed to save post";
+      toast.error(message);
     } finally {
       setSaving(false);
     }

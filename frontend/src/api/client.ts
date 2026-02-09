@@ -203,7 +203,7 @@ export const handleApiError = (error: unknown): ApiError => {
   if (axios.isAxiosError(error)) {
     const response = error.response?.data as ApiResponse;
     return new ApiError(
-      response?.error || error.message || 'An error occurred',
+      response?.error || response?.message || error.message || 'An error occurred',
       error.response?.status || 500,
       (response as any)?.code,
       response?.errors

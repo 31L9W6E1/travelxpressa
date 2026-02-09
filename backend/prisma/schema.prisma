@@ -265,4 +265,43 @@ model Post {
   // Timestamps
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+
+  // Localized translations
+  translations  PostTranslation[]
+}
+
+// Localized content for CMS posts
+model PostTranslation {
+  id               String   @id @default(cuid())
+  postId           String
+  post             Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  // Language settings
+  locale           String   // mn, ru, zh, etc.
+  sourceLocale     String   @default("en")
+
+  // Localized fields
+  title            String
+  slug             String
+  excerpt          String?
+  content          String
+  tags             String?
+
+  // Publishing
+  status           String   @default("draft") // draft, published
+  publishedAt      DateTime?
+
+  // Translation metadata
+  translator       String?  // openai, manual
+  translationModel String?
+  translatedAt     DateTime?
+  sourceUpdatedAt  DateTime?
+
+  // Timestamps
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@unique([postId, locale])
+  @@unique([locale, slug])
+  @@index([locale, status])
 }

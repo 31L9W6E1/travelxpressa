@@ -41,7 +41,7 @@ const Navbar = () => {
             </Link>
 
             {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-1">
+            <div className="hidden lg:flex items-center space-x-1">
               <Link
                 to="/about"
                 className="px-4 py-2 text-muted-foreground hover:text-foreground transition-colors"
@@ -82,7 +82,7 @@ const Navbar = () => {
           </div>
 
           {/* Desktop Auth & Theme Toggle */}
-          <div className="hidden md:flex items-center space-x-4">
+          <div className="hidden lg:flex items-center space-x-4">
             {/* Language Selector - uses Radix UI DropdownMenu */}
             <LanguageSwitcher />
 
@@ -107,7 +107,9 @@ const Navbar = () => {
                   className="flex items-center space-x-2 px-3 py-2 text-foreground hover:bg-secondary rounded-lg transition-colors"
                 >
                   <UserAvatar name={user.name} email={user.email} size="sm" />
-                  <span className="text-sm font-medium">{user.name || user.email?.split('@')[0]}</span>
+                  <span className="text-sm font-medium max-w-32 truncate">
+                    {user.name || user.email?.split('@')[0]}
+                  </span>
                   {user.role === "ADMIN" && (
                     <span className="px-2 py-0.5 text-xs bg-secondary text-secondary-foreground rounded">
                       {t('nav.admin')}
@@ -183,7 +185,7 @@ const Navbar = () => {
           </div>
 
           {/* Mobile: Language + Theme Toggle + Menu button */}
-          <div className="md:hidden flex items-center space-x-1">
+          <div className="lg:hidden flex items-center space-x-1">
             {/* Mobile Language Switcher */}
             <LanguageSwitcher />
 
@@ -209,7 +211,7 @@ const Navbar = () => {
 
         {/* Mobile Navigation */}
         {isMenuOpen && (
-          <div className="md:hidden py-4 bg-background border-t border-border">
+          <div className="lg:hidden py-4 bg-background border-t border-border">
             <div className="flex flex-col space-y-1">
               <Link
                 to="/about"

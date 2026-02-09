@@ -3,6 +3,7 @@ import Navbar from "./components/Navbar";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { Toaster } from "@/components/ui/sonner";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 // Import all page components
 import Home from "./pages/Home";
@@ -154,13 +155,15 @@ function App() {
             />
             
             {/* Admin routes - require admin role */}
-            <Route 
-              path="/admin" 
+            <Route
+              path="/admin"
               element={
                 <AdminRoute>
-                  <AdminDashboard />
+                  <ErrorBoundary>
+                    <AdminDashboard />
+                  </ErrorBoundary>
                 </AdminRoute>
-              } 
+              }
             />
             <Route
               path="/manage-users"

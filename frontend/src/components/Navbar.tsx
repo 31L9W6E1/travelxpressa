@@ -1,50 +1,31 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts/ThemeContext";
-import { Menu, X, Plane, User, LogOut, Settings, FileText, CreditCard, ChevronDown, Sun, Moon, Globe } from "lucide-react";
+import { Menu, X, Plane, User, LogOut, Settings, FileText, CreditCard, ChevronDown, Sun, Moon } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { UserAvatar } from "./UserAvatar";
 import { useTranslation } from 'react-i18next';
-import { languages } from '@/i18n';
+import LanguageSwitcher from "./LanguageSwitcher";
 
 const Navbar = () => {
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const langDropdownRef = useRef<HTMLDivElement>(null);
 
-  const handleLanguageChange = (langCode: string) => {
-    i18n.changeLanguage(langCode);
-    setIsLangDropdownOpen(false);
-  };
-
-  // Handle language codes like 'en-US' by extracting base code 'en'
-  const normalizedLang = i18n.language?.split('-')[0] || 'en';
-  const currentLanguage = languages.find(l => l.code === normalizedLang) || languages[0];
-
-  // Close dropdowns when clicking outside
+  // Close user dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as Node;
-
-      // Close language dropdown if clicking outside
-      if (isLangDropdownOpen && langDropdownRef.current && !langDropdownRef.current.contains(target)) {
-        setIsLangDropdownOpen(false);
-      }
-
-      // Close user dropdown if clicking outside
-      if (isDropdownOpen && dropdownRef.current && !dropdownRef.current.contains(target)) {
+      if (isDropdownOpen && dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsDropdownOpen(false);
       }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isLangDropdownOpen, isDropdownOpen]);
+  }, [isDropdownOpen]);
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border theme-transition">
@@ -96,39 +77,8 @@ const Navbar = () => {
 
           {/* Desktop Auth & Theme Toggle */}
           <div className="hidden md:flex items-center space-x-4">
-            {/* Language Selector */}
-            <div className="relative" ref={langDropdownRef}>
-              <button
-                onClick={() => {
-                  console.log('Button clicked, current state:', isLangDropdownOpen);
-                  setIsLangDropdownOpen(prev => !prev);
-                }}
-                className="flex items-center gap-2 px-3 py-2 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-lg transition-colors"
-                aria-label="Select language"
-              >
-                <Globe className="w-4 h-4" />
-                <span className="text-sm">{currentLanguage.flag}</span>
-                <ChevronDown className={`w-3 h-3 transition-transform ${isLangDropdownOpen ? 'rotate-180' : ''}`} />
-              </button>
-
-              {isLangDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-40 bg-card border border-border rounded-lg shadow-xl overflow-hidden z-50">
-                  {languages.map((lang) => (
-                    <button
-                      key={lang.code}
-                      type="button"
-                      onClick={() => handleLanguageChange(lang.code)}
-                      className={`flex items-center gap-3 w-full px-4 py-2.5 text-sm hover:bg-secondary transition-colors ${
-                        normalizedLang === lang.code ? 'bg-secondary text-foreground' : 'text-muted-foreground'
-                      }`}
-                    >
-                      <span>{lang.flag}</span>
-                      <span>{lang.name}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+            {/* Language Selector - uses Radix UI DropdownMenu */}
+            <LanguageSwitcher />
 
             {/* Theme Toggle */}
             <button

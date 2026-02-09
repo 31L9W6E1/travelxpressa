@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useRef } from 'react';
 import { uploadImage, normalizeImageUrl } from '@/api/upload';
 import { Upload, X, Link as LinkIcon, Loader2 } from 'lucide-react';
+// Image Upload Component v2 - with drag & drop support
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';

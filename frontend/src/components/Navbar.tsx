@@ -176,8 +176,11 @@ const Navbar = () => {
             )}
           </div>
 
-          {/* Mobile: Theme Toggle + Menu button */}
+          {/* Mobile: Language + Theme Toggle + Menu button */}
           <div className="md:hidden flex items-center space-x-1">
+            {/* Mobile Language Switcher */}
+            <LanguageSwitcher />
+
             <button
               onClick={toggleTheme}
               className="p-2 text-foreground hover:bg-secondary rounded-lg transition-colors"

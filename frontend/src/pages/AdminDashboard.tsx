@@ -971,12 +971,12 @@ const AdminDashboard = () => {
                         />
                       </div>
                       {/* Status Filter */}
-                      <Select value={statusFilter} onValueChange={setStatusFilter}>
+                      <Select value={statusFilter || "all"} onValueChange={(v) => setStatusFilter(v === "all" ? "" : v)}>
                         <SelectTrigger className="w-[140px]">
                           <SelectValue placeholder="All Status" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">All Status</SelectItem>
+                          <SelectItem value="all">All Status</SelectItem>
                           <SelectItem value="DRAFT">Draft</SelectItem>
                           <SelectItem value="IN_PROGRESS">In Progress</SelectItem>
                           <SelectItem value="SUBMITTED">Submitted</SelectItem>
@@ -986,12 +986,12 @@ const AdminDashboard = () => {
                         </SelectContent>
                       </Select>
                       {/* Visa Type Filter */}
-                      <Select value={visaTypeFilter} onValueChange={setVisaTypeFilter}>
+                      <Select value={visaTypeFilter || "all"} onValueChange={(v) => setVisaTypeFilter(v === "all" ? "" : v)}>
                         <SelectTrigger className="w-[130px]">
                           <SelectValue placeholder="All Types" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">All Types</SelectItem>
+                          <SelectItem value="all">All Types</SelectItem>
                           <SelectItem value="B1_B2">B1/B2</SelectItem>
                           <SelectItem value="F1">F1</SelectItem>
                           <SelectItem value="J1">J1</SelectItem>

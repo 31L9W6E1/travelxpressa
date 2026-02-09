@@ -8,15 +8,15 @@ import { getLanguageForCountry, defaultLanguage } from './countryLanguageMap';
 // localStorage key to track if geo detection has already run
 const GEO_DETECTED_KEY = 'travelxpressa_geo_detected';
 
-// Free IP geolocation API (no API key required, 45 req/min limit)
-const GEO_API_URL = 'https://ip-api.com/json/?fields=status,countryCode';
+// Free IP geolocation API - ipapi.co supports HTTPS (1000 req/day free)
+const GEO_API_URL = 'https://ipapi.co/json/';
 
 // Timeout for geolocation request (don't block the app for too long)
 const GEO_TIMEOUT_MS = 3000;
 
 interface GeoApiResponse {
-  status: 'success' | 'fail';
-  countryCode?: string;
+  country_code?: string;
+  error?: boolean;
 }
 
 /**
@@ -43,13 +43,13 @@ export async function detectLanguageByLocation(): Promise<string | null> {
 
     const data: GeoApiResponse = await response.json();
 
-    if (data.status === 'success' && data.countryCode) {
-      const language = getLanguageForCountry(data.countryCode);
+    if (!data.error && data.country_code) {
+      const language = getLanguageForCountry(data.country_code);
 
       // Mark as detected so we don't override user's future manual changes
       localStorage.setItem(GEO_DETECTED_KEY, 'true');
 
-      console.log(`[GeoDetector] Detected country: ${data.countryCode}, setting language: ${language}`);
+      console.log(`[GeoDetector] Detected country: ${data.country_code}, setting language: ${language}`);
       return language;
     }
   } catch (error) {

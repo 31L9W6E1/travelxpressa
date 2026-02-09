@@ -41,6 +41,7 @@ const cors_1 = __importDefault(require("cors"));
 const helmet_1 = __importDefault(require("helmet"));
 const compression_1 = __importDefault(require("compression"));
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
+const path_1 = __importDefault(require("path"));
 const config_1 = require("./config");
 const logger_1 = require("./utils/logger");
 // Middleware
@@ -56,6 +57,7 @@ const user_routes_1 = __importDefault(require("./routes/user.routes"));
 const application_routes_1 = __importDefault(require("./routes/application.routes"));
 const posts_routes_1 = __importDefault(require("./routes/posts.routes"));
 const chat_routes_1 = __importDefault(require("./routes/chat.routes"));
+const upload_routes_1 = __importDefault(require("./routes/upload.routes"));
 const app = (0, express_1.default)();
 // Trust proxy (for rate limiting behind reverse proxy)
 app.set('trust proxy', 1);
@@ -82,6 +84,8 @@ app.use(express_1.default.urlencoded({ extended: true, limit: '10mb' }));
 app.use((0, cookie_parser_1.default)(config_1.config.sessionSecret));
 // Compression
 app.use((0, compression_1.default)());
+// Serve uploaded images statically
+app.use('/uploads', express_1.default.static(path_1.default.join(process.cwd(), 'uploads')));
 // Security checks
 app.use(security_1.preventParamPollution);
 app.use(security_1.detectSuspiciousActivity);
@@ -131,6 +135,7 @@ if (config_1.config.isProduction) {
     app.use('/api/applications', rateLimit_1.apiRateLimit, application_routes_1.default);
     app.use('/api/posts', rateLimit_1.apiRateLimit, posts_routes_1.default);
     app.use('/api/chat', rateLimit_1.apiRateLimit, chat_routes_1.default);
+    app.use('/api/upload', rateLimit_1.apiRateLimit, upload_routes_1.default);
 }
 else {
     // Development - no rate limiting
@@ -141,6 +146,7 @@ else {
     app.use('/api/applications', application_routes_1.default);
     app.use('/api/posts', posts_routes_1.default);
     app.use('/api/chat', chat_routes_1.default);
+    app.use('/api/upload', upload_routes_1.default);
 }
 // 404 handler
 app.use(errorHandler_1.notFoundHandler);

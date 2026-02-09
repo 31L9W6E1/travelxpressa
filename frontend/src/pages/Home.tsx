@@ -20,6 +20,7 @@ import {
   getDefaultImage,
 } from "@/api/posts";
 import type { PostSummary } from "@/api/posts";
+import { normalizeImageUrl } from "@/api/upload";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -289,7 +290,7 @@ const Home = () => {
                 <Link to={`/blog/${blogPosts[0].slug}`} className="block">
                   <div className="relative aspect-[4/3] overflow-hidden">
                     <img
-                      src={blogPosts[0].imageUrl || getDefaultImage("blog")}
+                      src={blogPosts[0].imageUrl ? normalizeImageUrl(blogPosts[0].imageUrl) : getDefaultImage("blog")}
                       alt={blogPosts[0].title}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
@@ -330,7 +331,7 @@ const Home = () => {
                     <Link to={`/blog/${post.slug}`} className="flex gap-4 p-4">
                       <div className="relative w-24 h-24 flex-shrink-0 overflow-hidden rounded-lg">
                         <img
-                          src={post.imageUrl || getDefaultImage("blog")}
+                          src={post.imageUrl ? normalizeImageUrl(post.imageUrl) : getDefaultImage("blog")}
                           alt={post.title}
                           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                         />
@@ -406,7 +407,7 @@ const Home = () => {
                   <Link to={`/news/${item.slug}`} className="block">
                     <div className="relative aspect-square overflow-hidden">
                       <img
-                        src={item.imageUrl || getDefaultImage("news")}
+                        src={item.imageUrl ? normalizeImageUrl(item.imageUrl) : getDefaultImage("news")}
                         alt={item.title}
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                       />

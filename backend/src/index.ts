@@ -3,6 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
 import cookieParser from 'cookie-parser';
+import path from 'path';
 import { config } from './config';
 import { logger } from './utils/logger';
 
@@ -20,6 +21,7 @@ import userRoutes from './routes/user.routes';
 import applicationRoutes from './routes/application.routes';
 import postsRoutes from './routes/posts.routes';
 import chatRoutes from './routes/chat.routes';
+import uploadRoutes from './routes/upload.routes';
 
 const app = express();
 
@@ -53,6 +55,9 @@ app.use(cookieParser(config.sessionSecret));
 
 // Compression
 app.use(compression());
+
+// Serve uploaded images statically
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 // Security checks
 app.use(preventParamPollution);
@@ -107,6 +112,7 @@ if (config.isProduction) {
   app.use('/api/applications', apiRateLimit, applicationRoutes);
   app.use('/api/posts', apiRateLimit, postsRoutes);
   app.use('/api/chat', apiRateLimit, chatRoutes);
+  app.use('/api/upload', apiRateLimit, uploadRoutes);
 } else {
   // Development - no rate limiting
   app.use('/api/auth', authRoutes);
@@ -116,6 +122,7 @@ if (config.isProduction) {
   app.use('/api/applications', applicationRoutes);
   app.use('/api/posts', postsRoutes);
   app.use('/api/chat', chatRoutes);
+  app.use('/api/upload', uploadRoutes);
 }
 
 // 404 handler

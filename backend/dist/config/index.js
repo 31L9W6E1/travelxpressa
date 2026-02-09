@@ -16,6 +16,12 @@ function requireEnv(name, defaultValue) {
     }
     return value || '';
 }
+function parseOptionalInt(value) {
+    if (!value)
+        return undefined;
+    const parsed = parseInt(value, 10);
+    return Number.isFinite(parsed) ? parsed : undefined;
+}
 exports.config = {
     env: process.env.NODE_ENV || 'development',
     port: parseInt(process.env.PORT || '3000', 10),
@@ -62,6 +68,14 @@ exports.config = {
     },
     // Monitoring
     sentryDsn: process.env.SENTRY_DSN,
+    // Frontend URL
+    frontendUrl: process.env.FRONTEND_URL || 'http://localhost:5173',
+    // Telegram Notifications
+    telegram: {
+        botToken: process.env.TELEGRAM_BOT_TOKEN || '',
+        chatId: process.env.TELEGRAM_CHAT_ID || '',
+        messageThreadId: parseOptionalInt(process.env.TELEGRAM_MESSAGE_THREAD_ID),
+    },
     // Feature Flags
     features: {
         enable2FA: process.env.ENABLE_2FA === 'true',

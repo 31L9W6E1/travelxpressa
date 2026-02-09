@@ -4,6 +4,7 @@ import { Calendar, Clock, ArrowLeft, User, Loader2 } from 'lucide-react';
 import { getPostBySlug, formatPostDate, calculateReadTime, getDefaultImage } from '@/api/posts';
 import type { Post } from '@/api/posts';
 import { Button } from '@/components/ui/button';
+import { normalizeImageUrl } from '@/api/upload';
 
 const BlogPost = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -77,7 +78,7 @@ const BlogPost = () => {
         {post.imageUrl && (
           <div className="absolute inset-0 h-[400px]">
             <img
-              src={post.imageUrl || getDefaultImage('blog')}
+              src={post.imageUrl ? normalizeImageUrl(post.imageUrl) : getDefaultImage('blog')}
               alt={post.title}
               className="w-full h-full object-cover"
             />

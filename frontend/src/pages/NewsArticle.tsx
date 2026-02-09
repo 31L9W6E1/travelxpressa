@@ -4,6 +4,7 @@ import { Calendar, ArrowLeft, Loader2 } from 'lucide-react';
 import { getPostBySlug, formatPostDate, getDefaultImage } from '@/api/posts';
 import type { Post } from '@/api/posts';
 import { Button } from '@/components/ui/button';
+import { normalizeImageUrl } from '@/api/upload';
 
 const NewsArticle = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -101,7 +102,7 @@ const NewsArticle = () => {
         <div className="max-w-4xl mx-auto px-6 py-8">
           <div className="aspect-video rounded-xl overflow-hidden">
             <img
-              src={article.imageUrl || getDefaultImage('news')}
+              src={article.imageUrl ? normalizeImageUrl(article.imageUrl) : getDefaultImage('news')}
               alt={article.title}
               className="w-full h-full object-cover"
             />

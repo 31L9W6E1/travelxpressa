@@ -101,6 +101,7 @@ import { UserAvatar } from "@/components/UserAvatar";
 import api from "@/api/client";
 import ApplicationDetailModal from "@/components/admin/ApplicationDetailModal";
 import VisaTypeChart from "@/components/admin/VisaTypeChart";
+import ImageUpload from "@/components/ImageUpload";
 
 interface UserData {
   id: string;
@@ -1550,39 +1551,15 @@ const AdminDashboard = () => {
                 />
               </div>
 
-              {/* Image URL */}
-              <div className="grid gap-2">
-                <Label htmlFor="imageUrl">Featured Image URL</Label>
-                <div className="flex gap-2">
-                  <div className="relative flex-1">
-                    <ImageIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input
-                      id="imageUrl"
-                      value={newPost.imageUrl}
-                      onChange={(e) =>
-                        setNewPost((prev) => ({
-                          ...prev,
-                          imageUrl: e.target.value,
-                        }))
-                      }
-                      placeholder="https://example.com/image.jpg"
-                      className="pl-10"
-                    />
-                  </div>
-                </div>
-                {newPost.imageUrl && (
-                  <div className="relative aspect-video rounded-lg overflow-hidden bg-muted">
-                    <img
-                      src={newPost.imageUrl}
-                      alt="Preview"
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).style.display = "none";
-                      }}
-                    />
-                  </div>
-                )}
-              </div>
+              {/* Featured Image */}
+              <ImageUpload
+                value={newPost.imageUrl || ""}
+                onChange={(url) =>
+                  setNewPost((prev) => ({ ...prev, imageUrl: url }))
+                }
+                label="Featured Image"
+                disabled={saving}
+              />
 
               {/* Tags */}
               <div className="grid gap-2">

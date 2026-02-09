@@ -10,6 +10,8 @@ const schemas_1 = require("../validation/schemas");
 const types_1 = require("../types");
 const encryption_1 = require("../utils/encryption");
 const logger_1 = require("../utils/logger");
+const telegram_1 = require("../utils/telegram");
+const config_1 = require("../config");
 // Helper to safely extract string param
 const getIdParam = (req) => {
     const id = req.params.id;
@@ -190,6 +192,27 @@ router.post('/:id/submit', (0, validate_1.validate)({ params: schemas_1.idParamS
         },
     });
     logger_1.logger.info('Application submitted', { applicationId: id, userId });
+    const adminUrl = `${config_1.config.frontendUrl.replace(/\/+$/, '')}/admin`;
+    const submittedAt = updatedApplication.submittedAt
+        ? updatedApplication.submittedAt.toISOString()
+        : new Date().toISOString();
+    const userEmail = req.user.email;
+    const telegramMessage = [
+        'New DS-160 application submitted',
+        `Application ID: ${updatedApplication.id}`,
+        `User ID: ${userId}`,
+        `User Email: ${userEmail}`,
+        `Visa Type: ${updatedApplication.visaType}`,
+        `Submitted At: ${submittedAt}`,
+        `Admin Panel: ${adminUrl}`,
+    ].join('\n');
+    // Notification should never block submission success.
+    void (0, telegram_1.sendTelegramMessage)(telegramMessage).catch((notificationError) => {
+        logger_1.logger.error('Failed to send Telegram notification for submitted application', notificationError, {
+            applicationId: updatedApplication.id,
+            userId,
+        });
+    });
     res.json({
         success: true,
         data: {

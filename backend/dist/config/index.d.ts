@@ -33,6 +33,12 @@ export declare const config: {
         format: string;
     };
     sentryDsn: string | undefined;
+    frontendUrl: string;
+    telegram: {
+        botToken: string;
+        chatId: string;
+        messageThreadId: number | undefined;
+    };
     features: {
         enable2FA: boolean;
         enableAgentMode: boolean;

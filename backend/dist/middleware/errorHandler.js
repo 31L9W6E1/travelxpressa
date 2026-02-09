@@ -144,6 +144,7 @@ function errorHandler(err, req, res, _next) {
     const response = {
         success: false,
         error: appError.message,
+        message: appError.message,
         code: appError.code,
     };
     // Add validation errors if present

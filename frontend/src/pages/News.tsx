@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Calendar, ArrowLeft, Loader2 } from 'lucide-react';
 import { getPosts, formatPostDate, getDefaultImage } from '@/api/posts';
 import type { PostSummary } from '@/api/posts';
+import { normalizeImageUrl } from '@/api/upload';
 
 const News = () => {
   const [news, setNews] = useState<PostSummary[]>([]);
@@ -88,7 +89,7 @@ const News = () => {
                     <Link to={`/news/${item.slug}`} className="block">
                       <div className="relative aspect-square overflow-hidden rounded-lg mb-3">
                         <img
-                          src={item.imageUrl || getDefaultImage('news')}
+                          src={item.imageUrl ? normalizeImageUrl(item.imageUrl) : getDefaultImage('news')}
                           alt={item.title}
                           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                         />

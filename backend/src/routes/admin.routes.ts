@@ -354,13 +354,16 @@ router.get(
   validate({ query: paginationSchema }),
   asyncHandler(async (req: Request, res: Response) => {
     const { page = 1, limit = 20, sortOrder = 'desc' } = req.query as any;
-    const skip = (page - 1) * limit;
+    const pageNum = Number(page) || 1;
+    const limitNum = Number(limit) || 20;
+    const skip = (pageNum - 1) * limitNum;
+    const order = sortOrder === 'asc' ? 'asc' : 'desc';
 
     const [users, total] = await Promise.all([
       prisma.user.findMany({
-        orderBy: { createdAt: sortOrder },
+        orderBy: { createdAt: order },
         skip,
-        take: limit,
+        take: limitNum,
         select: {
           id: true,
           email: true,
@@ -384,10 +387,10 @@ router.get(
       success: true,
       data: users,
       pagination: {
-        page,
-        limit,
+        page: pageNum,
+        limit: limitNum,
         total,
-        totalPages: Math.ceil(total / limit),
+        totalPages: Math.ceil(total / limitNum),
       },
     });
   })
@@ -555,7 +558,10 @@ router.get(
     const { page = 1, limit = 50, sortOrder = 'desc' } = req.query as any;
     const status = req.query.status as string | undefined;
     const visaType = req.query.visaType as string | undefined;
-    const skip = (page - 1) * limit;
+    const pageNum = Number(page) || 1;
+    const limitNum = Number(limit) || 50;
+    const skip = (pageNum - 1) * limitNum;
+    const order = sortOrder === 'asc' ? 'asc' : 'desc';
 
     const whereClause: any = {};
     if (status) whereClause.status = status;
@@ -564,9 +570,9 @@ router.get(
     const [applications, total] = await Promise.all([
       prisma.application.findMany({
         where: whereClause,
-        orderBy: { createdAt: sortOrder },
+        orderBy: { createdAt: order },
         skip,
-        take: limit,
+        take: limitNum,
         include: {
           user: {
             select: { id: true, name: true, email: true },
@@ -580,10 +586,10 @@ router.get(
       success: true,
       data: applications,
       pagination: {
-        page,
-        limit,
+        page: pageNum,
+        limit: limitNum,
         total,
-        totalPages: Math.ceil(total / limit),
+        totalPages: Math.ceil(total / limitNum),
       },
     });
   })

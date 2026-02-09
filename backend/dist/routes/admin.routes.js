@@ -292,12 +292,15 @@ router.get('/stats', (0, errorHandler_1.asyncHandler)(async (_req, res) => {
  */
 router.get('/users', (0, validate_1.validate)({ query: schemas_1.paginationSchema }), (0, errorHandler_1.asyncHandler)(async (req, res) => {
     const { page = 1, limit = 20, sortOrder = 'desc' } = req.query;
-    const skip = (page - 1) * limit;
+    const pageNum = Number(page) || 1;
+    const limitNum = Number(limit) || 20;
+    const skip = (pageNum - 1) * limitNum;
+    const order = sortOrder === 'asc' ? 'asc' : 'desc';
     const [users, total] = await Promise.all([
         prisma_1.prisma.user.findMany({
-            orderBy: { createdAt: sortOrder },
+            orderBy: { createdAt: order },
             skip,
-            take: limit,
+            take: limitNum,
             select: {
                 id: true,
                 email: true,
@@ -320,10 +323,10 @@ router.get('/users', (0, validate_1.validate)({ query: schemas_1.paginationSchem
         success: true,
         data: users,
         pagination: {
-            page,
-            limit,
+            page: pageNum,
+            limit: limitNum,
             total,
-            totalPages: Math.ceil(total / limit),
+            totalPages: Math.ceil(total / limitNum),
         },
     });
 }));
@@ -454,7 +457,10 @@ router.get('/applications', (0, validate_1.validate)({ query: schemas_1.paginati
     const { page = 1, limit = 50, sortOrder = 'desc' } = req.query;
     const status = req.query.status;
     const visaType = req.query.visaType;
-    const skip = (page - 1) * limit;
+    const pageNum = Number(page) || 1;
+    const limitNum = Number(limit) || 50;
+    const skip = (pageNum - 1) * limitNum;
+    const order = sortOrder === 'asc' ? 'asc' : 'desc';
     const whereClause = {};
     if (status)
         whereClause.status = status;
@@ -463,9 +469,9 @@ router.get('/applications', (0, validate_1.validate)({ query: schemas_1.paginati
     const [applications, total] = await Promise.all([
         prisma_1.prisma.application.findMany({
             where: whereClause,
-            orderBy: { createdAt: sortOrder },
+            orderBy: { createdAt: order },
             skip,
-            take: limit,
+            take: limitNum,
             include: {
                 user: {
                     select: { id: true, name: true, email: true },
@@ -478,10 +484,10 @@ router.get('/applications', (0, validate_1.validate)({ query: schemas_1.paginati
         success: true,
         data: applications,
         pagination: {
-            page,
-            limit,
+            page: pageNum,
+            limit: limitNum,
             total,
-            totalPages: Math.ceil(total / limit),
+            totalPages: Math.ceil(total / limitNum),
         },
     });
 }));

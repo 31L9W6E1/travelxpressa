@@ -57,6 +57,12 @@ export const clearTokens = () => {
 export const getAccessToken = () => accessToken;
 export const getRefreshToken = () => refreshToken;
 
+const isHtmlPayload = (payload: unknown): boolean => {
+  if (typeof payload !== 'string') return false;
+  const head = payload.trim().slice(0, 200).toLowerCase();
+  return head.startsWith('<!doctype') || head.startsWith('<html');
+};
+
 // Create axios instance
 const api: AxiosInstance = axios.create({
   baseURL: API_URL,
@@ -97,7 +103,14 @@ const processQueue = (error: Error | null, token: string | null = null) => {
 };
 
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    if (isHtmlPayload(response.data)) {
+      return Promise.reject(
+        new Error('API returned HTML. Check VITE_API_URL or your /api proxy configuration.')
+      );
+    }
+    return response;
+  },
   async (error: AxiosError) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
 

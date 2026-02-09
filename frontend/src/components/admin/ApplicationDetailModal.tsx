@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -113,6 +113,12 @@ export default function ApplicationDetailModal({
   const [selectedStatus, setSelectedStatus] = useState(application?.status || 'DRAFT');
   const [adminNotes, setAdminNotes] = useState(application?.adminNotes || '');
   const [isUpdating, setIsUpdating] = useState(false);
+  const safeStatus = typeof application?.status === 'string' && application.status ? application.status : 'DRAFT';
+
+  useEffect(() => {
+    setSelectedStatus(application?.status || 'DRAFT');
+    setAdminNotes(application?.adminNotes || '');
+  }, [application]);
 
   if (!application) return null;
 
@@ -174,7 +180,7 @@ export default function ApplicationDetailModal({
       <body>
         <h1>DS-160 Visa Application</h1>
         <p><strong>Application ID:</strong> ${application.id}</p>
-        <p><strong>Status:</strong> <span class="status status-${application.status?.toLowerCase()}">${application.status}</span></p>
+        <p><strong>Status:</strong> <span class="status status-${String(safeStatus).toLowerCase()}">${safeStatus}</span></p>
         <p><strong>Visa Type:</strong> ${application.visaType}</p>
         <p><strong>Submitted:</strong> ${formatDate(application.submittedAt || application.createdAt)}</p>
 
@@ -240,8 +246,8 @@ export default function ApplicationDetailModal({
               </DialogDescription>
             </div>
             <div className="flex items-center gap-2">
-              <Badge className={getStatusBadge(application.status)}>
-                {application.status}
+              <Badge className={getStatusBadge(safeStatus)}>
+                {safeStatus}
               </Badge>
               <Button variant="outline" size="sm" onClick={handleExportPDF}>
                 <Download className="w-4 h-4 mr-2" />

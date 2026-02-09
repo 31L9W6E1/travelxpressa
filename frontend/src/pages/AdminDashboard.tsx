@@ -485,8 +485,9 @@ const AdminDashboard = () => {
     return styles[status] || styles.DRAFT;
   };
 
-  const parseFormData = (jsonString?: string) => {
+  const parseFormData = (jsonString?: string | Record<string, unknown>) => {
     if (!jsonString) return null;
+    if (typeof jsonString !== "string") return jsonString;
     try {
       return JSON.parse(jsonString);
     } catch {
@@ -1042,6 +1043,14 @@ const AdminDashboard = () => {
                         ) : (
                           filteredApplications.map((app) => {
                             const personalInfo = parseFormData(app.personalInfo);
+                            const status =
+                              typeof app.status === "string" && app.status
+                                ? app.status
+                                : "DRAFT";
+                            const currentStep =
+                              Number.isFinite(app.currentStep) && app.currentStep > 0
+                                ? app.currentStep
+                                : 0;
                             return (
                               <tr
                                 key={app.id}
@@ -1072,7 +1081,7 @@ const AdminDashboard = () => {
                                 </td>
                                 <td className="px-4 py-3">
                                   <Badge className={getStatusBadge(app.status)}>
-                                    {app.status.replace(/_/g, " ")}
+                                    {status.replace(/_/g, " ")}
                                   </Badge>
                                 </td>
                                 <td className="px-4 py-3">
@@ -1080,11 +1089,11 @@ const AdminDashboard = () => {
                                     <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
                                       <div
                                         className="h-full bg-primary transition-all"
-                                        style={{ width: `${Math.round((app.currentStep / 9) * 100)}%` }}
+                                        style={{ width: `${Math.round((currentStep / 9) * 100)}%` }}
                                       />
                                     </div>
                                     <span className="text-xs text-muted-foreground">
-                                      {app.currentStep}/9
+                                      {currentStep}/9
                                     </span>
                                   </div>
                                 </td>

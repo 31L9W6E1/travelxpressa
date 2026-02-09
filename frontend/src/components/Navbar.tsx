@@ -41,7 +41,7 @@ const Navbar = () => {
             </Link>
 
             {/* Desktop Navigation */}
-            <div className="hidden lg:flex items-center space-x-1">
+            <div className="hidden md:flex items-center space-x-1">
               <Link
                 to="/about"
                 className="px-4 py-2 text-muted-foreground hover:text-foreground transition-colors"
@@ -82,7 +82,7 @@ const Navbar = () => {
           </div>
 
           {/* Desktop Auth & Theme Toggle */}
-          <div className="hidden lg:flex items-center space-x-4">
+          <div className="hidden md:flex items-center space-x-4">
             {/* Language Selector - uses Radix UI DropdownMenu */}
             <LanguageSwitcher />
 
@@ -185,7 +185,7 @@ const Navbar = () => {
           </div>
 
           {/* Mobile: Language + Theme Toggle + Menu button */}
-          <div className="lg:hidden flex items-center space-x-1">
+          <div className="md:hidden flex items-center space-x-1">
             {/* Mobile Language Switcher */}
             <LanguageSwitcher />
 
@@ -211,7 +211,7 @@ const Navbar = () => {
 
         {/* Mobile Navigation */}
         {isMenuOpen && (
-          <div className="lg:hidden py-4 bg-background border-t border-border">
+          <div className="md:hidden py-4 bg-background border-t border-border">
             <div className="flex flex-col space-y-1">
               <Link
                 to="/about"

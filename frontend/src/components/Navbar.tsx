@@ -54,6 +54,12 @@ const Navbar = () => {
               >
                 {t('nav.learnMore')}
               </Link>
+              <Link
+                to="/gallery"
+                className="px-4 py-2 text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {t('nav.gallery', { defaultValue: 'Gallery' })}
+              </Link>
               {user && user.role !== "ADMIN" && (
                 <Link
                   to="/application"
@@ -218,6 +224,13 @@ const Navbar = () => {
                 onClick={() => setIsMenuOpen(false)}
               >
                 {t('nav.learnMore')}
+              </Link>
+              <Link
+                to="/gallery"
+                className="px-4 py-3 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                {t('nav.gallery', { defaultValue: 'Gallery' })}
               </Link>
               {user && (
                 <>

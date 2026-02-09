@@ -35,7 +35,8 @@
     "dashboard": "Панель управления",
     "admin": "Админ",
     "profile": "Профиль",
-    "settings": "Настройки"
+    "settings": "Настройки",
+    "gallery": "Галерея"
   },
   "auth": {
     "welcomeBack": "С возвращением",

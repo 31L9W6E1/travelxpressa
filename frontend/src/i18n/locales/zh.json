@@ -35,7 +35,8 @@
     "dashboard": "仪表板",
     "admin": "管理",
     "profile": "个人资料",
-    "settings": "设置"
+    "settings": "设置",
+    "gallery": "图库"
   },
   "auth": {
     "welcomeBack": "欢迎回来",

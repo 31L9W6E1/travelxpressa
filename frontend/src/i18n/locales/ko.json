@@ -35,7 +35,8 @@
     "dashboard": "대시보드",
     "admin": "관리자",
     "profile": "프로필",
-    "settings": "설정"
+    "settings": "설정",
+    "gallery": "갤러리"
   },
   "auth": {
     "welcomeBack": "다시 오신 것을 환영합니다",

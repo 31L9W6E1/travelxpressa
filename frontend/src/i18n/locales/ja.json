@@ -35,7 +35,8 @@
     "dashboard": "ダッシュボード",
     "admin": "管理者",
     "profile": "プロフィール",
-    "settings": "設定"
+    "settings": "設定",
+    "gallery": "ギャラリー"
   },
   "auth": {
     "welcomeBack": "お帰りなさい",

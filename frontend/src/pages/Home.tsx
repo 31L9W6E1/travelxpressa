@@ -436,28 +436,6 @@ const Home = () => {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-20">
-        <div className="max-w-7xl mx-auto px-6">
-          <Card className="bg-gradient-to-br from-secondary to-secondary/70 border-primary/20">
-            <CardContent className="p-12 md:p-16 text-center">
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6">
-                {t("home.cta.title")}
-              </h2>
-              <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed">
-                {t("home.cta.subtitle")}
-              </p>
-              <Button asChild size="lg" className="px-10 py-6 text-lg hover-lift">
-                <Link to="/login" className="gap-3">
-                  {t("home.cta.button")}
-                  <ArrowRight className="w-5 h-5" />
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-      </section>
-
       {/* Footer */}
       <footer className="border-t border-border py-12">
         <div className="max-w-7xl mx-auto px-6">

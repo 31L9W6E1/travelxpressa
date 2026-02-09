@@ -17,10 +17,22 @@ function validate(schemas) {
                 req.body = await schemas.body.parseAsync(req.body);
             }
             if (schemas.query) {
-                req.query = await schemas.query.parseAsync(req.query);
+                // Note: req.query is read-only in Express 5+, so we just validate without reassigning
+                // The parsed/transformed values are stored on req for use in handlers
+                const parsedQuery = await schemas.query.parseAsync(req.query);
+                // Store parsed query on request for handlers to use
+                req.validatedQuery = parsedQuery;
+                // Copy parsed values back to query object properties (without replacing the object)
+                Object.keys(parsedQuery).forEach(key => {
+                    req.query[key] = parsedQuery[key];
+                });
             }
             if (schemas.params) {
-                req.params = await schemas.params.parseAsync(req.params);
+                // Same approach for params
+                const parsedParams = await schemas.params.parseAsync(req.params);
+                Object.keys(parsedParams).forEach(key => {
+                    req.params[key] = parsedParams[key];
+                });
             }
             next();
         }

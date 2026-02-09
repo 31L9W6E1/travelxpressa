@@ -151,69 +151,69 @@ const Home = () => {
       </div>
 
       {/* Hero Section - adjust pt to account for navbar + ticker */}
-      <section className="relative pt-32 pb-16 border-b border-border">
+      <section className="relative pt-32 pb-20 border-b border-border/50">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div>
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            <div className="animate-fade-in-up">
               <Badge variant="secondary" className="mb-6">
                 {t("home.hero.trusted")}
               </Badge>
-              <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6 leading-tight">
                 {t("home.hero.titleLine1")}
-                <span className="block text-muted-foreground">
+                <span className="block text-primary">
                   {t("home.hero.titleLine2")}
                 </span>
                 {t("home.hero.titleLine3")}
               </h1>
-              <p className="text-xl text-muted-foreground mb-8 max-w-xl">
+              <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-xl leading-relaxed">
                 {t("home.hero.subtitle")}
               </p>
               <div className="flex flex-wrap gap-4">
-                <Button asChild size="lg">
+                <Button asChild size="lg" className="px-8 hover-lift">
                   <Link to="/login" className="gap-2">
                     {t("home.hero.cta")}
                     <ArrowRight className="w-5 h-5" />
                   </Link>
                 </Button>
-                <Button asChild variant="outline" size="lg">
+                <Button asChild variant="outline" size="lg" className="px-8">
                   <Link to="/learn-more">{t("home.hero.learnMore")}</Link>
                 </Button>
               </div>
             </div>
 
             {/* Stats Card */}
-            <Card className="bg-secondary/50">
-              <CardContent className="p-8">
-                <div className="grid grid-cols-2 gap-6">
-                  <div className="text-center p-4">
-                    <div className="text-4xl font-bold text-foreground mb-1">
+            <Card className="bg-secondary/50 animate-fade-in-up animation-delay-200 hover-lift">
+              <CardContent className="p-8 md:p-10">
+                <div className="grid grid-cols-2 gap-8">
+                  <div className="text-center p-4 border-r border-b border-border/30">
+                    <div className="text-4xl md:text-5xl font-bold text-foreground mb-2">
                       50K+
                     </div>
-                    <div className="text-sm text-muted-foreground">
+                    <div className="text-sm text-muted-foreground font-medium">
                       {t("home.stats.applicationsCompleted")}
                     </div>
                   </div>
-                  <div className="text-center p-4">
-                    <div className="text-4xl font-bold text-foreground mb-1">
+                  <div className="text-center p-4 border-b border-border/30">
+                    <div className="text-4xl md:text-5xl font-bold text-foreground mb-2">
                       98%
                     </div>
-                    <div className="text-sm text-muted-foreground">
+                    <div className="text-sm text-muted-foreground font-medium">
                       {t("home.stats.successRate")}
                     </div>
                   </div>
-                  <div className="text-center p-4">
-                    <div className="text-4xl font-bold text-foreground mb-1">
+                  <div className="text-center p-4 border-r border-border/30">
+                    <div className="text-4xl md:text-5xl font-bold text-foreground mb-2">
                       24/7
                     </div>
-                    <div className="text-sm text-muted-foreground">
+                    <div className="text-sm text-muted-foreground font-medium">
                       {t("home.stats.supportAvailable")}
                     </div>
                   </div>
                   <div className="text-center p-4">
-                    <div className="text-4xl font-bold text-foreground mb-1">
+                    <div className="text-4xl md:text-5xl font-bold text-foreground mb-2">
                       4.9
                     </div>
-                    <div className="text-sm text-muted-foreground">
+                    <div className="text-sm text-muted-foreground font-medium">
                       {t("home.stats.customerRating")}
                     </div>
                   </div>
@@ -225,13 +225,13 @@ const Home = () => {
       </section>
 
       {/* Features Section */}
-      <section className="py-16 border-b border-border">
+      <section className="py-20 border-b border-border/50">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
               {t("home.features.title")}
             </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               {t("home.features.subtitle")}
             </p>
           </div>
@@ -239,16 +239,16 @@ const Home = () => {
             {features.map((feature, index) => (
               <Card
                 key={index}
-                className="bg-secondary/30 hover:bg-secondary/50 transition-colors"
+                className="bg-secondary/30 hover:bg-secondary/50 transition-all duration-200 hover-lift group"
               >
                 <CardContent className="p-6">
-                  <div className="w-12 h-12 bg-primary text-primary-foreground rounded-lg flex items-center justify-center mb-4">
+                  <div className="w-12 h-12 bg-primary text-primary-foreground rounded-xl flex items-center justify-center mb-4 group-hover:scale-105 transition-transform duration-200">
                     <feature.icon className="w-6 h-6" />
                   </div>
-                  <h3 className="font-semibold text-foreground mb-2">
+                  <h3 className="font-semibold text-foreground mb-2 text-lg">
                     {feature.title}
                   </h3>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-muted-foreground leading-relaxed">
                     {feature.description}
                   </p>
                 </CardContent>
@@ -259,7 +259,7 @@ const Home = () => {
       </section>
 
       {/* Featured Posts Section */}
-      <section className="py-16 border-b border-border">
+      <section className="py-20 border-b border-border/50">
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex items-center justify-between mb-8">
             <div>
@@ -376,7 +376,7 @@ const Home = () => {
       </section>
 
       {/* News Grid Section */}
-      <section className="py-16 border-b border-border">
+      <section className="py-20 border-b border-border/50">
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex items-center justify-between mb-8">
             <div>
@@ -437,18 +437,18 @@ const Home = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16">
+      <section className="py-20">
         <div className="max-w-7xl mx-auto px-6">
-          <Card className="bg-secondary">
-            <CardContent className="p-12 text-center">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+          <Card className="bg-gradient-to-br from-secondary to-secondary/70 border-primary/20">
+            <CardContent className="p-12 md:p-16 text-center">
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6">
                 {t("home.cta.title")}
               </h2>
-              <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+              <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed">
                 {t("home.cta.subtitle")}
               </p>
-              <Button asChild size="lg">
-                <Link to="/login" className="gap-2">
+              <Button asChild size="lg" className="px-10 py-6 text-lg hover-lift">
+                <Link to="/login" className="gap-3">
                   {t("home.cta.button")}
                   <ArrowRight className="w-5 h-5" />
                 </Link>

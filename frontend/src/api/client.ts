@@ -1,16 +1,7 @@
 import axios, { type AxiosInstance, type AxiosError, type InternalAxiosRequestConfig } from 'axios';
 
 const resolveApiUrl = (): string => {
-  const configuredApiUrl = (import.meta.env.VITE_API_URL as string | undefined)?.trim();
-  if (configuredApiUrl) {
-    return configuredApiUrl.replace(/\/+$/, '');
-  }
-
   if (typeof window !== 'undefined') {
-    const runtimeApiUrl = (window as any).__API_URL__ as string | undefined;
-    if (runtimeApiUrl && runtimeApiUrl.trim()) {
-      return runtimeApiUrl.trim().replace(/\/+$/, '');
-    }
     const { hostname, port, protocol, origin } = window.location;
     const isTravelxpressaDomain =
       hostname === 'travelxpressa.com' || hostname === 'www.travelxpressa.com';
@@ -18,19 +9,37 @@ const resolveApiUrl = (): string => {
       hostname === 'localhost' ||
       hostname === '127.0.0.1' ||
       hostname === '0.0.0.0';
+    const isVercelPreview = hostname.endsWith('.vercel.app');
 
     // Local Vite dev fallback
     if (isLocalHost && port === '5173') {
       return `${protocol}//${hostname}:3000`;
     }
 
-    // Prefer same-origin for our custom domain so Vercel rewrites can proxy /api and /uploads.
-    if (isTravelxpressaDomain) {
+    // Prefer same-origin for our custom domain (and Vercel preview deployments)
+    // so Vercel rewrites can proxy /api and /uploads.
+    //
+    // This is important even when VITE_API_URL is configured, because hitting the
+    // Railway backend directly makes uploaded images cross-origin and they can be
+    // blocked by `Cross-Origin-Resource-Policy: same-origin`.
+    if (isTravelxpressaDomain || isVercelPreview) {
       return origin;
     }
 
+    const runtimeApiUrl = (window as any).__API_URL__ as string | undefined;
+    if (runtimeApiUrl && runtimeApiUrl.trim()) {
+      return runtimeApiUrl.trim().replace(/\/+$/, '');
+    }
+  }
+
+  const configuredApiUrl = (import.meta.env.VITE_API_URL as string | undefined)?.trim();
+  if (configuredApiUrl) {
+    return configuredApiUrl.replace(/\/+$/, '');
+  }
+
+  if (typeof window !== 'undefined') {
     // Production/default same-origin fallback
-    return origin;
+    return window.location.origin;
   }
 
   return 'http://localhost:3000';

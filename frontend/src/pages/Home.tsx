@@ -132,14 +132,14 @@ const Home = () => {
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* News Ticker - Fixed at top below navbar */}
-      <div className="fixed top-16 left-0 right-0 z-40 bg-primary text-primary-foreground overflow-hidden">
+      <div className="fixed top-16 left-0 right-0 z-40 bg-transparent text-foreground overflow-hidden">
         <div className="flex items-center h-10">
-          <div className="flex-shrink-0 px-4 bg-primary-foreground/10 h-full flex items-center gap-2">
+          <div className="flex-shrink-0 px-4 bg-transparent h-full flex items-center gap-2">
             <Bell className="w-4 h-4" />
             <span className="text-sm font-semibold">{t("home.news")}</span>
           </div>
           <div className="flex-1 overflow-hidden">
-            <div className="animate-ticker whitespace-nowrap flex">
+            <div className="animate-ticker whitespace-nowrap flex min-w-max">
               {/* Duplicate content for seamless loop */}
               {[...tickerItems, ...tickerItems].map((item, index) => (
                 <span key={index} className="inline-block px-8 text-sm">

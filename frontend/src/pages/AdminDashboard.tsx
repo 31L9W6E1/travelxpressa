@@ -25,6 +25,7 @@ import {
   Globe,
   Image as ImageIcon,
   Loader2,
+  CreditCard,
 } from "lucide-react";
 import {
   ChartContainer,
@@ -102,6 +103,7 @@ import api from "@/api/client";
 import ApplicationDetailModal from "@/components/admin/ApplicationDetailModal";
 import VisaTypeChart from "@/components/admin/VisaTypeChart";
 import ImageUpload from "@/components/ImageUpload";
+import PaymentDashboard from "@/components/admin/PaymentDashboard";
 
 interface UserData {
   id: string;
@@ -215,7 +217,7 @@ const userGrowthConfig = {
 const AdminDashboard = () => {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<
-    "overview" | "users" | "applications" | "cms"
+    "overview" | "users" | "applications" | "payments" | "cms"
   >("overview");
   const [users, setUsers] = useState<UserData[]>([]);
   const [applications, setApplications] = useState<ApplicationData[]>([]);
@@ -571,6 +573,10 @@ const AdminDashboard = () => {
             <TabsTrigger value="applications" className="gap-2">
               <FileText className="w-4 h-4" />
               Applications
+            </TabsTrigger>
+            <TabsTrigger value="payments" className="gap-2">
+              <CreditCard className="w-4 h-4" />
+              Payments
             </TabsTrigger>
             <TabsTrigger value="cms" className="gap-2">
               <Newspaper className="w-4 h-4" />
@@ -1130,6 +1136,11 @@ const AdminDashboard = () => {
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          {/* Payments Tab */}
+          <TabsContent value="payments">
+            <PaymentDashboard />
           </TabsContent>
 
           {/* CMS Tab */}

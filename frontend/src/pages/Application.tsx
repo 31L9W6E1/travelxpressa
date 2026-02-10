@@ -18,8 +18,12 @@ import {
   Briefcase,
   Shield,
   AlertCircle,
-  Loader2
+  Loader2,
+  CreditCard,
+  CheckCircle2
 } from 'lucide-react';
+import PaymentModal from '@/components/PaymentModal';
+import { Payment, formatMNT } from '@/api/payments';
 
 // Form step types
 type StepStatus = 'pending' | 'current' | 'completed';
@@ -135,6 +139,8 @@ export default function Application() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [applicationId, setApplicationId] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [paymentComplete, setPaymentComplete] = useState(false);
 
   // Get selected country from localStorage (set in CountrySelect page)
   const selectedCountryCode = localStorage.getItem('selectedCountry') as CountryCode || 'USA';
@@ -367,6 +373,76 @@ export default function Application() {
     }
   };
 
+  // Prepare application data for submission (reusable)
+  const prepareApplicationData = () => {
+    return {
+      currentStep: 5,
+      personalInfo: {
+        surnames: formData.personalInfo.surnames,
+        givenNames: formData.personalInfo.givenNames,
+        fullNameNative: formData.personalInfo.fullNameNative || undefined,
+        otherNamesUsed: false,
+        telCode: '',
+        sex: (formData.personalInfo.sex || 'M') as 'M' | 'F',
+        maritalStatus: (formData.personalInfo.maritalStatus || 'SINGLE') as 'SINGLE' | 'MARRIED' | 'DIVORCED' | 'WIDOWED' | 'SEPARATED',
+        dateOfBirth: formData.personalInfo.dateOfBirth,
+        cityOfBirth: formData.personalInfo.cityOfBirth,
+        stateOfBirth: formData.personalInfo.stateOfBirth || undefined,
+        countryOfBirth: formData.personalInfo.countryOfBirth,
+        nationality: formData.personalInfo.nationality,
+      },
+      contactInfo: {
+        homeAddress: {
+          street: formData.contactInfo.streetAddress,
+          city: formData.contactInfo.city,
+          state: formData.contactInfo.state || undefined,
+          postalCode: formData.contactInfo.postalCode || undefined,
+          country: formData.contactInfo.country,
+        },
+        phone: formData.contactInfo.phone,
+        email: formData.contactInfo.email,
+      },
+      passportInfo: {
+        passportType: 'REGULAR' as const,
+        passportNumber: formData.passportInfo.passportNumber,
+        passportBookNumber: formData.passportInfo.passportBookNumber || undefined,
+        countryOfIssuance: formData.passportInfo.countryOfIssuance,
+        cityOfIssuance: formData.passportInfo.cityOfIssuance,
+        issuanceDate: formData.passportInfo.issuanceDate,
+        expirationDate: formData.passportInfo.expirationDate,
+        hasOtherPassport: false,
+      },
+      travelInfo: {
+        purposeOfTrip: formData.travelInfo.purposeOfTrip,
+        intendedArrivalDate: formData.travelInfo.intendedArrivalDate,
+        intendedLengthOfStay: formData.travelInfo.intendedLengthOfStay,
+        addressWhileInUS: {
+          street: formData.travelInfo.usAddress,
+          city: formData.travelInfo.usCity,
+          state: formData.travelInfo.usState,
+        },
+        payingForTrip: formData.travelInfo.payingForTrip,
+        travelingWithOthers: false,
+      },
+    };
+  };
+
+  // Handle payment completion - this gets called when payment is successful
+  const handlePaymentSuccess = async (payment: Payment) => {
+    setPaymentComplete(true);
+    setShowPaymentModal(false);
+
+    toast.success('Payment successful!', {
+      description: 'Your application has been submitted. You will receive a confirmation email shortly.',
+      duration: 5000,
+    });
+
+    // Navigate to profile after a short delay to show the success message
+    setTimeout(() => {
+      navigate('/profile');
+    }, 2000);
+  };
+
   const handleSubmit = async () => {
     // Validate all steps before submission
     for (let step = 1; step <= 4; step++) {
@@ -379,59 +455,9 @@ export default function Application() {
 
     setIsSubmitting(true);
     setSaveError(null);
-    try {
-      // Transform form data to match API schema
-      const apiData = {
-        currentStep: 5,
-        personalInfo: {
-          surnames: formData.personalInfo.surnames,
-          givenNames: formData.personalInfo.givenNames,
-          fullNameNative: formData.personalInfo.fullNameNative || undefined,
-          otherNamesUsed: false,
-          telCode: '',
-          sex: (formData.personalInfo.sex || 'M') as 'M' | 'F',
-          maritalStatus: (formData.personalInfo.maritalStatus || 'SINGLE') as 'SINGLE' | 'MARRIED' | 'DIVORCED' | 'WIDOWED' | 'SEPARATED',
-          dateOfBirth: formData.personalInfo.dateOfBirth,
-          cityOfBirth: formData.personalInfo.cityOfBirth,
-          stateOfBirth: formData.personalInfo.stateOfBirth || undefined,
-          countryOfBirth: formData.personalInfo.countryOfBirth,
-          nationality: formData.personalInfo.nationality,
-        },
-        contactInfo: {
-          homeAddress: {
-            street: formData.contactInfo.streetAddress,
-            city: formData.contactInfo.city,
-            state: formData.contactInfo.state || undefined,
-            postalCode: formData.contactInfo.postalCode || undefined,
-            country: formData.contactInfo.country,
-          },
-          phone: formData.contactInfo.phone,
-          email: formData.contactInfo.email,
-        },
-        passportInfo: {
-          passportType: 'REGULAR' as const,
-          passportNumber: formData.passportInfo.passportNumber,
-          passportBookNumber: formData.passportInfo.passportBookNumber || undefined,
-          countryOfIssuance: formData.passportInfo.countryOfIssuance,
-          cityOfIssuance: formData.passportInfo.cityOfIssuance,
-          issuanceDate: formData.passportInfo.issuanceDate,
-          expirationDate: formData.passportInfo.expirationDate,
-          hasOtherPassport: false,
-        },
-        travelInfo: {
-          purposeOfTrip: formData.travelInfo.purposeOfTrip,
-          intendedArrivalDate: formData.travelInfo.intendedArrivalDate,
-          intendedLengthOfStay: formData.travelInfo.intendedLengthOfStay,
-          addressWhileInUS: {
-            street: formData.travelInfo.usAddress,
-            city: formData.travelInfo.usCity,
-            state: formData.travelInfo.usState,
-          },
-          payingForTrip: formData.travelInfo.payingForTrip,
-          travelingWithOthers: false,
-        },
-      };
 
+    try {
+      const apiData = prepareApplicationData();
       let appId = applicationId;
 
       if (!appId) {
@@ -441,20 +467,14 @@ export default function Application() {
         setApplicationId(appId);
       }
 
-      // Save all form data
+      // Save all form data before showing payment
       await applicationsApi.update(appId, apiData);
 
-      // Submit the application
-      await applicationsApi.submit(appId);
-
-      toast.success('Application submitted!', {
-        description: 'Your visa application has been submitted successfully. You will receive a confirmation email.',
-        duration: 5000,
-      });
-      navigate('/profile');
+      // Show payment modal instead of directly submitting
+      setShowPaymentModal(true);
     } catch (error: any) {
       console.error('Submit error:', error);
-      const errorMessage = error?.message || 'Failed to submit application. Please try again.';
+      const errorMessage = error?.message || 'Failed to save application. Please try again.';
       setSaveError(errorMessage);
       toast.error('Submission failed', { description: errorMessage });
     } finally {
@@ -870,9 +890,50 @@ export default function Application() {
       case 5:
         return (
           <div className="space-y-6">
-            <h3 className="text-xl font-semibold text-foreground mb-6">Review Your Application</h3>
+            <h3 className="text-xl font-semibold text-foreground mb-6">Review & Submit</h3>
 
             <div className="space-y-6">
+              {/* Payment Success State */}
+              {paymentComplete && (
+                <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center">
+                      <CheckCircle2 className="w-6 h-6 text-green-600" />
+                    </div>
+                    <div>
+                      <h4 className="text-green-700 dark:text-green-400 font-semibold text-lg">Payment Successful!</h4>
+                      <p className="text-sm text-green-600 dark:text-green-500">
+                        Your application has been submitted. Redirecting to your profile...
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Payment Info Card */}
+              {!paymentComplete && (
+                <div className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20 rounded-xl p-6">
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 bg-primary/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                      <CreditCard className="w-6 h-6 text-primary" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="text-foreground font-semibold text-lg mb-1">Application Fee</h4>
+                      <p className="text-sm text-muted-foreground mb-3">
+                        Complete your payment to submit your visa application
+                      </p>
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-3xl font-bold text-primary">{formatMNT(150000)}</span>
+                        <span className="text-sm text-muted-foreground">MNT</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-2">
+                        Includes professional document review and processing assistance
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Personal Info Summary */}
               <div className="bg-muted/50 border border-border rounded-xl p-6">
                 <h4 className="text-lg font-medium text-foreground mb-4 flex items-center gap-2">
@@ -928,17 +989,19 @@ export default function Application() {
               </div>
 
               {/* Warning */}
-              <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-6">
-                <div className="flex items-start gap-3">
-                  <AlertCircle className="w-6 h-6 text-amber-500 flex-shrink-0" />
-                  <div>
-                    <h4 className="text-foreground font-medium mb-1">Important Notice</h4>
-                    <p className="text-sm text-muted-foreground">
-                      Please review all information carefully before submitting. Once submitted, you may need to start a new application to make changes. Providing false information may result in visa denial.
-                    </p>
+              {!paymentComplete && (
+                <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-6">
+                  <div className="flex items-start gap-3">
+                    <AlertCircle className="w-6 h-6 text-amber-500 flex-shrink-0" />
+                    <div>
+                      <h4 className="text-foreground font-medium mb-1">Important Notice</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Please review all information carefully before submitting. Once submitted, you may need to start a new application to make changes. Providing false information may result in visa denial.
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         );
@@ -1047,11 +1110,25 @@ export default function Application() {
               ) : (
                 <button
                   onClick={handleSubmit}
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || paymentComplete}
                   className="flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg font-semibold hover:bg-primary/90 transition-all disabled:opacity-50"
                 >
-                  {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
-                  Submit Application
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      Processing...
+                    </>
+                  ) : paymentComplete ? (
+                    <>
+                      <CheckCircle2 className="w-5 h-5" />
+                      Submitted
+                    </>
+                  ) : (
+                    <>
+                      <CreditCard className="w-5 h-5" />
+                      Pay & Submit
+                    </>
+                  )}
                 </button>
               )}
             </div>

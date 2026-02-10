@@ -54,7 +54,7 @@ export const getFullImageUrl = (url: string): string => {
 
   // If it's already a full URL, return as-is
   if (url.startsWith('http://') || url.startsWith('https://')) {
-    return normalizeImageUrl(url);
+    return url;
   }
 
   // If it's a relative URL (starts with /uploads), prepend the API base URL
@@ -66,16 +66,16 @@ export const getFullImageUrl = (url: string): string => {
 };
 
 /**
- * Convert Unsplash page URL to direct image URL
- * @param url - The Unsplash URL (can be page URL or direct URL)
- * @returns Direct image URL
+ * Convert Unsplash page URL to direct image URL, or local uploads to full URL
+ * @param url - The URL to normalize
+ * @returns Normalized image URL
  */
 export const normalizeImageUrl = (url: string): string => {
   if (!url) return '';
 
-  // If it's a local upload URL, return full URL
+  // If it's a local upload URL, prepend the API base URL
   if (url.startsWith('/uploads')) {
-    return getFullImageUrl(url);
+    return `${getApiBaseUrl()}${url}`;
   }
 
   // If it's already a direct image URL, return as-is

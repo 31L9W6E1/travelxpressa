@@ -278,6 +278,7 @@ export default function ApplicationDetailModal({
   const [isUpdating, setIsUpdating] = useState(false);
   const [details, setDetails] = useState<any | null>(null);
   const [detailsLoading, setDetailsLoading] = useState(false);
+  const [detailsError, setDetailsError] = useState<string | null>(null);
 
   useEffect(() => {
     setSelectedStatus(application?.status || 'DRAFT');
@@ -290,18 +291,25 @@ export default function ApplicationDetailModal({
     const loadDetails = async () => {
       if (!open || !application?.id) {
         setDetails(null);
+        setDetailsError(null);
         return;
       }
 
       setDetailsLoading(true);
+      setDetailsError(null);
       try {
-        // Fetch decrypted details via the standard application endpoint.
-        // Admin/Agent roles are allowed by backend auth checks.
-        const res = await api.get(`/api/applications/${application.id}`);
+        // Fetch decrypted details via the admin endpoint (includes related user info).
+        const res = await api.get(`/api/admin/applications/${application.id}`);
         const payload = res.data?.data ?? res.data;
         if (!cancelled) setDetails(payload);
-      } catch {
-        if (!cancelled) setDetails(null);
+      } catch (error: any) {
+        if (!cancelled) {
+          setDetails(null);
+          setDetailsError(
+            error?.message ||
+              'Failed to load application details. Check your API configuration and try again.',
+          );
+        }
       } finally {
         if (!cancelled) setDetailsLoading(false);
       }
@@ -326,6 +334,23 @@ export default function ApplicationDetailModal({
   const workEducation = parseFormData<WorkEducation>(app.workEducation);
   const securityInfo = parseFormData<SecurityInfo>(app.securityInfo);
   const documents = parseFormData<Documents>(app.documents);
+  const hasEncryptedSections =
+    typeof application?.personalInfo === 'string' ||
+    typeof application?.contactInfo === 'string' ||
+    typeof application?.passportInfo === 'string' ||
+    typeof application?.travelInfo === 'string' ||
+    typeof application?.familyInfo === 'string' ||
+    typeof application?.workEducation === 'string' ||
+    typeof application?.securityInfo === 'string';
+  const hasAnyDecryptedSection =
+    Boolean(personalInfo) ||
+    Boolean(contactInfo) ||
+    Boolean(passportInfo) ||
+    Boolean(travelInfo) ||
+    Boolean(familyInfo) ||
+    Boolean(workEducation) ||
+    Boolean(securityInfo) ||
+    Boolean(documents);
 
   const handleUpdateStatus = async () => {
     setIsUpdating(true);
@@ -437,7 +462,7 @@ export default function ApplicationDetailModal({
           <div className="flex items-center justify-between">
             <div>
               <DialogTitle className="text-xl">Application Details</DialogTitle>
-              <DialogDescription className="mt-1">
+              <DialogDescription className="mt-1 font-mono text-xs break-all">
                 Application ID: {app.id}
               </DialogDescription>
             </div>
@@ -454,6 +479,21 @@ export default function ApplicationDetailModal({
         </DialogHeader>
 
         <ScrollArea className="h-[60vh]">
+          {detailsError && (
+            <div className="px-6 pt-6">
+              <div className="rounded-lg border border-destructive/20 bg-destructive/10 p-4 text-sm text-destructive">
+                {detailsError}
+              </div>
+            </div>
+          )}
+          {!detailsLoading && !detailsError && hasEncryptedSections && !hasAnyDecryptedSection && (
+            <div className="px-6 pt-6">
+              <div className="rounded-lg border border-amber-500/20 bg-amber-500/10 p-4 text-sm text-amber-700 dark:text-amber-300">
+                Application sections could not be decrypted. This can happen if the server encryption key was
+                changed after the application was saved. Metadata is still available.
+              </div>
+            </div>
+          )}
           {detailsLoading && (
             <div className="p-6 flex items-center gap-2 text-sm text-muted-foreground">
               <Loader2 className="w-4 h-4 animate-spin" />

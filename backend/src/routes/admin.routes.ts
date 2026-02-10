@@ -6,12 +6,28 @@ import { asyncHandler, NotFoundError, BadRequestError } from '../middleware/erro
 import { auditLog } from '../middleware/security';
 import { paginationSchema, idParamSchema, updateInquiryStatusSchema, updateRoleSchema } from '../validation/schemas';
 import { AuthenticatedRequest, UserRole } from '../types';
+import { decrypt } from '../utils/encryption';
 import { logger } from '../utils/logger';
 
 // Helper to safely extract string param
 const getIdParam = (req: Request): string => {
   const id = req.params.id;
   return Array.isArray(id) ? id[0] : id;
+};
+
+const safeDecryptJson = (value?: string | null) => {
+  if (!value) return null;
+  try {
+    return JSON.parse(decrypt(value));
+  } catch {
+    // Fallback for legacy/plain JSON values (or corrupted ciphertext).
+    try {
+      return JSON.parse(value);
+    } catch {
+      // Avoid throwing for corrupted/legacy values; admin UI can still show metadata.
+      return null;
+    }
+  }
 };
 
 const router = Router();
@@ -617,9 +633,20 @@ router.get(
       throw new NotFoundError('Application not found');
     }
 
+    const decryptedApplication = {
+      ...application,
+      personalInfo: safeDecryptJson(application.personalInfo),
+      contactInfo: safeDecryptJson(application.contactInfo),
+      passportInfo: safeDecryptJson(application.passportInfo),
+      travelInfo: safeDecryptJson(application.travelInfo),
+      familyInfo: safeDecryptJson(application.familyInfo),
+      workEducation: safeDecryptJson(application.workEducation),
+      securityInfo: safeDecryptJson(application.securityInfo),
+    };
+
     res.json({
       success: true,
-      data: application,
+      data: decryptedApplication,
     });
   })
 );

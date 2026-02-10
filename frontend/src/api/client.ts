@@ -24,9 +24,9 @@ const resolveApiUrl = (): string => {
       return `${protocol}//${hostname}:3000`;
     }
 
-    // Production fallback for custom domain when proxy rewrites are missing.
+    // Prefer same-origin for our custom domain so Vercel rewrites can proxy /api and /uploads.
     if (isTravelxpressaDomain) {
-      return 'https://travelxpressa-backend-production.up.railway.app';
+      return origin;
     }
 
     // Production/default same-origin fallback

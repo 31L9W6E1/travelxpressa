@@ -36,7 +36,7 @@ export const authApi = {
     try {
       const response = await api.post<ApiResponse<AuthResponse>>('/api/auth/login', credentials);
       const { accessToken, refreshToken, user } = response.data.data!;
-      setTokens(accessToken, refreshToken);
+      setTokens(accessToken, refreshToken ?? null);
       return user;
     } catch (error) {
       throw handleApiError(error);
@@ -47,7 +47,7 @@ export const authApi = {
     try {
       const response = await api.post<ApiResponse<AuthResponse>>('/api/auth/register', credentials);
       const { accessToken, refreshToken, user } = response.data.data!;
-      setTokens(accessToken, refreshToken);
+      setTokens(accessToken, refreshToken ?? null);
       return user;
     } catch (error) {
       throw handleApiError(error);
@@ -105,7 +105,7 @@ export const authApi = {
     try {
       const response = await api.post<ApiResponse<{ accessToken: string; refreshToken?: string }>>('/api/auth/refresh');
       const { accessToken, refreshToken } = response.data.data!;
-      setTokens(accessToken, refreshToken);
+      setTokens(accessToken, refreshToken ?? null);
     } catch (error) {
       clearTokens();
       throw handleApiError(error);

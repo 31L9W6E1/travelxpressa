@@ -50,10 +50,18 @@ if (typeof window !== 'undefined') {
 }
 
 // Token management
-export const setTokens = (access: string, refresh?: string) => {
+export const setTokens = (access: string, refresh?: string | null) => {
   accessToken = access;
   localStorage.setItem('accessToken', access);
-  if (refresh) {
+
+  // `refresh` handling:
+  // - string: store it (dev/non-prod)
+  // - null: clear any previously-stored refresh token (prod uses httpOnly cookie)
+  // - undefined: leave as-is
+  if (refresh === null) {
+    refreshToken = null;
+    localStorage.removeItem('refreshToken');
+  } else if (refresh) {
     refreshToken = refresh;
     localStorage.setItem('refreshToken', refresh);
   }
@@ -126,8 +134,16 @@ api.interceptors.response.use(
   async (error: AxiosError) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
 
-    // If error is 401 and we haven't retried yet
-    if (error.response?.status === 401 && !originalRequest._retry && refreshToken) {
+    const canAttemptRefresh =
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      // Only attempt refresh when we *had* an access token (i.e., this is likely expiry vs. a guest 401).
+      !!accessToken &&
+      // Prefer refreshToken from localStorage in dev; production uses httpOnly cookie.
+      (!!refreshToken || (typeof window !== 'undefined' && api.defaults.withCredentials));
+
+    // If error is 401 and we haven't retried yet, try refresh token rotation.
+    if (canAttemptRefresh) {
       if (isRefreshing) {
         // Wait for the refresh to complete
         return new Promise((resolve, reject) => {
@@ -142,12 +158,19 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const response = await axios.post(`${API_URL}/api/auth/refresh`, {
-          refreshToken,
-        });
+        const response = await axios.post(
+          `${API_URL}/api/auth/refresh`,
+          refreshToken ? { refreshToken } : undefined,
+          { withCredentials: true }
+        );
 
-        const { accessToken: newAccessToken, refreshToken: newRefreshToken } = response.data.data;
-        setTokens(newAccessToken, newRefreshToken);
+        const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
+          (response.data as any)?.data || {};
+        if (!newAccessToken) {
+          throw new Error('Token refresh did not return a new access token');
+        }
+        // In production, refresh token lives in an httpOnly cookie and won't be returned in JSON.
+        setTokens(newAccessToken, newRefreshToken ?? null);
 
         processQueue(null, newAccessToken);
 

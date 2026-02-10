@@ -93,7 +93,7 @@ const OAuthCallback = () => {
 
       try {
         // Store tokens (use setTokens to update both localStorage and in-memory token)
-        setTokens(accessToken, refreshToken);
+        setTokens(accessToken, refreshToken ?? null);
 
         // Refresh user data in context
         await refreshUser();

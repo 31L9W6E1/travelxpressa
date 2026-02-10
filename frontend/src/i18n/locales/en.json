@@ -32,6 +32,7 @@
     "enabled": "Enabled",
     "disabled": "Disabled",
     "total": "Total",
+    "user": "User",
     "noName": "No name",
     "never": "Never",
     "unknown": "Unknown",
@@ -89,7 +90,51 @@
     "and": "and",
     "privacyPolicy": "Privacy Policy",
     "forgotPassword": "Forgot password?",
-    "rememberMe": "Remember me"
+    "rememberMe": "Remember me",
+    "sr": {
+      "signInDescription": "Enter your credentials to sign in",
+      "signUpDescription": "Create a new account"
+    },
+    "validation": {
+      "emailInvalid": "Please enter a valid email address",
+      "passwordRequired": "Password is required",
+      "nameMin": "Name must be at least {{min}} characters",
+      "passwordMin": "Password must be at least {{min}} characters",
+      "passwordUppercase": "Password must contain at least one uppercase letter",
+      "passwordLowercase": "Password must contain at least one lowercase letter",
+      "passwordNumber": "Password must contain at least one number",
+      "passwordSpecial": "Password must contain at least one special character"
+    },
+    "errors": {
+      "googleUnavailable": "Google login is not available yet",
+      "facebookUnavailable": "Facebook login is not available yet"
+    },
+    "toasts": {
+      "signInSuccess": {
+        "title": "Welcome back!",
+        "description": "You have been signed in successfully."
+      },
+      "signInFailed": {
+        "title": "Sign in failed",
+        "description": "Please check your details and try again."
+      },
+      "registerSuccess": {
+        "title": "Account created!",
+        "description": "Welcome to TravelXpressa."
+      },
+      "registerFailed": {
+        "title": "Registration failed",
+        "description": "Please try again."
+      },
+      "googleUnavailable": {
+        "title": "Google login unavailable",
+        "description": "This feature is coming soon."
+      },
+      "facebookUnavailable": {
+        "title": "Facebook login unavailable",
+        "description": "This feature is coming soon."
+      }
+    }
   },
   "home": {
     "news": "News",
@@ -1065,6 +1110,54 @@
     "supportDescription": "Our support team is available 24/7 to assist with your application.",
     "contactSupport": "Contact Support",
     "paymentInitiated": "Payment initiated! You will receive confirmation shortly.",
-    "ivePaid": "I've Paid"
+    "ivePaid": "I've Paid",
+    "status": {
+      "draft": "Draft",
+      "inProgress": "In Progress",
+      "submitted": "Submitted",
+      "paymentPending": "Payment Pending",
+      "underReview": "Under Review",
+      "approved": "Approved",
+      "rejected": "Rejected"
+    },
+    "timeline": {
+      "applicationStarted": "Application Started",
+      "formCompleted": "Form Completed",
+      "submitted": "Submitted",
+      "paymentReceived": "Payment Received",
+      "underReview": "Under Review",
+      "decisionMade": "Decision Made"
+    },
+    "paymentMethods": {
+      "khanQr": {
+        "name": "Khan Bank QR",
+        "description": "Pay using Khan Bank QR code",
+        "instructions": "Scan the QR code with your Khan Bank app"
+      },
+      "monpay": {
+        "name": "MonPay",
+        "description": "Pay using MonPay wallet",
+        "instructions": "Open MonPay app and scan or enter payment code"
+      },
+      "bankTransfer": {
+        "name": "Bank Transfer",
+        "description": "Direct bank transfer",
+        "instructions": "Transfer to our bank account directly"
+      },
+      "qpay": {
+        "name": "QPay",
+        "description": "Pay using QPay",
+        "instructions": "Scan QR code with any QPay-supported bank app"
+      }
+    },
+    "applicationTitle": "{{visaType}} Visa Application",
+    "visaLabel": "{{visaType}} Visa",
+    "startedOn": "Started {{date}}",
+    "updatedOn": "Updated {{date}}",
+    "paymentModal": {
+      "amount": "Amount",
+      "noteTitle": "Note",
+      "noteBody": "After payment, it may take up to 24 hours for your payment to be confirmed. You will receive an email notification once your payment is processed."
+    }
   }
 }

@@ -240,9 +240,16 @@ export default function Application() {
             Object.values(section).some((v) => String(v || '').trim() !== ''),
           );
           if (hasAnyRestoredValue) {
-            toast.info('Draft loaded', {
-              description: 'Your previous progress has been restored.',
-            });
+            toast.info(
+              t('applicationPage.toasts.draftLoaded.title', {
+                defaultValue: 'Draft loaded',
+              }),
+              {
+                description: t('applicationPage.toasts.draftLoaded.description', {
+                  defaultValue: 'Your previous progress has been restored.',
+                }),
+              },
+            );
           }
         }
       } catch (error) {

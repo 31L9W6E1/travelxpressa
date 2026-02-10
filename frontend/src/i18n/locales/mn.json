@@ -32,6 +32,7 @@
     "enabled": "Идэвхтэй",
     "disabled": "Идэвхгүй",
     "total": "Нийт",
+    "user": "Хэрэглэгч",
     "noName": "Нэргүй",
     "never": "Хэзээ ч үгүй",
     "unknown": "Тодорхойгүй",
@@ -89,7 +90,51 @@
     "and": "болон",
     "privacyPolicy": "Нууцлалын бодлого",
     "forgotPassword": "Нууц үгээ мартсан уу?",
-    "rememberMe": "Намайг сана"
+    "rememberMe": "Намайг сана",
+    "sr": {
+      "signInDescription": "Нэвтрэхийн тулд мэдээллээ оруулна уу",
+      "signUpDescription": "Шинэ бүртгэл үүсгэнэ үү"
+    },
+    "validation": {
+      "emailInvalid": "Зөв имэйл хаяг оруулна уу",
+      "passwordRequired": "Нууц үг шаардлагатай",
+      "nameMin": "Нэр хамгийн багадаа {{min}} тэмдэгттэй байх ёстой",
+      "passwordMin": "Нууц үг хамгийн багадаа {{min}} тэмдэгттэй байх ёстой",
+      "passwordUppercase": "Нууц үг дор хаяж нэг том үсэг агуулсан байх ёстой",
+      "passwordLowercase": "Нууц үг дор хаяж нэг жижиг үсэг агуулсан байх ёстой",
+      "passwordNumber": "Нууц үг дор хаяж нэг тоо агуулсан байх ёстой",
+      "passwordSpecial": "Нууц үг дор хаяж нэг тусгай тэмдэгт агуулсан байх ёстой"
+    },
+    "errors": {
+      "googleUnavailable": "Google-ээр нэвтрэх одоогоор боломжгүй",
+      "facebookUnavailable": "Facebook-ээр нэвтрэх одоогоор боломжгүй"
+    },
+    "toasts": {
+      "signInSuccess": {
+        "title": "Тавтай морил!",
+        "description": "Та амжилттай нэвтэрлээ."
+      },
+      "signInFailed": {
+        "title": "Нэвтрэхэд амжилтгүй",
+        "description": "Мэдээллээ шалгаад дахин оролдоно уу."
+      },
+      "registerSuccess": {
+        "title": "Бүртгэл үүсгэгдлээ!",
+        "description": "TravelXpressa-д тавтай морилно уу."
+      },
+      "registerFailed": {
+        "title": "Бүртгэл амжилтгүй",
+        "description": "Дахин оролдоно уу."
+      },
+      "googleUnavailable": {
+        "title": "Google нэвтрэлт боломжгүй",
+        "description": "Энэ боломж удахгүй нэмэгдэнэ."
+      },
+      "facebookUnavailable": {
+        "title": "Facebook нэвтрэлт боломжгүй",
+        "description": "Энэ боломж удахгүй нэмэгдэнэ."
+      }
+    }
   },
   "home": {
     "news": "Мэдээ",
@@ -1065,6 +1110,54 @@
     "supportDescription": "Манай тусламжийн баг таны өргөдөлд тусалхад 24/7 бэлэн байна.",
     "contactSupport": "Тусламж авах",
     "paymentInitiated": "Төлбөр эхэлсэн! Удахгүй баталгаажуулалт хүлээн авна.",
-    "ivePaid": "Төлсөн"
+    "ivePaid": "Төлсөн",
+    "status": {
+      "draft": "Ноорог",
+      "inProgress": "Явагдаж байна",
+      "submitted": "Илгээсэн",
+      "paymentPending": "Төлбөр хүлээгдэж байна",
+      "underReview": "Шалгаж байна",
+      "approved": "Зөвшөөрсөн",
+      "rejected": "Татгалзсан"
+    },
+    "timeline": {
+      "applicationStarted": "Өргөдөл эхэлсэн",
+      "formCompleted": "Маягт бөглөгдсөн",
+      "submitted": "Илгээсэн",
+      "paymentReceived": "Төлбөр хүлээн авсан",
+      "underReview": "Шалгаж байна",
+      "decisionMade": "Шийдвэр гарсан"
+    },
+    "paymentMethods": {
+      "khanQr": {
+        "name": "Хаан банк QR",
+        "description": "Хаан банкны QR кодоор төлөх",
+        "instructions": "Хаан банкны апп-аа ашиглан QR код скан хийнэ үү"
+      },
+      "monpay": {
+        "name": "MonPay",
+        "description": "MonPay хэтэвчээр төлөх",
+        "instructions": "MonPay апп нээж, QR скан хийх эсвэл төлбөрийн код оруулна уу"
+      },
+      "bankTransfer": {
+        "name": "Банкны шилжүүлэг",
+        "description": "Шууд банкны шилжүүлэг",
+        "instructions": "Манай банкны данс руу шууд шилжүүлнэ үү"
+      },
+      "qpay": {
+        "name": "QPay",
+        "description": "QPay-ээр төлөх",
+        "instructions": "QPay дэмждэг банкны апп-аар QR код скан хийнэ үү"
+      }
+    },
+    "applicationTitle": "{{visaType}} визийн өргөдөл",
+    "visaLabel": "{{visaType}} виз",
+    "startedOn": "Эхэлсэн {{date}}",
+    "updatedOn": "Шинэчлэгдсэн {{date}}",
+    "paymentModal": {
+      "amount": "Дүн",
+      "noteTitle": "Тэмдэглэл",
+      "noteBody": "Төлбөр төлсний дараа баталгаажуулахад 24 цаг хүртэл хугацаа шаардагдаж болзошгүй. Төлбөр боловсруулсаны дараа танд имэйл мэдэгдэл ирнэ."
+    }
   }
 }

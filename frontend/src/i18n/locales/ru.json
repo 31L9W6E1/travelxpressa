@@ -30,7 +30,8 @@
     "processing": "Обработка...",
     "enabled": "Включено",
     "disabled": "Отключено",
-    "total": "Всего"
+    "total": "Всего",
+    "user": "Пользователь"
   },
   "nav": {
     "home": "Главная",
@@ -84,7 +85,51 @@
     "and": "и",
     "privacyPolicy": "Политика конфиденциальности",
     "forgotPassword": "Забыли пароль?",
-    "rememberMe": "Запомнить меня"
+    "rememberMe": "Запомнить меня",
+    "sr": {
+      "signInDescription": "Введите данные для входа",
+      "signUpDescription": "Создайте новый аккаунт"
+    },
+    "validation": {
+      "emailInvalid": "Введите корректный адрес email",
+      "passwordRequired": "Пароль обязателен",
+      "nameMin": "Имя должно быть не короче {{min}} символов",
+      "passwordMin": "Пароль должен быть не короче {{min}} символов",
+      "passwordUppercase": "Пароль должен содержать хотя бы одну заглавную букву",
+      "passwordLowercase": "Пароль должен содержать хотя бы одну строчную букву",
+      "passwordNumber": "Пароль должен содержать хотя бы одну цифру",
+      "passwordSpecial": "Пароль должен содержать хотя бы один специальный символ"
+    },
+    "errors": {
+      "googleUnavailable": "Вход через Google пока недоступен",
+      "facebookUnavailable": "Вход через Facebook пока недоступен"
+    },
+    "toasts": {
+      "signInSuccess": {
+        "title": "С возвращением!",
+        "description": "Вы успешно вошли."
+      },
+      "signInFailed": {
+        "title": "Ошибка входа",
+        "description": "Проверьте данные и попробуйте снова."
+      },
+      "registerSuccess": {
+        "title": "Аккаунт создан!",
+        "description": "Добро пожаловать в TravelXpressa."
+      },
+      "registerFailed": {
+        "title": "Регистрация не удалась",
+        "description": "Пожалуйста, попробуйте снова."
+      },
+      "googleUnavailable": {
+        "title": "Вход через Google недоступен",
+        "description": "Функция скоро появится."
+      },
+      "facebookUnavailable": {
+        "title": "Вход через Facebook недоступен",
+        "description": "Функция скоро появится."
+      }
+    }
   },
   "home": {
     "news": "Новости",
@@ -951,6 +996,54 @@
     "supportDescription": "Наша служба поддержки доступна круглосуточно для помощи с вашей заявкой.",
     "contactSupport": "Связаться с поддержкой",
     "paymentInitiated": "Оплата инициирована! Вы получите подтверждение в ближайшее время.",
-    "ivePaid": "Я оплатил"
+    "ivePaid": "Я оплатил",
+    "status": {
+      "draft": "Черновик",
+      "inProgress": "В процессе",
+      "submitted": "Отправлено",
+      "paymentPending": "Ожидает оплаты",
+      "underReview": "На рассмотрении",
+      "approved": "Одобрено",
+      "rejected": "Отклонено"
+    },
+    "timeline": {
+      "applicationStarted": "Заявка начата",
+      "formCompleted": "Форма заполнена",
+      "submitted": "Отправлено",
+      "paymentReceived": "Оплата получена",
+      "underReview": "На рассмотрении",
+      "decisionMade": "Решение принято"
+    },
+    "paymentMethods": {
+      "khanQr": {
+        "name": "Khan Bank QR",
+        "description": "Оплата по QR Khan Bank",
+        "instructions": "Сканируйте QR-код в приложении Khan Bank"
+      },
+      "monpay": {
+        "name": "MonPay",
+        "description": "Оплата через кошелек MonPay",
+        "instructions": "Откройте MonPay и отсканируйте QR-код или введите код оплаты"
+      },
+      "bankTransfer": {
+        "name": "Банковский перевод",
+        "description": "Прямой банковский перевод",
+        "instructions": "Переведите средства напрямую на наш банковский счет"
+      },
+      "qpay": {
+        "name": "QPay",
+        "description": "Оплата через QPay",
+        "instructions": "Сканируйте QR-код в любом банке, поддерживающем QPay"
+      }
+    },
+    "applicationTitle": "{{visaType}} Заявка на визу",
+    "visaLabel": "{{visaType}} Виза",
+    "startedOn": "Начато {{date}}",
+    "updatedOn": "Обновлено {{date}}",
+    "paymentModal": {
+      "amount": "Сумма",
+      "noteTitle": "Примечание",
+      "noteBody": "После оплаты подтверждение может занять до 24 часов. Вы получите уведомление по email после обработки платежа."
+    }
   }
 }

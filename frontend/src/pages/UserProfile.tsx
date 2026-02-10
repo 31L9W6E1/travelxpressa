@@ -40,7 +40,7 @@ interface Application {
 }
 
 const UserProfile = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
@@ -71,7 +71,7 @@ const UserProfile = () => {
     switch (status) {
       case "SUBMITTED":
         return {
-          label: "Submitted",
+          label: t('userProfile.status.submitted', 'Submitted'),
           color: "text-foreground",
           bgColor: "bg-secondary",
           borderColor: "border-border",
@@ -79,7 +79,7 @@ const UserProfile = () => {
         };
       case "UNDER_REVIEW":
         return {
-          label: "Under Review",
+          label: t('userProfile.status.underReview', 'Under Review'),
           color: "text-foreground",
           bgColor: "bg-secondary",
           borderColor: "border-border",
@@ -87,7 +87,7 @@ const UserProfile = () => {
         };
       case "PAYMENT_PENDING":
         return {
-          label: "Payment Pending",
+          label: t('userProfile.status.paymentPending', 'Payment Pending'),
           color: "text-foreground",
           bgColor: "bg-secondary",
           borderColor: "border-border",
@@ -95,7 +95,7 @@ const UserProfile = () => {
         };
       case "APPROVED":
         return {
-          label: "Approved",
+          label: t('userProfile.status.approved', 'Approved'),
           color: "text-green-600 dark:text-green-400",
           bgColor: "bg-green-100 dark:bg-green-900/30",
           borderColor: "border-green-200 dark:border-green-800",
@@ -103,7 +103,7 @@ const UserProfile = () => {
         };
       case "REJECTED":
         return {
-          label: "Rejected",
+          label: t('userProfile.status.rejected', 'Rejected'),
           color: "text-red-600 dark:text-red-400",
           bgColor: "bg-red-100 dark:bg-red-900/30",
           borderColor: "border-red-200 dark:border-red-800",
@@ -113,7 +113,9 @@ const UserProfile = () => {
       case "IN_PROGRESS":
       default:
         return {
-          label: status === "DRAFT" ? "Draft" : "In Progress",
+          label: status === "DRAFT"
+            ? t('userProfile.status.draft', 'Draft')
+            : t('userProfile.status.inProgress', 'In Progress'),
           color: "text-muted-foreground",
           bgColor: "bg-secondary/50",
           borderColor: "border-border",
@@ -123,42 +125,42 @@ const UserProfile = () => {
   };
 
   const statusTimeline = [
-    { step: 1, label: "Application Started", completed: true },
-    { step: 2, label: "Form Completed", completed: activeApplication?.status !== "DRAFT" && activeApplication?.status !== "IN_PROGRESS" },
-    { step: 3, label: "Submitted", completed: ["SUBMITTED", "PAYMENT_PENDING", "UNDER_REVIEW", "APPROVED"].includes(activeApplication?.status || "") },
-    { step: 4, label: "Payment Received", completed: ["UNDER_REVIEW", "APPROVED"].includes(activeApplication?.status || "") },
-    { step: 5, label: "Under Review", completed: ["UNDER_REVIEW", "APPROVED"].includes(activeApplication?.status || "") },
-    { step: 6, label: "Decision Made", completed: activeApplication?.status === "APPROVED" || activeApplication?.status === "REJECTED" },
+    { step: 1, label: t('userProfile.timeline.applicationStarted', 'Application Started'), completed: true },
+    { step: 2, label: t('userProfile.timeline.formCompleted', 'Form Completed'), completed: activeApplication?.status !== "DRAFT" && activeApplication?.status !== "IN_PROGRESS" },
+    { step: 3, label: t('userProfile.timeline.submitted', 'Submitted'), completed: ["SUBMITTED", "PAYMENT_PENDING", "UNDER_REVIEW", "APPROVED"].includes(activeApplication?.status || "") },
+    { step: 4, label: t('userProfile.timeline.paymentReceived', 'Payment Received'), completed: ["UNDER_REVIEW", "APPROVED"].includes(activeApplication?.status || "") },
+    { step: 5, label: t('userProfile.timeline.underReview', 'Under Review'), completed: ["UNDER_REVIEW", "APPROVED"].includes(activeApplication?.status || "") },
+    { step: 6, label: t('userProfile.timeline.decisionMade', 'Decision Made'), completed: activeApplication?.status === "APPROVED" || activeApplication?.status === "REJECTED" },
   ];
 
   const paymentMethods = [
     {
       id: "khan_qr",
-      name: "Khan Bank QR",
-      description: "Pay using Khan Bank QR code",
+      name: t('userProfile.paymentMethods.khanQr.name', 'Khan Bank QR'),
+      description: t('userProfile.paymentMethods.khanQr.description', 'Pay using Khan Bank QR code'),
       icon: QrCode,
-      instructions: "Scan the QR code with your Khan Bank app"
+      instructions: t('userProfile.paymentMethods.khanQr.instructions', 'Scan the QR code with your Khan Bank app')
     },
     {
       id: "monpay",
-      name: "MonPay",
-      description: "Pay using MonPay wallet",
+      name: t('userProfile.paymentMethods.monpay.name', 'MonPay'),
+      description: t('userProfile.paymentMethods.monpay.description', 'Pay using MonPay wallet'),
       icon: Smartphone,
-      instructions: "Open MonPay app and scan or enter payment code"
+      instructions: t('userProfile.paymentMethods.monpay.instructions', 'Open MonPay app and scan or enter payment code')
     },
     {
       id: "bank_transfer",
-      name: "Bank Transfer",
-      description: "Direct bank transfer",
+      name: t('userProfile.paymentMethods.bankTransfer.name', 'Bank Transfer'),
+      description: t('userProfile.paymentMethods.bankTransfer.description', 'Direct bank transfer'),
       icon: Building2,
-      instructions: "Transfer to our bank account directly"
+      instructions: t('userProfile.paymentMethods.bankTransfer.instructions', 'Transfer to our bank account directly')
     },
     {
       id: "qpay",
-      name: "QPay",
-      description: "Pay using QPay",
+      name: t('userProfile.paymentMethods.qpay.name', 'QPay'),
+      description: t('userProfile.paymentMethods.qpay.description', 'Pay using QPay'),
       icon: Wallet,
-      instructions: "Scan QR code with any QPay-supported bank app"
+      instructions: t('userProfile.paymentMethods.qpay.instructions', 'Scan QR code with any QPay-supported bank app')
     }
   ];
 
@@ -183,12 +185,12 @@ const UserProfile = () => {
               {user?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase()}
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-foreground">{user?.name || "User"}</h1>
+              <h1 className="text-2xl font-bold text-foreground">{user?.name || t('common.user', 'User')}</h1>
               <p className="text-muted-foreground">{user?.email}</p>
               <div className="flex items-center gap-4 mt-2">
                 <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
                   <Calendar className="w-4 h-4" />
-                  {t('userProfile.memberSince', 'Member since')} {new Date().toLocaleDateString()}
+                  {t('userProfile.memberSince', 'Member since')} {new Date().toLocaleDateString(i18n.language)}
                 </span>
               </div>
             </div>
@@ -213,10 +215,16 @@ const UserProfile = () => {
                       </div>
                       <div>
                         <h2 className="text-lg font-semibold text-foreground">
-                          {activeApplication.visaType || "B1/B2"} Visa Application
+                          {t('userProfile.applicationTitle', {
+                            defaultValue: '{{visaType}} Visa Application',
+                            visaType: activeApplication.visaType || "B1/B2",
+                          })}
                         </h2>
                         <p className="text-muted-foreground text-sm">
-                          Started {new Date(activeApplication.createdAt).toLocaleDateString()}
+                          {t('userProfile.startedOn', {
+                            defaultValue: 'Started {{date}}',
+                            date: new Date(activeApplication.createdAt).toLocaleDateString(i18n.language),
+                          })}
                         </p>
                       </div>
                     </div>
@@ -327,9 +335,17 @@ const UserProfile = () => {
                             <FileText className="w-5 h-5 text-foreground" />
                           </div>
                           <div>
-                            <p className="text-foreground font-medium">{app.visaType || "B1/B2"} Visa</p>
+                            <p className="text-foreground font-medium">
+                              {t('userProfile.visaLabel', {
+                                defaultValue: '{{visaType}} Visa',
+                                visaType: app.visaType || "B1/B2",
+                              })}
+                            </p>
                             <p className="text-muted-foreground text-sm">
-                              Updated {new Date(app.updatedAt).toLocaleDateString()}
+                              {t('userProfile.updatedOn', {
+                                defaultValue: 'Updated {{date}}',
+                                date: new Date(app.updatedAt).toLocaleDateString(i18n.language),
+                              })}
                             </p>
                           </div>
                         </div>
@@ -478,7 +494,9 @@ const UserProfile = () => {
             </div>
 
             <div className="text-center mb-6">
-              <p className="text-foreground font-semibold mb-1">Amount: $185.00</p>
+              <p className="text-foreground font-semibold mb-1">
+                {t('userProfile.paymentModal.amount', { defaultValue: 'Amount' })}: $185.00
+              </p>
               <p className="text-muted-foreground text-sm">
                 {paymentMethods.find(m => m.id === selectedPayment)?.instructions}
               </p>
@@ -486,7 +504,13 @@ const UserProfile = () => {
 
             <div className="bg-secondary rounded-lg p-4 mb-6 border border-border">
               <p className="text-xs text-muted-foreground">
-                <strong className="text-foreground">Note:</strong> After payment, it may take up to 24 hours for your payment to be confirmed. You will receive an email notification once your payment is processed.
+                <strong className="text-foreground">
+                  {t('userProfile.paymentModal.noteTitle', { defaultValue: 'Note' })}:
+                </strong>{" "}
+                {t('userProfile.paymentModal.noteBody', {
+                  defaultValue:
+                    'After payment, it may take up to 24 hours for your payment to be confirmed. You will receive an email notification once your payment is processed.',
+                })}
               </p>
             </div>
 

@@ -30,7 +30,8 @@
     "processing": "処理中...",
     "enabled": "有効",
     "disabled": "無効",
-    "total": "合計"
+    "total": "合計",
+    "user": "ユーザー"
   },
   "nav": {
     "home": "ホーム",
@@ -84,7 +85,51 @@
     "and": "および",
     "privacyPolicy": "プライバシーポリシー",
     "forgotPassword": "パスワードをお忘れですか？",
-    "rememberMe": "ログイン状態を維持"
+    "rememberMe": "ログイン状態を維持",
+    "sr": {
+      "signInDescription": "ログイン情報を入力してください",
+      "signUpDescription": "新しいアカウントを作成します"
+    },
+    "validation": {
+      "emailInvalid": "有効なメールアドレスを入力してください",
+      "passwordRequired": "パスワードは必須です",
+      "nameMin": "名前は{{min}}文字以上で入力してください",
+      "passwordMin": "パスワードは{{min}}文字以上で入力してください",
+      "passwordUppercase": "パスワードには大文字を1文字以上含めてください",
+      "passwordLowercase": "パスワードには小文字を1文字以上含めてください",
+      "passwordNumber": "パスワードには数字を1文字以上含めてください",
+      "passwordSpecial": "パスワードには記号を1文字以上含めてください"
+    },
+    "errors": {
+      "googleUnavailable": "Googleでのログインはまだ利用できません",
+      "facebookUnavailable": "Facebookでのログインはまだ利用できません"
+    },
+    "toasts": {
+      "signInSuccess": {
+        "title": "お帰りなさい！",
+        "description": "正常にサインインしました。"
+      },
+      "signInFailed": {
+        "title": "サインインに失敗しました",
+        "description": "内容を確認してもう一度お試しください。"
+      },
+      "registerSuccess": {
+        "title": "アカウントを作成しました！",
+        "description": "TravelXpressaへようこそ。"
+      },
+      "registerFailed": {
+        "title": "登録に失敗しました",
+        "description": "もう一度お試しください。"
+      },
+      "googleUnavailable": {
+        "title": "Googleログイン利用不可",
+        "description": "近日提供予定です。"
+      },
+      "facebookUnavailable": {
+        "title": "Facebookログイン利用不可",
+        "description": "近日提供予定です。"
+      }
+    }
   },
   "home": {
     "news": "ニュース",
@@ -951,6 +996,54 @@
     "supportDescription": "サポートチームが24時間年中無休で申請をサポートします。",
     "contactSupport": "サポートに連絡",
     "paymentInitiated": "支払いが開始されました！まもなく確認が届きます。",
-    "ivePaid": "支払い済み"
+    "ivePaid": "支払い済み",
+    "status": {
+      "draft": "下書き",
+      "inProgress": "進行中",
+      "submitted": "提出済み",
+      "paymentPending": "支払い待ち",
+      "underReview": "審査中",
+      "approved": "承認",
+      "rejected": "却下"
+    },
+    "timeline": {
+      "applicationStarted": "申請開始",
+      "formCompleted": "フォーム完了",
+      "submitted": "提出済み",
+      "paymentReceived": "支払い確認",
+      "underReview": "審査中",
+      "decisionMade": "決定済み"
+    },
+    "paymentMethods": {
+      "khanQr": {
+        "name": "Khan Bank QR",
+        "description": "Khan BankのQRで支払う",
+        "instructions": "Khan BankアプリでQRコードをスキャンしてください"
+      },
+      "monpay": {
+        "name": "MonPay",
+        "description": "MonPayウォレットで支払う",
+        "instructions": "MonPayアプリを開き、スキャンまたは支払いコードを入力してください"
+      },
+      "bankTransfer": {
+        "name": "銀行振込",
+        "description": "銀行振込（直接）",
+        "instructions": "当社の銀行口座へ直接お振込みください"
+      },
+      "qpay": {
+        "name": "QPay",
+        "description": "QPayで支払う",
+        "instructions": "QPay対応の銀行アプリでQRコードをスキャンしてください"
+      }
+    },
+    "applicationTitle": "{{visaType}} ビザ申請",
+    "visaLabel": "{{visaType}} ビザ",
+    "startedOn": "{{date}}に開始",
+    "updatedOn": "{{date}}に更新",
+    "paymentModal": {
+      "amount": "金額",
+      "noteTitle": "注意",
+      "noteBody": "支払い後、確認まで最大24時間かかる場合があります。処理完了後、メールで通知します。"
+    }
   }
 }

@@ -1,5 +1,5 @@
 import { useAuth } from "../contexts/AuthContext";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Plane, Mail, Lock, User, ArrowRight, Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
@@ -29,27 +29,16 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 
-// Login form schema
-const loginSchema = z.object({
-  email: z.string().email("Please enter a valid email address"),
-  password: z.string().min(1, "Password is required"),
-});
+type LoginFormValues = {
+  email: string;
+  password: string;
+};
 
-// Register form schema - must match backend requirements
-const registerSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email("Please enter a valid email address"),
-  password: z
-    .string()
-    .min(8, "Password must be at least 8 characters")
-    .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
-    .regex(/[a-z]/, "Password must contain at least one lowercase letter")
-    .regex(/[0-9]/, "Password must contain at least one number")
-    .regex(/[^A-Za-z0-9]/, "Password must contain at least one special character"),
-});
-
-type LoginFormValues = z.infer<typeof loginSchema>;
-type RegisterFormValues = z.infer<typeof registerSchema>;
+type RegisterFormValues = {
+  name: string;
+  email: string;
+  password: string;
+};
 
 // Google icon SVG component
 const GoogleIcon = () => (
@@ -81,7 +70,7 @@ const FacebookIcon = () => (
 );
 
 const Login = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   // Rename to avoid conflict with react-hook-form's register
   const { login: authLogin, register: authRegister } = useAuth();
   const navigate = useNavigate();
@@ -89,6 +78,89 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSocialLoading, setIsSocialLoading] = useState<string | null>(null);
   const [error, setError] = useState("");
+
+  // Build schemas inside the component so validation messages follow the selected language.
+  const loginSchema = useMemo(
+    () =>
+      z.object({
+        email: z
+          .string()
+          .email(
+            t("auth.validation.emailInvalid", {
+              defaultValue: "Please enter a valid email address",
+            }),
+          ),
+        password: z
+          .string()
+          .min(
+            1,
+            t("auth.validation.passwordRequired", {
+              defaultValue: "Password is required",
+            }),
+          ),
+      }),
+    [i18n.language, t],
+  );
+
+  // Register form schema must match backend requirements.
+  const registerSchema = useMemo(
+    () =>
+      z.object({
+        name: z
+          .string()
+          .min(
+            2,
+            t("auth.validation.nameMin", {
+              defaultValue: "Name must be at least 2 characters",
+              min: 2,
+            }),
+          ),
+        email: z
+          .string()
+          .email(
+            t("auth.validation.emailInvalid", {
+              defaultValue: "Please enter a valid email address",
+            }),
+          ),
+        password: z
+          .string()
+          .min(
+            8,
+            t("auth.validation.passwordMin", {
+              defaultValue: "Password must be at least 8 characters",
+              min: 8,
+            }),
+          )
+          .regex(
+            /[A-Z]/,
+            t("auth.validation.passwordUppercase", {
+              defaultValue:
+                "Password must contain at least one uppercase letter",
+            }),
+          )
+          .regex(
+            /[a-z]/,
+            t("auth.validation.passwordLowercase", {
+              defaultValue:
+                "Password must contain at least one lowercase letter",
+            }),
+          )
+          .regex(
+            /[0-9]/,
+            t("auth.validation.passwordNumber", {
+              defaultValue: "Password must contain at least one number",
+            }),
+          )
+          .regex(
+            /[^A-Za-z0-9]/,
+            t("auth.validation.passwordSpecial", {
+              defaultValue:
+                "Password must contain at least one special character",
+            }),
+          ),
+      }),
+    [i18n.language, t],
+  );
 
   // Login form
   const loginForm = useForm<LoginFormValues>({
@@ -116,9 +188,16 @@ const Login = () => {
     try {
       const loggedInUser = await authLogin(values.email, values.password);
 
-      toast.success("Welcome back!", {
-        description: "You have been signed in successfully.",
-      });
+      toast.success(
+        t("auth.toasts.signInSuccess.title", {
+          defaultValue: "Welcome back!",
+        }),
+        {
+          description: t("auth.toasts.signInSuccess.description", {
+            defaultValue: "You have been signed in successfully.",
+          }),
+        },
+      );
 
       // Admin users go directly to admin dashboard
       if (loggedInUser?.role === 'ADMIN') {
@@ -131,9 +210,18 @@ const Login = () => {
       navigate(selectedCountry ? "/ready" : "/select-country");
     } catch (err: any) {
       setError(err.message);
-      toast.error("Sign in failed", {
-        description: err.message,
-      });
+      toast.error(
+        t("auth.toasts.signInFailed.title", {
+          defaultValue: "Sign in failed",
+        }),
+        {
+          description:
+            err?.message ||
+            t("auth.toasts.signInFailed.description", {
+              defaultValue: "Please check your details and try again.",
+            }),
+        },
+      );
     } finally {
       setIsLoading(false);
     }
@@ -145,16 +233,32 @@ const Login = () => {
 
     try {
       await authRegister(values.email, values.password, values.name);
-      toast.success("Account created!", {
-        description: "Welcome to TravelXpressa.",
-      });
+      toast.success(
+        t("auth.toasts.registerSuccess.title", {
+          defaultValue: "Account created!",
+        }),
+        {
+          description: t("auth.toasts.registerSuccess.description", {
+            defaultValue: "Welcome to TravelXpressa.",
+          }),
+        },
+      );
       // New users always go to country selection
       navigate("/select-country");
     } catch (err: any) {
       setError(err.message);
-      toast.error("Registration failed", {
-        description: err.message,
-      });
+      toast.error(
+        t("auth.toasts.registerFailed.title", {
+          defaultValue: "Registration failed",
+        }),
+        {
+          description:
+            err?.message ||
+            t("auth.toasts.registerFailed.description", {
+              defaultValue: "Please try again.",
+            }),
+        },
+      );
     } finally {
       setIsLoading(false);
     }
@@ -168,10 +272,21 @@ const Login = () => {
       const backendUrl = getApiBaseUrl();
       window.location.href = `${backendUrl}/api/auth/google`;
     } catch (err: any) {
-      setError("Google login is not available yet");
-      toast.error("Google login unavailable", {
-        description: "This feature is coming soon.",
-      });
+      setError(
+        t("auth.errors.googleUnavailable", {
+          defaultValue: "Google login is not available yet",
+        }),
+      );
+      toast.error(
+        t("auth.toasts.googleUnavailable.title", {
+          defaultValue: "Google login unavailable",
+        }),
+        {
+          description: t("auth.toasts.googleUnavailable.description", {
+            defaultValue: "This feature is coming soon.",
+          }),
+        },
+      );
       setIsSocialLoading(null);
     }
   };
@@ -184,10 +299,21 @@ const Login = () => {
       const backendUrl = getApiBaseUrl();
       window.location.href = `${backendUrl}/api/auth/facebook`;
     } catch (err: any) {
-      setError("Facebook login is not available yet");
-      toast.error("Facebook login unavailable", {
-        description: "This feature is coming soon.",
-      });
+      setError(
+        t("auth.errors.facebookUnavailable", {
+          defaultValue: "Facebook login is not available yet",
+        }),
+      );
+      toast.error(
+        t("auth.toasts.facebookUnavailable.title", {
+          defaultValue: "Facebook login unavailable",
+        }),
+        {
+          description: t("auth.toasts.facebookUnavailable.description", {
+            defaultValue: "This feature is coming soon.",
+          }),
+        },
+      );
       setIsSocialLoading(null);
     }
   };
@@ -223,9 +349,15 @@ const Login = () => {
         {/* Form Card */}
         <Card>
           <CardHeader className="sr-only">
-            <CardTitle>{isLogin ? "Sign In" : "Sign Up"}</CardTitle>
+            <CardTitle>{isLogin ? t("auth.signIn") : t("auth.signUp")}</CardTitle>
             <CardDescription>
-              {isLogin ? "Enter your credentials to sign in" : "Create a new account"}
+              {isLogin
+                ? t("auth.sr.signInDescription", {
+                    defaultValue: "Enter your credentials to sign in",
+                  })
+                : t("auth.sr.signUpDescription", {
+                    defaultValue: "Create a new account",
+                  })}
             </CardDescription>
           </CardHeader>
           <CardContent className="pt-6">

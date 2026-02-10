@@ -30,7 +30,8 @@
     "processing": "处理中...",
     "enabled": "已启用",
     "disabled": "已禁用",
-    "total": "总计"
+    "total": "总计",
+    "user": "用户"
   },
   "nav": {
     "home": "首页",
@@ -84,7 +85,51 @@
     "and": "和",
     "privacyPolicy": "隐私政策",
     "forgotPassword": "忘记密码？",
-    "rememberMe": "记住我"
+    "rememberMe": "记住我",
+    "sr": {
+      "signInDescription": "请输入凭据以登录",
+      "signUpDescription": "创建新账户"
+    },
+    "validation": {
+      "emailInvalid": "请输入有效的电子邮箱地址",
+      "passwordRequired": "请输入密码",
+      "nameMin": "姓名至少需要 {{min}} 个字符",
+      "passwordMin": "密码至少需要 {{min}} 个字符",
+      "passwordUppercase": "密码必须包含至少一个大写字母",
+      "passwordLowercase": "密码必须包含至少一个小写字母",
+      "passwordNumber": "密码必须包含至少一个数字",
+      "passwordSpecial": "密码必须包含至少一个特殊字符"
+    },
+    "errors": {
+      "googleUnavailable": "暂时无法使用 Google 登录",
+      "facebookUnavailable": "暂时无法使用 Facebook 登录"
+    },
+    "toasts": {
+      "signInSuccess": {
+        "title": "欢迎回来！",
+        "description": "您已成功登录。"
+      },
+      "signInFailed": {
+        "title": "登录失败",
+        "description": "请检查信息后重试。"
+      },
+      "registerSuccess": {
+        "title": "账户已创建！",
+        "description": "欢迎使用 TravelXpressa。"
+      },
+      "registerFailed": {
+        "title": "注册失败",
+        "description": "请重试。"
+      },
+      "googleUnavailable": {
+        "title": "Google 登录不可用",
+        "description": "该功能即将上线。"
+      },
+      "facebookUnavailable": {
+        "title": "Facebook 登录不可用",
+        "description": "该功能即将上线。"
+      }
+    }
   },
   "home": {
     "news": "新闻",
@@ -951,6 +996,54 @@
     "supportDescription": "我们的支持团队24/7全天候为您的申请提供帮助。",
     "contactSupport": "联系支持",
     "paymentInitiated": "付款已发起！您将很快收到确认。",
-    "ivePaid": "我已付款"
+    "ivePaid": "我已付款",
+    "status": {
+      "draft": "草稿",
+      "inProgress": "进行中",
+      "submitted": "已提交",
+      "paymentPending": "待付款",
+      "underReview": "审核中",
+      "approved": "已批准",
+      "rejected": "已拒绝"
+    },
+    "timeline": {
+      "applicationStarted": "申请已开始",
+      "formCompleted": "表格已完成",
+      "submitted": "已提交",
+      "paymentReceived": "已收到付款",
+      "underReview": "审核中",
+      "decisionMade": "已做出决定"
+    },
+    "paymentMethods": {
+      "khanQr": {
+        "name": "Khan Bank QR",
+        "description": "使用 Khan Bank 二维码付款",
+        "instructions": "使用 Khan Bank 应用扫描二维码"
+      },
+      "monpay": {
+        "name": "MonPay",
+        "description": "使用 MonPay 钱包付款",
+        "instructions": "打开 MonPay 应用并扫描或输入付款码"
+      },
+      "bankTransfer": {
+        "name": "银行转账",
+        "description": "直接银行转账",
+        "instructions": "直接转账至我们的银行账户"
+      },
+      "qpay": {
+        "name": "QPay",
+        "description": "使用 QPay 付款",
+        "instructions": "使用任意支持 QPay 的银行应用扫描二维码"
+      }
+    },
+    "applicationTitle": "{{visaType}} 签证申请",
+    "visaLabel": "{{visaType}} 签证",
+    "startedOn": "开始于 {{date}}",
+    "updatedOn": "更新于 {{date}}",
+    "paymentModal": {
+      "amount": "金额",
+      "noteTitle": "提示",
+      "noteBody": "付款后确认可能需要最长 24 小时。付款处理完成后，您将收到邮件通知。"
+    }
   }
 }

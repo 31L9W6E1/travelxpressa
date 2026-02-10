@@ -194,73 +194,7 @@ interface Stats {
   };
 }
 
-// Chart configurations
-const applicationChartConfig = {
-  submitted: {
-    label: "Submitted",
-    color: "hsl(var(--chart-1))",
-  },
-  approved: {
-    label: "Approved",
-    color: "hsl(var(--chart-2))",
-  },
-  pending: {
-    label: "Pending",
-    color: "hsl(var(--chart-3))",
-  },
-  rejected: {
-    label: "Rejected",
-    color: "hsl(var(--chart-4))",
-  },
-} satisfies ChartConfig;
-
-const userGrowthConfig = {
-  users: {
-    label: "Users",
-    color: "hsl(var(--chart-1))",
-  },
-} satisfies ChartConfig;
-
-const applicationsUsersChartConfig = {
-  applications: {
-    label: "Applications",
-    color: "hsl(var(--chart-1))",
-  },
-  users: {
-    label: "Users",
-    color: "hsl(var(--chart-2))",
-  },
-} satisfies ChartConfig;
-
-const applicationStatusRingsConfig = {
-  count: {
-    label: "Applications",
-  },
-  draft: {
-    label: "Draft",
-    color: "#94a3b8",
-  },
-  inProgress: {
-    label: "In Progress",
-    color: "#38bdf8",
-  },
-  submitted: {
-    label: "Submitted",
-    color: "#818cf8",
-  },
-  underReview: {
-    label: "Under Review",
-    color: "#a78bfa",
-  },
-  completed: {
-    label: "Completed",
-    color: "#34d399",
-  },
-  rejected: {
-    label: "Rejected",
-    color: "#f87171",
-  },
-} satisfies ChartConfig;
+// Chart configurations are defined inside the component so labels can be localized.
 
 type AdminTab =
   | "overview"
@@ -296,6 +230,73 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
   const { section } = useParams<{ section?: string }>();
   const tabFromUrl = getAdminTabFromSection(section);
+
+  const applicationChartConfig = {
+    submitted: {
+      label: t("dashboard.status.Submitted", "Submitted"),
+      color: "hsl(var(--chart-1))",
+    },
+    approved: {
+      label: t("dashboard.status.Approved", "Approved"),
+      color: "hsl(var(--chart-2))",
+    },
+    pending: {
+      label: t("dashboard.status.pending", "Pending"),
+      color: "hsl(var(--chart-3))",
+    },
+    rejected: {
+      label: t("dashboard.status.Rejected", "Rejected"),
+      color: "hsl(var(--chart-4))",
+    },
+  } satisfies ChartConfig;
+
+  const userGrowthConfig = {
+    users: {
+      label: t("dashboard.tabs.users", "Users"),
+      color: "hsl(var(--chart-1))",
+    },
+  } satisfies ChartConfig;
+
+  const applicationsUsersChartConfig = {
+    applications: {
+      label: t("dashboard.stats.applications", "Applications"),
+      color: "hsl(var(--chart-1))",
+    },
+    users: {
+      label: t("dashboard.tabs.users", "Users"),
+      color: "hsl(var(--chart-2))",
+    },
+  } satisfies ChartConfig;
+
+  const applicationStatusRingsConfig = {
+    count: {
+      label: t("dashboard.stats.applications", "Applications"),
+    },
+    draft: {
+      label: t("dashboard.status.Draft", "Draft"),
+      color: "#94a3b8",
+    },
+    inProgress: {
+      label: t("dashboard.status.InProgress", "In Progress"),
+      color: "#38bdf8",
+    },
+    submitted: {
+      label: t("dashboard.status.Submitted", "Submitted"),
+      color: "#818cf8",
+    },
+    underReview: {
+      label: t("dashboard.status.UnderReview", "Under Review"),
+      color: "#a78bfa",
+    },
+    completed: {
+      label: t("dashboard.status.Completed", "Completed"),
+      color: "#34d399",
+    },
+    rejected: {
+      label: t("dashboard.status.Rejected", "Rejected"),
+      color: "#f87171",
+    },
+  } satisfies ChartConfig;
 
   const [activeTab, setActiveTab] = useState<AdminTab>(tabFromUrl);
   const [users, setUsers] = useState<UserData[]>([]);

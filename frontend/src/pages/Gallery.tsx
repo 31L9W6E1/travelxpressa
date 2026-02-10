@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
+import api from "@/api/client";
+import { getFullImageUrl } from "@/api/upload";
 
 // Placeholder images - will be replaced with API/CMS data later
 const galleryImages = [
@@ -98,17 +100,75 @@ const galleryImages = [
   },
 ];
 
-const categories = ["all", "destinations", "nature", "landmarks", "travel"];
+type GalleryItem = {
+  id: string | number;
+  src: string;
+  alt: string;
+  category: string;
+};
 
 const Gallery = () => {
   const { t } = useTranslation();
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [selectedImage, setSelectedImage] = useState<typeof galleryImages[0] | null>(null);
+  const [selectedImage, setSelectedImage] = useState<GalleryItem | null>(null);
+  const [uploadedImages, setUploadedImages] = useState<GalleryItem[] | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const fetchPublicGallery = async () => {
+      try {
+        const res = await api.get("/api/upload/public-gallery");
+        const images = res.data?.data?.images;
+        if (!Array.isArray(images)) {
+          if (!cancelled) setUploadedImages([]);
+          return;
+        }
+
+        const mapped: GalleryItem[] = images.map((img: any) => {
+          const filename = String(img?.filename || "");
+          const url = String(img?.url || "");
+          return {
+            id: filename || url || crypto.randomUUID(),
+            src: getFullImageUrl(url),
+            alt: filename || t("gallery.uploadedImage", "Uploaded image"),
+            category: "uploads",
+          };
+        });
+
+        if (!cancelled) setUploadedImages(mapped);
+      } catch {
+        // If the backend gallery isn't configured yet, keep placeholders.
+        if (!cancelled) setUploadedImages([]);
+      }
+    };
+
+    void fetchPublicGallery();
+    return () => {
+      cancelled = true;
+    };
+  }, [t]);
+
+  const usingUploads = (uploadedImages?.length ?? 0) > 0;
+
+  useEffect(() => {
+    if (usingUploads) {
+      setSelectedCategory("all");
+    }
+  }, [usingUploads]);
+
+  const categories = useMemo(() => {
+    return usingUploads ? ["all"] : ["all", "destinations", "nature", "landmarks", "travel"];
+  }, [usingUploads]);
+
+  const galleryItems: GalleryItem[] = usingUploads
+    ? uploadedImages || []
+    : (galleryImages as unknown as GalleryItem[]);
 
   const filteredImages =
     selectedCategory === "all"
-      ? galleryImages
-      : galleryImages.filter((img) => img.category === selectedCategory);
+      ? galleryItems
+      : galleryItems.filter((img) => img.category === selectedCategory);
 
   return (
     <div className="min-h-screen bg-background text-foreground pt-20">
@@ -131,21 +191,26 @@ const Gallery = () => {
           </div>
 
           {/* Category Filter */}
-          <div className="flex flex-wrap justify-center gap-2 mt-8">
-            {categories.map((category) => (
-              <button
-                key={category}
-                onClick={() => setSelectedCategory(category)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
-                  selectedCategory === category
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
-                }`}
-              >
-                {t(`gallery.categories.${category}`, category.charAt(0).toUpperCase() + category.slice(1))}
-              </button>
-            ))}
-          </div>
+          {categories.length > 1 && (
+            <div className="flex flex-wrap justify-center gap-2 mt-8">
+              {categories.map((category) => (
+                <button
+                  key={category}
+                  onClick={() => setSelectedCategory(category)}
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                    selectedCategory === category
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                  }`}
+                >
+                  {t(
+                    `gallery.categories.${category}`,
+                    category.charAt(0).toUpperCase() + category.slice(1)
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -179,7 +244,9 @@ const Gallery = () => {
                     {image.alt}
                   </p>
                   <Badge variant="secondary" className="mt-2 text-xs">
-                    {image.category}
+                    {image.category === "uploads"
+                      ? t("gallery.categories.uploads", "Uploads")
+                      : image.category}
                   </Badge>
                 </div>
               </Card>

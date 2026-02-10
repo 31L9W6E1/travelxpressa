@@ -165,9 +165,9 @@ const Home = () => {
       {/* News Ticker - Glass morphism style */}
       <div className="fixed top-16 left-0 right-0 z-40 ticker-bar text-gray-300 overflow-hidden">
         <div className="flex items-center h-10">
-          <div className="flex-shrink-0 px-4 bg-primary/20 backdrop-blur-sm h-full flex items-center gap-2 z-10 text-gray-200">
-            <Bell className="w-3.5 h-3.5 text-gray-200" />
-            <span className="text-xs font-semibold uppercase tracking-wide text-gray-200">
+          <div className="flex-shrink-0 px-4 bg-primary/20 backdrop-blur-sm h-full flex items-center gap-2 z-10 text-gray-300">
+            <Bell className="w-3.5 h-3.5 text-gray-300" />
+            <span className="text-xs font-semibold uppercase tracking-wide text-gray-300">
               {t("home.news")}
             </span>
           </div>

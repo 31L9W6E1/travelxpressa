@@ -48,6 +48,7 @@
     "helmet": "^7.1.0",
     "jsonwebtoken": "^9.0.3",
     "multer": "^2.0.2",
+    "nodemailer": "^8.0.1",
     "prisma": "^5.22.0",
     "zod": "^3.25.0"
   },
@@ -60,6 +61,7 @@
     "@types/jest": "^29.5.12",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^25.0.9",
+    "@types/nodemailer": "^7.0.9",
     "@types/supertest": "^6.0.2",
     "@typescript-eslint/eslint-plugin": "^7.0.0",
     "@typescript-eslint/parser": "^7.0.0",

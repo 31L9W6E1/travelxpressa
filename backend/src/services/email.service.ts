@@ -389,7 +389,7 @@ class EmailService {
     });
 
     // Verify connection
-    this.transporter.verify((error) => {
+    this.transporter.verify((error: Error | null) => {
       if (error) {
         logger.error('Email transporter verification failed', error);
         this.transporter = null;

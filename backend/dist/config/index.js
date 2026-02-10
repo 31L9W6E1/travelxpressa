@@ -81,6 +81,16 @@ exports.config = {
         enable2FA: process.env.ENABLE_2FA === 'true',
         enableAgentMode: process.env.ENABLE_AGENT_MODE === 'true',
     },
+    // QPay Payment Gateway
+    qpay: {
+        baseUrl: process.env.QPAY_BASE_URL || 'https://merchant.qpay.mn/v2',
+        sandboxUrl: 'https://merchant-sandbox.qpay.mn/v2',
+        username: process.env.QPAY_USERNAME || '',
+        password: process.env.QPAY_PASSWORD || '',
+        invoiceCode: process.env.QPAY_INVOICE_CODE || '',
+        callbackUrl: process.env.QPAY_CALLBACK_URL || '',
+        useSandbox: process.env.QPAY_USE_SANDBOX === 'true',
+    },
     isProduction: process.env.NODE_ENV === 'production',
     isDevelopment: process.env.NODE_ENV === 'development',
     isTest: process.env.NODE_ENV === 'test',

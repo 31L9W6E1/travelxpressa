@@ -43,6 +43,15 @@ export declare const config: {
         enable2FA: boolean;
         enableAgentMode: boolean;
     };
+    qpay: {
+        baseUrl: string;
+        sandboxUrl: string;
+        username: string;
+        password: string;
+        invoiceCode: string;
+        callbackUrl: string;
+        useSandbox: boolean;
+    };
     isProduction: boolean;
     isDevelopment: boolean;
     isTest: boolean;

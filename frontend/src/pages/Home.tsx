@@ -134,15 +134,21 @@ const Home = () => {
       {/* News Ticker - Fixed at top below navbar */}
       <div className="fixed top-16 left-0 right-0 z-40 bg-transparent text-foreground overflow-hidden">
         <div className="flex items-center h-10">
-          <div className="flex-shrink-0 px-4 bg-transparent h-full flex items-center gap-2">
-            <Bell className="w-4 h-4" />
+          <div className="flex-shrink-0 px-4 bg-transparent h-full flex items-center gap-2 z-10">
+            <Bell className="w-4 h-4 text-primary" />
             <span className="text-sm font-semibold">{t("home.news")}</span>
           </div>
-          <div className="flex-1 overflow-hidden">
-            <div className="animate-ticker whitespace-nowrap flex min-w-max">
-              {/* Duplicate content for seamless loop */}
-              {[...tickerItems, ...tickerItems].map((item, index) => (
-                <span key={index} className="inline-block px-8 text-sm">
+          <div className="ticker-wrapper">
+            <div className="animate-ticker">
+              {/* First set of items */}
+              {tickerItems.map((item, index) => (
+                <span key={`a-${index}`} className="inline-block px-8 text-sm whitespace-nowrap">
+                  {item}
+                </span>
+              ))}
+              {/* Duplicate set for seamless loop */}
+              {tickerItems.map((item, index) => (
+                <span key={`b-${index}`} className="inline-block px-8 text-sm whitespace-nowrap">
                   {item}
                 </span>
               ))}

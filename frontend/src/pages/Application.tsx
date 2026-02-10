@@ -1135,6 +1135,19 @@ export default function Application() {
           </div>
         </div>
       </div>
+
+      {/* Payment Modal */}
+      {applicationId && (
+        <PaymentModal
+          isOpen={showPaymentModal}
+          onClose={() => setShowPaymentModal(false)}
+          applicationId={applicationId}
+          serviceType="VISA_APPLICATION"
+          amount={150000}
+          description={`DS-160 Visa Application - ${formData.personalInfo.surnames} ${formData.personalInfo.givenNames}`}
+          onPaymentSuccess={handlePaymentSuccess}
+        />
+      )}
     </div>
   );
 }

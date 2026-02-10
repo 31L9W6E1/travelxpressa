@@ -145,7 +145,7 @@ class QPayService {
       throw new Error(`QPay authentication failed: ${response.status}`);
     }
 
-    const data: QPayTokenResponse = await response.json();
+    const data = await response.json() as QPayTokenResponse;
     const now = Date.now();
 
     this.tokenCache = {
@@ -180,7 +180,7 @@ class QPayService {
       throw new Error('Token refresh failed');
     }
 
-    const data: QPayTokenResponse = await response.json();
+    const data = await response.json() as QPayTokenResponse;
     const now = Date.now();
 
     this.tokenCache = {
@@ -222,7 +222,7 @@ class QPayService {
       throw new Error(`QPay API error: ${response.status} - ${errorText}`);
     }
 
-    return response.json();
+    return await response.json() as T;
   }
 
   /**

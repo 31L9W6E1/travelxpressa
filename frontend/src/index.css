@@ -175,7 +175,7 @@
 /* News Ticker Animation */
 @keyframes ticker {
   0% {
-    transform: translateX(0);
+    transform: translateX(0%);
   }
   100% {
     transform: translateX(-50%);
@@ -183,12 +183,25 @@
 }
 
 .animate-ticker {
-  animation: ticker 30s linear infinite;
+  display: inline-flex;
+  animation: ticker 40s linear infinite;
   will-change: transform;
 }
 
 .animate-ticker:hover {
   animation-play-state: paused;
+}
+
+/* Ticker container wrapper */
+.ticker-wrapper {
+  display: flex;
+  overflow: hidden;
+  width: 100%;
+}
+
+.ticker-content {
+  display: inline-flex;
+  white-space: nowrap;
 }
 
 /* Page Entry Animations - respects prefers-reduced-motion */

@@ -51,6 +51,7 @@ export interface ServicePrice {
 
 export interface CreatePaymentParams {
   serviceType: PaymentServiceType;
+  amount?: number;
   description?: string;
   applicationId?: string;
 }

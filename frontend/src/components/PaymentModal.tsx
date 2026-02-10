@@ -18,7 +18,9 @@ interface PaymentModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: (payment: Payment) => void;
+  onPaymentSuccess?: (payment: Payment) => void; // Alias for onSuccess
   serviceType: PaymentServiceType;
+  amount?: number;
   description?: string;
   applicationId?: string;
 }
@@ -29,10 +31,14 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
   isOpen,
   onClose,
   onSuccess,
+  onPaymentSuccess,
   serviceType,
+  amount,
   description,
   applicationId,
 }) => {
+  // Use onPaymentSuccess as alias for onSuccess
+  const handleSuccess = onPaymentSuccess || onSuccess;
   const [step, setStep] = useState<ModalStep>('loading');
   const [payment, setPayment] = useState<Payment | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -63,6 +69,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
     try {
       const response = await createPayment({
         serviceType,
+        amount,
         description,
         applicationId,
       });
@@ -93,7 +100,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
         if (response.data.status === 'PAID') {
           setPayment({ ...payment, status: 'PAID' });
           setStep('success');
-          onSuccess?.({ ...payment, status: 'PAID' });
+          handleSuccess?.({ ...payment, status: 'PAID' });
         } else if (response.data.status === 'FAILED') {
           setStep('failed');
         }

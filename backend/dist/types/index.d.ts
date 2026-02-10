@@ -29,9 +29,11 @@ export declare enum VisaType {
 export declare enum ApplicationStatus {
     DRAFT = "DRAFT",
     IN_PROGRESS = "IN_PROGRESS",
+    PAYMENT_PENDING = "PAYMENT_PENDING",
     SUBMITTED = "SUBMITTED",
     UNDER_REVIEW = "UNDER_REVIEW",
-    COMPLETED = "COMPLETED"
+    COMPLETED = "COMPLETED",
+    REJECTED = "REJECTED"
 }
 export interface JWTPayload {
     userId: string;
@@ -189,5 +191,86 @@ export interface DS160Application {
     createdAt: Date;
     updatedAt: Date;
     submittedAt?: Date;
+}
+export declare enum PaymentStatus {
+    PENDING = "PENDING",
+    PROCESSING = "PROCESSING",
+    PAID = "PAID",
+    FAILED = "FAILED",
+    CANCELLED = "CANCELLED",
+    REFUNDED = "REFUNDED",
+    PARTIALLY_REFUNDED = "PARTIALLY_REFUNDED"
+}
+export declare enum PaymentProvider {
+    QPAY = "QPAY",
+    KHAN_BANK = "KHAN_BANK",
+    MONPAY = "MONPAY",
+    SOCIALPAY = "SOCIALPAY",
+    BANK_TRANSFER = "BANK_TRANSFER"
+}
+export declare enum PaymentServiceType {
+    VISA_APPLICATION = "VISA_APPLICATION",
+    CONSULTATION = "CONSULTATION",
+    DOCUMENT_REVIEW = "DOCUMENT_REVIEW",
+    RUSH_PROCESSING = "RUSH_PROCESSING"
+}
+export interface CreatePaymentDTO {
+    userId: string;
+    serviceType: PaymentServiceType;
+    amount: number;
+    currency?: string;
+    description?: string;
+    applicationId?: string;
+    metadata?: Record<string, unknown>;
+}
+export interface PaymentResponse {
+    id: string;
+    invoiceNo: string;
+    amount: number;
+    currency: string;
+    status: PaymentStatus;
+    provider: PaymentProvider;
+    serviceType: PaymentServiceType;
+    description?: string;
+    qrCode?: string;
+    qrImage?: string;
+    deepLinks?: Array<{
+        name: string;
+        logo: string;
+        link: string;
+    }>;
+    expiresAt?: Date;
+    createdAt: Date;
+}
+export interface PaymentCallbackData {
+    invoiceId: string;
+    paymentId?: string;
+    paymentStatus?: string;
+    paymentAmount?: number;
+    paymentDate?: string;
+}
+export interface PaymentSummary {
+    totalRevenue: number;
+    totalTransactions: number;
+    successfulPayments: number;
+    failedPayments: number;
+    pendingPayments: number;
+    refundedAmount: number;
+    byServiceType: Record<string, {
+        count: number;
+        revenue: number;
+    }>;
+    byProvider: Record<string, {
+        count: number;
+        revenue: number;
+    }>;
+}
+export interface PaymentListParams extends PaginationParams {
+    status?: PaymentStatus;
+    provider?: PaymentProvider;
+    serviceType?: PaymentServiceType;
+    userId?: string;
+    startDate?: Date;
+    endDate?: Date;
 }
 //# sourceMappingURL=index.d.ts.map

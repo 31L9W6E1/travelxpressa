@@ -9,6 +9,12 @@ import { config } from '../config';
 
 const router = Router();
 
+// Helper to safely extract string param
+const getIdParam = (req: Request): string => {
+  const id = req.params.id;
+  return Array.isArray(id) ? id[0] : id;
+};
+
 // Service prices in MNT (Mongolian Tugrik)
 const SERVICE_PRICES: Record<string, number> = {
   VISA_APPLICATION: 150000,    // 150,000 MNT (~$44)
@@ -281,7 +287,7 @@ router.get(
   async (req: Request, res: Response) => {
     try {
       const { userId, role } = (req as AuthenticatedRequest).user;
-      const { id } = req.params;
+      const id = getIdParam(req);
 
       const payment = await prisma.payment.findUnique({
         where: { id },
@@ -342,7 +348,7 @@ router.get(
   async (req: Request, res: Response) => {
     try {
       const { userId, role } = (req as AuthenticatedRequest).user;
-      const { id } = req.params;
+      const id = getIdParam(req);
 
       const payment = await prisma.payment.findUnique({
         where: { id },
@@ -423,7 +429,7 @@ router.post(
   async (req: Request, res: Response) => {
     try {
       const { userId, role } = (req as AuthenticatedRequest).user;
-      const { id } = req.params;
+      const id = getIdParam(req);
 
       const payment = await prisma.payment.findUnique({
         where: { id },
@@ -746,7 +752,7 @@ router.post(
   requireRole(UserRole.ADMIN),
   async (req: Request, res: Response) => {
     try {
-      const { id } = req.params;
+      const id = getIdParam(req);
       const { reason, amount } = req.body;
 
       const payment = await prisma.payment.findUnique({

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ApplicationStatus = exports.VisaType = exports.ServiceType = exports.InquiryStatus = exports.UserRole = void 0;
+exports.PaymentServiceType = exports.PaymentProvider = exports.PaymentStatus = exports.ApplicationStatus = exports.VisaType = exports.ServiceType = exports.InquiryStatus = exports.UserRole = void 0;
 // User roles enum
 var UserRole;
 (function (UserRole) {
@@ -41,8 +41,36 @@ var ApplicationStatus;
 (function (ApplicationStatus) {
     ApplicationStatus["DRAFT"] = "DRAFT";
     ApplicationStatus["IN_PROGRESS"] = "IN_PROGRESS";
+    ApplicationStatus["PAYMENT_PENDING"] = "PAYMENT_PENDING";
     ApplicationStatus["SUBMITTED"] = "SUBMITTED";
     ApplicationStatus["UNDER_REVIEW"] = "UNDER_REVIEW";
     ApplicationStatus["COMPLETED"] = "COMPLETED";
+    ApplicationStatus["REJECTED"] = "REJECTED";
 })(ApplicationStatus || (exports.ApplicationStatus = ApplicationStatus = {}));
+// Payment types
+var PaymentStatus;
+(function (PaymentStatus) {
+    PaymentStatus["PENDING"] = "PENDING";
+    PaymentStatus["PROCESSING"] = "PROCESSING";
+    PaymentStatus["PAID"] = "PAID";
+    PaymentStatus["FAILED"] = "FAILED";
+    PaymentStatus["CANCELLED"] = "CANCELLED";
+    PaymentStatus["REFUNDED"] = "REFUNDED";
+    PaymentStatus["PARTIALLY_REFUNDED"] = "PARTIALLY_REFUNDED";
+})(PaymentStatus || (exports.PaymentStatus = PaymentStatus = {}));
+var PaymentProvider;
+(function (PaymentProvider) {
+    PaymentProvider["QPAY"] = "QPAY";
+    PaymentProvider["KHAN_BANK"] = "KHAN_BANK";
+    PaymentProvider["MONPAY"] = "MONPAY";
+    PaymentProvider["SOCIALPAY"] = "SOCIALPAY";
+    PaymentProvider["BANK_TRANSFER"] = "BANK_TRANSFER";
+})(PaymentProvider || (exports.PaymentProvider = PaymentProvider = {}));
+var PaymentServiceType;
+(function (PaymentServiceType) {
+    PaymentServiceType["VISA_APPLICATION"] = "VISA_APPLICATION";
+    PaymentServiceType["CONSULTATION"] = "CONSULTATION";
+    PaymentServiceType["DOCUMENT_REVIEW"] = "DOCUMENT_REVIEW";
+    PaymentServiceType["RUSH_PROCESSING"] = "RUSH_PROCESSING";
+})(PaymentServiceType || (exports.PaymentServiceType = PaymentServiceType = {}));
 //# sourceMappingURL=index.js.map

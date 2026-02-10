@@ -178,13 +178,12 @@
 }
 
 /* News Ticker Animation - Cloudflare style */
-@keyframes ticker-scroll {
-  0% {
-    transform: translate3d(0, 0, 0);
-  }
-  100% {
-    transform: translate3d(-50%, 0, 0);
-  }
+/* Glass morphism ticker bar */
+.ticker-bar {
+  background: rgba(29, 29, 29, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .ticker-wrapper {
@@ -204,24 +203,36 @@
   animation-play-state: paused;
 }
 
-/* Cloudflare-style utilities */
-.cf-gradient {
-  background: linear-gradient(135deg, #f6821f 0%, #ff9f43 100%);
+@keyframes ticker-scroll {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
 }
 
-.cf-text-gradient {
-  background: linear-gradient(135deg, #f6821f 0%, #ff9f43 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
+@layer components {
 
-.cf-shadow {
-  box-shadow: 0 4px 14px 0 rgba(246, 130, 31, 0.39);
-}
+  /* Cloudflare-style utilities */
+  .cf-gradient {
+    background: linear-gradient(135deg, #f6821f 0%, #ff9f43 100%);
+  }
 
-.cf-border-glow {
-  box-shadow: 0 0 0 1px rgba(246, 130, 31, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+  .cf-text-gradient {
+    background: linear-gradient(135deg, #f6821f 0%, #ff9f43 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .cf-shadow {
+    box-shadow: 0 4px 14px 0 rgba(246, 130, 31, 0.39);
+  }
+
+  .cf-border-glow {
+    box-shadow: 0 0 0 1px rgba(246, 130, 31, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+  }
 }
 
 /* Page Entry Animations - respects prefers-reduced-motion */

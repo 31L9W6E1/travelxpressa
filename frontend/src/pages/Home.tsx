@@ -32,15 +32,14 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useTranslation } from "react-i18next";
 
-// News ticker items - can be fetched from API or managed via CMS
-const tickerItems = [
+// Default ticker items (shown while loading or if no news available)
+const defaultTickerItems = [
   "🌍 Travel Advisory: Updated visa requirements for B1/B2 applicants - check our blog for details",
   "📋 DS-160 Processing: Average processing time reduced to 3 business days",
   "🇺🇸 US Embassy Ulaanbaatar: Visa interview appointments now available for March 2025",
   "🎉 New Feature: Track your application status in real-time through our dashboard",
   "⚡ Express Processing: Priority visa services now available for business travelers",
   "📅 Reminder: Check your passport validity - must be valid for 6 months beyond travel date",
-  "🌍 Travel Advisory: Updated visa requirements for B1/B2 applicants - check our blog for details",
 ];
 
 // Fallback data for when API fails or is empty
@@ -82,6 +81,7 @@ const Home = () => {
   const { t } = useTranslation();
   const [blogPosts, setBlogPosts] = useState<PostSummary[]>([]);
   const [newsItems, setNewsItems] = useState<PostSummary[]>([]);
+  const [tickerItems, setTickerItems] = useState<string[]>(defaultTickerItems);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -94,6 +94,21 @@ const Home = () => {
         setNewsItems(
           content.newsPosts.length > 0 ? content.newsPosts : fallbackNewsItems,
         );
+
+        // Build ticker from latest news posts
+        if (content.newsPosts.length > 0) {
+          const newsTickerItems = content.newsPosts.slice(0, 10).map((post) => {
+            // Add emoji based on tags or default
+            const emoji = getNewsEmoji(post.tags);
+            return `${emoji} ${post.title}`;
+          });
+          // Only use news items if we have at least 3, otherwise mix with defaults
+          if (newsTickerItems.length >= 3) {
+            setTickerItems(newsTickerItems);
+          } else {
+            setTickerItems([...newsTickerItems, ...defaultTickerItems.slice(0, 6 - newsTickerItems.length)]);
+          }
+        }
       } catch (err) {
         console.error("Failed to fetch featured content:", err);
         setBlogPosts(fallbackBlogPosts);
@@ -105,6 +120,22 @@ const Home = () => {
 
     fetchContent();
   }, []);
+
+  // Get emoji based on news tags
+  const getNewsEmoji = (tags: string | null): string => {
+    if (!tags) return "📰";
+    const tagLower = tags.toLowerCase();
+    if (tagLower.includes("travel") || tagLower.includes("advisory")) return "🌍";
+    if (tagLower.includes("embassy") || tagLower.includes("consulate")) return "🏛️";
+    if (tagLower.includes("visa")) return "🇺🇸";
+    if (tagLower.includes("interview")) return "💼";
+    if (tagLower.includes("urgent") || tagLower.includes("alert")) return "🚨";
+    if (tagLower.includes("update") || tagLower.includes("new")) return "🎉";
+    if (tagLower.includes("reminder") || tagLower.includes("deadline")) return "📅";
+    if (tagLower.includes("processing") || tagLower.includes("status")) return "📋";
+    if (tagLower.includes("express") || tagLower.includes("fast")) return "⚡";
+    return "📰";
+  };
 
   const features = [
     {
@@ -131,10 +162,10 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground font-sans">
-      {/* News Ticker - Cloudflare style */}
-      <div className="fixed top-16 left-0 right-0 z-40 bg-[#1d1d1d] text-white overflow-hidden">
-        <div className="flex items-center h-9">
-          <div className="flex-shrink-0 px-4 bg-primary h-full flex items-center gap-2 z-10">
+      {/* News Ticker - Glass morphism style */}
+      <div className="fixed top-16 left-0 right-0 z-40 ticker-bar text-white overflow-hidden">
+        <div className="flex items-center h-10">
+          <div className="flex-shrink-0 px-4 bg-primary/90 backdrop-blur-sm h-full flex items-center gap-2 z-10">
             <Bell className="w-3.5 h-3.5" />
             <span className="text-xs font-semibold uppercase tracking-wide">{t("home.news")}</span>
           </div>

@@ -457,19 +457,17 @@ export default function ApplicationDetailModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] p-0">
-        <DialogHeader className="p-6 pb-0">
-          <div className="flex items-center justify-between">
-            <div>
+      <DialogContent className="w-[95vw] max-w-6xl h-[92vh] p-0 flex flex-col">
+        <DialogHeader className="p-6 pb-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div className="min-w-0">
               <DialogTitle className="text-xl">Application Details</DialogTitle>
               <DialogDescription className="mt-1 font-mono text-xs break-all">
                 Application ID: {app.id}
               </DialogDescription>
             </div>
-            <div className="flex items-center gap-2">
-              <Badge className={getStatusBadge(safeStatus)}>
-                {safeStatus}
-              </Badge>
+            <div className="flex flex-wrap items-center justify-start sm:justify-end gap-2">
+              <Badge className={getStatusBadge(safeStatus)}>{safeStatus}</Badge>
               <Button variant="outline" size="sm" onClick={handleExportPDF}>
                 <Download className="w-4 h-4 mr-2" />
                 Export PDF
@@ -478,7 +476,7 @@ export default function ApplicationDetailModal({
           </div>
         </DialogHeader>
 
-        <ScrollArea className="h-[60vh]">
+        <ScrollArea className="flex-1 min-h-0">
           {detailsError && (
             <div className="px-6 pt-6">
               <div className="rounded-lg border border-destructive/20 bg-destructive/10 p-4 text-sm text-destructive">
@@ -530,36 +528,36 @@ export default function ApplicationDetailModal({
 
             {/* Tabs for different sections */}
             <Tabs defaultValue="personal" className="w-full">
-              <TabsList className="grid grid-cols-4 lg:grid-cols-8 mb-4">
-                <TabsTrigger value="personal" className="text-xs">
+              <TabsList className="w-full justify-start overflow-x-auto mb-4 gap-1">
+                <TabsTrigger value="personal" className="text-xs flex-none">
                   <User className="w-3 h-3 mr-1" />
                   Personal
                 </TabsTrigger>
-                <TabsTrigger value="contact" className="text-xs">
+                <TabsTrigger value="contact" className="text-xs flex-none">
                   <Phone className="w-3 h-3 mr-1" />
                   Contact
                 </TabsTrigger>
-                <TabsTrigger value="passport" className="text-xs">
+                <TabsTrigger value="passport" className="text-xs flex-none">
                   <BookOpen className="w-3 h-3 mr-1" />
                   Passport
                 </TabsTrigger>
-                <TabsTrigger value="travel" className="text-xs">
+                <TabsTrigger value="travel" className="text-xs flex-none">
                   <Plane className="w-3 h-3 mr-1" />
                   Travel
                 </TabsTrigger>
-                <TabsTrigger value="family" className="text-xs">
+                <TabsTrigger value="family" className="text-xs flex-none">
                   <Users className="w-3 h-3 mr-1" />
                   Family
                 </TabsTrigger>
-                <TabsTrigger value="work" className="text-xs">
+                <TabsTrigger value="work" className="text-xs flex-none">
                   <Briefcase className="w-3 h-3 mr-1" />
                   Work
                 </TabsTrigger>
-                <TabsTrigger value="security" className="text-xs">
+                <TabsTrigger value="security" className="text-xs flex-none">
                   <Shield className="w-3 h-3 mr-1" />
                   Security
                 </TabsTrigger>
-                <TabsTrigger value="docs" className="text-xs">
+                <TabsTrigger value="docs" className="text-xs flex-none">
                   <FileText className="w-3 h-3 mr-1" />
                   Docs
                 </TabsTrigger>
@@ -576,7 +574,7 @@ export default function ApplicationDetailModal({
                   </CardHeader>
                   <CardContent>
                     {personalInfo ? (
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <InfoRow label="Surnames" value={personalInfo.surnames} icon={User} />
                         <InfoRow label="Given Names" value={personalInfo.givenNames} icon={User} />
                         <InfoRow label="Full Name (Native)" value={personalInfo.fullNameNative} />
@@ -611,7 +609,7 @@ export default function ApplicationDetailModal({
                   <CardContent>
                     {contactInfo ? (
                       <div className="space-y-6">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <InfoRow label="Email" value={contactInfo.email} icon={Mail} />
                           <InfoRow label="Phone" value={contactInfo.phone} icon={Phone} />
                           <InfoRow label="Secondary Phone" value={contactInfo.secondaryPhone} icon={Phone} />
@@ -621,7 +619,7 @@ export default function ApplicationDetailModal({
                         <div>
                           <h4 className="font-medium mb-3">Home Address</h4>
                           {contactInfo.homeAddress && (
-                            <div className="grid grid-cols-2 gap-4 pl-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-4">
                               <InfoRow label="Street" value={contactInfo.homeAddress.street} icon={MapPin} />
                               <InfoRow label="City" value={contactInfo.homeAddress.city} />
                               <InfoRow label="State" value={contactInfo.homeAddress.state} />
@@ -635,7 +633,7 @@ export default function ApplicationDetailModal({
                             <Separator />
                             <div>
                               <h4 className="font-medium mb-3">Mailing Address</h4>
-                              <div className="grid grid-cols-2 gap-4 pl-4">
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-4">
                                 <InfoRow label="Street" value={contactInfo.mailingAddress.street} icon={MapPin} />
                                 <InfoRow label="City" value={contactInfo.mailingAddress.city} />
                                 <InfoRow label="State" value={contactInfo.mailingAddress.state} />
@@ -664,7 +662,7 @@ export default function ApplicationDetailModal({
                   </CardHeader>
                   <CardContent>
                     {passportInfo ? (
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <InfoRow label="Passport Type" value={passportInfo.passportType} />
                         <InfoRow label="Passport Number" value={passportInfo.passportNumber} />
                         <InfoRow label="Book Number" value={passportInfo.passportBookNumber} />
@@ -700,7 +698,7 @@ export default function ApplicationDetailModal({
                   <CardContent>
                     {travelInfo ? (
                       <div className="space-y-6">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <InfoRow label="Purpose of Trip" value={travelInfo.purposeOfTrip} />
                           <InfoRow label="Specific Purpose" value={travelInfo.specificPurpose} />
                           <InfoRow label="Intended Arrival" value={formatDate(travelInfo.intendedArrivalDate)} icon={Calendar} />
@@ -713,7 +711,7 @@ export default function ApplicationDetailModal({
                             <Separator />
                             <div>
                               <h4 className="font-medium mb-3">Address While in US</h4>
-                              <div className="grid grid-cols-2 gap-4 pl-4">
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-4">
                                 <InfoRow label="Street" value={travelInfo.addressWhileInUS.street} icon={MapPin} />
                                 <InfoRow label="City" value={travelInfo.addressWhileInUS.city} />
                                 <InfoRow label="State" value={travelInfo.addressWhileInUS.state} />
@@ -760,7 +758,7 @@ export default function ApplicationDetailModal({
                       <div className="space-y-6">
                         <div>
                           <h4 className="font-medium mb-3">Father</h4>
-                          <div className="grid grid-cols-2 gap-4 pl-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-4">
                             <InfoRow label="Name" value={`${familyInfo.fatherGivenNames || ''} ${familyInfo.fatherSurnames || ''}`} icon={User} />
                             <InfoRow label="Date of Birth" value={formatDate(familyInfo.fatherDateOfBirth)} icon={Calendar} />
                             <InfoRow label="In US" value={familyInfo.isFatherInUS ? 'Yes' : 'No'} />
@@ -770,7 +768,7 @@ export default function ApplicationDetailModal({
                         <Separator />
                         <div>
                           <h4 className="font-medium mb-3">Mother</h4>
-                          <div className="grid grid-cols-2 gap-4 pl-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-4">
                             <InfoRow label="Name" value={`${familyInfo.motherGivenNames || ''} ${familyInfo.motherSurnames || ''}`} icon={User} />
                             <InfoRow label="Date of Birth" value={formatDate(familyInfo.motherDateOfBirth)} icon={Calendar} />
                             <InfoRow label="In US" value={familyInfo.isMotherInUS ? 'Yes' : 'No'} />
@@ -782,7 +780,7 @@ export default function ApplicationDetailModal({
                             <Separator />
                             <div>
                               <h4 className="font-medium mb-3">Spouse</h4>
-                              <div className="grid grid-cols-2 gap-4 pl-4">
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-4">
                                 <InfoRow label="Full Name" value={familyInfo.spouseFullName} icon={User} />
                                 <InfoRow label="Date of Birth" value={formatDate(familyInfo.spouseDateOfBirth)} icon={Calendar} />
                                 <InfoRow label="Nationality" value={familyInfo.spouseNationality} icon={Globe} />
@@ -849,7 +847,7 @@ export default function ApplicationDetailModal({
                       <div className="space-y-6">
                         <div>
                           <h4 className="font-medium mb-3">Current Employment</h4>
-                          <div className="grid grid-cols-2 gap-4 pl-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-4">
                             <InfoRow label="Occupation" value={workEducation.primaryOccupation} icon={Briefcase} />
                             <InfoRow label="Employer" value={workEducation.presentEmployerName} />
                             <InfoRow label="Monthly Salary" value={workEducation.monthlySalary} />
@@ -894,7 +892,7 @@ export default function ApplicationDetailModal({
                             <Separator />
                             <div>
                               <h4 className="font-medium mb-3">Military Service</h4>
-                              <div className="grid grid-cols-2 gap-4 pl-4">
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-4">
                                 <InfoRow label="Country" value={workEducation.militaryService.country} icon={Globe} />
                                 <InfoRow label="Branch" value={workEducation.militaryService.branch} />
                                 <InfoRow label="Rank" value={workEducation.militaryService.rank} />

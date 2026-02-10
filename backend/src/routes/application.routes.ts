@@ -27,6 +27,20 @@ const router = Router();
 // All routes require authentication
 router.use(authenticateToken);
 
+const safeDecryptJson = (value?: string | null) => {
+  if (!value) return null;
+  try {
+    return JSON.parse(decrypt(value));
+  } catch {
+    // Fallback for legacy/plain JSON values (or corrupted ciphertext).
+    try {
+      return JSON.parse(value);
+    } catch {
+      return null;
+    }
+  }
+};
+
 /**
  * Create a new DS-160 application
  */
@@ -127,10 +141,13 @@ router.get(
     // Decrypt sensitive fields if present
     const decryptedData = {
       ...application,
-      personalInfo: application.personalInfo ? JSON.parse(decrypt(application.personalInfo as string)) : null,
-      contactInfo: application.contactInfo ? JSON.parse(decrypt(application.contactInfo as string)) : null,
-      passportInfo: application.passportInfo ? JSON.parse(decrypt(application.passportInfo as string)) : null,
-      travelInfo: application.travelInfo ? JSON.parse(decrypt(application.travelInfo as string)) : null,
+      personalInfo: safeDecryptJson(application.personalInfo),
+      contactInfo: safeDecryptJson(application.contactInfo),
+      passportInfo: safeDecryptJson(application.passportInfo),
+      travelInfo: safeDecryptJson(application.travelInfo),
+      familyInfo: safeDecryptJson(application.familyInfo),
+      workEducation: safeDecryptJson(application.workEducation),
+      securityInfo: safeDecryptJson(application.securityInfo),
     };
 
     res.json({
@@ -150,7 +167,16 @@ router.patch(
   asyncHandler(async (req: Request, res: Response) => {
     const id = getIdParam(req);
     const userId = (req as AuthenticatedRequest).user.userId;
-    const { currentStep, personalInfo, contactInfo, passportInfo, travelInfo } = req.body;
+    const {
+      currentStep,
+      personalInfo,
+      contactInfo,
+      passportInfo,
+      travelInfo,
+      familyInfo,
+      workEducation,
+      securityInfo,
+    } = req.body;
 
     const application = await prisma.application.findUnique({
       where: { id },
@@ -187,6 +213,18 @@ router.patch(
 
     if (travelInfo) {
       updateData.travelInfo = encrypt(JSON.stringify(travelInfo));
+    }
+
+    if (familyInfo) {
+      updateData.familyInfo = encrypt(JSON.stringify(familyInfo));
+    }
+
+    if (workEducation) {
+      updateData.workEducation = encrypt(JSON.stringify(workEducation));
+    }
+
+    if (securityInfo) {
+      updateData.securityInfo = encrypt(JSON.stringify(securityInfo));
     }
 
     // Update status to IN_PROGRESS if it was DRAFT

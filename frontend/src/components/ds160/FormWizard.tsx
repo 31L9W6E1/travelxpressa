@@ -77,7 +77,18 @@ export default function FormWizard({ applicationId: propId }: FormWizardProps) {
         ...data,
         currentStep,
       });
-      setApplication(updated);
+      // Backend returns a minimal payload for updates; keep the in-memory draft by merging.
+      setApplication((prev) =>
+        prev
+          ? {
+              ...prev,
+              ...data,
+              currentStep,
+              status: (updated as any)?.status ?? prev.status,
+              updatedAt: (updated as any)?.updatedAt ?? prev.updatedAt,
+            }
+          : prev,
+      );
       setLastSaved(new Date());
     } catch (err) {
       setError('Failed to save progress');

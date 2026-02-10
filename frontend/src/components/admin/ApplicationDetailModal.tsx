@@ -44,6 +44,161 @@ import {
 import { toast } from 'sonner';
 import api from '@/api/client';
 
+// Type definitions for form data sections
+interface Address {
+  street?: string;
+  city?: string;
+  state?: string;
+  postalCode?: string;
+  zipCode?: string;
+  country?: string;
+}
+
+interface PersonalInfo {
+  surnames?: string;
+  givenNames?: string;
+  fullNameNative?: string;
+  dateOfBirth?: string;
+  sex?: string;
+  maritalStatus?: string;
+  nationality?: string;
+  countryOfBirth?: string;
+  cityOfBirth?: string;
+  stateOfBirth?: string;
+  otherNamesUsed?: boolean;
+  otherNames?: string[];
+}
+
+interface ContactInfo {
+  email?: string;
+  phone?: string;
+  secondaryPhone?: string;
+  workPhone?: string;
+  homeAddress?: Address;
+  mailingAddress?: Address;
+}
+
+interface PassportInfo {
+  passportType?: string;
+  passportNumber?: string;
+  passportBookNumber?: string;
+  countryOfIssuance?: string;
+  cityOfIssuance?: string;
+  stateOfIssuance?: string;
+  issuanceDate?: string;
+  expirationDate?: string;
+  hasOtherPassport?: boolean;
+  otherPassportInfo?: {
+    number?: string;
+    country?: string;
+  };
+}
+
+interface Companion {
+  name?: string;
+  relationship?: string;
+}
+
+interface TravelInfo {
+  purposeOfTrip?: string;
+  specificPurpose?: string;
+  intendedArrivalDate?: string;
+  intendedLengthOfStay?: string;
+  payingForTrip?: string;
+  travelingWithOthers?: boolean;
+  addressWhileInUS?: Address;
+  companions?: Companion[];
+}
+
+interface Child {
+  fullName?: string;
+  dateOfBirth?: string;
+  relationship?: string;
+}
+
+interface Relative {
+  fullName?: string;
+  relationship?: string;
+  status?: string;
+}
+
+interface FamilyInfo {
+  fatherGivenNames?: string;
+  fatherSurnames?: string;
+  fatherDateOfBirth?: string;
+  isFatherInUS?: boolean;
+  fatherUSStatus?: string;
+  motherGivenNames?: string;
+  motherSurnames?: string;
+  motherDateOfBirth?: string;
+  isMotherInUS?: boolean;
+  motherUSStatus?: string;
+  hasSpouse?: boolean;
+  spouseFullName?: string;
+  spouseDateOfBirth?: string;
+  spouseNationality?: string;
+  spouseCityOfBirth?: string;
+  spouseCountryOfBirth?: string;
+  children?: Child[];
+  immediateRelativesInUS?: Relative[];
+}
+
+interface Education {
+  institutionName?: string;
+  courseOfStudy?: string;
+  startDate?: string;
+  endDate?: string;
+}
+
+interface MilitaryService {
+  country?: string;
+  branch?: string;
+  rank?: string;
+  specialty?: string;
+}
+
+interface WorkEducation {
+  primaryOccupation?: string;
+  presentEmployerName?: string;
+  monthlySalary?: string;
+  startDate?: string;
+  jobDuties?: string;
+  presentEmployerPhone?: string;
+  education?: Education[];
+  languages?: string[];
+  hasServedInMilitary?: boolean;
+  militaryService?: MilitaryService;
+}
+
+interface SecurityInfo {
+  hasCommunicableDisease?: boolean;
+  hasMentalOrPhysicalDisorder?: boolean;
+  isDrugAbuser?: boolean;
+  hasBeenArrested?: boolean;
+  hasViolatedControlledSubstancesLaw?: boolean;
+  seeksEspionage?: boolean;
+  seeksToEngageInTerrorism?: boolean;
+  hasProvidedTerroristSupport?: boolean;
+  isTerroristOrganizationMember?: boolean;
+  hasBeenInUS?: boolean;
+  hasBeenIssuedUSVisa?: boolean;
+  hasBeenRefusedUSVisa?: boolean;
+  usVisitDetails?: string;
+  [key: string]: unknown;
+}
+
+interface DocumentFile {
+  fileName?: string;
+  fileUrl?: string;
+  documentType?: string;
+}
+
+interface Documents {
+  photo?: DocumentFile;
+  invitationLetter?: DocumentFile;
+  additionalDocuments?: DocumentFile[];
+}
+
 interface ApplicationDetailModalProps {
   application: any;
   open: boolean;
@@ -72,22 +227,22 @@ const getStatusBadge = (status: string) => {
   return styles[status] || styles.DRAFT;
 };
 
-const parseFormData = (value?: unknown) => {
+function parseFormData<T>(value?: unknown): T | null {
   if (!value) return null;
-  if (typeof value === 'object') return value as Record<string, unknown>;
+  if (typeof value === 'object') return value as T;
   if (typeof value !== 'string') return null;
 
   try {
     const parsed = JSON.parse(value);
     return typeof parsed === 'object' && parsed !== null
-      ? (parsed as Record<string, unknown>)
+      ? (parsed as T)
       : null;
   } catch {
     // Admin list endpoints return encrypted strings for sensitive sections.
     // Never return the raw string here, because downstream UI assumes an object.
     return null;
   }
-};
+}
 
 const formatDate = (dateString?: string) => {
   if (!dateString) return '-';
@@ -163,14 +318,14 @@ export default function ApplicationDetailModal({
   const app = details || application;
   const safeStatus = typeof app?.status === 'string' && app.status ? app.status : 'DRAFT';
 
-  const personalInfo = parseFormData(app.personalInfo);
-  const contactInfo = parseFormData(app.contactInfo);
-  const passportInfo = parseFormData(app.passportInfo);
-  const travelInfo = parseFormData(app.travelInfo);
-  const familyInfo = parseFormData(app.familyInfo);
-  const workEducation = parseFormData(app.workEducation);
-  const securityInfo = parseFormData(app.securityInfo);
-  const documents = parseFormData(app.documents);
+  const personalInfo = parseFormData<PersonalInfo>(app.personalInfo);
+  const contactInfo = parseFormData<ContactInfo>(app.contactInfo);
+  const passportInfo = parseFormData<PassportInfo>(app.passportInfo);
+  const travelInfo = parseFormData<TravelInfo>(app.travelInfo);
+  const familyInfo = parseFormData<FamilyInfo>(app.familyInfo);
+  const workEducation = parseFormData<WorkEducation>(app.workEducation);
+  const securityInfo = parseFormData<SecurityInfo>(app.securityInfo);
+  const documents = parseFormData<Documents>(app.documents);
 
   const handleUpdateStatus = async () => {
     setIsUpdating(true);
@@ -393,7 +548,7 @@ export default function ApplicationDetailModal({
                         <InfoRow label="City of Birth" value={personalInfo.cityOfBirth} icon={MapPin} />
                         <InfoRow label="State of Birth" value={personalInfo.stateOfBirth} />
                         <InfoRow label="Other Names Used" value={personalInfo.otherNamesUsed ? 'Yes' : 'No'} />
-                        {personalInfo.otherNames?.length > 0 && (
+                        {personalInfo.otherNames && personalInfo.otherNames.length > 0 && (
                           <InfoRow label="Other Names" value={personalInfo.otherNames.join(', ')} />
                         )}
                       </div>
@@ -527,13 +682,13 @@ export default function ApplicationDetailModal({
                             </div>
                           </>
                         )}
-                        {travelInfo.companions?.length > 0 && (
+                        {travelInfo.companions && travelInfo.companions.length > 0 && (
                           <>
                             <Separator />
                             <div>
                               <h4 className="font-medium mb-3">Travel Companions</h4>
                               <div className="space-y-2 pl-4">
-                                {travelInfo.companions.map((c: any, i: number) => (
+                                {travelInfo.companions.map((c: Companion, i: number) => (
                                   <div key={i} className="flex items-center gap-4 p-2 bg-muted/50 rounded">
                                     <span className="font-medium">{c.name}</span>
                                     <span className="text-muted-foreground">({c.relationship})</span>
@@ -596,13 +751,13 @@ export default function ApplicationDetailModal({
                             </div>
                           </>
                         )}
-                        {familyInfo.children?.length > 0 && (
+                        {familyInfo.children && familyInfo.children.length > 0 && (
                           <>
                             <Separator />
                             <div>
                               <h4 className="font-medium mb-3">Children</h4>
                               <div className="space-y-2 pl-4">
-                                {familyInfo.children.map((child: any, i: number) => (
+                                {familyInfo.children.map((child: Child, i: number) => (
                                   <div key={i} className="p-3 bg-muted/50 rounded">
                                     <p className="font-medium">{child.fullName}</p>
                                     <p className="text-sm text-muted-foreground">
@@ -614,13 +769,13 @@ export default function ApplicationDetailModal({
                             </div>
                           </>
                         )}
-                        {familyInfo.immediateRelativesInUS?.length > 0 && (
+                        {familyInfo.immediateRelativesInUS && familyInfo.immediateRelativesInUS.length > 0 && (
                           <>
                             <Separator />
                             <div>
                               <h4 className="font-medium mb-3">Immediate Relatives in US</h4>
                               <div className="space-y-2 pl-4">
-                                {familyInfo.immediateRelativesInUS.map((rel: any, i: number) => (
+                                {familyInfo.immediateRelativesInUS.map((rel: Relative, i: number) => (
                                   <div key={i} className="p-3 bg-muted/50 rounded">
                                     <p className="font-medium">{rel.fullName}</p>
                                     <p className="text-sm text-muted-foreground">
@@ -663,13 +818,13 @@ export default function ApplicationDetailModal({
                             <InfoRow label="Employer Phone" value={workEducation.presentEmployerPhone} icon={Phone} />
                           </div>
                         </div>
-                        {workEducation.education?.length > 0 && (
+                        {workEducation.education && workEducation.education.length > 0 && (
                           <>
                             <Separator />
                             <div>
                               <h4 className="font-medium mb-3">Education</h4>
                               <div className="space-y-2 pl-4">
-                                {workEducation.education.map((edu: any, i: number) => (
+                                {workEducation.education.map((edu: Education, i: number) => (
                                   <div key={i} className="p-3 bg-muted/50 rounded">
                                     <p className="font-medium">{edu.institutionName}</p>
                                     <p className="text-sm text-muted-foreground">
@@ -681,7 +836,7 @@ export default function ApplicationDetailModal({
                             </div>
                           </>
                         )}
-                        {workEducation.languages?.length > 0 && (
+                        {workEducation.languages && workEducation.languages.length > 0 && (
                           <>
                             <Separator />
                             <div>
@@ -821,11 +976,11 @@ export default function ApplicationDetailModal({
                             </Button>
                           </div>
                         )}
-                        {documents.additionalDocuments?.length > 0 && (
+                        {documents.additionalDocuments && documents.additionalDocuments.length > 0 && (
                           <div className="mt-4">
                             <h4 className="font-medium mb-3">Additional Documents</h4>
                             <div className="space-y-2">
-                              {documents.additionalDocuments.map((doc: any, i: number) => (
+                              {documents.additionalDocuments.map((doc: DocumentFile, i: number) => (
                                 <div key={i} className="flex items-center justify-between p-3 border rounded">
                                   <div className="flex items-center gap-3">
                                     <div className="w-10 h-10 bg-muted rounded flex items-center justify-center">

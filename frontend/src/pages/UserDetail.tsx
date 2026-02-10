@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import api from "../api/client";
@@ -59,6 +60,7 @@ interface UserDetailData {
 }
 
 const UserDetail = () => {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -107,7 +109,7 @@ const UserDetail = () => {
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center">
         <div className="text-center">
           <div className="w-12 h-12 border-2 border-blue-400 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-400">Loading user details...</p>
+          <p className="text-gray-400">{t('userDetail.loading', 'Loading user details...')}</p>
         </div>
       </div>
     );
@@ -118,13 +120,13 @@ const UserDetail = () => {
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center pt-20">
         <div className="text-center bg-white/5 border border-white/10 rounded-2xl p-12">
           <AlertCircle className="w-16 h-16 text-red-400 mx-auto mb-4" />
-          <h2 className="text-2xl font-semibold text-white mb-2">Error</h2>
-          <p className="text-gray-400">{error || "User not found"}</p>
+          <h2 className="text-2xl font-semibold text-white mb-2">{t('common.error', 'Error')}</h2>
+          <p className="text-gray-400">{error || t('userDetail.notFound', 'User not found')}</p>
           <Link
             to="/admin"
             className="mt-6 inline-block px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
-            Back to Dashboard
+            {t('userDetail.backToDashboard', 'Back to Dashboard')}
           </Link>
         </div>
       </div>
@@ -146,7 +148,7 @@ const UserDetail = () => {
           className="inline-flex items-center gap-2 text-gray-400 hover:text-white mb-6 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
-          Back to Dashboard
+          {t('userDetail.backToDashboard', 'Back to Dashboard')}
         </Link>
 
         {/* User Header */}
@@ -174,18 +176,18 @@ const UserDetail = () => {
                   {userData.emailVerified ? (
                     <span className="flex items-center gap-1 text-green-400 text-sm">
                       <CheckCircle className="w-4 h-4" />
-                      Verified
+                      {t('userDetail.verified', 'Verified')}
                     </span>
                   ) : (
                     <span className="flex items-center gap-1 text-amber-400 text-sm">
                       <XCircle className="w-4 h-4" />
-                      Unverified
+                      {t('userDetail.unverified', 'Unverified')}
                     </span>
                   )}
                   {userData.lockedUntil && new Date(userData.lockedUntil) > new Date() && (
                     <span className="flex items-center gap-1 text-red-400 text-sm">
                       <Lock className="w-4 h-4" />
-                      Locked
+                      {t('userDetail.locked', 'Locked')}
                     </span>
                   )}
                 </div>
@@ -194,11 +196,11 @@ const UserDetail = () => {
             <div className="flex items-center gap-3">
               <button className="px-4 py-2 bg-white/5 border border-white/10 text-gray-300 rounded-lg hover:bg-white/10 transition-colors flex items-center gap-2">
                 <Unlock className="w-4 h-4" />
-                Reset Password
+                {t('userDetail.resetPassword', 'Reset Password')}
               </button>
               <button className="px-4 py-2 bg-red-500/10 border border-red-500/20 text-red-400 rounded-lg hover:bg-red-500/20 transition-colors flex items-center gap-2">
                 <Trash2 className="w-4 h-4" />
-                Delete
+                {t('common.delete', 'Delete')}
               </button>
             </div>
           </div>
@@ -210,32 +212,32 @@ const UserDetail = () => {
           <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
             <h3 className="text-lg font-medium text-white mb-4 flex items-center gap-2">
               <User className="w-5 h-5 text-blue-400" />
-              Personal Information
+              {t('userDetail.personalInfo', 'Personal Information')}
             </h3>
             <div className="space-y-4">
               <div>
-                <p className="text-gray-500 text-sm">Full Name</p>
-                <p className="text-white">{userData.name || "Not provided"}</p>
+                <p className="text-gray-500 text-sm">{t('userDetail.fullName', 'Full Name')}</p>
+                <p className="text-white">{userData.name || t('userDetail.notProvided', 'Not provided')}</p>
               </div>
               <div>
-                <p className="text-gray-500 text-sm">Email</p>
+                <p className="text-gray-500 text-sm">{t('userDetail.email', 'Email')}</p>
                 <p className="text-white flex items-center gap-2">
                   <Mail className="w-4 h-4 text-gray-500" />
                   {userData.email}
                 </p>
               </div>
               <div>
-                <p className="text-gray-500 text-sm">Phone</p>
+                <p className="text-gray-500 text-sm">{t('userDetail.phone', 'Phone')}</p>
                 <p className="text-white flex items-center gap-2">
                   <Phone className="w-4 h-4 text-gray-500" />
-                  {userData.phone || "Not provided"}
+                  {userData.phone || t('userDetail.notProvided', 'Not provided')}
                 </p>
               </div>
               <div>
-                <p className="text-gray-500 text-sm">Country</p>
+                <p className="text-gray-500 text-sm">{t('userDetail.country', 'Country')}</p>
                 <p className="text-white flex items-center gap-2">
                   <Globe className="w-4 h-4 text-gray-500" />
-                  {userData.country || "Not provided"}
+                  {userData.country || t('userDetail.notProvided', 'Not provided')}
                 </p>
               </div>
             </div>
@@ -245,29 +247,29 @@ const UserDetail = () => {
           <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
             <h3 className="text-lg font-medium text-white mb-4 flex items-center gap-2">
               <Shield className="w-5 h-5 text-purple-400" />
-              Account Security
+              {t('userDetail.accountSecurity', 'Account Security')}
             </h3>
             <div className="space-y-4">
               <div>
-                <p className="text-gray-500 text-sm">Two-Factor Auth</p>
+                <p className="text-gray-500 text-sm">{t('userDetail.twoFactorAuth', 'Two-Factor Auth')}</p>
                 <p className={userData.twoFactorEnabled ? "text-green-400" : "text-gray-400"}>
-                  {userData.twoFactorEnabled ? "Enabled" : "Disabled"}
+                  {userData.twoFactorEnabled ? t('common.enabled', 'Enabled') : t('common.disabled', 'Disabled')}
                 </p>
               </div>
               <div>
-                <p className="text-gray-500 text-sm">Failed Login Attempts</p>
+                <p className="text-gray-500 text-sm">{t('userDetail.failedLoginAttempts', 'Failed Login Attempts')}</p>
                 <p className={userData.failedLogins > 0 ? "text-amber-400" : "text-white"}>
                   {userData.failedLogins}
                 </p>
               </div>
               <div>
-                <p className="text-gray-500 text-sm">Account Status</p>
+                <p className="text-gray-500 text-sm">{t('userDetail.accountStatus', 'Account Status')}</p>
                 <p className={userData.lockedUntil && new Date(userData.lockedUntil) > new Date() ? "text-red-400" : "text-green-400"}>
-                  {userData.lockedUntil && new Date(userData.lockedUntil) > new Date() ? "Locked" : "Active"}
+                  {userData.lockedUntil && new Date(userData.lockedUntil) > new Date() ? t('userDetail.locked', 'Locked') : t('userDetail.active', 'Active')}
                 </p>
               </div>
               <div>
-                <p className="text-gray-500 text-sm">Active Sessions</p>
+                <p className="text-gray-500 text-sm">{t('userDetail.activeSessions', 'Active Sessions')}</p>
                 <p className="text-white">{userData._count.refreshTokens}</p>
               </div>
             </div>
@@ -277,33 +279,33 @@ const UserDetail = () => {
           <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
             <h3 className="text-lg font-medium text-white mb-4 flex items-center gap-2">
               <Activity className="w-5 h-5 text-green-400" />
-              Activity
+              {t('userDetail.activity', 'Activity')}
             </h3>
             <div className="space-y-4">
               <div>
-                <p className="text-gray-500 text-sm">Member Since</p>
+                <p className="text-gray-500 text-sm">{t('userDetail.memberSince', 'Member Since')}</p>
                 <p className="text-white flex items-center gap-2">
                   <Calendar className="w-4 h-4 text-gray-500" />
                   {new Date(userData.createdAt).toLocaleDateString()}
                 </p>
               </div>
               <div>
-                <p className="text-gray-500 text-sm">Last Login</p>
+                <p className="text-gray-500 text-sm">{t('userDetail.lastLogin', 'Last Login')}</p>
                 <p className="text-white flex items-center gap-2">
                   <Clock className="w-4 h-4 text-gray-500" />
                   {userData.lastLoginAt
                     ? new Date(userData.lastLoginAt).toLocaleString()
-                    : "Never"}
+                    : t('userDetail.never', 'Never')}
                 </p>
               </div>
               <div>
-                <p className="text-gray-500 text-sm">Last Login IP</p>
+                <p className="text-gray-500 text-sm">{t('userDetail.lastLoginIp', 'Last Login IP')}</p>
                 <p className="text-white font-mono text-sm">
-                  {userData.lastLoginIp || "Unknown"}
+                  {userData.lastLoginIp || t('userDetail.unknown', 'Unknown')}
                 </p>
               </div>
               <div>
-                <p className="text-gray-500 text-sm">Total Applications</p>
+                <p className="text-gray-500 text-sm">{t('userDetail.totalApplications', 'Total Applications')}</p>
                 <p className="text-white">{userData._count.applications}</p>
               </div>
             </div>
@@ -315,7 +317,7 @@ const UserDetail = () => {
           <div className="p-6 border-b border-white/10">
             <h3 className="text-lg font-medium text-white flex items-center gap-2">
               <FileText className="w-5 h-5 text-blue-400" />
-              DS-160 Applications ({userData.applications.length})
+              {t('userDetail.ds160Applications', 'DS-160 Applications')} ({userData.applications.length})
             </h3>
           </div>
           {userData.applications.length > 0 ? (
@@ -327,9 +329,9 @@ const UserDetail = () => {
                       <FileText className="w-5 h-5 text-blue-400" />
                     </div>
                     <div>
-                      <p className="text-white font-medium">{app.visaType} Visa Application</p>
+                      <p className="text-white font-medium">{app.visaType} {t('userDetail.visaApplication', 'Visa Application')}</p>
                       <p className="text-gray-500 text-sm">
-                        Step {app.currentStep} · Created {new Date(app.createdAt).toLocaleDateString()}
+                        {t('userDetail.step', 'Step')} {app.currentStep} · {t('userDetail.created', 'Created')} {new Date(app.createdAt).toLocaleDateString()}
                       </p>
                     </div>
                   </div>
@@ -342,7 +344,7 @@ const UserDetail = () => {
           ) : (
             <div className="p-8 text-center">
               <FileText className="w-12 h-12 text-gray-600 mx-auto mb-3" />
-              <p className="text-gray-400">No applications yet</p>
+              <p className="text-gray-400">{t('userDetail.noApplications', 'No applications yet')}</p>
             </div>
           )}
         </div>
@@ -352,7 +354,7 @@ const UserDetail = () => {
           <div className="p-6 border-b border-white/10">
             <h3 className="text-lg font-medium text-white flex items-center gap-2">
               <Mail className="w-5 h-5 text-purple-400" />
-              Inquiries ({userData.inquiries.length})
+              {t('userDetail.inquiries', 'Inquiries')} ({userData.inquiries.length})
             </h3>
           </div>
           {userData.inquiries.length > 0 ? (
@@ -377,7 +379,7 @@ const UserDetail = () => {
           ) : (
             <div className="p-8 text-center">
               <Mail className="w-12 h-12 text-gray-600 mx-auto mb-3" />
-              <p className="text-gray-400">No inquiries yet</p>
+              <p className="text-gray-400">{t('userDetail.noInquiries', 'No inquiries yet')}</p>
             </div>
           )}
         </div>

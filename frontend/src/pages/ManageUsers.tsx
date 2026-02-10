@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../contexts/AuthContext";
 import api from "../api/client";
 
@@ -10,6 +11,7 @@ interface User {
 }
 
 const ManageUsers = () => {
+  const { t } = useTranslation();
   const { isAuthenticated } = useAuth();
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -42,7 +44,7 @@ const ManageUsers = () => {
   };
 
   if (isLoading) {
-    return <div className="p-8 text-center">Loading...</div>;
+    return <div className="p-8 text-center">{t('common.loading', 'Loading...')}</div>;
   }
 
   if (error) {
@@ -51,15 +53,15 @@ const ManageUsers = () => {
 
   return (
     <div className="p-8">
-      <h1 className="text-2xl font-bold mb-4">Manage Users</h1>
+      <h1 className="text-2xl font-bold mb-4">{t('manageUsers.title', 'Manage Users')}</h1>
       <div className="overflow-x-auto">
         <table className="min-w-full bg-white">
           <thead>
             <tr>
-              <th className="py-2 px-4 border-b">Name</th>
-              <th className="py-2 px-4 border-b">Email</th>
-              <th className="py-2 px-4 border-b">Role</th>
-              <th className="py-2 px-4 border-b">Actions</th>
+              <th className="py-2 px-4 border-b">{t('manageUsers.name', 'Name')}</th>
+              <th className="py-2 px-4 border-b">{t('manageUsers.email', 'Email')}</th>
+              <th className="py-2 px-4 border-b">{t('manageUsers.role', 'Role')}</th>
+              <th className="py-2 px-4 border-b">{t('manageUsers.actions', 'Actions')}</th>
             </tr>
           </thead>
           <tbody>

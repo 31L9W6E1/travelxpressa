@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../contexts/AuthContext";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
@@ -290,6 +291,7 @@ const getAdminTabFromSection = (section?: string): AdminTab => {
 };
 
 const AdminDashboard = () => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const navigate = useNavigate();
   const { section } = useParams<{ section?: string }>();
@@ -642,7 +644,7 @@ const AdminDashboard = () => {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <div className="w-12 h-12 border-2 border-foreground border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-muted-foreground">Loading dashboard...</p>
+          <p className="text-muted-foreground">{t('dashboard.loading', 'Loading dashboard...')}</p>
         </div>
       </div>
     );
@@ -654,16 +656,16 @@ const AdminDashboard = () => {
         <div className="text-center bg-card border border-border rounded-2xl p-12">
           <Shield className="w-16 h-16 text-destructive mx-auto mb-4" />
           <h2 className="text-2xl font-semibold text-foreground mb-2">
-            Access Denied
+            {t('dashboard.accessDenied', 'Access Denied')}
           </h2>
           <p className="text-muted-foreground">
-            You don't have permission to access this page.
+            {t('dashboard.noPermission', "You don't have permission to access this page.")}
           </p>
           <Link
             to="/"
             className="mt-6 inline-block px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-colors"
           >
-            Go Home
+            {t('dashboard.goHome', 'Go Home')}
           </Link>
         </div>
       </div>
@@ -677,15 +679,15 @@ const AdminDashboard = () => {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold text-foreground">
-              Admin Dashboard
+              {t('dashboard.title', 'Admin Dashboard')}
             </h1>
             <p className="text-muted-foreground mt-1">
-              Welcome back, {user?.name}
+              {t('dashboard.welcomeBack', 'Welcome back')}, {user?.name}
             </p>
           </div>
           <div className="flex items-center gap-2 px-3 py-1.5 bg-green-500/10 border border-green-500/20 rounded-full">
             <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-            <span className="text-green-500 text-sm">System Online</span>
+            <span className="text-green-500 text-sm">{t('dashboard.systemOnline', 'System Online')}</span>
           </div>
         </div>
 
@@ -698,35 +700,35 @@ const AdminDashboard = () => {
           <TabsList className="bg-secondary flex-wrap h-auto gap-1 p-1">
             <TabsTrigger value="overview" className="gap-2">
               <BarChart3 className="w-4 h-4" />
-              Overview
+              {t('dashboard.tabs.overview', 'Overview')}
             </TabsTrigger>
             <TabsTrigger value="users" className="gap-2">
               <Users className="w-4 h-4" />
-              Users
+              {t('dashboard.tabs.users', 'Users')}
             </TabsTrigger>
             <TabsTrigger value="applications" className="gap-2">
               <FileText className="w-4 h-4" />
-              Applications
+              {t('dashboard.tabs.applications', 'Applications')}
             </TabsTrigger>
             <TabsTrigger value="tracking" className="gap-2">
               <Activity className="w-4 h-4" />
-              Tracking
+              {t('dashboard.tabs.tracking', 'Tracking')}
             </TabsTrigger>
             <TabsTrigger value="payments" className="gap-2">
               <CreditCard className="w-4 h-4" />
-              Payments
+              {t('dashboard.tabs.payments', 'Payments')}
             </TabsTrigger>
             <TabsTrigger value="analytics" className="gap-2">
               <TrendingUp className="w-4 h-4" />
-              Analytics
+              {t('dashboard.tabs.analytics', 'Analytics')}
             </TabsTrigger>
             <TabsTrigger value="gallery" className="gap-2">
               <FolderOpen className="w-4 h-4" />
-              Gallery
+              {t('dashboard.tabs.gallery', 'Gallery')}
             </TabsTrigger>
             <TabsTrigger value="cms" className="gap-2">
               <Newspaper className="w-4 h-4" />
-              CMS
+              {t('dashboard.tabs.cms', 'CMS')}
             </TabsTrigger>
           </TabsList>
 
@@ -737,7 +739,7 @@ const AdminDashboard = () => {
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <CardTitle className="text-sm font-medium text-muted-foreground">
-                    Total Users
+                    {t('dashboard.stats.totalUsers', 'Total Users')}
                   </CardTitle>
                   <Users className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
@@ -749,7 +751,7 @@ const AdminDashboard = () => {
                     <TrendingUp className={`w-3 h-3 ${(stats?.users?.growth || 0) >= 0 ? 'text-green-500' : 'text-red-500'}`} />
                     <span className={(stats?.users?.growth || 0) >= 0 ? 'text-green-500' : 'text-red-500'}>
                       {(stats?.users?.growth || 0) >= 0 ? '+' : ''}{stats?.users?.growth || 0}%
-                    </span> from last month
+                    </span> {t('dashboard.stats.fromLastMonth', 'from last month')}
                   </p>
                 </CardContent>
               </Card>
@@ -757,7 +759,7 @@ const AdminDashboard = () => {
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <CardTitle className="text-sm font-medium text-muted-foreground">
-                    Applications
+                    {t('dashboard.stats.applications', 'Applications')}
                   </CardTitle>
                   <FileText className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
@@ -769,7 +771,7 @@ const AdminDashboard = () => {
                     <TrendingUp className={`w-3 h-3 ${(stats?.applications?.growth || 0) >= 0 ? 'text-green-500' : 'text-red-500'}`} />
                     <span className={(stats?.applications?.growth || 0) >= 0 ? 'text-green-500' : 'text-red-500'}>
                       {(stats?.applications?.growth || 0) >= 0 ? '+' : ''}{stats?.applications?.growth || 0}%
-                    </span> from last month
+                    </span> {t('dashboard.stats.fromLastMonth', 'from last month')}
                   </p>
                 </CardContent>
               </Card>
@@ -777,7 +779,7 @@ const AdminDashboard = () => {
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <CardTitle className="text-sm font-medium text-muted-foreground">
-                    Completed
+                    {t('dashboard.stats.completed', 'Completed')}
                   </CardTitle>
                   <CheckCircle className="h-4 w-4 text-green-500" />
                 </CardHeader>
@@ -786,7 +788,7 @@ const AdminDashboard = () => {
                     {stats?.applications?.completed || 0}
                   </div>
                   <p className="text-xs text-muted-foreground mt-1">
-                    {stats?.applications?.approvalRate || 0}% approval rate
+                    {stats?.applications?.approvalRate || 0}% {t('dashboard.stats.approvalRate', 'approval rate')}
                   </p>
                 </CardContent>
               </Card>
@@ -794,7 +796,7 @@ const AdminDashboard = () => {
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <CardTitle className="text-sm font-medium text-muted-foreground">
-                    Pending
+                    {t('dashboard.stats.pending', 'Pending')}
                   </CardTitle>
                   <Clock className="h-4 w-4 text-yellow-500" />
                 </CardHeader>
@@ -804,10 +806,10 @@ const AdminDashboard = () => {
                   </div>
                   <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
                     <AlertCircle className="w-3 h-3 text-yellow-500" />
-                    {stats?.applications?.draft || 0} draft,{" "}
-                    {stats?.applications?.inProgress || 0} in progress,{" "}
-                    {stats?.applications?.submitted || 0} submitted,{" "}
-                    {stats?.applications?.underReview || 0} under review
+                    {stats?.applications?.draft || 0} {t('dashboard.status.draft', 'draft')},{" "}
+                    {stats?.applications?.inProgress || 0} {t('dashboard.status.inProgress', 'in progress')},{" "}
+                    {stats?.applications?.submitted || 0} {t('dashboard.status.submitted', 'submitted')},{" "}
+                    {stats?.applications?.underReview || 0} {t('dashboard.status.underReview', 'under review')}
                   </p>
                 </CardContent>
               </Card>
@@ -817,8 +819,8 @@ const AdminDashboard = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>Applications Overview</CardTitle>
-                  <CardDescription>Total applications vs new users (last 6 months)</CardDescription>
+                  <CardTitle>{t('dashboard.charts.applicationsOverview', 'Applications Overview')}</CardTitle>
+                  <CardDescription>{t('dashboard.charts.applicationsOverviewDesc', 'Total applications vs new users (last 6 months)')}</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <ChartContainer
@@ -899,9 +901,9 @@ const AdminDashboard = () => {
 
               <Card>
                 <CardHeader>
-                  <CardTitle>User Growth</CardTitle>
+                  <CardTitle>{t('dashboard.charts.userGrowth', 'User Growth')}</CardTitle>
                   <CardDescription>
-                    New user registrations over time
+                    {t('dashboard.charts.userGrowthDesc', 'New user registrations over time')}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -934,9 +936,9 @@ const AdminDashboard = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>Status Distribution</CardTitle>
+                  <CardTitle>{t('dashboard.charts.statusDistribution', 'Status Distribution')}</CardTitle>
                   <CardDescription>
-                    Current application status breakdown
+                    {t('dashboard.charts.statusDistributionDesc', 'Current application status breakdown')}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -944,7 +946,7 @@ const AdminDashboard = () => {
                     <div className="h-[250px] flex flex-col items-center justify-center text-center">
                       <FileText className="w-10 h-10 text-muted-foreground mb-3" />
                       <p className="text-sm text-muted-foreground">
-                        No application data yet
+                        {t('dashboard.charts.noData', 'No application data yet')}
                       </p>
                     </div>
                   ) : (
@@ -1040,7 +1042,7 @@ const AdminDashboard = () => {
                           </span>
                         </Badge>
                         <span className="text-xs text-muted-foreground">
-                          from last month
+                          {t('dashboard.stats.fromLastMonth', 'from last month')}
                         </span>
                       </div>
                     </div>
@@ -1051,15 +1053,15 @@ const AdminDashboard = () => {
               <Card className="lg:col-span-2">
                 <CardHeader className="flex flex-row items-center justify-between">
                   <div>
-                    <CardTitle>Recent Users</CardTitle>
-                    <CardDescription>Latest registered users</CardDescription>
+                    <CardTitle>{t('dashboard.recentUsers.title', 'Recent Users')}</CardTitle>
+                    <CardDescription>{t('dashboard.recentUsers.description', 'Latest registered users')}</CardDescription>
                   </div>
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => setActiveTab("users")}
                   >
-                    View All <ChevronRight className="w-4 h-4 ml-1" />
+                    {t('common.viewAll', 'View All')} <ChevronRight className="w-4 h-4 ml-1" />
                   </Button>
                 </CardHeader>
                 <CardContent>
@@ -1073,7 +1075,7 @@ const AdminDashboard = () => {
                           <UserAvatar name={u.name} email={u.email} size="md" />
                           <div>
                             <p className="text-sm font-medium">
-                              {u.name || "No name"}
+                              {u.name || t('common.noName', 'No name')}
                             </p>
                             <p className="text-xs text-muted-foreground">
                               {u.email}
@@ -1099,15 +1101,15 @@ const AdminDashboard = () => {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle>User Management</CardTitle>
+                    <CardTitle>{t('dashboard.users.title', 'User Management')}</CardTitle>
                     <CardDescription>
-                      Manage all registered users
+                      {t('dashboard.users.description', 'Manage all registered users')}
                     </CardDescription>
                   </div>
                   <div className="relative">
                     <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                     <Input
-                      placeholder="Search users..."
+                      placeholder={t('dashboard.users.searchPlaceholder', 'Search users...')}
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       className="pl-10 w-64"
@@ -1121,22 +1123,22 @@ const AdminDashboard = () => {
                     <thead>
                       <tr className="border-b">
                         <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
-                          User
+                          {t('dashboard.users.table.user', 'User')}
                         </th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
-                          Role
+                          {t('dashboard.users.table.role', 'Role')}
                         </th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
-                          Status
+                          {t('dashboard.users.table.status', 'Status')}
                         </th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
-                          Apps
+                          {t('dashboard.users.table.apps', 'Apps')}
                         </th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
-                          Last Active
+                          {t('dashboard.users.table.lastActive', 'Last Active')}
                         </th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
-                          Actions
+                          {t('dashboard.users.table.actions', 'Actions')}
                         </th>
                       </tr>
                     </thead>
@@ -1151,7 +1153,7 @@ const AdminDashboard = () => {
                               <UserAvatar name={u.name} email={u.email} size="md" />
                               <div>
                                 <p className="font-medium">
-                                  {u.name || "No name"}
+                                  {u.name || t('common.noName', 'No name')}
                                 </p>
                                 <p className="text-sm text-muted-foreground">
                                   {u.email}
@@ -1172,13 +1174,13 @@ const AdminDashboard = () => {
                             {u.emailVerified ? (
                               <div className="flex items-center gap-2">
                                 <CheckCircle className="w-4 h-4 text-green-500" />
-                                <span className="text-sm">Verified</span>
+                                <span className="text-sm">{t('dashboard.users.verified', 'Verified')}</span>
                               </div>
                             ) : (
                               <div className="flex items-center gap-2">
                                 <XCircle className="w-4 h-4 text-muted-foreground" />
                                 <span className="text-sm text-muted-foreground">
-                                  Unverified
+                                  {t('dashboard.users.unverified', 'Unverified')}
                                 </span>
                               </div>
                             )}
@@ -1189,7 +1191,7 @@ const AdminDashboard = () => {
                           <td className="px-4 py-3 text-sm text-muted-foreground">
                             {u.lastLoginAt
                               ? new Date(u.lastLoginAt).toLocaleDateString()
-                              : "Never"}
+                              : t('common.never', 'Never')}
                           </td>
                           <td className="px-4 py-3">
                             <div className="flex items-center gap-1">
@@ -1230,9 +1232,9 @@ const AdminDashboard = () => {
                 <CardHeader>
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
-                      <CardTitle>All Applications</CardTitle>
+                      <CardTitle>{t('dashboard.applications.title', 'All Applications')}</CardTitle>
                       <CardDescription>
-                        Review and manage visa applications ({filteredApplications.length} of {applications.length})
+                        {t('dashboard.applications.description', 'Review and manage visa applications')} ({filteredApplications.length} {t('common.of', 'of')} {applications.length})
                       </CardDescription>
                     </div>
                     <div className="flex flex-wrap items-center gap-2">
@@ -1240,7 +1242,7 @@ const AdminDashboard = () => {
                       <div className="relative">
                         <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                         <Input
-                          placeholder="Search..."
+                          placeholder={t('common.search', 'Search...')}
                           value={searchTerm}
                           onChange={(e) => setSearchTerm(e.target.value)}
                           className="pl-10 w-48"
@@ -1249,25 +1251,25 @@ const AdminDashboard = () => {
                       {/* Status Filter */}
                       <Select value={statusFilter || "all"} onValueChange={(v) => setStatusFilter(v === "all" ? "" : v)}>
                         <SelectTrigger className="w-[140px]">
-                          <SelectValue placeholder="All Status" />
+                          <SelectValue placeholder={t('dashboard.applications.allStatus', 'All Status')} />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="all">All Status</SelectItem>
-                          <SelectItem value="DRAFT">Draft</SelectItem>
-                          <SelectItem value="IN_PROGRESS">In Progress</SelectItem>
-                          <SelectItem value="SUBMITTED">Submitted</SelectItem>
-                          <SelectItem value="UNDER_REVIEW">Under Review</SelectItem>
-                          <SelectItem value="COMPLETED">Completed</SelectItem>
-                          <SelectItem value="REJECTED">Rejected</SelectItem>
+                          <SelectItem value="all">{t('dashboard.applications.allStatus', 'All Status')}</SelectItem>
+                          <SelectItem value="DRAFT">{t('dashboard.status.Draft', 'Draft')}</SelectItem>
+                          <SelectItem value="IN_PROGRESS">{t('dashboard.status.InProgress', 'In Progress')}</SelectItem>
+                          <SelectItem value="SUBMITTED">{t('dashboard.status.Submitted', 'Submitted')}</SelectItem>
+                          <SelectItem value="UNDER_REVIEW">{t('dashboard.status.UnderReview', 'Under Review')}</SelectItem>
+                          <SelectItem value="COMPLETED">{t('dashboard.status.Completed', 'Completed')}</SelectItem>
+                          <SelectItem value="REJECTED">{t('dashboard.status.Rejected', 'Rejected')}</SelectItem>
                         </SelectContent>
                       </Select>
                       {/* Visa Type Filter */}
                       <Select value={visaTypeFilter || "all"} onValueChange={(v) => setVisaTypeFilter(v === "all" ? "" : v)}>
                         <SelectTrigger className="w-[130px]">
-                          <SelectValue placeholder="All Types" />
+                          <SelectValue placeholder={t('dashboard.applications.allTypes', 'All Types')} />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="all">All Types</SelectItem>
+                          <SelectItem value="all">{t('dashboard.applications.allTypes', 'All Types')}</SelectItem>
                           <SelectItem value="B1_B2">B1/B2</SelectItem>
                           <SelectItem value="F1">F1</SelectItem>
                           <SelectItem value="J1">J1</SelectItem>
@@ -1287,22 +1289,22 @@ const AdminDashboard = () => {
                       <thead>
                         <tr className="border-b">
                           <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
-                            Applicant
+                            {t('dashboard.applications.table.applicant', 'Applicant')}
                           </th>
                           <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
-                            Visa Type
+                            {t('dashboard.applications.table.visaType', 'Visa Type')}
                           </th>
                           <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
-                            Status
+                            {t('dashboard.applications.table.status', 'Status')}
                           </th>
                           <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
-                            Progress
+                            {t('dashboard.applications.table.progress', 'Progress')}
                           </th>
                           <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
-                            Created
+                            {t('dashboard.applications.table.created', 'Created')}
                           </th>
                           <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
-                            Actions
+                            {t('dashboard.applications.table.actions', 'Actions')}
                           </th>
                         </tr>
                       </thead>
@@ -1312,7 +1314,7 @@ const AdminDashboard = () => {
                             <td colSpan={6} className="px-4 py-12 text-center">
                               <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
                               <p className="text-muted-foreground">
-                                No applications found
+                                {t('dashboard.applications.noApplications', 'No applications found')}
                               </p>
                             </td>
                           </tr>
@@ -1341,7 +1343,7 @@ const AdminDashboard = () => {
                                     <UserAvatar name={app.user?.name} email={app.user?.email} size="md" />
                                     <div>
                                       <p className="font-medium">
-                                        {personalInfo?.givenNames || app.user?.name || "Unknown"}
+                                        {personalInfo?.givenNames || app.user?.name || t('common.unknown', 'Unknown')}
                                         {personalInfo?.surnames ? ` ${personalInfo.surnames}` : ""}
                                       </p>
                                       <p className="text-sm text-muted-foreground">
@@ -1387,7 +1389,7 @@ const AdminDashboard = () => {
                                     }}
                                   >
                                     <Eye className="w-4 h-4 mr-1" />
-                                    View
+                                    {t('common.view', 'View')}
                                   </Button>
                                 </td>
                               </tr>
@@ -1428,9 +1430,9 @@ const AdminDashboard = () => {
               {/* CMS Header */}
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-2xl font-bold">Content Management</h2>
+                  <h2 className="text-2xl font-bold">{t('dashboard.cms.title', 'Content Management')}</h2>
                   <p className="text-muted-foreground">
-                    Manage blog posts and news articles
+                    {t('dashboard.cms.description', 'Manage blog posts and news articles')}
                   </p>
                 </div>
                 <div className="flex gap-2">
@@ -1439,11 +1441,11 @@ const AdminDashboard = () => {
                     onClick={() => handleOpenNewPost("news")}
                   >
                     <Newspaper className="w-4 h-4 mr-2" />
-                    New News
+                    {t('dashboard.cms.newNews', 'New News')}
                   </Button>
                   <Button onClick={() => handleOpenNewPost("blog")}>
                     <Plus className="w-4 h-4 mr-2" />
-                    New Blog Post
+                    {t('dashboard.cms.newBlogPost', 'New Blog Post')}
                   </Button>
                 </div>
               </div>
@@ -1459,7 +1461,7 @@ const AdminDashboard = () => {
                       <div>
                         <p className="text-2xl font-bold">{blogPosts.length}</p>
                         <p className="text-sm text-muted-foreground">
-                          Blog Posts
+                          {t('dashboard.cms.blogPosts', 'Blog Posts')}
                         </p>
                       </div>
                     </div>
@@ -1474,7 +1476,7 @@ const AdminDashboard = () => {
                       <div>
                         <p className="text-2xl font-bold">{newsPosts.length}</p>
                         <p className="text-sm text-muted-foreground">
-                          News Articles
+                          {t('dashboard.cms.newsArticles', 'News Articles')}
                         </p>
                       </div>
                     </div>
@@ -1491,7 +1493,7 @@ const AdminDashboard = () => {
                           {posts.filter((p) => p.status === "published").length}
                         </p>
                         <p className="text-sm text-muted-foreground">
-                          Published
+                          {t('dashboard.cms.published', 'Published')}
                         </p>
                       </div>
                     </div>
@@ -1507,7 +1509,7 @@ const AdminDashboard = () => {
                         <p className="text-2xl font-bold">
                           {posts.filter((p) => p.status === "draft").length}
                         </p>
-                        <p className="text-sm text-muted-foreground">Drafts</p>
+                        <p className="text-sm text-muted-foreground">{t('dashboard.cms.drafts', 'Drafts')}</p>
                       </div>
                     </div>
                   </CardContent>
@@ -1522,7 +1524,7 @@ const AdminDashboard = () => {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <BookOpen className="w-5 h-5" />
-                        <CardTitle>Blog Posts</CardTitle>
+                        <CardTitle>{t('dashboard.cms.blogPosts', 'Blog Posts')}</CardTitle>
                       </div>
                       <Button
                         variant="ghost"
@@ -1532,7 +1534,7 @@ const AdminDashboard = () => {
                         <Plus className="w-4 h-4" />
                       </Button>
                     </div>
-                    <CardDescription>Manage your blog articles</CardDescription>
+                    <CardDescription>{t('dashboard.cms.manageBlog', 'Manage your blog articles')}</CardDescription>
                   </CardHeader>
                   <CardContent>
                     {cmsLoading ? (
@@ -1549,13 +1551,13 @@ const AdminDashboard = () => {
                       <div className="text-center py-12">
                         <BookOpen className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
                         <p className="text-muted-foreground mb-4">
-                          No blog posts yet
+                          {t('dashboard.cms.noBlogPosts', 'No blog posts yet')}
                         </p>
                         <Button
                           variant="outline"
                           onClick={() => handleOpenNewPost("blog")}
                         >
-                          Create your first post
+                          {t('dashboard.cms.createFirstPost', 'Create your first post')}
                         </Button>
                       </div>
                     ) : (
@@ -1636,7 +1638,7 @@ const AdminDashboard = () => {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Newspaper className="w-5 h-5" />
-                        <CardTitle>News Articles</CardTitle>
+                        <CardTitle>{t('dashboard.cms.newsArticles', 'News Articles')}</CardTitle>
                       </div>
                       <Button
                         variant="ghost"
@@ -1647,7 +1649,7 @@ const AdminDashboard = () => {
                       </Button>
                     </div>
                     <CardDescription>
-                      Manage news and announcements
+                      {t('dashboard.cms.manageNews', 'Manage news and announcements')}
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -1665,13 +1667,13 @@ const AdminDashboard = () => {
                       <div className="text-center py-12">
                         <Newspaper className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
                         <p className="text-muted-foreground mb-4">
-                          No news articles yet
+                          {t('dashboard.cms.noNewsArticles', 'No news articles yet')}
                         </p>
                         <Button
                           variant="outline"
                           onClick={() => handleOpenNewPost("news")}
                         >
-                          Create your first article
+                          {t('dashboard.cms.createFirstArticle', 'Create your first article')}
                         </Button>
                       </div>
                     ) : (
@@ -1755,33 +1757,33 @@ const AdminDashboard = () => {
           <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
-                {editingPost ? "Edit" : "Create"}{" "}
-                {newPost.category === "blog" ? "Blog Post" : "News Article"}
+                {editingPost ? t('common.edit', 'Edit') : t('common.create', 'Create')}{" "}
+                {newPost.category === "blog" ? t('dashboard.cms.blogPost', 'Blog Post') : t('dashboard.cms.newsArticle', 'News Article')}
               </DialogTitle>
               <DialogDescription>
                 {editingPost
-                  ? "Make changes to your content below."
-                  : `Create a new ${newPost.category === "blog" ? "blog post" : "news article"} for your website.`}
+                  ? t('dashboard.cms.editDescription', 'Make changes to your content below.')
+                  : t('dashboard.cms.createDescription', 'Create a new {{type}} for your website.', { type: newPost.category === "blog" ? t('dashboard.cms.blogPost', 'blog post') : t('dashboard.cms.newsArticle', 'news article') })}
               </DialogDescription>
             </DialogHeader>
 
             <div className="grid gap-6 py-4">
               {/* Title */}
               <div className="grid gap-2">
-                <Label htmlFor="title">Title *</Label>
+                <Label htmlFor="title">{t('dashboard.cms.form.title', 'Title')} *</Label>
                 <Input
                   id="title"
                   value={newPost.title}
                   onChange={(e) =>
                     setNewPost((prev) => ({ ...prev, title: e.target.value }))
                   }
-                  placeholder="Enter a compelling title..."
+                  placeholder={t('dashboard.cms.form.titlePlaceholder', 'Enter a compelling title...')}
                 />
               </div>
 
               {/* Category Toggle */}
               <div className="grid gap-2">
-                <Label>Category</Label>
+                <Label>{t('dashboard.cms.form.category', 'Category')}</Label>
                 <div className="flex gap-2">
                   <Button
                     type="button"
@@ -1794,7 +1796,7 @@ const AdminDashboard = () => {
                     className="flex-1"
                   >
                     <BookOpen className="w-4 h-4 mr-2" />
-                    Blog Post
+                    {t('dashboard.cms.blogPost', 'Blog Post')}
                   </Button>
                   <Button
                     type="button"
@@ -1807,35 +1809,35 @@ const AdminDashboard = () => {
                     className="flex-1"
                   >
                     <Newspaper className="w-4 h-4 mr-2" />
-                    News Article
+                    {t('dashboard.cms.newsArticle', 'News Article')}
                   </Button>
                 </div>
               </div>
 
               {/* Excerpt */}
               <div className="grid gap-2">
-                <Label htmlFor="excerpt">Short Description</Label>
+                <Label htmlFor="excerpt">{t('dashboard.cms.form.shortDescription', 'Short Description')}</Label>
                 <Textarea
                   id="excerpt"
                   value={newPost.excerpt}
                   onChange={(e) =>
                     setNewPost((prev) => ({ ...prev, excerpt: e.target.value }))
                   }
-                  placeholder="A brief summary that appears in previews..."
+                  placeholder={t('dashboard.cms.form.excerptPlaceholder', 'A brief summary that appears in previews...')}
                   rows={2}
                 />
               </div>
 
               {/* Content */}
               <div className="grid gap-2">
-                <Label htmlFor="content">Content *</Label>
+                <Label htmlFor="content">{t('dashboard.cms.form.content', 'Content')} *</Label>
                 <Textarea
                   id="content"
                   value={newPost.content}
                   onChange={(e) =>
                     setNewPost((prev) => ({ ...prev, content: e.target.value }))
                   }
-                  placeholder="Write your full article content here..."
+                  placeholder={t('dashboard.cms.form.contentPlaceholder', 'Write your full article content here...')}
                   rows={10}
                   className="font-mono text-sm"
                 />
@@ -1847,20 +1849,20 @@ const AdminDashboard = () => {
                 onChange={(url) =>
                   setNewPost((prev) => ({ ...prev, imageUrl: url }))
                 }
-                label="Featured Image"
+                label={t('dashboard.cms.form.featuredImage', 'Featured Image')}
                 disabled={saving}
               />
 
               {/* Tags */}
               <div className="grid gap-2">
-                <Label htmlFor="tags">Tags</Label>
+                <Label htmlFor="tags">{t('dashboard.cms.form.tags', 'Tags')}</Label>
                 <Input
                   id="tags"
                   value={newPost.tags}
                   onChange={(e) =>
                     setNewPost((prev) => ({ ...prev, tags: e.target.value }))
                   }
-                  placeholder="visa, travel, guide (comma-separated)"
+                  placeholder={t('dashboard.cms.form.tagsPlaceholder', 'visa, travel, guide (comma-separated)')}
                 />
               </div>
 
@@ -1869,10 +1871,9 @@ const AdminDashboard = () => {
               {/* Publish Status */}
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label>Publish immediately</Label>
+                  <Label>{t('dashboard.cms.form.publishImmediately', 'Publish immediately')}</Label>
                   <p className="text-sm text-muted-foreground">
-                    Make this {newPost.category === "blog" ? "post" : "article"}{" "}
-                    visible on the website
+                    {t('dashboard.cms.form.publishDescription', 'Make this content visible on the website')}
                   </p>
                 </div>
                 <Switch
@@ -1889,11 +1890,11 @@ const AdminDashboard = () => {
 
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                Cancel
+                {t('common.cancel', 'Cancel')}
               </Button>
               <Button onClick={handleSavePost} disabled={saving}>
                 {saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                {editingPost ? "Save Changes" : "Create Post"}
+                {editingPost ? t('common.saveChanges', 'Save Changes') : t('dashboard.cms.createPost', 'Create Post')}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -1903,19 +1904,18 @@ const AdminDashboard = () => {
         <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Delete Post</AlertDialogTitle>
+              <AlertDialogTitle>{t('dashboard.cms.deletePost', 'Delete Post')}</AlertDialogTitle>
               <AlertDialogDescription>
-                Are you sure you want to delete "{postToDelete?.title}"? This
-                action cannot be undone.
+                {t('dashboard.cms.deleteConfirmation', 'Are you sure you want to delete "{{title}}"? This action cannot be undone.', { title: postToDelete?.title })}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogCancel>{t('common.cancel', 'Cancel')}</AlertDialogCancel>
               <AlertDialogAction
                 onClick={handleDeletePost}
                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               >
-                Delete
+                {t('common.delete', 'Delete')}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

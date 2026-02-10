@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../contexts/AuthContext";
 import { Link } from "react-router-dom";
 import api from "../api/client";
@@ -39,6 +40,7 @@ interface Application {
 }
 
 const UserProfile = () => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
@@ -165,7 +167,7 @@ const UserProfile = () => {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-12 h-12 text-foreground animate-spin mx-auto mb-4" />
-          <p className="text-muted-foreground">Loading your profile...</p>
+          <p className="text-muted-foreground">{t('userProfile.loading', 'Loading your profile...')}</p>
         </div>
       </div>
     );
@@ -186,14 +188,14 @@ const UserProfile = () => {
               <div className="flex items-center gap-4 mt-2">
                 <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
                   <Calendar className="w-4 h-4" />
-                  Member since {new Date().toLocaleDateString()}
+                  {t('userProfile.memberSince', 'Member since')} {new Date().toLocaleDateString()}
                 </span>
               </div>
             </div>
           </div>
           <div className="flex items-center gap-2 px-3 py-1.5 bg-secondary border border-border rounded-full">
             <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-            <span className="text-foreground text-sm">Auto-save enabled</span>
+            <span className="text-foreground text-sm">{t('userProfile.autoSaveEnabled', 'Auto-save enabled')}</span>
           </div>
         </div>
 
@@ -233,7 +235,7 @@ const UserProfile = () => {
 
                 {/* Status Timeline */}
                 <CardContent className="p-6">
-                  <h3 className="text-sm font-medium text-muted-foreground mb-4">Application Progress</h3>
+                  <h3 className="text-sm font-medium text-muted-foreground mb-4">{t('userProfile.applicationProgress', 'Application Progress')}</h3>
                   <div className="relative">
                     {statusTimeline.map((item, index) => (
                       <div key={item.step} className="flex items-start gap-4 mb-6 last:mb-0">
@@ -272,18 +274,18 @@ const UserProfile = () => {
                       <Button asChild>
                         <Link to="/application" className="flex items-center gap-2">
                           <Edit3 className="w-4 h-4" />
-                          Continue Application
+                          {t('userProfile.continueApplication', 'Continue Application')}
                         </Link>
                       </Button>
                     ) : (
                       <Button variant="outline" className="flex items-center gap-2">
                         <Eye className="w-4 h-4" />
-                        View Application
+                        {t('userProfile.viewApplication', 'View Application')}
                       </Button>
                     )}
                     <Button variant="outline" className="flex items-center gap-2">
                       <Download className="w-4 h-4" />
-                      Download PDF
+                      {t('userProfile.downloadPdf', 'Download PDF')}
                     </Button>
                   </div>
                 </div>
@@ -291,11 +293,11 @@ const UserProfile = () => {
             ) : (
               <Card className="p-12 text-center">
                 <FileText className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-foreground mb-2">No Applications Yet</h3>
-                <p className="text-muted-foreground mb-6">Start your DS-160 visa application today.</p>
+                <h3 className="text-xl font-semibold text-foreground mb-2">{t('userProfile.noApplicationsYet', 'No Applications Yet')}</h3>
+                <p className="text-muted-foreground mb-6">{t('userProfile.startYourApplication', 'Start your DS-160 visa application today.')}</p>
                 <Button asChild>
                   <Link to="/application" className="inline-flex items-center gap-2">
-                    Start Application
+                    {t('userProfile.startApplication', 'Start Application')}
                     <ChevronRight className="w-4 h-4" />
                   </Link>
                 </Button>
@@ -306,7 +308,7 @@ const UserProfile = () => {
             {applications.length > 1 && (
               <Card>
                 <CardHeader className="border-b border-border">
-                  <h2 className="text-lg font-semibold text-foreground">Submission History</h2>
+                  <h2 className="text-lg font-semibold text-foreground">{t('userProfile.submissionHistory', 'Submission History')}</h2>
                 </CardHeader>
                 <div className="divide-y divide-border">
                   {applications.map((app) => {
@@ -352,25 +354,25 @@ const UserProfile = () => {
                   <div className="p-2 bg-secondary rounded-lg">
                     <CreditCard className="w-5 h-5 text-foreground" />
                   </div>
-                  <h3 className="text-lg font-semibold text-foreground">Payment Required</h3>
+                  <h3 className="text-lg font-semibold text-foreground">{t('userProfile.paymentRequired', 'Payment Required')}</h3>
                 </div>
                 <p className="text-muted-foreground text-sm mb-4">
-                  Complete your payment to proceed with visa application processing.
+                  {t('userProfile.paymentDescription', 'Complete your payment to proceed with visa application processing.')}
                 </p>
 
                 {/* Fee Breakdown */}
                 <div className="p-4 bg-secondary/50 rounded-xl border border-border mb-4">
                   <div className="flex justify-between items-center mb-2">
-                    <span className="text-muted-foreground">Application Fee</span>
+                    <span className="text-muted-foreground">{t('userProfile.applicationFee', 'Application Fee')}</span>
                     <span className="text-foreground font-medium">$160.00</span>
                   </div>
                   <div className="flex justify-between items-center mb-2">
-                    <span className="text-muted-foreground">Processing Fee</span>
+                    <span className="text-muted-foreground">{t('userProfile.processingFee', 'Processing Fee')}</span>
                     <span className="text-foreground font-medium">$25.00</span>
                   </div>
                   <div className="border-t border-border pt-2 mt-2">
                     <div className="flex justify-between items-center">
-                      <span className="text-foreground font-medium">Total</span>
+                      <span className="text-foreground font-medium">{t('common.total', 'Total')}</span>
                       <span className="text-foreground font-bold text-lg">$185.00</span>
                     </div>
                   </div>
@@ -402,14 +404,14 @@ const UserProfile = () => {
                 </div>
 
                 <p className="text-xs text-muted-foreground text-center">
-                  Secure payment processing. Your payment information is encrypted.
+                  {t('userProfile.securePayment', 'Secure payment processing. Your payment information is encrypted.')}
                 </p>
               </Card>
             )}
 
             {/* Quick Actions */}
             <Card className="p-6">
-              <h3 className="text-lg font-semibold text-foreground mb-4">Quick Actions</h3>
+              <h3 className="text-lg font-semibold text-foreground mb-4">{t('userProfile.quickActions', 'Quick Actions')}</h3>
               <div className="space-y-3">
                 <Link
                   to="/application"
@@ -417,21 +419,21 @@ const UserProfile = () => {
                 >
                   <div className="flex items-center gap-3">
                     <FileText className="w-5 h-5 text-foreground" />
-                    <span className="text-muted-foreground">New Application</span>
+                    <span className="text-muted-foreground">{t('userProfile.newApplication', 'New Application')}</span>
                   </div>
                   <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
                 </Link>
                 <button className="w-full flex items-center justify-between p-3 bg-secondary/50 rounded-xl border border-border hover:bg-secondary hover:border-muted-foreground transition-all group">
                   <div className="flex items-center gap-3">
                     <User className="w-5 h-5 text-foreground" />
-                    <span className="text-muted-foreground">Edit Profile</span>
+                    <span className="text-muted-foreground">{t('userProfile.editProfile', 'Edit Profile')}</span>
                   </div>
                   <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
                 </button>
                 <button className="w-full flex items-center justify-between p-3 bg-secondary/50 rounded-xl border border-border hover:bg-secondary hover:border-muted-foreground transition-all group">
                   <div className="flex items-center gap-3">
                     <Shield className="w-5 h-5 text-foreground" />
-                    <span className="text-muted-foreground">Security Settings</span>
+                    <span className="text-muted-foreground">{t('userProfile.securitySettings', 'Security Settings')}</span>
                   </div>
                   <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
                 </button>
@@ -440,12 +442,12 @@ const UserProfile = () => {
 
             {/* Help */}
             <Card className="p-6">
-              <h3 className="text-lg font-semibold text-foreground mb-2">Need Help?</h3>
+              <h3 className="text-lg font-semibold text-foreground mb-2">{t('userProfile.needHelp', 'Need Help?')}</h3>
               <p className="text-muted-foreground text-sm mb-4">
-                Our support team is available 24/7 to assist with your application.
+                {t('userProfile.supportDescription', 'Our support team is available 24/7 to assist with your application.')}
               </p>
               <Button variant="outline" className="w-full">
-                Contact Support
+                {t('userProfile.contactSupport', 'Contact Support')}
               </Button>
             </Card>
           </div>
@@ -494,16 +496,16 @@ const UserProfile = () => {
                 onClick={() => setShowPaymentModal(false)}
                 className="flex-1"
               >
-                Cancel
+                {t('common.cancel', 'Cancel')}
               </Button>
               <Button
                 onClick={() => {
-                  alert("Payment initiated! You will receive confirmation shortly.");
+                  alert(t('userProfile.paymentInitiated', 'Payment initiated! You will receive confirmation shortly.'));
                   setShowPaymentModal(false);
                 }}
                 className="flex-1"
               >
-                I've Paid
+                {t('userProfile.ivePaid', "I've Paid")}
               </Button>
             </div>
           </Card>

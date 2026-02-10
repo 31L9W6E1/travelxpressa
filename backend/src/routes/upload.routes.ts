@@ -94,6 +94,64 @@ router.post(
   }
 );
 
+// GET /api/upload/gallery - Get all uploaded images (admin only)
+router.get(
+  '/gallery',
+  authenticateToken,
+  requireRole(UserRole.ADMIN),
+  async (req: Request, res: Response) => {
+    try {
+      // Read all files from uploads directory
+      const files = fs.readdirSync(uploadsDir);
+
+      // Get file stats for each file
+      const images = files
+        .filter(file => {
+          const ext = path.extname(file).toLowerCase();
+          return ['.jpg', '.jpeg', '.png', '.gif', '.webp'].includes(ext);
+        })
+        .map(filename => {
+          const filePath = path.join(uploadsDir, filename);
+          const stats = fs.statSync(filePath);
+          const ext = path.extname(filename).toLowerCase().slice(1);
+
+          return {
+            filename,
+            url: `/uploads/images/${filename}`,
+            size: stats.size,
+            type: `image/${ext === 'jpg' ? 'jpeg' : ext}`,
+            uploadedAt: stats.mtime.toISOString(),
+          };
+        })
+        .sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime());
+
+      // Calculate stats
+      const oneWeekAgo = new Date();
+      oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+      const stats = {
+        totalImages: images.length,
+        totalSize: images.reduce((acc, img) => acc + img.size, 0),
+        recentUploads: images.filter(img => new Date(img.uploadedAt) > oneWeekAgo).length,
+      };
+
+      res.json({
+        success: true,
+        data: {
+          images,
+          stats,
+        },
+      });
+    } catch (error) {
+      logger.error('Error fetching gallery', error as Error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch gallery',
+      });
+    }
+  }
+);
+
 // DELETE /api/upload/image/:filename - Delete image (admin only)
 router.delete(
   '/image/:filename',

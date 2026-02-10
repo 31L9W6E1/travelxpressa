@@ -26,6 +26,8 @@ import {
   Image as ImageIcon,
   Loader2,
   CreditCard,
+  Activity,
+  FolderOpen,
 } from "lucide-react";
 import {
   ChartContainer,
@@ -104,6 +106,9 @@ import ApplicationDetailModal from "@/components/admin/ApplicationDetailModal";
 import VisaTypeChart from "@/components/admin/VisaTypeChart";
 import ImageUpload from "@/components/ImageUpload";
 import PaymentDashboard from "@/components/admin/PaymentDashboard";
+import PaymentAnalytics from "@/components/admin/PaymentAnalytics";
+import GalleryManager from "@/components/admin/GalleryManager";
+import ApplicationTracker from "@/components/admin/ApplicationTracker";
 
 interface UserData {
   id: string;
@@ -217,7 +222,7 @@ const userGrowthConfig = {
 const AdminDashboard = () => {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<
-    "overview" | "users" | "applications" | "payments" | "cms"
+    "overview" | "users" | "applications" | "tracking" | "payments" | "analytics" | "gallery" | "cms"
   >("overview");
   const [users, setUsers] = useState<UserData[]>([]);
   const [applications, setApplications] = useState<ApplicationData[]>([]);
@@ -561,7 +566,7 @@ const AdminDashboard = () => {
           onValueChange={(v) => setActiveTab(v as any)}
           className="space-y-6"
         >
-          <TabsList className="bg-secondary">
+          <TabsList className="bg-secondary flex-wrap h-auto gap-1 p-1">
             <TabsTrigger value="overview" className="gap-2">
               <BarChart3 className="w-4 h-4" />
               Overview
@@ -574,9 +579,21 @@ const AdminDashboard = () => {
               <FileText className="w-4 h-4" />
               Applications
             </TabsTrigger>
+            <TabsTrigger value="tracking" className="gap-2">
+              <Activity className="w-4 h-4" />
+              Tracking
+            </TabsTrigger>
             <TabsTrigger value="payments" className="gap-2">
               <CreditCard className="w-4 h-4" />
               Payments
+            </TabsTrigger>
+            <TabsTrigger value="analytics" className="gap-2">
+              <TrendingUp className="w-4 h-4" />
+              Analytics
+            </TabsTrigger>
+            <TabsTrigger value="gallery" className="gap-2">
+              <FolderOpen className="w-4 h-4" />
+              Gallery
             </TabsTrigger>
             <TabsTrigger value="cms" className="gap-2">
               <Newspaper className="w-4 h-4" />
@@ -1138,9 +1155,24 @@ const AdminDashboard = () => {
             </div>
           </TabsContent>
 
+          {/* Tracking Tab */}
+          <TabsContent value="tracking">
+            <ApplicationTracker />
+          </TabsContent>
+
           {/* Payments Tab */}
           <TabsContent value="payments">
             <PaymentDashboard />
+          </TabsContent>
+
+          {/* Analytics Tab */}
+          <TabsContent value="analytics">
+            <PaymentAnalytics />
+          </TabsContent>
+
+          {/* Gallery Tab */}
+          <TabsContent value="gallery">
+            <GalleryManager />
           </TabsContent>
 
           {/* CMS Tab */}

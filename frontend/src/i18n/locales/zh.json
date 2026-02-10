@@ -249,9 +249,11 @@
   },
   "learnMorePage": {
     "hero": {
-      "titleLine1": "签证数据与",
-      "titleLine2": "洞察",
-      "subtitle": "面向蒙古公民和全球旅行者的美国签证申请、获批率与趋势的综合数据。"
+      "titleLine1": "签证费用与",
+      "titleLine2": "要求",
+      "subtitle": "比较热门目的地的政府费用、面签要求和处理时间。服务费按（政府费用 x 2）+5% 计算；加急服务在服务费基础上 +15%。",
+      "cta": "选择目的地",
+      "secondaryCta": "继续申请"
     },
     "mongoliaStats": {
       "totalApplications": "申请总量（2023）",

@@ -175,6 +175,16 @@ function App() {
               }
             />
             <Route
+              path="/admin/applications/:applicationId"
+              element={
+                <AdminRoute>
+                  <ErrorBoundary>
+                    <AdminDashboard />
+                  </ErrorBoundary>
+                </AdminRoute>
+              }
+            />
+            <Route
               path="/admin/:section"
               element={
                 <AdminRoute>

@@ -228,8 +228,9 @@ const AdminDashboard = () => {
   const { t } = useTranslation();
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { section } = useParams<{ section?: string }>();
-  const tabFromUrl = getAdminTabFromSection(section);
+  const { section, applicationId } =
+    useParams<{ section?: string; applicationId?: string }>();
+  const tabFromUrl = applicationId ? "applications" : getAdminTabFromSection(section);
 
   const applicationChartConfig = {
     submitted: {
@@ -420,6 +421,11 @@ const AdminDashboard = () => {
   }, [user]);
 
   useEffect(() => {
+    if (applicationId) {
+      setActiveTab("applications");
+      return;
+    }
+
     const nextTab = getAdminTabFromSection(section);
     setActiveTab(nextTab);
 
@@ -427,7 +433,47 @@ const AdminDashboard = () => {
     if (!section || section !== nextTab) {
       navigate(`/admin/${nextTab}`, { replace: true });
     }
-  }, [section, navigate]);
+  }, [section, applicationId, navigate]);
+
+  // Deep-link support: /admin/applications/:applicationId
+  useEffect(() => {
+    if (!applicationId || user?.role !== "ADMIN") return;
+
+    // If we already have it selected, just ensure the modal is open.
+    if (selectedApplication?.id === applicationId) {
+      setDetailModalOpen(true);
+      return;
+    }
+
+    const fromList = applications.find((a) => a.id === applicationId);
+    if (fromList) {
+      setSelectedApplication(fromList);
+      setDetailModalOpen(true);
+      return;
+    }
+
+    // Fallback: fetch the application directly.
+    (async () => {
+      try {
+        const res = await api.get(`/api/admin/applications/${applicationId}`);
+        const payload = res.data;
+        const app =
+          payload?.data ||
+          payload?.application ||
+          payload?.data?.application ||
+          payload;
+        if (app?.id) {
+          setSelectedApplication(app);
+          setDetailModalOpen(true);
+        } else {
+          toast.error("Failed to load application details");
+        }
+      } catch (err) {
+        console.error("Failed to fetch application for deep link:", err);
+        toast.error("Failed to load application details");
+      }
+    })();
+  }, [applicationId, user, applications, selectedApplication]);
 
   const handleTabChange = (nextTab: AdminTab) => {
     setActiveTab(nextTab);
@@ -1927,7 +1973,12 @@ const AdminDashboard = () => {
         <ApplicationDetailModal
           application={selectedApplication}
           open={detailModalOpen}
-          onOpenChange={setDetailModalOpen}
+          onOpenChange={(open) => {
+            setDetailModalOpen(open);
+            if (!open && applicationId) {
+              navigate("/admin/applications", { replace: true });
+            }
+          }}
           onStatusUpdate={(updatedApp) => {
             setApplications((prev) =>
               prev.map((app) => (app.id === updatedApp.id ? updatedApp : app))

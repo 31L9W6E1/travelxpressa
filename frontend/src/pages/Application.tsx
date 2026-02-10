@@ -25,7 +25,8 @@ import {
 } from 'lucide-react';
 import PaymentModal from '@/components/PaymentModal';
 import type { Payment } from '@/api/payments';
-import { SERVICE_FEE_MNT } from '@/config/pricing';
+import { convertCurrency, isFxCurrencySupported } from '@/config/fx';
+import { calculateServiceFee, FALLBACK_SERVICE_FEE_MNT } from '@/config/pricing';
 import { formatNumber } from '@/lib/money';
 
 // Form step types
@@ -147,8 +148,28 @@ export default function Application() {
   const [paymentComplete, setPaymentComplete] = useState(false);
 
   // Get selected country from localStorage (set in CountrySelect page)
-  const selectedCountryCode = localStorage.getItem('selectedCountry') as CountryCode || 'USA';
+  // Note: Korea is currently not offered, so fall back to USA if it was previously selected.
+  const storedCountryCode = localStorage.getItem('selectedCountry') as CountryCode | null;
+  const selectedCountryCode: CountryCode =
+    storedCountryCode && storedCountryCode !== 'KOREA' ? storedCountryCode : 'USA';
   const countryConfig = findCountryByCode(selectedCountryCode);
+
+  const serviceFeeAmountMnt = (() => {
+    const baseFee = countryConfig?.paymentPricing?.baseFee;
+    const currency = countryConfig?.paymentPricing?.currency;
+    if (!baseFee || !currency) return FALLBACK_SERVICE_FEE_MNT;
+
+    const serviceFeeInCurrency = calculateServiceFee(baseFee);
+    if (!serviceFeeInCurrency) return FALLBACK_SERVICE_FEE_MNT;
+
+    if (!isFxCurrencySupported(currency) || !isFxCurrencySupported("MNT")) {
+      return FALLBACK_SERVICE_FEE_MNT;
+    }
+
+    const mnt = convertCurrency(serviceFeeInCurrency, currency, "MNT");
+    const rounded = Math.round(mnt);
+    return rounded > 0 ? rounded : FALLBACK_SERVICE_FEE_MNT;
+  })();
 
   // Map country to visa type
   const getVisaTypeForCountry = (countryCode: CountryCode): VisaType => {
@@ -1106,7 +1127,7 @@ export default function Application() {
                       </p>
                       <div className="flex items-baseline gap-2">
                         <span className="text-3xl font-bold text-primary">
-                          {formatNumber(SERVICE_FEE_MNT, i18n.language)}
+                          {formatNumber(serviceFeeAmountMnt, i18n.language)}
                         </span>
                         <span className="text-sm text-muted-foreground">MNT</span>
                       </div>
@@ -1415,17 +1436,17 @@ export default function Application() {
       </div>
 
       {/* Payment Modal */}
-      {applicationId && (
-        <PaymentModal
-          isOpen={showPaymentModal}
-          onClose={() => setShowPaymentModal(false)}
-          applicationId={applicationId}
-          serviceType="VISA_APPLICATION"
-          amount={SERVICE_FEE_MNT}
-          description={`${t('applicationPage.title', { defaultValue: 'DS-160 Visa Application' })} - ${formData.personalInfo.surnames} ${formData.personalInfo.givenNames}`}
-          onPaymentSuccess={handlePaymentSuccess}
-        />
-      )}
+	      {applicationId && (
+	        <PaymentModal
+	          isOpen={showPaymentModal}
+	          onClose={() => setShowPaymentModal(false)}
+	          applicationId={applicationId}
+	          serviceType="VISA_APPLICATION"
+	          amount={serviceFeeAmountMnt}
+	          description={`${t('applicationPage.title', { defaultValue: 'DS-160 Visa Application' })} - ${formData.personalInfo.surnames} ${formData.personalInfo.givenNames}`}
+	          onPaymentSuccess={handlePaymentSuccess}
+	        />
+	      )}
     </div>
   );
 }

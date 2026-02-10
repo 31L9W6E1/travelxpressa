@@ -9,8 +9,12 @@ import {
   getAvailableCountries,
   type CountryCode,
 } from "@/config/countries";
-import { SERVICE_FEE_MNT } from "@/config/pricing";
-import { formatCurrencyCodeAmount, formatMnt } from "@/lib/money";
+import {
+  calculateExpressServiceFee,
+  calculateServiceFee,
+} from "@/config/pricing";
+import { convertCurrency, FX_LAST_UPDATED_ISO, isFxCurrencySupported } from "@/config/fx";
+import { formatCurrencyCodeAmount, getCurrencyForLanguage } from "@/lib/money";
 
 const LearnMore = () => {
   const { t, i18n } = useTranslation();
@@ -19,13 +23,71 @@ const LearnMore = () => {
 
   useEffect(() => {
     const stored = localStorage.getItem("selectedCountry");
+    if (stored === "KOREA") {
+      localStorage.removeItem("selectedCountry");
+      return;
+    }
     if (stored && Object.prototype.hasOwnProperty.call(countryConfigs, stored)) {
       setSelectedCountryCode(stored as CountryCode);
     }
   }, []);
 
   const destinations = useMemo(() => getAvailableCountries(), []);
-  const serviceFeeLabel = formatMnt(SERVICE_FEE_MNT, i18n.language);
+  const displayCurrency = getCurrencyForLanguage(i18n.language);
+
+  const toDisplayCurrency = (amount: number, fromCurrency: string): string => {
+    const rounded = Math.round(amount);
+    if (!isFxCurrencySupported(fromCurrency) || !isFxCurrencySupported(displayCurrency)) {
+      return formatCurrencyCodeAmount(fromCurrency, rounded, i18n.language);
+    }
+    const converted = convertCurrency(rounded, fromCurrency, displayCurrency);
+    return formatCurrencyCodeAmount(displayCurrency, Math.round(converted), i18n.language);
+  };
+
+  const selectedDestination = useMemo(() => {
+    if (selectedCountryCode) {
+      const cfg = countryConfigs[selectedCountryCode];
+      if (cfg && cfg.code !== "KOREA") return cfg;
+    }
+    return destinations[0] ?? null;
+  }, [selectedCountryCode, destinations]);
+
+  const selectedGovernmentFeeLabel = selectedDestination
+    ? toDisplayCurrency(
+        selectedDestination.paymentPricing.baseFee,
+        selectedDestination.paymentPricing.currency,
+      )
+    : "";
+  const selectedServiceFeeLabel = selectedDestination
+    ? toDisplayCurrency(
+        calculateServiceFee(selectedDestination.paymentPricing.baseFee),
+        selectedDestination.paymentPricing.currency,
+      )
+    : "";
+  const selectedExpressServiceFeeLabel = selectedDestination
+    ? toDisplayCurrency(
+        calculateExpressServiceFee(
+          calculateServiceFee(selectedDestination.paymentPricing.baseFee),
+        ),
+        selectedDestination.paymentPricing.currency,
+      )
+    : "";
+  const selectedTotalLabel = selectedDestination
+    ? toDisplayCurrency(
+        selectedDestination.paymentPricing.baseFee +
+          calculateServiceFee(selectedDestination.paymentPricing.baseFee),
+        selectedDestination.paymentPricing.currency,
+      )
+    : "";
+  const selectedExpressTotalLabel = selectedDestination
+    ? toDisplayCurrency(
+        selectedDestination.paymentPricing.baseFee +
+          calculateExpressServiceFee(
+            calculateServiceFee(selectedDestination.paymentPricing.baseFee),
+          ),
+        selectedDestination.paymentPricing.currency,
+      )
+    : "";
 
   return (
     <div className="min-h-screen bg-background text-foreground pt-16">
@@ -46,8 +108,7 @@ const LearnMore = () => {
             <p className="text-xl text-muted-foreground mb-8">
               {t("learnMorePage.hero.subtitle", {
                 defaultValue:
-                  "Compare typical government fees, interview requirements, and processing timelines for popular destinations. Our service fee is {{fee}}.",
-                fee: serviceFeeLabel,
+                  "Compare typical government fees, interview requirements, and processing timelines for popular destinations. Service fee is calculated as (fee × 2) + 5%. Express adds +15%.",
               })}
             </p>
 
@@ -112,10 +173,12 @@ const LearnMore = () => {
                 <div>
                   <p className="text-sm text-muted-foreground">
                     {t("learnMorePage.sections.fees.serviceFeeLabel", {
-                      defaultValue: "Service fee",
+                      defaultValue: "Service fee (standard)",
                     })}
                   </p>
-                  <p className="text-2xl font-bold">{serviceFeeLabel}</p>
+                  <p className="text-2xl font-bold">
+                    {selectedServiceFeeLabel || t("common.na", { defaultValue: "N/A" })}
+                  </p>
                   <p className="text-xs text-muted-foreground mt-1">
                     {t("learnMorePage.sections.fees.serviceFeeNote", {
                       defaultValue:
@@ -162,10 +225,13 @@ const LearnMore = () => {
                 <tbody>
                   {destinations.map((dest) => {
                     const isSelected = dest.code === selectedCountryCode;
-                    const governmentFee = formatCurrencyCodeAmount(
-                      dest.paymentPricing.currency,
+                    const governmentFee = toDisplayCurrency(
                       dest.paymentPricing.baseFee,
-                      i18n.language,
+                      dest.paymentPricing.currency,
+                    );
+                    const serviceFee = toDisplayCurrency(
+                      calculateServiceFee(dest.paymentPricing.baseFee),
+                      dest.paymentPricing.currency,
                     );
                     return (
                       <tr
@@ -183,7 +249,7 @@ const LearnMore = () => {
                           </div>
                         </td>
                         <td className="p-4 font-mono text-sm">{governmentFee}</td>
-                        <td className="p-4 font-mono text-sm">{serviceFeeLabel}</td>
+                        <td className="p-4 font-mono text-sm">{serviceFee}</td>
                         <td className="p-4 text-sm text-muted-foreground">
                           {dest.processingTimeline}
                         </td>
@@ -207,9 +273,111 @@ const LearnMore = () => {
           <p className="text-xs text-muted-foreground mt-4">
             {t("learnMorePage.sections.fees.disclaimer", {
               defaultValue:
-                "We are not affiliated with any government agency. Fees and processing timelines are indicative and may change.",
+                "We are not affiliated with any government agency. Fees and timelines may change. Converted amounts are estimates (FX updated: {{date}}).",
+              date: FX_LAST_UPDATED_ISO,
             })}
           </p>
+
+          {selectedDestination && (
+            <div className="mt-10 grid md:grid-cols-2 gap-6">
+              <Card className="bg-secondary/50">
+                <CardContent className="p-6">
+                  <h3 className="text-lg font-semibold">
+                    {t("learnMorePage.sections.fees.breakdown.title", {
+                      defaultValue: "Detailed fee breakdown",
+                    })}
+                  </h3>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {t("learnMorePage.sections.fees.breakdown.subtitle", {
+                      defaultValue:
+                        "Displayed in {{currency}} based on your selected language.",
+                      currency: displayCurrency,
+                    })}
+                  </p>
+
+                  <div className="mt-4 space-y-2 text-sm">
+                    <div className="flex items-center justify-between gap-4">
+                      <span className="text-muted-foreground">
+                        {t("learnMorePage.sections.fees.breakdown.governmentFee", {
+                          defaultValue: "Government fee",
+                        })}
+                      </span>
+                      <span className="font-mono">{selectedGovernmentFeeLabel}</span>
+                    </div>
+                    <div className="flex items-center justify-between gap-4">
+                      <span className="text-muted-foreground">
+                        {t("learnMorePage.sections.fees.breakdown.serviceFee", {
+                          defaultValue: "Service fee (standard)",
+                        })}
+                      </span>
+                      <span className="font-mono">{selectedServiceFeeLabel}</span>
+                    </div>
+                    <div className="flex items-center justify-between gap-4">
+                      <span className="text-muted-foreground">
+                        {t("learnMorePage.sections.fees.breakdown.expressServiceFee", {
+                          defaultValue: "Service fee (express, +15%)",
+                        })}
+                      </span>
+                      <span className="font-mono">{selectedExpressServiceFeeLabel}</span>
+                    </div>
+
+                    <div className="border-t border-border pt-3 mt-3 space-y-2">
+                      <div className="flex items-center justify-between gap-4">
+                        <span className="font-medium">
+                          {t("learnMorePage.sections.fees.breakdown.totalStandard", {
+                            defaultValue: "Total (standard)",
+                          })}
+                        </span>
+                        <span className="font-mono font-semibold">
+                          {selectedTotalLabel}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between gap-4">
+                        <span className="font-medium">
+                          {t("learnMorePage.sections.fees.breakdown.totalExpress", {
+                            defaultValue: "Total (express)",
+                          })}
+                        </span>
+                        <span className="font-mono font-semibold">
+                          {selectedExpressTotalLabel}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-secondary/50">
+                <CardContent className="p-6">
+                  <h3 className="text-lg font-semibold">
+                    {t("learnMorePage.sections.fees.notes.title", {
+                      defaultValue: "Notes",
+                    })}
+                  </h3>
+                  <ul className="mt-3 space-y-2 text-sm text-muted-foreground list-disc pl-5">
+                    <li>
+                      {t("learnMorePage.sections.fees.notes.item1", {
+                        defaultValue:
+                          "Government fees are set by authorities and can change without notice.",
+                      })}
+                    </li>
+                    <li>
+                      {t("learnMorePage.sections.fees.notes.item2", {
+                        defaultValue:
+                          "Converted amounts are estimates for comparison only.",
+                      })}
+                    </li>
+                    <li>
+                      {t("learnMorePage.sections.fees.notes.item3", {
+                        defaultValue:
+                          "Express service (if selected) increases the service fee by 15%.",
+                      })}
+                    </li>
+                  </ul>
+                </CardContent>
+              </Card>
+            </div>
+          )}
         </div>
       </section>
 
@@ -380,4 +548,3 @@ const LearnMore = () => {
 };
 
 export default LearnMore;
-

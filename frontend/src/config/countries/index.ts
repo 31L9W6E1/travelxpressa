@@ -43,7 +43,8 @@ export const getCountryConfig = (code: CountryCode): CountryConfig => {
 
 // Get all available countries
 export const getAvailableCountries = (): CountryConfig[] => {
-  return Object.values(countryConfigs);
+  // Business decision: we do not currently offer Korea visa services.
+  return Object.values(countryConfigs).filter((c) => c.code !== "KOREA");
 };
 
 // Get country by code (with null check)
@@ -52,7 +53,7 @@ export const findCountryByCode = (code: string): CountryConfig | undefined => {
 };
 
 // Country list for selection dropdown
-export const countryList = Object.values(countryConfigs).map((config) => ({
+export const countryList = getAvailableCountries().map((config) => ({
   code: config.code,
   name: config.name,
   flag: config.flag,

@@ -249,9 +249,11 @@
   },
   "learnMorePage": {
     "hero": {
-      "titleLine1": "ビザ統計と",
-      "titleLine2": "インサイト",
-      "subtitle": "モンゴル国籍の方や世界中の旅行者向けに、米国ビザ申請件数、承認率、傾向などの総合データを提供します。"
+      "titleLine1": "ビザ料金と",
+      "titleLine2": "要件",
+      "subtitle": "人気の渡航先について、政府手数料・面接要件・処理期間の目安を比較できます。サービス料は（政府手数料 x 2）+5%で計算し、エクスプレスは+15%です。",
+      "cta": "目的地を選ぶ",
+      "secondaryCta": "申請を続ける"
     },
     "mongoliaStats": {
       "totalApplications": "申請総数（2023年）",

@@ -249,9 +249,11 @@
   },
   "learnMorePage": {
     "hero": {
-      "titleLine1": "비자 통계 및",
-      "titleLine2": "인사이트",
-      "subtitle": "몽골 시민과 전 세계 여행자를 위한 미국 비자 신청, 승인률, 추세에 대한 종합 데이터입니다."
+      "titleLine1": "비자 수수료 및",
+      "titleLine2": "요건",
+      "subtitle": "주요 목적지의 정부 수수료, 인터뷰 요구사항, 처리 기간을 비교하세요. 서비스 수수료는 (정부 수수료 x 2) + 5%로 계산되며, 익스프레스는 +15%가 추가됩니다.",
+      "cta": "목적지 선택",
+      "secondaryCta": "신청 계속"
     },
     "mongoliaStats": {
       "totalApplications": "총 신청 건수 (2023)",

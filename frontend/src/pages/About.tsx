@@ -30,7 +30,7 @@ const About = () => {
       title: t("aboutPage.features.saveTime.title", { defaultValue: "Save Time" }),
       description: t("aboutPage.features.saveTime.description", {
         defaultValue:
-          "Our guided process helps you complete your DS-160 form faster with fewer errors than doing it alone.",
+          "Our guided process helps you prepare applications faster with fewer errors than doing it alone.",
       }),
     },
     {
@@ -78,9 +78,28 @@ const About = () => {
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-10">
             {t("aboutPage.hero.subtitle", {
               defaultValue:
-                "We simplify the US visa application process by providing a user-friendly platform that guides you through every step of the DS-160 form completion.",
+                "We simplify visa application preparation with guided steps, clear checklists, and support for multiple destinations.",
             })}
           </p>
+
+          <p className="text-sm text-muted-foreground mb-8">
+            {t("aboutPage.hero.customers", {
+              defaultValue: "We have helped 1,000+ customers.",
+            })}
+          </p>
+
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Button asChild size="lg">
+              <Link to="/select-country">
+                {t("aboutPage.hero.primaryCta", { defaultValue: "Start Application" })}
+              </Link>
+            </Button>
+            <Button asChild variant="outline" size="lg">
+              <Link to="/learn-more">
+                {t("aboutPage.hero.secondaryCta", { defaultValue: "View Fees & Requirements" })}
+              </Link>
+            </Button>
+          </div>
         </div>
       </section>
 
@@ -147,7 +166,8 @@ const About = () => {
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
               {t("aboutPage.howItWorks.subtitle", {
-                defaultValue: "Complete your DS-160 application in three simple steps.",
+                defaultValue:
+                  "An online service for busy travelers: prepare your application, track progress, and get support when you need it.",
               })}
             </p>
           </div>
@@ -165,7 +185,7 @@ const About = () => {
                 <p className="text-muted-foreground">
                   {t("aboutPage.howItWorks.steps.createAccount.description", {
                     defaultValue:
-                      "Sign up for free and access our guided DS-160 form builder with auto-save functionality.",
+                      "Create an account and choose your destination. Your progress is saved automatically.",
                   })}
                 </p>
               </CardContent>
@@ -183,7 +203,7 @@ const About = () => {
                 <p className="text-muted-foreground">
                   {t("aboutPage.howItWorks.steps.fillApplication.description", {
                     defaultValue:
-                      "Complete each section with our step-by-step guidance. Get help anytime from our support team.",
+                      "Complete each section with step-by-step guidance and clear checklists. Get help anytime from our support team.",
                   })}
                 </p>
               </CardContent>
@@ -201,43 +221,12 @@ const About = () => {
                 <p className="text-muted-foreground">
                   {t("aboutPage.howItWorks.steps.submitTrack.description", {
                     defaultValue:
-                      "Review your application, submit to CEAC, and track your visa status all in one place.",
+                      "Review and export your application and track it through your dashboard. Appointment availability varies by location (US, Schengen, and other destinations) and earlier slots can sometimes open within 1-2 days. Express support (if selected) adds +15% to the service fee.",
                   })}
                 </p>
               </CardContent>
             </Card>
           </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-24">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
-          <Card className="bg-secondary">
-            <CardContent className="p-12">
-              <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-                {t("aboutPage.cta.title", { defaultValue: "Ready to Start Your Application?" })}
-              </h2>
-              <p className="text-muted-foreground mb-8 max-w-2xl mx-auto">
-                {t("aboutPage.cta.subtitle", {
-                  defaultValue:
-                    "Join thousands of successful applicants who have used our platform to complete their DS-160 forms.",
-                })}
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button asChild size="lg">
-                  <Link to="/login">
-                    {t("aboutPage.cta.primary", { defaultValue: "Get Started Free" })}
-                  </Link>
-                </Button>
-                <Button asChild variant="outline" size="lg">
-                  <Link to="/learn-more">
-                    {t("nav.learnMore", { defaultValue: "Learn More" })}
-                  </Link>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
         </div>
       </section>
 

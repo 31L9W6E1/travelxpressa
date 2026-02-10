@@ -39,9 +39,9 @@ export const usaConfig: CountryConfig = {
     'Previous US Visas (if any)'
   ],
   interviewRequired: true,
-  processingTimeline: '4-6 weeks for interview appointment, 1-2 weeks post-interview for visa processing',
+  processingTimeline: 'Appointment availability varies by location; visa processing is typically 1-2 weeks after interview',
   paymentPricing: {
-    baseFee: 160,
+    baseFee: 180,
     currency: 'USD',
     serviceFee: 50
   },

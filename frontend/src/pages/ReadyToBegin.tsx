@@ -1,7 +1,8 @@
 import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { findCountryByCode, type CountryConfig } from "../config/countries";
-import { SERVICE_FEE_MNT } from "../config/pricing";
+import { convertCurrency, isFxCurrencySupported } from "@/config/fx";
+import { calculateServiceFee } from "@/config/pricing";
 import { useState, useEffect } from "react";
 import {
   ArrowRight,
@@ -23,12 +24,19 @@ import {
   DollarSign
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { formatMnt } from "../lib/money";
+import { formatCurrencyCodeAmount, getCurrencyForLanguage } from "@/lib/money";
 
 const ReadyToBegin = () => {
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const [selectedCountry, setSelectedCountry] = useState<CountryConfig | null>(null);
+  const displayCurrency = getCurrencyForLanguage(i18n.language);
+
+  // Business decision: Korea visa services are not currently offered.
+  // Clear any stale selection so the redirect logic below works immediately.
+  if (typeof window !== "undefined" && localStorage.getItem("selectedCountry") === "KOREA") {
+    localStorage.removeItem("selectedCountry");
+  }
 
   useEffect(() => {
     const countryCode = localStorage.getItem('selectedCountry');
@@ -103,6 +111,15 @@ const ReadyToBegin = () => {
     return sectionIcons[sectionName] || FileText;
   };
 
+  const toDisplayCurrency = (amount: number, fromCurrency: string): string => {
+    const rounded = Math.round(amount);
+    if (!isFxCurrencySupported(fromCurrency) || !isFxCurrencySupported(displayCurrency)) {
+      return formatCurrencyCodeAmount(fromCurrency, rounded, i18n.language);
+    }
+    const converted = convertCurrency(rounded, fromCurrency, displayCurrency);
+    return formatCurrencyCodeAmount(displayCurrency, Math.round(converted), i18n.language);
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground pt-16 theme-transition">
       {/* Header Section */}
@@ -174,12 +191,17 @@ const ReadyToBegin = () => {
                     {t("readyPage.info.visaFee", { defaultValue: "Visa Fee" })}
                   </p>
                   <p className="font-medium text-foreground text-sm">
-                    {selectedCountry.paymentPricing.currency} {selectedCountry.paymentPricing.baseFee}
-                    {SERVICE_FEE_MNT > 0 &&
-                      ` ${t("readyPage.info.serviceFeeSuffix", {
-                        defaultValue: "+ {{fee}} service fee",
-                        fee: formatMnt(SERVICE_FEE_MNT, i18n.language),
-                      })}`}
+                    {toDisplayCurrency(
+                      selectedCountry.paymentPricing.baseFee,
+                      selectedCountry.paymentPricing.currency,
+                    )}{" "}
+                    {t("readyPage.info.serviceFeeSuffix", {
+                      defaultValue: "+ {{fee}} service fee",
+                      fee: toDisplayCurrency(
+                        calculateServiceFee(selectedCountry.paymentPricing.baseFee),
+                        selectedCountry.paymentPricing.currency,
+                      ),
+                    })}
                   </p>
                 </div>
               </div>

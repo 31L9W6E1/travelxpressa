@@ -219,18 +219,21 @@
   "aboutPage": {
     "hero": {
       "titlePrefix": "About",
-      "subtitle": "We simplify visa application preparation with guided steps, clear checklists, and support for multiple destinations."
+      "subtitle": "We simplify visa application preparation with guided steps, clear checklists, and support for multiple destinations.",
+      "customers": "We have helped 1,000+ customers.",
+      "primaryCta": "Start Application",
+      "secondaryCta": "View Fees & Requirements"
     },
     "features": {
       "subtitle": "Our platform is designed to make your visa application experience as smooth as possible.",
       "saveTime": {
         "title": "Save Time",
-        "description": "Our guided process helps you complete your DS-160 form faster with fewer errors than doing it alone."
+        "description": "Our guided process helps you prepare applications faster with fewer errors than doing it alone."
       }
     },
     "howItWorks": {
       "title": "How It Works",
-      "subtitle": "Prepare your visa application in three simple steps.",
+      "subtitle": "An online service for busy travelers: prepare your application, track progress, and get support when you need it.",
       "steps": {
         "createAccount": {
           "title": "Create Account",
@@ -242,7 +245,7 @@
         },
         "submitTrack": {
           "title": "Submit & Track",
-          "description": "Review, export, and track your progress from your dashboard."
+          "description": "Review and export your application and track it through your dashboard. Appointment availability varies by location (US, Schengen, and other destinations) and earlier slots can sometimes open within 1-2 days. Express support (if selected) adds +15% to the service fee."
         }
       }
     },
@@ -256,7 +259,7 @@
     "hero": {
       "titleLine1": "Visa Fees &",
       "titleLine2": "Requirements",
-      "subtitle": "Compare typical government fees, interview requirements, and processing timelines for popular destinations. Our service fee is {{fee}}.",
+      "subtitle": "Compare typical government fees, interview requirements, and processing timelines for popular destinations. Service fee is calculated as (government fee x 2) + 5%. Express adds +15%.",
       "cta": "Choose Destination",
       "secondaryCta": "Continue Application"
     },
@@ -278,7 +281,7 @@
         "title": "Fees by Destination",
         "subtitle": "Government fees vary by visa type and can change. Use this as a quick reference and confirm on official embassy/consulate websites.",
         "selectedDestination": "Selected destination: {{country}}",
-        "serviceFeeLabel": "Service fee",
+        "serviceFeeLabel": "Service fee (standard)",
         "serviceFeeNote": "Includes guided form, document checklist, and support.",
         "table": {
           "destination": "Destination",
@@ -289,7 +292,7 @@
         },
         "interviewYes": "Usually yes",
         "interviewNo": "Usually no",
-        "disclaimer": "We are not affiliated with any government agency. Fees and processing timelines are indicative and may change."
+        "disclaimer": "We are not affiliated with any government agency. Fees and timelines may change. Converted amounts are estimates (FX updated: {{date}})."
       },
       "mongolia": {
         "title": "Mongolia Visa Data"

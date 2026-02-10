@@ -130,25 +130,27 @@ const Home = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      {/* News Ticker - Fixed at top below navbar */}
-      <div className="fixed top-16 left-0 right-0 z-40 bg-transparent text-foreground overflow-hidden">
-        <div className="flex items-center h-10">
-          <div className="flex-shrink-0 px-4 bg-transparent h-full flex items-center gap-2 z-10">
-            <Bell className="w-4 h-4 text-primary" />
-            <span className="text-sm font-semibold">{t("home.news")}</span>
+    <div className="min-h-screen bg-background text-foreground font-sans">
+      {/* News Ticker - Cloudflare style */}
+      <div className="fixed top-16 left-0 right-0 z-40 bg-[#1d1d1d] text-white overflow-hidden">
+        <div className="flex items-center h-9">
+          <div className="flex-shrink-0 px-4 bg-primary h-full flex items-center gap-2 z-10">
+            <Bell className="w-3.5 h-3.5" />
+            <span className="text-xs font-semibold uppercase tracking-wide">{t("home.news")}</span>
           </div>
-          <div className="ticker-wrapper">
+          <div className="ticker-wrapper flex-1">
             <div className="animate-ticker">
               {/* First set of items */}
               {tickerItems.map((item, index) => (
-                <span key={`a-${index}`} className="inline-block px-8 text-sm whitespace-nowrap">
+                <span key={`a-${index}`} className="inline-flex items-center px-8 text-sm whitespace-nowrap text-gray-300">
+                  <span className="w-1.5 h-1.5 rounded-full bg-primary mr-3"></span>
                   {item}
                 </span>
               ))}
               {/* Duplicate set for seamless loop */}
               {tickerItems.map((item, index) => (
-                <span key={`b-${index}`} className="inline-block px-8 text-sm whitespace-nowrap">
+                <span key={`b-${index}`} className="inline-flex items-center px-8 text-sm whitespace-nowrap text-gray-300">
+                  <span className="w-1.5 h-1.5 rounded-full bg-primary mr-3"></span>
                   {item}
                 </span>
               ))}
@@ -157,17 +159,22 @@ const Home = () => {
         </div>
       </div>
 
-      {/* Hero Section - adjust pt to account for navbar + ticker */}
-      <section className="relative pt-32 pb-20 border-b border-border/50">
-        <div className="max-w-7xl mx-auto px-6">
+      {/* Hero Section - Cloudflare inspired */}
+      <section className="relative pt-32 pb-24 overflow-hidden">
+        {/* Background decoration */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent pointer-events-none" />
+        <div className="absolute top-20 right-0 w-[600px] h-[600px] bg-primary/10 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="max-w-7xl mx-auto px-6 relative">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div className="animate-fade-in-up">
-              <Badge variant="secondary" className="mb-6">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
+                <CheckCircle className="w-4 h-4" />
                 {t("home.hero.trusted")}
-              </Badge>
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6 leading-tight">
+              </div>
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6 leading-[1.1]">
                 {t("home.hero.titleLine1")}
-                <span className="block text-primary">
+                <span className="block cf-text-gradient">
                   {t("home.hero.titleLine2")}
                 </span>
                 {t("home.hero.titleLine3")}
@@ -176,48 +183,48 @@ const Home = () => {
                 {t("home.hero.subtitle")}
               </p>
               <div className="flex flex-wrap gap-4">
-                <Button asChild size="lg" className="px-8 hover-lift">
+                <Button asChild size="lg" className="px-8 cf-shadow font-semibold">
                   <Link to="/login" className="gap-2">
                     {t("home.hero.cta")}
                     <ArrowRight className="w-5 h-5" />
                   </Link>
                 </Button>
-                <Button asChild variant="outline" size="lg" className="px-8">
+                <Button asChild variant="outline" size="lg" className="px-8 font-semibold border-2">
                   <Link to="/learn-more">{t("home.hero.learnMore")}</Link>
                 </Button>
               </div>
             </div>
 
-            {/* Stats Card */}
-            <Card className="bg-secondary/50 animate-fade-in-up animation-delay-200 hover-lift">
+            {/* Stats Card - Cloudflare style */}
+            <Card className="bg-card border-border shadow-xl animate-fade-in-up animation-delay-200">
               <CardContent className="p-8 md:p-10">
-                <div className="grid grid-cols-2 gap-8">
-                  <div className="text-center p-4 border-r border-b border-border/30">
-                    <div className="text-4xl md:text-5xl font-bold text-foreground mb-2">
+                <div className="grid grid-cols-2 gap-6">
+                  <div className="text-center p-5 rounded-xl bg-secondary/50">
+                    <div className="text-4xl md:text-5xl font-bold cf-text-gradient mb-2">
                       50K+
                     </div>
                     <div className="text-sm text-muted-foreground font-medium">
                       {t("home.stats.applicationsCompleted")}
                     </div>
                   </div>
-                  <div className="text-center p-4 border-b border-border/30">
-                    <div className="text-4xl md:text-5xl font-bold text-foreground mb-2">
+                  <div className="text-center p-5 rounded-xl bg-secondary/50">
+                    <div className="text-4xl md:text-5xl font-bold cf-text-gradient mb-2">
                       98%
                     </div>
                     <div className="text-sm text-muted-foreground font-medium">
                       {t("home.stats.successRate")}
                     </div>
                   </div>
-                  <div className="text-center p-4 border-r border-border/30">
-                    <div className="text-4xl md:text-5xl font-bold text-foreground mb-2">
+                  <div className="text-center p-5 rounded-xl bg-secondary/50">
+                    <div className="text-4xl md:text-5xl font-bold cf-text-gradient mb-2">
                       24/7
                     </div>
                     <div className="text-sm text-muted-foreground font-medium">
                       {t("home.stats.supportAvailable")}
                     </div>
                   </div>
-                  <div className="text-center p-4">
-                    <div className="text-4xl md:text-5xl font-bold text-foreground mb-2">
+                  <div className="text-center p-5 rounded-xl bg-secondary/50">
+                    <div className="text-4xl md:text-5xl font-bold cf-text-gradient mb-2">
                       4.9
                     </div>
                     <div className="text-sm text-muted-foreground font-medium">

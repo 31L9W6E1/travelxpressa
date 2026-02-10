@@ -429,18 +429,39 @@ export default function Application() {
 
   // Handle payment completion - this gets called when payment is successful
   const handlePaymentSuccess = async (payment: Payment) => {
-    setPaymentComplete(true);
     setShowPaymentModal(false);
 
-    toast.success('Payment successful!', {
-      description: 'Your application has been submitted. You will receive a confirmation email shortly.',
-      duration: 5000,
-    });
+    if (!applicationId) {
+      toast.error('Submission failed', {
+        description: 'Missing application ID. Please refresh and try again.',
+      });
+      return;
+    }
 
-    // Navigate to profile after a short delay to show the success message
-    setTimeout(() => {
-      navigate('/profile');
-    }, 2000);
+    try {
+      // Payment is only half of "submit". We must explicitly submit the application
+      // so it becomes visible to admins as SUBMITTED and shows up in dashboard charts.
+      await applicationsApi.submit(applicationId);
+
+      setPaymentComplete(true);
+
+      toast.success('Application submitted!', {
+        description: 'Payment successful. Your application has been submitted for review.',
+        duration: 5000,
+      });
+
+      // Navigate to profile after a short delay to show the success message
+      setTimeout(() => {
+        navigate('/profile');
+      }, 2000);
+    } catch (error: any) {
+      console.error('Submit after payment error:', error);
+      toast.error('Submission failed', {
+        description:
+          error?.message ||
+          'Payment succeeded but submitting the application failed. Please try again or contact support.',
+      });
+    }
   };
 
   const handleSubmit = async () => {

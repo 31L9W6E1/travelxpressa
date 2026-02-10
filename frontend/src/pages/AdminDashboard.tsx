@@ -28,6 +28,7 @@ import {
   CreditCard,
   Activity,
   FolderOpen,
+  TrendingDown,
 } from "lucide-react";
 import {
   ChartContainer,
@@ -87,7 +88,7 @@ import {
   PieChart,
   Pie,
   Cell,
-  ResponsiveContainer,
+  LabelList,
 } from "recharts";
 
 import {
@@ -219,6 +220,47 @@ const userGrowthConfig = {
   },
 } satisfies ChartConfig;
 
+const applicationsUsersChartConfig = {
+  applications: {
+    label: "Applications",
+    color: "hsl(var(--chart-1))",
+  },
+  users: {
+    label: "Users",
+    color: "hsl(var(--chart-2))",
+  },
+} satisfies ChartConfig;
+
+const applicationStatusRingsConfig = {
+  count: {
+    label: "Applications",
+  },
+  draft: {
+    label: "Draft",
+    color: "#94a3b8",
+  },
+  inProgress: {
+    label: "In Progress",
+    color: "#38bdf8",
+  },
+  submitted: {
+    label: "Submitted",
+    color: "#818cf8",
+  },
+  underReview: {
+    label: "Under Review",
+    color: "#a78bfa",
+  },
+  completed: {
+    label: "Completed",
+    color: "#34d399",
+  },
+  rejected: {
+    label: "Rejected",
+    color: "#f87171",
+  },
+} satisfies ChartConfig;
+
 const AdminDashboard = () => {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<
@@ -276,23 +318,65 @@ const AdminDashboard = () => {
       { month: "Jun", users: 0 },
     ];
 
-  const statusDistributionData = [
+  const applicationsUsersChartData = monthlyApplicationData.map((item: any) => {
+    const totalFromApi = Number.isFinite(item?.total) ? Number(item.total) : null;
+    const total =
+      totalFromApi ??
+      Number(item?.pending || 0) +
+        Number(item?.submitted || 0) +
+        Number(item?.approved || 0) +
+        Number(item?.rejected || 0);
+    const usersForMonth =
+      userGrowthData.find((u: any) => u.month === item.month)?.users ?? 0;
+    return {
+      month: item.month,
+      applications: total,
+      users: Number(usersForMonth) || 0,
+    };
+  });
+
+  const pendingApplicationsCount =
+    (stats?.applications?.draft || 0) +
+    (stats?.applications?.inProgress || 0) +
+    (stats?.applications?.submitted || 0) +
+    (stats?.applications?.underReview || 0);
+
+  const statusRingsDataRaw = [
+    { key: "draft", count: stats?.applications?.draft || 0, fill: "var(--color-draft)" },
     {
-      name: "Approved",
-      value: stats?.applications?.completed || 0,
-      fill: "#22c55e",
+      key: "inProgress",
+      count: stats?.applications?.inProgress || 0,
+      fill: "var(--color-inProgress)",
     },
     {
-      name: "Pending",
-      value: (stats?.applications?.submitted || 0) + (stats?.applications?.underReview || 0) + (stats?.applications?.inProgress || 0),
-      fill: "#eab308"
+      key: "submitted",
+      count: stats?.applications?.submitted || 0,
+      fill: "var(--color-submitted)",
     },
     {
-      name: "Rejected",
-      value: stats?.applications?.rejected || 0,
-      fill: "#ef4444",
+      key: "underReview",
+      count: stats?.applications?.underReview || 0,
+      fill: "var(--color-underReview)",
+    },
+    {
+      key: "completed",
+      count: stats?.applications?.completed || 0,
+      fill: "var(--color-completed)",
+    },
+    {
+      key: "rejected",
+      count: stats?.applications?.rejected || 0,
+      fill: "var(--color-rejected)",
     },
   ];
+  const statusRingsData = statusRingsDataRaw.filter((d) => d.count > 0);
+  const sortedStatusRingsData = [...statusRingsData].sort(
+    (a, b) => a.count - b.count,
+  );
+  const statusRingsTotal = sortedStatusRingsData.reduce(
+    (sum, d) => sum + d.count,
+    0,
+  );
 
   useEffect(() => {
     if (user?.role === "ADMIN") {
@@ -671,11 +755,14 @@ const AdminDashboard = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">
-                    {(stats?.applications?.submitted || 0) + (stats?.applications?.underReview || 0)}
+                    {pendingApplicationsCount}
                   </div>
                   <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
                     <AlertCircle className="w-3 h-3 text-yellow-500" />
-                    {stats?.applications?.submitted || 0} submitted, {stats?.applications?.underReview || 0} under review
+                    {stats?.applications?.draft || 0} draft,{" "}
+                    {stats?.applications?.inProgress || 0} in progress,{" "}
+                    {stats?.applications?.submitted || 0} submitted,{" "}
+                    {stats?.applications?.underReview || 0} under review
                   </p>
                 </CardContent>
               </Card>
@@ -686,36 +773,79 @@ const AdminDashboard = () => {
               <Card>
                 <CardHeader>
                   <CardTitle>Applications Overview</CardTitle>
-                  <CardDescription>Monthly application trends</CardDescription>
+                  <CardDescription>Total applications vs new users (last 6 months)</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <ChartContainer
-                    config={applicationChartConfig}
+                    config={applicationsUsersChartConfig}
                     className="h-[300px]"
                   >
-                    <AreaChart data={monthlyApplicationData}>
-                      <CartesianGrid
-                        strokeDasharray="3 3"
-                        className="stroke-muted"
+                    <AreaChart accessibilityLayer data={applicationsUsersChartData}>
+                      <CartesianGrid vertical={false} strokeDasharray="3 3" className="stroke-muted" />
+                      <XAxis
+                        dataKey="month"
+                        tickLine={false}
+                        axisLine={false}
+                        tickMargin={8}
+                        className="text-xs"
                       />
-                      <XAxis dataKey="month" className="text-xs" />
                       <YAxis className="text-xs" />
-                      <ChartTooltip content={<ChartTooltipContent />} />
+                      <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+                      <defs>
+                        <linearGradient
+                          id="gradient-admin-chart-applications"
+                          x1="0"
+                          y1="0"
+                          x2="0"
+                          y2="1"
+                        >
+                          <stop
+                            offset="5%"
+                            stopColor="var(--color-applications)"
+                            stopOpacity={0.5}
+                          />
+                          <stop
+                            offset="95%"
+                            stopColor="var(--color-applications)"
+                            stopOpacity={0.1}
+                          />
+                        </linearGradient>
+                        <linearGradient
+                          id="gradient-admin-chart-users"
+                          x1="0"
+                          y1="0"
+                          x2="0"
+                          y2="1"
+                        >
+                          <stop
+                            offset="5%"
+                            stopColor="var(--color-users)"
+                            stopOpacity={0.5}
+                          />
+                          <stop
+                            offset="95%"
+                            stopColor="var(--color-users)"
+                            stopOpacity={0.1}
+                          />
+                        </linearGradient>
+                      </defs>
                       <Area
-                        type="monotone"
-                        dataKey="submitted"
-                        stackId="1"
-                        stroke="var(--color-submitted)"
-                        fill="var(--color-submitted)"
+                        dataKey="users"
+                        type="natural"
+                        fill="url(#gradient-admin-chart-users)"
                         fillOpacity={0.4}
+                        stroke="var(--color-users)"
+                        strokeWidth={0.9}
+                        strokeDasharray={"3 3"}
                       />
                       <Area
-                        type="monotone"
-                        dataKey="approved"
-                        stackId="2"
-                        stroke="var(--color-approved)"
-                        fill="var(--color-approved)"
-                        fillOpacity={0.4}
+                        dataKey="applications"
+                        type="natural"
+                        fill="url(#gradient-admin-chart-applications)"
+                        fillOpacity={0.35}
+                        stroke="var(--color-applications)"
+                        strokeWidth={0.9}
+                        strokeDasharray={"3 3"}
                       />
                     </AreaChart>
                   </ChartContainer>
@@ -765,39 +895,111 @@ const AdminDashboard = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="h-[200px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={statusDistributionData}
-                          cx="50%"
-                          cy="50%"
-                          innerRadius={40}
-                          outerRadius={80}
-                          paddingAngle={5}
-                          dataKey="value"
-                        >
-                          {statusDistributionData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.fill} />
+                  {statusRingsTotal === 0 ? (
+                    <div className="h-[250px] flex flex-col items-center justify-center text-center">
+                      <FileText className="w-10 h-10 text-muted-foreground mb-3" />
+                      <p className="text-sm text-muted-foreground">
+                        No application data yet
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <ChartContainer
+                        config={applicationStatusRingsConfig}
+                        className="mx-auto aspect-square max-h-[250px]"
+                      >
+                        <PieChart>
+                          <ChartTooltip
+                            content={
+                              <ChartTooltipContent
+                                nameKey="key"
+                                hideLabel
+                              />
+                            }
+                          />
+                          {sortedStatusRingsData.map((entry, index) => (
+                            <Pie
+                              key={`status-ring-${entry.key}`}
+                              data={[entry]}
+                              innerRadius={30}
+                              outerRadius={50 + index * 10}
+                              dataKey="count"
+                              cornerRadius={4}
+                              startAngle={
+                                (sortedStatusRingsData
+                                  .slice(0, index)
+                                  .reduce((sum, d) => sum + d.count, 0) /
+                                  statusRingsTotal) *
+                                360
+                              }
+                              endAngle={
+                                (sortedStatusRingsData
+                                  .slice(0, index + 1)
+                                  .reduce((sum, d) => sum + d.count, 0) /
+                                  statusRingsTotal) *
+                                360
+                              }
+                            >
+                              <Cell fill={entry.fill} />
+                              <LabelList
+                                dataKey="count"
+                                stroke="none"
+                                fontSize={12}
+                                fontWeight={500}
+                                fill="currentColor"
+                                formatter={(value: number) => value.toString()}
+                              />
+                            </Pie>
                           ))}
-                        </Pie>
-                        <ChartTooltip />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </div>
-                  <div className="flex justify-center gap-4 mt-4">
-                    {statusDistributionData.map((item) => (
-                      <div key={item.name} className="flex items-center gap-2">
-                        <div
-                          className="w-3 h-3 rounded-full"
-                          style={{ backgroundColor: item.fill }}
-                        />
+                        </PieChart>
+                      </ChartContainer>
+
+                      <div className="flex flex-wrap justify-center gap-x-4 gap-y-2">
+                        {sortedStatusRingsData.map((item) => (
+                          <div
+                            key={item.key}
+                            className="flex items-center gap-2"
+                          >
+                            <div
+                              className="w-3 h-3 rounded-full"
+                              style={{ backgroundColor: item.fill }}
+                            />
+                            <span className="text-xs text-muted-foreground">
+                              {
+                                applicationStatusRingsConfig[
+                                  item.key as keyof typeof applicationStatusRingsConfig
+                                ]?.label as any
+                              }
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="flex items-center justify-center gap-2">
+                        <Badge
+                          variant="outline"
+                          className={`border-none ${
+                            (stats?.applications?.growth || 0) < 0
+                              ? "text-red-500 bg-red-500/10"
+                              : "text-green-500 bg-green-500/10"
+                          }`}
+                        >
+                          {(stats?.applications?.growth || 0) < 0 ? (
+                            <TrendingDown className="h-4 w-4" />
+                          ) : (
+                            <TrendingUp className="h-4 w-4" />
+                          )}
+                          <span className="ml-1">
+                            {(stats?.applications?.growth || 0) >= 0 ? "+" : ""}
+                            {stats?.applications?.growth || 0}%
+                          </span>
+                        </Badge>
                         <span className="text-xs text-muted-foreground">
-                          {item.name}
+                          from last month
                         </span>
                       </div>
-                    ))}
-                  </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
 

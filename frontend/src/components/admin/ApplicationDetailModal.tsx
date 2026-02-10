@@ -72,12 +72,20 @@ const getStatusBadge = (status: string) => {
   return styles[status] || styles.DRAFT;
 };
 
-const parseFormData = (jsonString?: string) => {
-  if (!jsonString) return null;
+const parseFormData = (value?: unknown) => {
+  if (!value) return null;
+  if (typeof value === 'object') return value as Record<string, unknown>;
+  if (typeof value !== 'string') return null;
+
   try {
-    return typeof jsonString === 'string' ? JSON.parse(jsonString) : jsonString;
+    const parsed = JSON.parse(value);
+    return typeof parsed === 'object' && parsed !== null
+      ? (parsed as Record<string, unknown>)
+      : null;
   } catch {
-    return jsonString;
+    // Admin list endpoints return encrypted strings for sensitive sections.
+    // Never return the raw string here, because downstream UI assumes an object.
+    return null;
   }
 };
 
@@ -113,23 +121,56 @@ export default function ApplicationDetailModal({
   const [selectedStatus, setSelectedStatus] = useState(application?.status || 'DRAFT');
   const [adminNotes, setAdminNotes] = useState(application?.adminNotes || '');
   const [isUpdating, setIsUpdating] = useState(false);
-  const safeStatus = typeof application?.status === 'string' && application.status ? application.status : 'DRAFT';
+  const [details, setDetails] = useState<any | null>(null);
+  const [detailsLoading, setDetailsLoading] = useState(false);
 
   useEffect(() => {
     setSelectedStatus(application?.status || 'DRAFT');
     setAdminNotes(application?.adminNotes || '');
   }, [application]);
 
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadDetails = async () => {
+      if (!open || !application?.id) {
+        setDetails(null);
+        return;
+      }
+
+      setDetailsLoading(true);
+      try {
+        // Fetch decrypted details via the standard application endpoint.
+        // Admin/Agent roles are allowed by backend auth checks.
+        const res = await api.get(`/api/applications/${application.id}`);
+        const payload = res.data?.data ?? res.data;
+        if (!cancelled) setDetails(payload);
+      } catch {
+        if (!cancelled) setDetails(null);
+      } finally {
+        if (!cancelled) setDetailsLoading(false);
+      }
+    };
+
+    void loadDetails();
+    return () => {
+      cancelled = true;
+    };
+  }, [open, application?.id]);
+
   if (!application) return null;
 
-  const personalInfo = parseFormData(application.personalInfo);
-  const contactInfo = parseFormData(application.contactInfo);
-  const passportInfo = parseFormData(application.passportInfo);
-  const travelInfo = parseFormData(application.travelInfo);
-  const familyInfo = parseFormData(application.familyInfo);
-  const workEducation = parseFormData(application.workEducation);
-  const securityInfo = parseFormData(application.securityInfo);
-  const documents = parseFormData(application.documents);
+  const app = details || application;
+  const safeStatus = typeof app?.status === 'string' && app.status ? app.status : 'DRAFT';
+
+  const personalInfo = parseFormData(app.personalInfo);
+  const contactInfo = parseFormData(app.contactInfo);
+  const passportInfo = parseFormData(app.passportInfo);
+  const travelInfo = parseFormData(app.travelInfo);
+  const familyInfo = parseFormData(app.familyInfo);
+  const workEducation = parseFormData(app.workEducation);
+  const securityInfo = parseFormData(app.securityInfo);
+  const documents = parseFormData(app.documents);
 
   const handleUpdateStatus = async () => {
     setIsUpdating(true);
@@ -162,7 +203,7 @@ export default function ApplicationDetailModal({
       <!DOCTYPE html>
       <html>
       <head>
-        <title>Application ${application.id} - ${application.user?.name}</title>
+        <title>Application ${app.id} - ${app.user?.name}</title>
         <style>
           body { font-family: Arial, sans-serif; padding: 40px; line-height: 1.6; }
           h1 { color: #1e40af; border-bottom: 2px solid #1e40af; padding-bottom: 10px; }
@@ -179,10 +220,10 @@ export default function ApplicationDetailModal({
       </head>
       <body>
         <h1>DS-160 Visa Application</h1>
-        <p><strong>Application ID:</strong> ${application.id}</p>
+        <p><strong>Application ID:</strong> ${app.id}</p>
         <p><strong>Status:</strong> <span class="status status-${String(safeStatus).toLowerCase()}">${safeStatus}</span></p>
-        <p><strong>Visa Type:</strong> ${application.visaType}</p>
-        <p><strong>Submitted:</strong> ${formatDate(application.submittedAt || application.createdAt)}</p>
+        <p><strong>Visa Type:</strong> ${app.visaType}</p>
+        <p><strong>Submitted:</strong> ${formatDate(app.submittedAt || app.createdAt)}</p>
 
         ${personalInfo ? `
           <h2>Personal Information</h2>
@@ -242,7 +283,7 @@ export default function ApplicationDetailModal({
             <div>
               <DialogTitle className="text-xl">Application Details</DialogTitle>
               <DialogDescription className="mt-1">
-                Application ID: {application.id}
+                Application ID: {app.id}
               </DialogDescription>
             </div>
             <div className="flex items-center gap-2">
@@ -258,6 +299,12 @@ export default function ApplicationDetailModal({
         </DialogHeader>
 
         <ScrollArea className="h-[60vh]">
+          {detailsLoading && (
+            <div className="p-6 flex items-center gap-2 text-sm text-muted-foreground">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              Loading application details…
+            </div>
+          )}
           <div className="p-6 pt-4">
             {/* Applicant Info Header */}
             <Card className="mb-6">

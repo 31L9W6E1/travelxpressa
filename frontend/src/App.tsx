@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { Toaster } from "@/components/ui/sonner";
 import ErrorBoundary from "./components/ErrorBoundary";
+import { useTranslation } from "react-i18next";
 
 // Import all page components
 import Home from "./pages/Home";
@@ -29,10 +30,15 @@ import OAuthCallback from "./pages/OAuthCallback";
 
 // Protected route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const { t } = useTranslation();
   const { user, isLoading } = useAuth();
   
   if (isLoading) {
-    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        {t("common.loading", { defaultValue: "Loading..." })}
+      </div>
+    );
   }
   
   if (!user) {
@@ -44,10 +50,15 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
 // Admin route component
 const AdminRoute = ({ children }: { children: React.ReactNode }) => {
+  const { t } = useTranslation();
   const { user, isLoading } = useAuth();
 
   if (isLoading) {
-    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        {t("common.loading", { defaultValue: "Loading..." })}
+      </div>
+    );
   }
 
   if (!user) {

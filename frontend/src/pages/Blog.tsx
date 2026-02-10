@@ -4,8 +4,10 @@ import { Calendar, Clock, ArrowLeft, Loader2 } from 'lucide-react';
 import { getPosts, formatPostDate, calculateReadTime, getDefaultImage } from '@/api/posts';
 import type { PostSummary } from '@/api/posts';
 import { normalizeImageUrl } from '@/api/upload';
+import { useTranslation } from 'react-i18next';
 
 const Blog = () => {
+  const { t, i18n } = useTranslation();
   const [posts, setPosts] = useState<PostSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -21,7 +23,7 @@ const Blog = () => {
         setTotalPages(response.pagination.totalPages);
         setError(null);
       } catch (err) {
-        setError('Failed to load blog posts');
+        setError(t('blogPage.errors.loadFailed', { defaultValue: 'Failed to load blog posts' }));
         console.error(err);
       } finally {
         setLoading(false);
@@ -53,11 +55,16 @@ const Blog = () => {
             className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-8"
           >
             <ArrowLeft className="w-4 h-4" />
-            Back to Home
+            {t('common.backToHome', { defaultValue: 'Back to Home' })}
           </Link>
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">Blog</h1>
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">
+            {t('blogPage.title', { defaultValue: 'Blog' })}
+          </h1>
           <p className="text-xl text-muted-foreground max-w-2xl">
-            Visa guides, travel tips, and expert advice to help you navigate your journey to the United States.
+            {t('blogPage.subtitle', {
+              defaultValue:
+                'Visa guides, travel tips, and expert advice to help you navigate your journey to the United States.',
+            })}
           </p>
         </div>
       </section>
@@ -72,13 +79,19 @@ const Blog = () => {
                 onClick={() => setPage(1)}
                 className="text-primary hover:underline"
               >
-                Try again
+                {t('errors.tryAgain', { defaultValue: 'Try again' })}
               </button>
             </div>
           ) : posts.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-muted-foreground text-lg">No blog posts published yet.</p>
-              <p className="text-muted-foreground mt-2">Check back soon for visa guides and travel tips!</p>
+              <p className="text-muted-foreground text-lg">
+                {t('blogPage.empty.title', { defaultValue: 'No blog posts published yet.' })}
+              </p>
+              <p className="text-muted-foreground mt-2">
+                {t('blogPage.empty.subtitle', {
+                  defaultValue: 'Check back soon for visa guides and travel tips!',
+                })}
+              </p>
             </div>
           ) : (
             <>
@@ -102,11 +115,14 @@ const Blog = () => {
                       <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
                         <span className="flex items-center gap-1">
                           <Calendar className="w-4 h-4" />
-                          {formatPostDate(post.publishedAt || post.createdAt)}
+                          {formatPostDate(post.publishedAt || post.createdAt, i18n.language)}
                         </span>
                         <span className="flex items-center gap-1">
                           <Clock className="w-4 h-4" />
-                          {calculateReadTime(post.excerpt || '')}
+                          {t('content.readTime', {
+                            defaultValue: '{{minutes}} min read',
+                            minutes: calculateReadTime(post.excerpt || ''),
+                          })}
                         </span>
                       </div>
                       <h2 className="text-xl font-bold mb-2 group-hover:text-muted-foreground transition-colors line-clamp-2">
@@ -114,7 +130,9 @@ const Blog = () => {
                       </h2>
                       <p className="text-muted-foreground line-clamp-2">{post.excerpt}</p>
                       {post.authorName && (
-                        <p className="text-sm text-muted-foreground mt-3">By {post.authorName}</p>
+                        <p className="text-sm text-muted-foreground mt-3">
+                          {t('content.by', { defaultValue: 'By {{name}}', name: post.authorName })}
+                        </p>
                       )}
                     </Link>
                   </article>
@@ -129,17 +147,21 @@ const Blog = () => {
                     disabled={page === 1}
                     className="px-4 py-2 border border-border rounded-lg hover:bg-secondary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Previous
+                    {t('common.previous', { defaultValue: 'Previous' })}
                   </button>
                   <span className="px-4 py-2 text-muted-foreground">
-                    Page {page} of {totalPages}
+                    {t('common.pageOf', {
+                      defaultValue: 'Page {{page}} of {{total}}',
+                      page,
+                      total: totalPages,
+                    })}
                   </span>
                   <button
                     onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                     disabled={page === totalPages}
                     className="px-4 py-2 border border-border rounded-lg hover:bg-secondary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Next
+                    {t('common.next', { defaultValue: 'Next' })}
                   </button>
                 </div>
               )}

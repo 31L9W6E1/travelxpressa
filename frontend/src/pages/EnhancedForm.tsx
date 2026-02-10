@@ -2,8 +2,10 @@ import { useAuth } from "../contexts/AuthContext";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import api from "../api/client";
+import { useTranslation } from "react-i18next";
 
 const EnhancedForm = () => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [formData, setFormData] = useState({
     name: user?.name || "",
@@ -20,27 +22,41 @@ const EnhancedForm = () => {
   const serviceTypes = [
     { 
       value: "visa", 
-      label: "Visa Application", 
+      label: t("inquiryPage.services.visa.label", { defaultValue: "Visa Application" }), 
       icon: "🛂", 
-      description: "Tourist, business, or student visas",
-      pricing: "From $299",
-      features: ["Expert consultation", "Document preparation", "Fast processing"]
+      description: t("inquiryPage.services.visa.description", { defaultValue: "Tourist, business, or student visas" }),
+      pricing: t("inquiryPage.services.visa.pricing", { defaultValue: "From $299" }),
+      features: [
+        t("inquiryPage.services.visa.features.expertConsultation", { defaultValue: "Expert consultation" }),
+        t("inquiryPage.services.visa.features.documentPreparation", { defaultValue: "Document preparation" }),
+        t("inquiryPage.services.visa.features.fastProcessing", { defaultValue: "Fast processing" }),
+      ]
     },
     { 
       value: "tourism", 
-      label: "Tourism Package", 
+      label: t("inquiryPage.services.tourism.label", { defaultValue: "Tourism Package" }), 
       icon: "✈️", 
-      description: "Custom travel packages and tours",
-      pricing: "From $599", 
-      features: ["Flight booking", "Hotel accommodation", "Tour guide", "Travel insurance"]
+      description: t("inquiryPage.services.tourism.description", { defaultValue: "Custom travel packages and tours" }),
+      pricing: t("inquiryPage.services.tourism.pricing", { defaultValue: "From $599" }), 
+      features: [
+        t("inquiryPage.services.tourism.features.flightBooking", { defaultValue: "Flight booking" }),
+        t("inquiryPage.services.tourism.features.hotelAccommodation", { defaultValue: "Hotel accommodation" }),
+        t("inquiryPage.services.tourism.features.tourGuide", { defaultValue: "Tour guide" }),
+        t("inquiryPage.services.tourism.features.travelInsurance", { defaultValue: "Travel insurance" }),
+      ]
     },
     { 
       value: "consultation", 
-      label: "Consultation", 
+      label: t("inquiryPage.services.consultation.label", { defaultValue: "Consultation" }), 
       icon: "💼", 
-      description: "Expert travel advice and planning",
-      pricing: "From $99",
-      features: ["Personalized planning", "Budget optimization", "24/7 support", "Itinerary creation"]
+      description: t("inquiryPage.services.consultation.description", { defaultValue: "Expert travel advice and planning" }),
+      pricing: t("inquiryPage.services.consultation.pricing", { defaultValue: "From $99" }),
+      features: [
+        t("inquiryPage.services.consultation.features.personalizedPlanning", { defaultValue: "Personalized planning" }),
+        t("inquiryPage.services.consultation.features.budgetOptimization", { defaultValue: "Budget optimization" }),
+        t("inquiryPage.services.consultation.features.support24x7", { defaultValue: "24/7 support" }),
+        t("inquiryPage.services.consultation.features.itineraryCreation", { defaultValue: "Itinerary creation" }),
+      ]
     }
   ];
 
@@ -67,13 +83,21 @@ const EnhancedForm = () => {
     
     if (!formData.name || !formData.email || !formData.phone || !formData.message) {
       setSubmitStatus("error");
-      setErrorMessage("Please fill in all required fields");
+      setErrorMessage(
+        t("inquiryPage.validation.requiredFields", {
+          defaultValue: "Please fill in all required fields",
+        }),
+      );
       return;
     }
 
     if (!formData.email.includes("@")) {
       setSubmitStatus("error");
-      setErrorMessage("Please enter a valid email address");
+      setErrorMessage(
+        t("inquiryPage.validation.invalidEmail", {
+          defaultValue: "Please enter a valid email address",
+        }),
+      );
       return;
     }
 
@@ -96,7 +120,12 @@ const EnhancedForm = () => {
         });
         setCharCount(0);
       } else {
-        throw new Error(response.data.error || "Failed to submit application");
+        throw new Error(
+          response.data.error ||
+            t("inquiryPage.validation.submitFailed", {
+              defaultValue: "Failed to submit application",
+            }),
+        );
       }
     } catch (error: any) {
       setSubmitStatus("error");
@@ -119,16 +148,21 @@ const EnhancedForm = () => {
           {/* Header */}
           <div className="text-center mb-12">
             <h1 className="text-4xl md:text-5xl font-bold text-gradient-primary mb-4">
-              Travel Application
+              {t("inquiryPage.title", { defaultValue: "Travel Application" })}
             </h1>
             <p className="text-lg text-secondary mb-8 max-w-2xl mx-auto">
-              Complete the form below to begin your journey with confidence and ease
+              {t("inquiryPage.subtitle", {
+                defaultValue:
+                  "Complete the form below to begin your journey with confidence and ease",
+              })}
             </p>
           </div>
 
           {/* Service Selection */}
           <div className="mb-12">
-            <h2 className="text-xl font-semibold text-primary mb-6">Select Service Type</h2>
+            <h2 className="text-xl font-semibold text-primary mb-6">
+              {t("inquiryPage.serviceType.title", { defaultValue: "Select Service Type" })}
+            </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {serviceTypes.map((service) => (
                 <label
@@ -176,8 +210,12 @@ const EnhancedForm = () => {
                 <div className="w-3 h-3 bg-purple-500 rounded-full animate-pulse"></div>
                 <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
               </div>
-              <h2 className="prettify-title">Application Details</h2>
-              <p className="prettify-subtitle">Please provide accurate information</p>
+              <h2 className="prettify-title">
+                {t("inquiryPage.form.title", { defaultValue: "Application Details" })}
+              </h2>
+              <p className="prettify-subtitle">
+                {t("inquiryPage.form.subtitle", { defaultValue: "Please provide accurate information" })}
+              </p>
             </div>
 
             {submitStatus === "success" && (
@@ -188,8 +226,15 @@ const EnhancedForm = () => {
                   </svg>
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-green-900 dark:text-green-100">Application Submitted!</h3>
-                  <p className="text-green-700 dark:text-green-300">Your application has been successfully submitted. We'll contact you within 24 hours.</p>
+                  <h3 className="text-lg font-semibold text-green-900 dark:text-green-100">
+                    {t("inquiryPage.alerts.success.title", { defaultValue: "Application Submitted!" })}
+                  </h3>
+                  <p className="text-green-700 dark:text-green-300">
+                    {t("inquiryPage.alerts.success.description", {
+                      defaultValue:
+                        "Your application has been successfully submitted. We'll contact you within 24 hours.",
+                    })}
+                  </p>
                 </div>
               </div>
             )}
@@ -202,7 +247,9 @@ const EnhancedForm = () => {
                   </svg>
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-red-900 dark:text-red-100">Submission Failed</h3>
+                  <h3 className="text-lg font-semibold text-red-900 dark:text-red-100">
+                    {t("inquiryPage.alerts.error.title", { defaultValue: "Submission Failed" })}
+                  </h3>
                   <p className="text-red-700 dark:text-red-300">{errorMessage}</p>
                 </div>
               </div>
@@ -211,7 +258,9 @@ const EnhancedForm = () => {
             <form onSubmit={handleSubmit} className="space-y-8">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-primary mb-2">Full Name *</label>
+                  <label className="block text-sm font-medium text-primary mb-2">
+                    {t("auth.fullName", { defaultValue: "Full Name" })} *
+                  </label>
                   <input
                     type="text"
                     name="name"
@@ -219,12 +268,14 @@ const EnhancedForm = () => {
                     onChange={handleInputChange}
                     disabled={!!user?.name}
                     className="prettify-input"
-                    placeholder="Enter your full name"
+                    placeholder={t("inquiryPage.fields.fullNamePlaceholder", { defaultValue: "Enter your full name" })}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-primary mb-2">Email Address *</label>
+                  <label className="block text-sm font-medium text-primary mb-2">
+                    {t("auth.emailAddress", { defaultValue: "Email address" })} *
+                  </label>
                   <input
                     type="email"
                     name="email"
@@ -238,7 +289,9 @@ const EnhancedForm = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-primary mb-2">Phone Number *</label>
+                <label className="block text-sm font-medium text-primary mb-2">
+                  {t("form.contact.phone", { defaultValue: "Phone Number" })} *
+                </label>
                 <input
                   type="tel"
                   name="phone"
@@ -251,7 +304,10 @@ const EnhancedForm = () => {
 
               <div>
                 <label className="block text-sm font-medium text-primary mb-2">
-                  Message / Additional Details *
+                  {t("inquiryPage.fields.messageLabel", {
+                    defaultValue: "Message / Additional Details",
+                  })}{" "}
+                  *
                   <span className="text-muted ml-2">({charCount}/500)</span>
                 </label>
                 <textarea
@@ -260,7 +316,10 @@ const EnhancedForm = () => {
                   onChange={handleInputChange}
                   rows={6}
                   className="prettify-input resize-none"
-                  placeholder="Please describe your requirements, travel dates, destination, and any specific needs..."
+                  placeholder={t("inquiryPage.fields.messagePlaceholder", {
+                    defaultValue:
+                      "Please describe your requirements, travel dates, destination, and any specific needs...",
+                  })}
                 />
               </div>
 
@@ -277,17 +336,17 @@ const EnhancedForm = () => {
                   {isSubmitting ? (
                     <div className="flex items-center space-x-2">
                       <div className="w-4 h-4 bg-white rounded-full animate-spin"></div>
-                      <span>Processing...</span>
+                      <span>{t("common.processing", { defaultValue: "Processing..." })}</span>
                     </div>
                   ) : submitStatus === "success" ? (
                     <div className="flex items-center space-x-2">
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                       </svg>
-                      <span>Application Submitted</span>
+                      <span>{t("inquiryPage.buttons.submitted", { defaultValue: "Application Submitted" })}</span>
                     </div>
                   ) : (
-                    "Submit Application"
+                    t("inquiryPage.buttons.submit", { defaultValue: "Submit Application" })
                   )}
                 </button>
               </div>
@@ -301,19 +360,19 @@ const EnhancedForm = () => {
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
-                <span className="stat-value">Need Help?</span>
+                <span className="stat-value">{t("inquiryPage.quickLinks.needHelp", { defaultValue: "Need Help?" })}</span>
               </div>
               <div className="stat-item">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.228 9c.549-1.165 2.03-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
-                <span className="stat-value">Contact Support</span>
+                <span className="stat-value">{t("inquiryPage.quickLinks.contactSupport", { defaultValue: "Contact Support" })}</span>
               </div>
               <div className="stat-item">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                 </svg>
-                <span className="stat-value">Documents</span>
+                <span className="stat-value">{t("dashboard.documents", { defaultValue: "Documents" })}</span>
               </div>
             </div>
             <Link 
@@ -323,7 +382,7 @@ const EnhancedForm = () => {
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V8a2 2 0 00-2-2h-4m4 11h6m-6 0h6"></path>
               </svg>
-              View Dashboard
+              {t("inquiryPage.quickLinks.viewDashboard", { defaultValue: "View Dashboard" })}
             </Link>
           </div>
         </div>

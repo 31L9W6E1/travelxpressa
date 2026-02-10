@@ -21,8 +21,10 @@ import {
   Clock,
   DollarSign
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const ReadyToBegin = () => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [selectedCountry, setSelectedCountry] = useState<CountryConfig | null>(null);
 
@@ -109,7 +111,10 @@ const ReadyToBegin = () => {
             {user && (
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-secondary border border-border rounded-full text-sm text-muted-foreground">
                 <Sparkles className="w-4 h-4" />
-                Welcome back, {user.name}
+                {t("readyPage.badge.welcomeBack", {
+                  defaultValue: "Welcome back, {{name}}",
+                  name: user.name,
+                })}
               </div>
             )}
             {selectedCountry && (
@@ -120,18 +125,28 @@ const ReadyToBegin = () => {
                 <Globe className="w-4 h-4" />
                 <span className="text-lg">{selectedCountry.flag}</span>
                 {selectedCountry.name}
-                <span className="text-muted-foreground text-xs">(Change)</span>
+                <span className="text-muted-foreground text-xs">
+                  {t("readyPage.badge.change", { defaultValue: "(Change)" })}
+                </span>
               </Link>
             )}
           </div>
 
           <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">
-            Information You'll Need
+            {t("readyPage.title", { defaultValue: "Information You'll Need" })}
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl">
             {selectedCountry
-              ? `The ${selectedCountry.name} visa application contains ${selectedCountry.formSections.length} main sections. Gather these details before starting to make the process smoother.`
-              : "Gather all required details before starting your visa application to make the process smoother."}
+              ? t("readyPage.subtitleWithCountry", {
+                  defaultValue:
+                    "The {{country}} visa application contains {{count}} main sections. Gather these details before starting to make the process smoother.",
+                  country: selectedCountry.name,
+                  count: selectedCountry.formSections.length,
+                })
+              : t("readyPage.subtitleGeneric", {
+                  defaultValue:
+                    "Gather all required details before starting your visa application to make the process smoother.",
+                })}
           </p>
         </div>
       </section>
@@ -144,25 +159,39 @@ const ReadyToBegin = () => {
               <div className="flex items-center gap-3 p-4 bg-secondary rounded-xl">
                 <Clock className="w-5 h-5 text-muted-foreground" />
                 <div>
-                  <p className="text-xs text-muted-foreground">Processing Time</p>
+                  <p className="text-xs text-muted-foreground">
+                    {t("readyPage.info.processingTime", { defaultValue: "Processing Time" })}
+                  </p>
                   <p className="font-medium text-foreground text-sm">{selectedCountry.processingTimeline}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3 p-4 bg-secondary rounded-xl">
                 <DollarSign className="w-5 h-5 text-muted-foreground" />
                 <div>
-                  <p className="text-xs text-muted-foreground">Visa Fee</p>
+                  <p className="text-xs text-muted-foreground">
+                    {t("readyPage.info.visaFee", { defaultValue: "Visa Fee" })}
+                  </p>
                   <p className="font-medium text-foreground text-sm">
                     {selectedCountry.paymentPricing.currency} {selectedCountry.paymentPricing.baseFee}
-                    {selectedCountry.paymentPricing.serviceFee > 0 && ` + ${selectedCountry.paymentPricing.serviceFee} service fee`}
+                    {selectedCountry.paymentPricing.serviceFee > 0 &&
+                      ` ${t("readyPage.info.serviceFeeSuffix", {
+                        defaultValue: "+ {{fee}} service fee",
+                        fee: selectedCountry.paymentPricing.serviceFee,
+                      })}`}
                   </p>
                 </div>
               </div>
               <div className="flex items-center gap-3 p-4 bg-secondary rounded-xl">
                 <Users className="w-5 h-5 text-muted-foreground" />
                 <div>
-                  <p className="text-xs text-muted-foreground">Interview Required</p>
-                  <p className="font-medium text-foreground text-sm">{selectedCountry.interviewRequired ? 'Yes' : 'Generally No'}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {t("readyPage.info.interviewRequired", { defaultValue: "Interview Required" })}
+                  </p>
+                  <p className="font-medium text-foreground text-sm">
+                    {selectedCountry.interviewRequired
+                      ? t("readyPage.info.interviewYes", { defaultValue: "Yes" })
+                      : t("readyPage.info.interviewNo", { defaultValue: "Generally No" })}
+                  </p>
                 </div>
               </div>
             </div>
@@ -177,10 +206,15 @@ const ReadyToBegin = () => {
             <div className="flex items-start gap-4">
               <AlertTriangle className="w-6 h-6 text-foreground flex-shrink-0 mt-0.5" />
               <div>
-                <h4 className="font-semibold text-foreground mb-1">Important Notice</h4>
+                <h4 className="font-semibold text-foreground mb-1">
+                  {t("readyPage.notice.title", { defaultValue: "Important Notice" })}
+                </h4>
                 <p className="text-muted-foreground text-sm">
                   {selectedCountry?.embassyRequirements ||
-                    "All answers must be in English using English characters. Your application will be saved automatically as you progress."}
+                    t("readyPage.notice.defaultDescription", {
+                      defaultValue:
+                        "All answers must be in English using English characters. Your application will be saved automatically as you progress.",
+                    })}
                 </p>
               </div>
             </div>
@@ -191,7 +225,9 @@ const ReadyToBegin = () => {
       {/* Form Sections Grid */}
       <section className="py-16 border-b border-border">
         <div className="max-w-6xl mx-auto px-6">
-          <h2 className="text-2xl font-bold mb-8">Application Sections</h2>
+          <h2 className="text-2xl font-bold mb-8">
+            {t("readyPage.sections.title", { defaultValue: "Application Sections" })}
+          </h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {selectedCountry?.formSections.map((section, index) => {
               const IconComponent = getIconForSection(section);
@@ -207,7 +243,12 @@ const ReadyToBegin = () => {
                       <IconComponent className="w-5 h-5 text-foreground" />
                     </div>
                     <div>
-                      <span className="text-xs text-muted-foreground">Section {index + 1}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {t("readyPage.sections.sectionNumber", {
+                          defaultValue: "Section {{number}}",
+                          number: index + 1,
+                        })}
+                      </span>
                       <h3 className="font-semibold text-foreground">{section}</h3>
                     </div>
                   </div>
@@ -224,7 +265,9 @@ const ReadyToBegin = () => {
       {/* Required Documents Checklist */}
       <section className="py-16 border-b border-border">
         <div className="max-w-6xl mx-auto px-6">
-          <h2 className="text-2xl font-bold mb-8">Required Documents</h2>
+          <h2 className="text-2xl font-bold mb-8">
+            {t("readyPage.documents.title", { defaultValue: "Required Documents" })}
+          </h2>
 
           <div className="grid md:grid-cols-2 gap-4">
             {selectedCountry?.requiredDocuments.map((doc, index) => (
@@ -244,32 +287,44 @@ const ReadyToBegin = () => {
       <section className="py-20">
         <div className="max-w-4xl mx-auto px-6 text-center">
           <div className="bg-secondary border border-border rounded-2xl p-12">
-            <h2 className="text-3xl font-bold mb-4">Ready to Begin?</h2>
+            <h2 className="text-3xl font-bold mb-4">
+              {t("readyPage.cta.title", { defaultValue: "Ready to Begin?" })}
+            </h2>
             <p className="text-muted-foreground mb-8 max-w-xl mx-auto">
-              Our guided system will walk you through each section of your {selectedCountry?.name || 'visa'} application.
-              Your progress is automatically saved.
+              {t("readyPage.cta.subtitle", {
+                defaultValue:
+                  "Our guided system will walk you through each section of your {{country}} application. Your progress is automatically saved.",
+                country:
+                  selectedCountry?.name ||
+                  t("readyPage.cta.visa", { defaultValue: "visa" }),
+              })}
             </p>
 
             <Link
               to="/application"
               className="group inline-flex items-center gap-3 px-10 py-5 bg-primary text-primary-foreground rounded-lg font-semibold hover:opacity-90 transition-all text-lg"
             >
-              Start {selectedCountry?.name || 'Visa'} Application
+              {t("readyPage.cta.startButton", {
+                defaultValue: "Start {{country}} Application",
+                country:
+                  selectedCountry?.name ||
+                  t("readyPage.cta.visaCapitalized", { defaultValue: "Visa" }),
+              })}
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
 
             <div className="flex flex-wrap justify-center gap-6 mt-8 text-sm text-muted-foreground">
               <span className="flex items-center gap-2">
                 <CheckCircle className="w-4 h-4" />
-                Free to start
+                {t("readyPage.cta.badges.freeToStart", { defaultValue: "Free to start" })}
               </span>
               <span className="flex items-center gap-2">
                 <Shield className="w-4 h-4" />
-                No credit card required
+                {t("readyPage.cta.badges.noCardRequired", { defaultValue: "No credit card required" })}
               </span>
               <span className="flex items-center gap-2">
                 <FileText className="w-4 h-4" />
-                Auto-save enabled
+                {t("readyPage.cta.badges.autoSaveEnabled", { defaultValue: "Auto-save enabled" })}
               </span>
             </div>
           </div>

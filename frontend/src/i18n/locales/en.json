@@ -22,7 +22,12 @@
     "warning": "Warning",
     "info": "Info",
     "viewAll": "View All",
-    "select": "Select"
+    "select": "Select",
+    "backToHome": "Back to Home",
+    "backToBlog": "Back to Blog",
+    "backToNews": "Back to News",
+    "pageOf": "Page {{page}} of {{total}}",
+    "processing": "Processing..."
   },
   "nav": {
     "home": "Home",
@@ -155,6 +160,311 @@
       "title": "Ready to Start Your Visa Journey?",
       "subtitle": "Join thousands of satisfied travelers who have successfully obtained their US visa through TravelXpressa.",
       "button": "Get Started Today"
+    }
+  },
+  "aboutPage": {
+    "hero": {
+      "titlePrefix": "About",
+      "subtitle": "We simplify the US visa application process by providing a user-friendly platform that guides you through every step of the DS-160 form completion."
+    },
+    "features": {
+      "subtitle": "Our platform is designed to make your visa application experience as smooth as possible.",
+      "saveTime": {
+        "title": "Save Time",
+        "description": "Our guided process helps you complete your DS-160 form faster with fewer errors than doing it alone."
+      }
+    },
+    "howItWorks": {
+      "title": "How It Works",
+      "subtitle": "Complete your DS-160 application in three simple steps.",
+      "steps": {
+        "createAccount": {
+          "title": "Create Account",
+          "description": "Sign up for free and access our guided DS-160 form builder with auto-save functionality."
+        },
+        "fillApplication": {
+          "title": "Fill Your Application",
+          "description": "Complete each section with our step-by-step guidance. Get help anytime from our support team."
+        },
+        "submitTrack": {
+          "title": "Submit & Track",
+          "description": "Review your application, submit to CEAC, and track your visa status all in one place."
+        }
+      }
+    },
+    "cta": {
+      "title": "Ready to Start Your Application?",
+      "subtitle": "Join thousands of successful applicants who have used our platform to complete their DS-160 forms.",
+      "primary": "Get Started Free"
+    }
+  },
+  "learnMorePage": {
+    "hero": {
+      "titleLine1": "Visa Statistics &",
+      "titleLine2": "Insights",
+      "subtitle": "Comprehensive data on US visa applications, approval rates, and trends for Mongolian citizens and global travelers."
+    },
+    "mongoliaStats": {
+      "totalApplications": "Total Applications (2023)",
+      "approvalRate": "Approval Rate",
+      "avgProcessing": "Average Processing",
+      "b1b2Issued": "B1/B2 Visas Issued"
+    },
+    "visaCategories": {
+      "b1b2": "B1/B2 Tourist/Business",
+      "f1": "F1 Student",
+      "h1b": "H1B Work",
+      "j1": "J1 Exchange",
+      "other": "Other Categories"
+    },
+    "sections": {
+      "mongolia": {
+        "title": "Mongolia Visa Data"
+      },
+      "categories": {
+        "title": "Visa Categories Breakdown"
+      },
+      "global": {
+        "title": "Global Approval Rates",
+        "table": {
+          "country": "Country",
+          "approvalRate": "Approval Rate",
+          "comparison": "Comparison"
+        },
+        "you": "You"
+      },
+      "insights": {
+        "title": "Key Insights",
+        "item1": "Mongolia's approval rate has increased by 3% compared to the previous year",
+        "item2": "B1/B2 tourist visas remain the most commonly applied category",
+        "item3": "Complete documentation significantly improves approval chances"
+      }
+    },
+    "tips": {
+      "title": "Tips to Improve Your Approval Chances",
+      "items": {
+        "documentation": {
+          "title": "Complete Documentation",
+          "description": "Ensure all required documents are accurate, up-to-date, and properly organized before your interview."
+        },
+        "ties": {
+          "title": "Strong Ties to Home",
+          "description": "Demonstrate employment, property ownership, family ties, or other reasons to return to Mongolia."
+        },
+        "purpose": {
+          "title": "Clear Travel Purpose",
+          "description": "Articulate a specific, legitimate reason for your trip with supporting documentation."
+        },
+        "finances": {
+          "title": "Financial Stability",
+          "description": "Show sufficient funds through bank statements and proof of income to cover your trip expenses."
+        },
+        "honesty": {
+          "title": "Honest Answers",
+          "description": "Always provide truthful information. Inconsistencies can lead to immediate denial."
+        },
+        "appearance": {
+          "title": "Professional Appearance",
+          "description": "Dress appropriately and arrive early for your interview to make a positive impression."
+        }
+      }
+    },
+    "cta": {
+      "title": "Ready to Apply?",
+      "subtitle": "Start your DS-160 application with TravelXpressa and join the thousands who have successfully obtained their US visa.",
+      "primary": "Start Your Application"
+    }
+  },
+  "content": {
+    "readTime": "{{minutes}} min read",
+    "by": "By {{name}}"
+  },
+  "blogPage": {
+    "title": "Blog",
+    "subtitle": "Visa guides, travel tips, and expert advice to help you navigate your journey to the United States.",
+    "errors": {
+      "loadFailed": "Failed to load blog posts"
+    },
+    "empty": {
+      "title": "No blog posts published yet.",
+      "subtitle": "Check back soon for visa guides and travel tips!"
+    }
+  },
+  "blogPostPage": {
+    "errors": {
+      "notFound": "Post not found",
+      "loadFailed": "Failed to load post"
+    },
+    "notFound": {
+      "title": "Post Not Found",
+      "description": "The post you are looking for does not exist."
+    },
+    "cta": {
+      "subtitle": "Let TravelXpressa guide you through the DS-160 application process."
+    }
+  },
+  "newsPage": {
+    "title": "News",
+    "subtitle": "Latest updates from the US Embassy and immigration services.",
+    "errors": {
+      "loadFailed": "Failed to load news"
+    },
+    "empty": {
+      "title": "No news articles published yet.",
+      "subtitle": "Check back soon for the latest updates!"
+    }
+  },
+  "newsArticlePage": {
+    "errors": {
+      "notFound": "Article not found",
+      "loadFailed": "Failed to load article"
+    },
+    "notFound": {
+      "title": "Article Not Found",
+      "description": "The article you are looking for does not exist."
+    },
+    "relatedCta": {
+      "title": "Stay Updated",
+      "subtitle": "Check out more news and announcements.",
+      "viewAll": "View All News"
+    }
+  },
+  "readyPage": {
+    "badge": {
+      "welcomeBack": "Welcome back, {{name}}",
+      "change": "(Change)"
+    },
+    "title": "Information You'll Need",
+    "subtitleWithCountry": "The {{country}} visa application contains {{count}} main sections. Gather these details before starting to make the process smoother.",
+    "subtitleGeneric": "Gather all required details before starting your visa application to make the process smoother.",
+    "info": {
+      "processingTime": "Processing Time",
+      "visaFee": "Visa Fee",
+      "serviceFeeSuffix": "+ {{fee}} service fee",
+      "interviewRequired": "Interview Required",
+      "interviewYes": "Yes",
+      "interviewNo": "Generally No"
+    },
+    "notice": {
+      "title": "Important Notice",
+      "defaultDescription": "All answers must be in English using English characters. Your application will be saved automatically as you progress."
+    },
+    "sections": {
+      "title": "Application Sections",
+      "sectionNumber": "Section {{number}}"
+    },
+    "documents": {
+      "title": "Required Documents"
+    },
+    "cta": {
+      "title": "Ready to Begin?",
+      "subtitle": "Our guided system will walk you through each section of your {{country}} application. Your progress is automatically saved.",
+      "startButton": "Start {{country}} Application",
+      "visa": "visa",
+      "visaCapitalized": "Visa",
+      "badges": {
+        "freeToStart": "Free to start",
+        "noCardRequired": "No credit card required",
+        "autoSaveEnabled": "Auto-save enabled"
+      }
+    }
+  },
+  "oauthPage": {
+    "processingTitle": "Signing you in",
+    "processingMessage": "Processing your login...",
+    "successWelcome": "Welcome{{name}}!",
+    "successRedirect": "Redirecting you now...",
+    "errorTitle": "Authentication Failed",
+    "errorRedirect": "Redirecting to login page...",
+    "toasts": {
+      "loginFailedTitle": "Login failed",
+      "loginSuccessTitle": "Login successful!",
+      "loginSuccessDescription": "You have been signed in successfully."
+    },
+    "errors": {
+      "authFailedGeneric": "Authentication failed. Please try again.",
+      "googleNotConfigured": "Google login is not configured. Please use email/password.",
+      "facebookNotConfigured": "Facebook login is not configured. Please use email/password.",
+      "googleAuthFailed": "Google authentication failed. Please try again.",
+      "facebookAuthFailed": "Facebook authentication failed. Please try again.",
+      "facebookNoEmail": "Could not retrieve email from Facebook. Please ensure your Facebook account has an email address or use email/password login.",
+      "invalidResponse": "Invalid authentication response. Please try again.",
+      "invalidResponseShort": "Invalid authentication response",
+      "completeFailed": "Failed to complete authentication. Please try again.",
+      "completeFailedShort": "Failed to complete authentication"
+    }
+  },
+  "inquiryPage": {
+    "title": "Travel Application",
+    "subtitle": "Complete the form below to begin your journey with confidence and ease",
+    "serviceType": {
+      "title": "Select Service Type"
+    },
+    "form": {
+      "title": "Application Details",
+      "subtitle": "Please provide accurate information"
+    },
+    "alerts": {
+      "success": {
+        "title": "Application Submitted!",
+        "description": "Your application has been successfully submitted. We'll contact you within 24 hours."
+      },
+      "error": {
+        "title": "Submission Failed"
+      }
+    },
+    "fields": {
+      "fullNamePlaceholder": "Enter your full name",
+      "messageLabel": "Message / Additional Details",
+      "messagePlaceholder": "Please describe your requirements, travel dates, destination, and any specific needs..."
+    },
+    "buttons": {
+      "submitted": "Application Submitted",
+      "submit": "Submit Application"
+    },
+    "quickLinks": {
+      "needHelp": "Need Help?",
+      "contactSupport": "Contact Support",
+      "viewDashboard": "View Dashboard"
+    },
+    "validation": {
+      "requiredFields": "Please fill in all required fields",
+      "invalidEmail": "Please enter a valid email address",
+      "submitFailed": "Failed to submit application"
+    },
+    "services": {
+      "visa": {
+        "label": "Visa Application",
+        "description": "Tourist, business, or student visas",
+        "pricing": "From $299",
+        "features": {
+          "expertConsultation": "Expert consultation",
+          "documentPreparation": "Document preparation",
+          "fastProcessing": "Fast processing"
+        }
+      },
+      "tourism": {
+        "label": "Tourism Package",
+        "description": "Custom travel packages and tours",
+        "pricing": "From $599",
+        "features": {
+          "flightBooking": "Flight booking",
+          "hotelAccommodation": "Hotel accommodation",
+          "tourGuide": "Tour guide",
+          "travelInsurance": "Travel insurance"
+        }
+      },
+      "consultation": {
+        "label": "Consultation",
+        "description": "Expert travel advice and planning",
+        "pricing": "From $99",
+        "features": {
+          "personalizedPlanning": "Personalized planning",
+          "budgetOptimization": "Budget optimization",
+          "support24x7": "24/7 support",
+          "itineraryCreation": "Itinerary creation"
+        }
+      }
     }
   },
   "dashboard": {
@@ -553,7 +863,11 @@
     "serverError": "Server error",
     "networkError": "Network error",
     "tryAgain": "Try again",
-    "goHome": "Go Home"
+    "goHome": "Go Home",
+    "unexpectedTitle": "Something went wrong",
+    "unexpectedDescription": "An unexpected error occurred. Please try refreshing the page.",
+    "goBack": "Go Back",
+    "refreshPage": "Refresh Page"
   },
   "footer": {
     "copyright": "All rights reserved",

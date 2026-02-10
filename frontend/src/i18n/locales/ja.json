@@ -22,7 +22,12 @@
     "warning": "警告",
     "info": "情報",
     "viewAll": "すべて見る",
-    "select": "選択"
+    "select": "選択",
+    "backToHome": "ホームに戻る",
+    "backToBlog": "ブログに戻る",
+    "backToNews": "ニュースに戻る",
+    "pageOf": "{{page}} / {{total}} ページ",
+    "processing": "処理中..."
   },
   "nav": {
     "home": "ホーム",
@@ -156,6 +161,311 @@
       "title": "ビザの旅を始める準備はできましたか？",
       "subtitle": "TravelXpressaを通じて米国ビザを取得した数千人の満足した旅行者に加わりましょう。",
       "button": "今日から始める"
+    }
+  },
+  "aboutPage": {
+    "hero": {
+      "titlePrefix": "私たちについて",
+      "subtitle": "私たちは、DS-160フォームの入力を各ステップで案内する使いやすいプラットフォームにより、米国ビザ申請プロセスを簡素化します。"
+    },
+    "features": {
+      "subtitle": "当プラットフォームは、ビザ申請をできるだけスムーズに進められるように設計されています。",
+      "saveTime": {
+        "title": "時間を節約",
+        "description": "ガイドに従うことで、DS-160を一人で作成するよりも早く、ミスを減らして入力できます。"
+      }
+    },
+    "howItWorks": {
+      "title": "ご利用の流れ",
+      "subtitle": "3つの簡単なステップでDS-160申請を完了できます。",
+      "steps": {
+        "createAccount": {
+          "title": "アカウント作成",
+          "description": "無料で登録し、自動保存機能付きのDS-160ガイドフォームを利用できます。"
+        },
+        "fillApplication": {
+          "title": "申請を入力",
+          "description": "ステップごとの案内に従って各セクションを入力。いつでもサポートを受けられます。"
+        },
+        "submitTrack": {
+          "title": "提出と追跡",
+          "description": "内容を確認してCEACへ提出し、ビザの状況を一か所で追跡できます。"
+        }
+      }
+    },
+    "cta": {
+      "title": "申請を始める準備はできましたか？",
+      "subtitle": "当プラットフォームでDS-160を完成させた多くの申請者に続きましょう。",
+      "primary": "無料で始める"
+    }
+  },
+  "learnMorePage": {
+    "hero": {
+      "titleLine1": "ビザ統計と",
+      "titleLine2": "インサイト",
+      "subtitle": "モンゴル国籍の方や世界中の旅行者向けに、米国ビザ申請件数、承認率、傾向などの総合データを提供します。"
+    },
+    "mongoliaStats": {
+      "totalApplications": "申請総数（2023年）",
+      "approvalRate": "承認率",
+      "avgProcessing": "平均処理期間",
+      "b1b2Issued": "発給されたB1/B2ビザ"
+    },
+    "visaCategories": {
+      "b1b2": "B1/B2 観光/ビジネス",
+      "f1": "F1 学生",
+      "h1b": "H1B 就労",
+      "j1": "J1 交流",
+      "other": "その他のカテゴリー"
+    },
+    "sections": {
+      "mongolia": {
+        "title": "モンゴルのビザデータ"
+      },
+      "categories": {
+        "title": "ビザカテゴリー内訳"
+      },
+      "global": {
+        "title": "世界の承認率",
+        "table": {
+          "country": "国",
+          "approvalRate": "承認率",
+          "comparison": "比較"
+        },
+        "you": "あなた"
+      },
+      "insights": {
+        "title": "主なポイント",
+        "item1": "モンゴルの承認率は前年より3%上昇しました",
+        "item2": "B1/B2観光ビザは最も申請が多いカテゴリーのままです",
+        "item3": "書類を十分に準備することで承認の可能性が大きく高まります"
+      }
+    },
+    "tips": {
+      "title": "承認の可能性を高めるコツ",
+      "items": {
+        "documentation": {
+          "title": "書類を揃える",
+          "description": "面接前に必要書類が正確で最新、かつ整理されていることを確認しましょう。"
+        },
+        "ties": {
+          "title": "母国との強い結びつき",
+          "description": "就業、資産、家族など、モンゴルに戻る理由を示しましょう。"
+        },
+        "purpose": {
+          "title": "渡航目的を明確に",
+          "description": "具体的で正当な目的を、裏付け資料とともに説明しましょう。"
+        },
+        "finances": {
+          "title": "経済的な安定",
+          "description": "銀行明細や収入証明で、旅行費用を賄える資金があることを示しましょう。"
+        },
+        "honesty": {
+          "title": "正直に回答",
+          "description": "常に正確な情報を提供してください。不一致は即時却下につながる場合があります。"
+        },
+        "appearance": {
+          "title": "身だしなみ",
+          "description": "面接にふさわしい服装で早めに到着し、良い印象を与えましょう。"
+        }
+      }
+    },
+    "cta": {
+      "title": "申請する準備はできましたか？",
+      "subtitle": "TravelXpressaでDS-160申請を始め、米国ビザを取得した多くの方々に続きましょう。",
+      "primary": "申請を開始"
+    }
+  },
+  "content": {
+    "readTime": "読了目安 {{minutes}} 分",
+    "by": "著者: {{name}}"
+  },
+  "blogPage": {
+    "title": "ブログ",
+    "subtitle": "米国への渡航に役立つビザガイド、旅行のヒント、専門家のアドバイスをお届けします。",
+    "errors": {
+      "loadFailed": "ブログ記事の読み込みに失敗しました"
+    },
+    "empty": {
+      "title": "まだ公開されたブログ記事がありません。",
+      "subtitle": "ビザガイドや旅行のヒントを近日公開します。"
+    }
+  },
+  "blogPostPage": {
+    "errors": {
+      "notFound": "記事が見つかりません",
+      "loadFailed": "記事の読み込みに失敗しました"
+    },
+    "notFound": {
+      "title": "記事が見つかりません",
+      "description": "お探しの記事は存在しません。"
+    },
+    "cta": {
+      "subtitle": "TravelXpressaがDS-160申請プロセスをガイドします。"
+    }
+  },
+  "newsPage": {
+    "title": "ニュース",
+    "subtitle": "米国大使館および移民関連機関からの最新情報。",
+    "errors": {
+      "loadFailed": "ニュースの読み込みに失敗しました"
+    },
+    "empty": {
+      "title": "まだ公開されたニュースがありません。",
+      "subtitle": "最新情報を近日公開します。"
+    }
+  },
+  "newsArticlePage": {
+    "errors": {
+      "notFound": "記事が見つかりません",
+      "loadFailed": "記事の読み込みに失敗しました"
+    },
+    "notFound": {
+      "title": "記事が見つかりません",
+      "description": "お探しの記事は存在しません。"
+    },
+    "relatedCta": {
+      "title": "最新情報をチェック",
+      "subtitle": "他のニュースやお知らせもご覧ください。",
+      "viewAll": "ニュース一覧を見る"
+    }
+  },
+  "readyPage": {
+    "badge": {
+      "welcomeBack": "お帰りなさい、{{name}}",
+      "change": "（変更）"
+    },
+    "title": "事前に用意する情報",
+    "subtitleWithCountry": "{{country}}のビザ申請には主要セクションが{{count}}つあります。開始前に必要情報を準備するとスムーズです。",
+    "subtitleGeneric": "ビザ申請を開始する前に必要情報を準備するとスムーズです。",
+    "info": {
+      "processingTime": "処理期間",
+      "visaFee": "ビザ料金",
+      "serviceFeeSuffix": "+ {{fee}} サービス料",
+      "interviewRequired": "面接が必要",
+      "interviewYes": "はい",
+      "interviewNo": "通常は不要"
+    },
+    "notice": {
+      "title": "重要なお知らせ",
+      "defaultDescription": "回答はすべて英語（英字）で入力してください。進捗は自動的に保存されます。"
+    },
+    "sections": {
+      "title": "申請セクション",
+      "sectionNumber": "セクション {{number}}"
+    },
+    "documents": {
+      "title": "必要書類"
+    },
+    "cta": {
+      "title": "始める準備はできましたか？",
+      "subtitle": "ガイドに沿って{{country}}申請の各セクションを進められます。進捗は自動的に保存されます。",
+      "startButton": "{{country}}申請を開始",
+      "visa": "ビザ",
+      "visaCapitalized": "ビザ",
+      "badges": {
+        "freeToStart": "無料で開始",
+        "noCardRequired": "クレジットカード不要",
+        "autoSaveEnabled": "自動保存有効"
+      }
+    }
+  },
+  "oauthPage": {
+    "processingTitle": "サインイン中",
+    "processingMessage": "ログインを処理しています...",
+    "successWelcome": "ようこそ{{name}}！",
+    "successRedirect": "移動しています...",
+    "errorTitle": "認証に失敗しました",
+    "errorRedirect": "ログインページへ移動します...",
+    "toasts": {
+      "loginFailedTitle": "ログインに失敗しました",
+      "loginSuccessTitle": "ログイン成功！",
+      "loginSuccessDescription": "ログインしました。"
+    },
+    "errors": {
+      "authFailedGeneric": "認証に失敗しました。もう一度お試しください。",
+      "googleNotConfigured": "Googleログインが設定されていません。メール/パスワードでログインしてください。",
+      "facebookNotConfigured": "Facebookログインが設定されていません。メール/パスワードでログインしてください。",
+      "googleAuthFailed": "Google認証に失敗しました。もう一度お試しください。",
+      "facebookAuthFailed": "Facebook認証に失敗しました。もう一度お試しください。",
+      "facebookNoEmail": "Facebookからメールアドレスを取得できませんでした。Facebookアカウントにメールが設定されているか確認するか、メール/パスワードでログインしてください。",
+      "invalidResponse": "認証結果が無効です。もう一度お試しください。",
+      "invalidResponseShort": "無効な認証結果",
+      "completeFailed": "認証を完了できませんでした。もう一度お試しください。",
+      "completeFailedShort": "認証の完了に失敗しました"
+    }
+  },
+  "inquiryPage": {
+    "title": "渡航申請",
+    "subtitle": "下のフォームに入力して、安心してスムーズに旅を始めましょう",
+    "serviceType": {
+      "title": "サービス種別を選択"
+    },
+    "form": {
+      "title": "申請内容",
+      "subtitle": "正確な情報を入力してください"
+    },
+    "alerts": {
+      "success": {
+        "title": "申請が送信されました！",
+        "description": "申請は正常に送信されました。24時間以内にご連絡します。"
+      },
+      "error": {
+        "title": "送信に失敗しました"
+      }
+    },
+    "fields": {
+      "fullNamePlaceholder": "氏名を入力してください",
+      "messageLabel": "メッセージ / 追加情報",
+      "messagePlaceholder": "ご要望、渡航日程、目的地、その他の必要事項を入力してください..."
+    },
+    "buttons": {
+      "submitted": "送信済み",
+      "submit": "申請を送信"
+    },
+    "quickLinks": {
+      "needHelp": "お困りですか？",
+      "contactSupport": "サポートに連絡",
+      "viewDashboard": "ダッシュボードを見る"
+    },
+    "validation": {
+      "requiredFields": "必須項目をすべて入力してください",
+      "invalidEmail": "有効なメールアドレスを入力してください",
+      "submitFailed": "申請の送信に失敗しました"
+    },
+    "services": {
+      "visa": {
+        "label": "ビザ申請",
+        "description": "観光・ビジネス・学生ビザ",
+        "pricing": "$299から",
+        "features": {
+          "expertConsultation": "専門家相談",
+          "documentPreparation": "書類準備",
+          "fastProcessing": "迅速な処理"
+        }
+      },
+      "tourism": {
+        "label": "旅行パッケージ",
+        "description": "カスタム旅行パッケージとツアー",
+        "pricing": "$599から",
+        "features": {
+          "flightBooking": "航空券予約",
+          "hotelAccommodation": "ホテル手配",
+          "tourGuide": "ツアーガイド",
+          "travelInsurance": "旅行保険"
+        }
+      },
+      "consultation": {
+        "label": "相談",
+        "description": "専門的な旅行アドバイスと計画",
+        "pricing": "$99から",
+        "features": {
+          "personalizedPlanning": "個別プラン",
+          "budgetOptimization": "予算最適化",
+          "support24x7": "24/7サポート",
+          "itineraryCreation": "旅程作成"
+        }
+      }
     }
   },
   "dashboard": {
@@ -554,7 +864,11 @@
     "serverError": "サーバーエラー",
     "networkError": "ネットワークエラー",
     "tryAgain": "再試行",
-    "goHome": "ホームへ戻る"
+    "goHome": "ホームへ戻る",
+    "unexpectedTitle": "問題が発生しました",
+    "unexpectedDescription": "予期しないエラーが発生しました。ページを更新してみてください。",
+    "goBack": "戻る",
+    "refreshPage": "ページを更新"
   },
   "footer": {
     "copyright": "全著作権所有",

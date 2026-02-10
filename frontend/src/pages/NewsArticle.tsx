@@ -5,8 +5,10 @@ import { getPostBySlug, formatPostDate, getDefaultImage } from '@/api/posts';
 import type { Post } from '@/api/posts';
 import { Button } from '@/components/ui/button';
 import { normalizeImageUrl } from '@/api/upload';
+import { useTranslation } from 'react-i18next';
 
 const NewsArticle = () => {
+  const { t, i18n } = useTranslation();
   const { slug } = useParams<{ slug: string }>();
   const [article, setArticle] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
@@ -15,7 +17,7 @@ const NewsArticle = () => {
   useEffect(() => {
     const fetchArticle = async () => {
       if (!slug) {
-        setError('Article not found');
+        setError(t('newsArticlePage.errors.notFound', { defaultValue: 'Article not found' }));
         setLoading(false);
         return;
       }
@@ -27,9 +29,9 @@ const NewsArticle = () => {
         setError(null);
       } catch (err: any) {
         if (err.response?.status === 404) {
-          setError('Article not found');
+          setError(t('newsArticlePage.errors.notFound', { defaultValue: 'Article not found' }));
         } else {
-          setError('Failed to load article');
+          setError(t('newsArticlePage.errors.loadFailed', { defaultValue: 'Failed to load article' }));
         }
         console.error(err);
       } finally {
@@ -57,12 +59,19 @@ const NewsArticle = () => {
       <div className="min-h-screen bg-background text-foreground">
         <div className="max-w-4xl mx-auto px-6 py-20">
           <div className="text-center py-20">
-            <h1 className="text-4xl font-bold mb-4">Article Not Found</h1>
-            <p className="text-muted-foreground mb-8">{error || 'The article you are looking for does not exist.'}</p>
+            <h1 className="text-4xl font-bold mb-4">
+              {t('newsArticlePage.notFound.title', { defaultValue: 'Article Not Found' })}
+            </h1>
+            <p className="text-muted-foreground mb-8">
+              {error ||
+                t('newsArticlePage.notFound.description', {
+                  defaultValue: 'The article you are looking for does not exist.',
+                })}
+            </p>
             <Button asChild>
               <Link to="/news">
                 <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to News
+                {t('common.backToNews', { defaultValue: 'Back to News' })}
               </Link>
             </Button>
           </div>
@@ -81,12 +90,12 @@ const NewsArticle = () => {
             className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-8"
           >
             <ArrowLeft className="w-4 h-4" />
-            Back to News
+            {t('common.backToNews', { defaultValue: 'Back to News' })}
           </Link>
 
           <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
             <Calendar className="w-4 h-4" />
-            {formatPostDate(article.publishedAt || article.createdAt)}
+            {formatPostDate(article.publishedAt || article.createdAt, i18n.language)}
           </div>
 
           <h1 className="text-4xl md:text-5xl font-bold mb-6">{article.title}</h1>
@@ -127,11 +136,19 @@ const NewsArticle = () => {
       <div className="max-w-4xl mx-auto px-6 py-12 border-t border-border">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-lg font-semibold mb-1">Stay Updated</h3>
-            <p className="text-muted-foreground">Check out more news and announcements.</p>
+            <h3 className="text-lg font-semibold mb-1">
+              {t('newsArticlePage.relatedCta.title', { defaultValue: 'Stay Updated' })}
+            </h3>
+            <p className="text-muted-foreground">
+              {t('newsArticlePage.relatedCta.subtitle', {
+                defaultValue: 'Check out more news and announcements.',
+              })}
+            </p>
           </div>
           <Button asChild variant="outline">
-            <Link to="/news">View All News</Link>
+            <Link to="/news">
+              {t('newsArticlePage.relatedCta.viewAll', { defaultValue: 'View All News' })}
+            </Link>
           </Button>
         </div>
       </div>

@@ -4,8 +4,10 @@ import { Calendar, ArrowLeft, Loader2 } from 'lucide-react';
 import { getPosts, formatPostDate, getDefaultImage } from '@/api/posts';
 import type { PostSummary } from '@/api/posts';
 import { normalizeImageUrl } from '@/api/upload';
+import { useTranslation } from 'react-i18next';
 
 const News = () => {
+  const { t, i18n } = useTranslation();
   const [news, setNews] = useState<PostSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -21,7 +23,7 @@ const News = () => {
         setTotalPages(response.pagination.totalPages);
         setError(null);
       } catch (err) {
-        setError('Failed to load news');
+        setError(t('newsPage.errors.loadFailed', { defaultValue: 'Failed to load news' }));
         console.error(err);
       } finally {
         setLoading(false);
@@ -53,11 +55,15 @@ const News = () => {
             className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-8"
           >
             <ArrowLeft className="w-4 h-4" />
-            Back to Home
+            {t('common.backToHome', { defaultValue: 'Back to Home' })}
           </Link>
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">News</h1>
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">
+            {t('newsPage.title', { defaultValue: 'News' })}
+          </h1>
           <p className="text-xl text-muted-foreground max-w-2xl">
-            Latest updates from the US Embassy and immigration services.
+            {t('newsPage.subtitle', {
+              defaultValue: 'Latest updates from the US Embassy and immigration services.',
+            })}
           </p>
         </div>
       </section>
@@ -72,13 +78,19 @@ const News = () => {
                 onClick={() => setPage(1)}
                 className="text-primary hover:underline"
               >
-                Try again
+                {t('errors.tryAgain', { defaultValue: 'Try again' })}
               </button>
             </div>
           ) : news.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-muted-foreground text-lg">No news articles published yet.</p>
-              <p className="text-muted-foreground mt-2">Check back soon for the latest updates!</p>
+              <p className="text-muted-foreground text-lg">
+                {t('newsPage.empty.title', { defaultValue: 'No news articles published yet.' })}
+              </p>
+              <p className="text-muted-foreground mt-2">
+                {t('newsPage.empty.subtitle', {
+                  defaultValue: 'Check back soon for the latest updates!',
+                })}
+              </p>
             </div>
           ) : (
             <>
@@ -102,7 +114,7 @@ const News = () => {
                       </div>
                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
                         <Calendar className="w-3 h-3" />
-                        {formatPostDate(item.publishedAt || item.createdAt)}
+                        {formatPostDate(item.publishedAt || item.createdAt, i18n.language)}
                       </div>
                       {item.excerpt && (
                         <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{item.excerpt}</p>
@@ -120,17 +132,21 @@ const News = () => {
                     disabled={page === 1}
                     className="px-4 py-2 border border-border rounded-lg hover:bg-secondary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Previous
+                    {t('common.previous', { defaultValue: 'Previous' })}
                   </button>
                   <span className="px-4 py-2 text-muted-foreground">
-                    Page {page} of {totalPages}
+                    {t('common.pageOf', {
+                      defaultValue: 'Page {{page}} of {{total}}',
+                      page,
+                      total: totalPages,
+                    })}
                   </span>
                   <button
                     onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                     disabled={page === totalPages}
                     className="px-4 py-2 border border-border rounded-lg hover:bg-secondary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Next
+                    {t('common.next', { defaultValue: 'Next' })}
                   </button>
                 </div>
               )}

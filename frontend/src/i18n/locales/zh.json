@@ -22,7 +22,12 @@
     "warning": "警告",
     "info": "信息",
     "viewAll": "查看全部",
-    "select": "选择"
+    "select": "选择",
+    "backToHome": "返回首页",
+    "backToBlog": "返回博客",
+    "backToNews": "返回新闻",
+    "pageOf": "第 {{page}} / {{total}} 页",
+    "processing": "处理中..."
   },
   "nav": {
     "home": "首页",
@@ -156,6 +161,311 @@
       "title": "准备好开始您的签证之旅了吗？",
       "subtitle": "加入数千名通过TravelXpressa成功获得美国签证的满意旅行者。",
       "button": "今天就开始"
+    }
+  },
+  "aboutPage": {
+    "hero": {
+      "titlePrefix": "关于",
+      "subtitle": "我们通过易用的平台简化美国签证申请流程，引导您完成 DS-160 表格的每一步。"
+    },
+    "features": {
+      "subtitle": "我们的平台旨在让您的签证申请体验尽可能顺畅。",
+      "saveTime": {
+        "title": "节省时间",
+        "description": "我们的引导式流程可帮助您更快、更少错误地完成 DS-160 表格。"
+      }
+    },
+    "howItWorks": {
+      "title": "如何运作",
+      "subtitle": "只需三个简单步骤即可完成 DS-160 申请。",
+      "steps": {
+        "createAccount": {
+          "title": "创建账户",
+          "description": "免费注册，使用带自动保存功能的 DS-160 引导式填写工具。"
+        },
+        "fillApplication": {
+          "title": "填写申请",
+          "description": "在分步指引下完成每个部分，随时获得支持团队帮助。"
+        },
+        "submitTrack": {
+          "title": "提交并跟踪",
+          "description": "核对后提交至 CEAC，并在一个地方跟踪签证状态。"
+        }
+      }
+    },
+    "cta": {
+      "title": "准备开始申请了吗？",
+      "subtitle": "加入成千上万成功使用我们平台完成 DS-160 的申请者。",
+      "primary": "免费开始"
+    }
+  },
+  "learnMorePage": {
+    "hero": {
+      "titleLine1": "签证数据与",
+      "titleLine2": "洞察",
+      "subtitle": "面向蒙古公民和全球旅行者的美国签证申请、获批率与趋势的综合数据。"
+    },
+    "mongoliaStats": {
+      "totalApplications": "申请总量（2023）",
+      "approvalRate": "获批率",
+      "avgProcessing": "平均处理时间",
+      "b1b2Issued": "签发的 B1/B2 签证"
+    },
+    "visaCategories": {
+      "b1b2": "B1/B2 旅游/商务",
+      "f1": "F1 学生",
+      "h1b": "H1B 工作",
+      "j1": "J1 交流",
+      "other": "其他类别"
+    },
+    "sections": {
+      "mongolia": {
+        "title": "蒙古签证数据"
+      },
+      "categories": {
+        "title": "签证类别分布"
+      },
+      "global": {
+        "title": "全球获批率",
+        "table": {
+          "country": "国家/地区",
+          "approvalRate": "获批率",
+          "comparison": "对比"
+        },
+        "you": "你"
+      },
+      "insights": {
+        "title": "关键洞察",
+        "item1": "与上一年相比，蒙古的获批率提高了 3%",
+        "item2": "B1/B2 旅游签证仍是最常见的申请类别",
+        "item3": "完整的材料准备能显著提高获批概率"
+      }
+    },
+    "tips": {
+      "title": "提高获批概率的建议",
+      "items": {
+        "documentation": {
+          "title": "材料齐全",
+          "description": "面试前请确保所有所需材料准确、最新并整理有序。"
+        },
+        "ties": {
+          "title": "与本国的强关联",
+          "description": "通过工作、房产、家庭关系等证明您会返回蒙古。"
+        },
+        "purpose": {
+          "title": "清晰的出行目的",
+          "description": "用材料支持，清楚说明此次行程的具体、合法目的。"
+        },
+        "finances": {
+          "title": "财务稳定",
+          "description": "通过银行流水与收入证明展示有足够资金覆盖旅行费用。"
+        },
+        "honesty": {
+          "title": "如实回答",
+          "description": "始终提供真实信息。不一致可能导致立即拒签。"
+        },
+        "appearance": {
+          "title": "得体着装",
+          "description": "面试时着装得体并提前到达，以留下良好印象。"
+        }
+      }
+    },
+    "cta": {
+      "title": "准备申请了吗？",
+      "subtitle": "从 TravelXpressa 开始您的 DS-160 申请，加入成功获得美国签证的数千人。",
+      "primary": "开始申请"
+    }
+  },
+  "content": {
+    "readTime": "约 {{minutes}} 分钟阅读",
+    "by": "作者：{{name}}"
+  },
+  "blogPage": {
+    "title": "博客",
+    "subtitle": "签证指南、旅行建议与专家提示，帮助你更顺利地前往美国。",
+    "errors": {
+      "loadFailed": "无法加载博客文章"
+    },
+    "empty": {
+      "title": "暂无已发布的博客文章。",
+      "subtitle": "稍后再来查看签证指南与旅行建议！"
+    }
+  },
+  "blogPostPage": {
+    "errors": {
+      "notFound": "未找到文章",
+      "loadFailed": "无法加载文章"
+    },
+    "notFound": {
+      "title": "未找到文章",
+      "description": "你要查看的文章不存在。"
+    },
+    "cta": {
+      "subtitle": "让 TravelXpressa 引导你完成 DS-160 申请流程。"
+    }
+  },
+  "newsPage": {
+    "title": "新闻",
+    "subtitle": "来自美国使馆与移民机构的最新动态。",
+    "errors": {
+      "loadFailed": "无法加载新闻"
+    },
+    "empty": {
+      "title": "暂无已发布的新闻。",
+      "subtitle": "稍后再来查看最新动态！"
+    }
+  },
+  "newsArticlePage": {
+    "errors": {
+      "notFound": "未找到文章",
+      "loadFailed": "无法加载文章"
+    },
+    "notFound": {
+      "title": "未找到文章",
+      "description": "你要查看的新闻文章不存在。"
+    },
+    "relatedCta": {
+      "title": "获取最新动态",
+      "subtitle": "查看更多新闻与公告。",
+      "viewAll": "查看全部新闻"
+    }
+  },
+  "readyPage": {
+    "badge": {
+      "welcomeBack": "欢迎回来，{{name}}",
+      "change": "（更改）"
+    },
+    "title": "开始前需要准备的信息",
+    "subtitleWithCountry": "{{country}} 签证申请包含 {{count}} 个主要部分。开始前先准备好这些信息，让流程更顺畅。",
+    "subtitleGeneric": "开始签证申请前先准备好所需信息，让流程更顺畅。",
+    "info": {
+      "processingTime": "处理时间",
+      "visaFee": "签证费用",
+      "serviceFeeSuffix": "+ {{fee}} 服务费",
+      "interviewRequired": "是否需要面试",
+      "interviewYes": "是",
+      "interviewNo": "通常不需要"
+    },
+    "notice": {
+      "title": "重要提示",
+      "defaultDescription": "所有回答必须使用英文字符填写。填写过程中将自动保存进度。"
+    },
+    "sections": {
+      "title": "申请部分",
+      "sectionNumber": "第 {{number}} 部分"
+    },
+    "documents": {
+      "title": "所需材料"
+    },
+    "cta": {
+      "title": "准备开始了吗？",
+      "subtitle": "我们的引导系统将带你完成 {{country}} 申请的每个部分，进度会自动保存。",
+      "startButton": "开始 {{country}} 申请",
+      "visa": "签证",
+      "visaCapitalized": "签证",
+      "badges": {
+        "freeToStart": "免费开始",
+        "noCardRequired": "无需信用卡",
+        "autoSaveEnabled": "已启用自动保存"
+      }
+    }
+  },
+  "oauthPage": {
+    "processingTitle": "正在登录",
+    "processingMessage": "正在处理登录...",
+    "successWelcome": "欢迎{{name}}！",
+    "successRedirect": "正在跳转...",
+    "errorTitle": "认证失败",
+    "errorRedirect": "正在跳转到登录页...",
+    "toasts": {
+      "loginFailedTitle": "登录失败",
+      "loginSuccessTitle": "登录成功！",
+      "loginSuccessDescription": "你已成功登录。"
+    },
+    "errors": {
+      "authFailedGeneric": "认证失败，请重试。",
+      "googleNotConfigured": "未配置 Google 登录。请使用邮箱/密码登录。",
+      "facebookNotConfigured": "未配置 Facebook 登录。请使用邮箱/密码登录。",
+      "googleAuthFailed": "Google 认证失败，请重试。",
+      "facebookAuthFailed": "Facebook 认证失败，请重试。",
+      "facebookNoEmail": "无法从 Facebook 获取邮箱。请确认你的 Facebook 账号绑定了邮箱，或使用邮箱/密码登录。",
+      "invalidResponse": "认证响应无效，请重试。",
+      "invalidResponseShort": "认证响应无效",
+      "completeFailed": "无法完成认证，请重试。",
+      "completeFailedShort": "无法完成认证"
+    }
+  },
+  "inquiryPage": {
+    "title": "出行申请",
+    "subtitle": "填写下方表单，轻松自信地开启你的旅程",
+    "serviceType": {
+      "title": "选择服务类型"
+    },
+    "form": {
+      "title": "申请详情",
+      "subtitle": "请填写准确的信息"
+    },
+    "alerts": {
+      "success": {
+        "title": "申请已提交！",
+        "description": "你的申请已成功提交。我们将在 24 小时内与你联系。"
+      },
+      "error": {
+        "title": "提交失败"
+      }
+    },
+    "fields": {
+      "fullNamePlaceholder": "请输入你的全名",
+      "messageLabel": "留言 / 补充信息",
+      "messagePlaceholder": "请描述你的需求、出行日期、目的地以及其他特殊要求..."
+    },
+    "buttons": {
+      "submitted": "已提交",
+      "submit": "提交申请"
+    },
+    "quickLinks": {
+      "needHelp": "需要帮助？",
+      "contactSupport": "联系支持",
+      "viewDashboard": "查看仪表板"
+    },
+    "validation": {
+      "requiredFields": "请填写所有必填字段",
+      "invalidEmail": "请输入有效的邮箱地址",
+      "submitFailed": "提交申请失败"
+    },
+    "services": {
+      "visa": {
+        "label": "签证申请",
+        "description": "旅游、商务或学生签证",
+        "pricing": "起价 $299",
+        "features": {
+          "expertConsultation": "专家咨询",
+          "documentPreparation": "材料准备",
+          "fastProcessing": "快速处理"
+        }
+      },
+      "tourism": {
+        "label": "旅游套餐",
+        "description": "定制旅行套餐与行程",
+        "pricing": "起价 $599",
+        "features": {
+          "flightBooking": "机票预订",
+          "hotelAccommodation": "酒店住宿",
+          "tourGuide": "导游服务",
+          "travelInsurance": "旅行保险"
+        }
+      },
+      "consultation": {
+        "label": "咨询",
+        "description": "专家出行建议与规划",
+        "pricing": "起价 $99",
+        "features": {
+          "personalizedPlanning": "个性化规划",
+          "budgetOptimization": "预算优化",
+          "support24x7": "24/7 支持",
+          "itineraryCreation": "行程制定"
+        }
+      }
     }
   },
   "dashboard": {
@@ -554,7 +864,11 @@
     "serverError": "服务器错误",
     "networkError": "网络错误",
     "tryAgain": "重试",
-    "goHome": "返回首页"
+    "goHome": "返回首页",
+    "unexpectedTitle": "出了点问题",
+    "unexpectedDescription": "发生了意外错误。请尝试刷新页面。",
+    "goBack": "返回",
+    "refreshPage": "刷新页面"
   },
   "footer": {
     "copyright": "版权所有",

@@ -1,6 +1,7 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { AlertCircle, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import i18n from '@/i18n';
 
 interface Props {
   children: ReactNode;
@@ -50,9 +51,13 @@ class ErrorBoundary extends Component<Props, State> {
               <AlertCircle className="h-16 w-16 text-destructive" />
             </div>
             <div className="space-y-2">
-              <h1 className="text-2xl font-bold text-foreground">Something went wrong</h1>
+              <h1 className="text-2xl font-bold text-foreground">
+                {i18n.t('errors.unexpectedTitle', { defaultValue: 'Something went wrong' })}
+              </h1>
               <p className="text-muted-foreground">
-                An unexpected error occurred. Please try refreshing the page.
+                {i18n.t('errors.unexpectedDescription', {
+                  defaultValue: 'An unexpected error occurred. Please try refreshing the page.',
+                })}
               </p>
             </div>
             {import.meta.env.DEV && this.state.error && (
@@ -69,11 +74,11 @@ class ErrorBoundary extends Component<Props, State> {
             )}
             <div className="flex gap-4 justify-center">
               <Button variant="outline" onClick={this.handleGoBack}>
-                Go Back
+                {i18n.t('errors.goBack', { defaultValue: 'Go Back' })}
               </Button>
               <Button onClick={this.handleRefresh}>
                 <RefreshCw className="h-4 w-4 mr-2" />
-                Refresh Page
+                {i18n.t('errors.refreshPage', { defaultValue: 'Refresh Page' })}
               </Button>
             </div>
           </div>

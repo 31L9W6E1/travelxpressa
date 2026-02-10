@@ -172,10 +172,10 @@ export const togglePostPublish = async (id: string): Promise<{ success: boolean;
 // ==================== UTILITY ====================
 
 // Format date for display
-export const formatPostDate = (dateString: string | null): string => {
-  if (!dateString) return 'Not published';
+export const formatPostDate = (dateString: string | null, locale?: string): string => {
+  if (!dateString) return '';
   const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', {
+  return date.toLocaleDateString(locale || undefined, {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
@@ -183,11 +183,11 @@ export const formatPostDate = (dateString: string | null): string => {
 };
 
 // Calculate read time
-export const calculateReadTime = (content: string): string => {
+export const calculateReadTime = (content: string): number => {
   const wordsPerMinute = 200;
   const wordCount = content.split(/\s+/).length;
   const minutes = Math.ceil(wordCount / wordsPerMinute);
-  return `${minutes} min read`;
+  return minutes;
 };
 
 // Default images for posts without images

@@ -22,7 +22,12 @@
     "warning": "경고",
     "info": "정보",
     "viewAll": "전체 보기",
-    "select": "선택"
+    "select": "선택",
+    "backToHome": "홈으로 돌아가기",
+    "backToBlog": "블로그로 돌아가기",
+    "backToNews": "뉴스로 돌아가기",
+    "pageOf": "페이지 {{page}} / {{total}}",
+    "processing": "처리 중..."
   },
   "nav": {
     "home": "홈",
@@ -156,6 +161,311 @@
       "title": "비자 여정을 시작할 준비가 되셨나요?",
       "subtitle": "TravelXpressa를 통해 성공적으로 미국 비자를 취득한 수천 명의 만족한 여행자와 함께하세요.",
       "button": "오늘 시작하기"
+    }
+  },
+  "aboutPage": {
+    "hero": {
+      "titlePrefix": "소개",
+      "subtitle": "저희는 사용하기 쉬운 플랫폼으로 DS-160 작성의 모든 단계를 안내하여 미국 비자 신청 과정을 간소화합니다."
+    },
+    "features": {
+      "subtitle": "저희 플랫폼은 비자 신청 과정을 최대한 간편하게 만들도록 설계되었습니다.",
+      "saveTime": {
+        "title": "시간 절약",
+        "description": "가이드형 절차로 DS-160을 더 빠르고 더 적은 오류로 작성할 수 있습니다."
+      }
+    },
+    "howItWorks": {
+      "title": "이용 방법",
+      "subtitle": "세 가지 간단한 단계로 DS-160 신청을 완료하세요.",
+      "steps": {
+        "createAccount": {
+          "title": "계정 만들기",
+          "description": "무료로 가입하고 자동 저장 기능이 있는 DS-160 작성 가이드를 이용하세요."
+        },
+        "fillApplication": {
+          "title": "신청서 작성",
+          "description": "단계별 안내에 따라 각 섹션을 작성하고, 필요할 때 언제든 지원을 받으세요."
+        },
+        "submitTrack": {
+          "title": "제출 및 추적",
+          "description": "신청서를 검토한 후 CEAC에 제출하고, 한곳에서 비자 상태를 추적하세요."
+        }
+      }
+    },
+    "cta": {
+      "title": "신청을 시작할 준비가 되셨나요?",
+      "subtitle": "저희 플랫폼으로 DS-160을 완료한 수많은 신청자들과 함께하세요.",
+      "primary": "무료로 시작하기"
+    }
+  },
+  "learnMorePage": {
+    "hero": {
+      "titleLine1": "비자 통계 및",
+      "titleLine2": "인사이트",
+      "subtitle": "몽골 시민과 전 세계 여행자를 위한 미국 비자 신청, 승인률, 추세에 대한 종합 데이터입니다."
+    },
+    "mongoliaStats": {
+      "totalApplications": "총 신청 건수 (2023)",
+      "approvalRate": "승인률",
+      "avgProcessing": "평균 처리 기간",
+      "b1b2Issued": "발급된 B1/B2 비자"
+    },
+    "visaCategories": {
+      "b1b2": "B1/B2 관광/비즈니스",
+      "f1": "F1 학생",
+      "h1b": "H1B 취업",
+      "j1": "J1 교환",
+      "other": "기타 카테고리"
+    },
+    "sections": {
+      "mongolia": {
+        "title": "몽골 비자 데이터"
+      },
+      "categories": {
+        "title": "비자 카테고리 분포"
+      },
+      "global": {
+        "title": "전 세계 승인률",
+        "table": {
+          "country": "국가",
+          "approvalRate": "승인률",
+          "comparison": "비교"
+        },
+        "you": "본인"
+      },
+      "insights": {
+        "title": "핵심 인사이트",
+        "item1": "몽골의 승인률은 전년 대비 3% 증가했습니다",
+        "item2": "B1/B2 관광 비자는 가장 많이 신청되는 카테고리로 유지되고 있습니다",
+        "item3": "서류를 완벽히 준비하면 승인 가능성이 크게 높아집니다"
+      }
+    },
+    "tips": {
+      "title": "승인 가능성을 높이는 팁",
+      "items": {
+        "documentation": {
+          "title": "서류 완비",
+          "description": "면접 전 필요한 모든 서류가 정확하고 최신이며 잘 정리되어 있는지 확인하세요."
+        },
+        "ties": {
+          "title": "본국과의 강한 연계",
+          "description": "직장, 재산, 가족 관계 등 몽골로 돌아갈 이유를 입증하세요."
+        },
+        "purpose": {
+          "title": "명확한 여행 목적",
+          "description": "근거 서류와 함께 구체적이고 합법적인 여행 목적을 설명하세요."
+        },
+        "finances": {
+          "title": "재정적 안정성",
+          "description": "은행 거래내역과 소득 증빙으로 여행 경비를 감당할 충분한 자금을 보여주세요."
+        },
+        "honesty": {
+          "title": "정직한 답변",
+          "description": "항상 사실대로 답하세요. 불일치는 즉각적인 거절로 이어질 수 있습니다."
+        },
+        "appearance": {
+          "title": "단정한 복장",
+          "description": "면접에 어울리는 복장으로 일찍 도착해 좋은 인상을 남기세요."
+        }
+      }
+    },
+    "cta": {
+      "title": "신청할 준비가 되셨나요?",
+      "subtitle": "TravelXpressa로 DS-160 신청을 시작하고 미국 비자를 성공적으로 받은 수많은 사람들과 함께하세요.",
+      "primary": "신청 시작하기"
+    }
+  },
+  "content": {
+    "readTime": "약 {{minutes}}분 읽기",
+    "by": "작성자: {{name}}"
+  },
+  "blogPage": {
+    "title": "블로그",
+    "subtitle": "미국 여행을 준비하는 데 도움이 되는 비자 가이드, 여행 팁, 전문가 조언을 확인하세요.",
+    "errors": {
+      "loadFailed": "블로그 글을 불러오지 못했습니다"
+    },
+    "empty": {
+      "title": "아직 게시된 블로그 글이 없습니다.",
+      "subtitle": "곧 비자 가이드와 여행 팁을 업데이트할게요!"
+    }
+  },
+  "blogPostPage": {
+    "errors": {
+      "notFound": "글을 찾을 수 없습니다",
+      "loadFailed": "글을 불러오지 못했습니다"
+    },
+    "notFound": {
+      "title": "글을 찾을 수 없습니다",
+      "description": "찾고 있는 글이 존재하지 않습니다."
+    },
+    "cta": {
+      "subtitle": "TravelXpressa가 DS-160 신청 과정을 안내해 드립니다."
+    }
+  },
+  "newsPage": {
+    "title": "뉴스",
+    "subtitle": "미국 대사관 및 이민 서비스의 최신 업데이트를 확인하세요.",
+    "errors": {
+      "loadFailed": "뉴스를 불러오지 못했습니다"
+    },
+    "empty": {
+      "title": "아직 게시된 뉴스가 없습니다.",
+      "subtitle": "곧 최신 업데이트를 확인하세요!"
+    }
+  },
+  "newsArticlePage": {
+    "errors": {
+      "notFound": "기사를 찾을 수 없습니다",
+      "loadFailed": "기사를 불러오지 못했습니다"
+    },
+    "notFound": {
+      "title": "기사를 찾을 수 없습니다",
+      "description": "찾고 있는 기사가 존재하지 않습니다."
+    },
+    "relatedCta": {
+      "title": "최신 소식 받기",
+      "subtitle": "더 많은 뉴스와 공지사항을 확인하세요.",
+      "viewAll": "모든 뉴스 보기"
+    }
+  },
+  "readyPage": {
+    "badge": {
+      "welcomeBack": "다시 오신 것을 환영합니다, {{name}}",
+      "change": "(변경)"
+    },
+    "title": "준비해야 할 정보",
+    "subtitleWithCountry": "{{country}} 비자 신청은 총 {{count}}개의 주요 섹션으로 구성됩니다. 시작하기 전에 필요한 정보를 준비하면 더 수월합니다.",
+    "subtitleGeneric": "비자 신청을 시작하기 전에 필요한 정보를 준비하면 더 수월합니다.",
+    "info": {
+      "processingTime": "처리 기간",
+      "visaFee": "비자 수수료",
+      "serviceFeeSuffix": "+ {{fee}} 서비스 수수료",
+      "interviewRequired": "면접 필요",
+      "interviewYes": "예",
+      "interviewNo": "보통 아니오"
+    },
+    "notice": {
+      "title": "중요 안내",
+      "defaultDescription": "모든 답변은 영어로(영문자) 작성해야 합니다. 진행 상황은 자동으로 저장됩니다."
+    },
+    "sections": {
+      "title": "신청서 섹션",
+      "sectionNumber": "섹션 {{number}}"
+    },
+    "documents": {
+      "title": "필요 서류"
+    },
+    "cta": {
+      "title": "시작할 준비가 되셨나요?",
+      "subtitle": "가이드 시스템이 {{country}} 신청서의 각 섹션을 안내합니다. 진행 상황은 자동으로 저장됩니다.",
+      "startButton": "{{country}} 신청 시작하기",
+      "visa": "비자",
+      "visaCapitalized": "비자",
+      "badges": {
+        "freeToStart": "무료로 시작",
+        "noCardRequired": "신용카드 불필요",
+        "autoSaveEnabled": "자동 저장 사용"
+      }
+    }
+  },
+  "oauthPage": {
+    "processingTitle": "로그인 중",
+    "processingMessage": "로그인을 처리 중...",
+    "successWelcome": "환영합니다{{name}}!",
+    "successRedirect": "곧 이동합니다...",
+    "errorTitle": "인증 실패",
+    "errorRedirect": "로그인 페이지로 이동 중...",
+    "toasts": {
+      "loginFailedTitle": "로그인 실패",
+      "loginSuccessTitle": "로그인 성공!",
+      "loginSuccessDescription": "성공적으로 로그인되었습니다."
+    },
+    "errors": {
+      "authFailedGeneric": "인증에 실패했습니다. 다시 시도해 주세요.",
+      "googleNotConfigured": "Google 로그인이 설정되어 있지 않습니다. 이메일/비밀번호로 로그인해 주세요.",
+      "facebookNotConfigured": "Facebook 로그인이 설정되어 있지 않습니다. 이메일/비밀번호로 로그인해 주세요.",
+      "googleAuthFailed": "Google 인증에 실패했습니다. 다시 시도해 주세요.",
+      "facebookAuthFailed": "Facebook 인증에 실패했습니다. 다시 시도해 주세요.",
+      "facebookNoEmail": "Facebook에서 이메일을 가져올 수 없습니다. Facebook 계정에 이메일이 있는지 확인하거나 이메일/비밀번호로 로그인해 주세요.",
+      "invalidResponse": "인증 응답이 올바르지 않습니다. 다시 시도해 주세요.",
+      "invalidResponseShort": "인증 응답 오류",
+      "completeFailed": "인증을 완료하지 못했습니다. 다시 시도해 주세요.",
+      "completeFailedShort": "인증 완료 실패"
+    }
+  },
+  "inquiryPage": {
+    "title": "여행 신청",
+    "subtitle": "아래 양식을 작성하여 쉽고 자신 있게 여정을 시작하세요",
+    "serviceType": {
+      "title": "서비스 유형 선택"
+    },
+    "form": {
+      "title": "신청 상세 정보",
+      "subtitle": "정확한 정보를 입력해 주세요"
+    },
+    "alerts": {
+      "success": {
+        "title": "신청이 제출되었습니다!",
+        "description": "신청이 성공적으로 제출되었습니다. 24시간 이내에 연락드리겠습니다."
+      },
+      "error": {
+        "title": "제출 실패"
+      }
+    },
+    "fields": {
+      "fullNamePlaceholder": "성명을 입력하세요",
+      "messageLabel": "메시지 / 추가 정보",
+      "messagePlaceholder": "요구사항, 여행 날짜, 목적지 및 기타 필요 사항을 설명해 주세요..."
+    },
+    "buttons": {
+      "submitted": "제출 완료",
+      "submit": "신청서 제출"
+    },
+    "quickLinks": {
+      "needHelp": "도움이 필요하신가요?",
+      "contactSupport": "지원 문의",
+      "viewDashboard": "대시보드 보기"
+    },
+    "validation": {
+      "requiredFields": "필수 항목을 모두 입력해 주세요",
+      "invalidEmail": "유효한 이메일 주소를 입력해 주세요",
+      "submitFailed": "신청을 제출하지 못했습니다"
+    },
+    "services": {
+      "visa": {
+        "label": "비자 신청",
+        "description": "관광, 비즈니스 또는 학생 비자",
+        "pricing": "$299부터",
+        "features": {
+          "expertConsultation": "전문가 상담",
+          "documentPreparation": "서류 준비",
+          "fastProcessing": "빠른 처리"
+        }
+      },
+      "tourism": {
+        "label": "관광 패키지",
+        "description": "맞춤 여행 패키지 및 투어",
+        "pricing": "$599부터",
+        "features": {
+          "flightBooking": "항공권 예약",
+          "hotelAccommodation": "호텔 숙박",
+          "tourGuide": "투어 가이드",
+          "travelInsurance": "여행자 보험"
+        }
+      },
+      "consultation": {
+        "label": "상담",
+        "description": "전문 여행 조언 및 계획",
+        "pricing": "$99부터",
+        "features": {
+          "personalizedPlanning": "맞춤형 계획",
+          "budgetOptimization": "예산 최적화",
+          "support24x7": "24/7 지원",
+          "itineraryCreation": "일정 작성"
+        }
+      }
     }
   },
   "dashboard": {
@@ -554,7 +864,11 @@
     "serverError": "서버 오류",
     "networkError": "네트워크 오류",
     "tryAgain": "다시 시도",
-    "goHome": "홈으로 이동"
+    "goHome": "홈으로 이동",
+    "unexpectedTitle": "문제가 발생했습니다",
+    "unexpectedDescription": "예기치 않은 오류가 발생했습니다. 페이지를 새로고침해 주세요.",
+    "goBack": "뒤로",
+    "refreshPage": "페이지 새로고침"
   },
   "footer": {
     "copyright": "모든 권리 보유",

@@ -78,7 +78,7 @@ const fallbackNewsItems: PostSummary[] = [
 ];
 
 const Home = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [blogPosts, setBlogPosts] = useState<PostSummary[]>([]);
   const [newsItems, setNewsItems] = useState<PostSummary[]>([]);
   const [tickerItems, setTickerItems] = useState<string[]>(defaultTickerItems);
@@ -351,11 +351,15 @@ const Home = () => {
                         <Calendar className="w-4 h-4" />
                         {formatPostDate(
                           blogPosts[0].publishedAt || blogPosts[0].createdAt,
+                          i18n.language,
                         )}
                       </span>
                       <span className="flex items-center gap-1">
                         <Clock className="w-4 h-4" />
-                        {calculateReadTime(blogPosts[0].excerpt || "")}
+                        {t("content.readTime", {
+                          defaultValue: "{{minutes}} min read",
+                          minutes: calculateReadTime(blogPosts[0].excerpt || ""),
+                        })}
                       </span>
                     </div>
                     <h3 className="text-xl font-bold mb-2 group-hover:text-muted-foreground transition-colors">
@@ -390,7 +394,10 @@ const Home = () => {
                           {post.title}
                         </h3>
                         <p className="text-sm text-muted-foreground mt-1">
-                          {formatPostDate(post.publishedAt || post.createdAt)}
+                          {formatPostDate(
+                            post.publishedAt || post.createdAt,
+                            i18n.language,
+                          )}
                         </p>
                       </div>
                     </Link>
@@ -464,7 +471,10 @@ const Home = () => {
                     </div>
                     <CardContent className="p-3">
                       <p className="text-xs text-muted-foreground">
-                        {formatPostDate(item.publishedAt || item.createdAt)}
+                        {formatPostDate(
+                          item.publishedAt || item.createdAt,
+                          i18n.language,
+                        )}
                       </p>
                     </CardContent>
                   </Link>

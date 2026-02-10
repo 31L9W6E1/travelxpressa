@@ -4,13 +4,17 @@ import { useAuth } from '../contexts/AuthContext';
 import { setTokens } from '../api/client';
 import { Loader2, CheckCircle, XCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 const OAuthCallback = () => {
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { refreshUser } = useAuth();
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
-  const [message, setMessage] = useState('Processing your login...');
+  const [message, setMessage] = useState(
+    t('oauthPage.processingMessage', { defaultValue: 'Processing your login...' }),
+  );
 
   useEffect(() => {
     const handleOAuthCallback = async () => {
@@ -24,28 +28,43 @@ const OAuthCallback = () => {
 
       if (error) {
         setStatus('error');
-        let errorMessage = 'Authentication failed. Please try again.';
+        let errorMessage = t('oauthPage.errors.authFailedGeneric', {
+          defaultValue: 'Authentication failed. Please try again.',
+        });
 
         switch (error) {
           case 'google_not_configured':
-            errorMessage = 'Google login is not configured. Please use email/password.';
+            errorMessage = t('oauthPage.errors.googleNotConfigured', {
+              defaultValue: 'Google login is not configured. Please use email/password.',
+            });
             break;
           case 'facebook_not_configured':
-            errorMessage = 'Facebook login is not configured. Please use email/password.';
+            errorMessage = t('oauthPage.errors.facebookNotConfigured', {
+              defaultValue: 'Facebook login is not configured. Please use email/password.',
+            });
             break;
           case 'google_auth_failed':
-            errorMessage = 'Google authentication failed. Please try again.';
+            errorMessage = t('oauthPage.errors.googleAuthFailed', {
+              defaultValue: 'Google authentication failed. Please try again.',
+            });
             break;
           case 'facebook_auth_failed':
-            errorMessage = 'Facebook authentication failed. Please try again.';
+            errorMessage = t('oauthPage.errors.facebookAuthFailed', {
+              defaultValue: 'Facebook authentication failed. Please try again.',
+            });
             break;
           case 'facebook_no_email':
-            errorMessage = 'Could not retrieve email from Facebook. Please ensure your Facebook account has an email address or use email/password login.';
+            errorMessage = t('oauthPage.errors.facebookNoEmail', {
+              defaultValue:
+                'Could not retrieve email from Facebook. Please ensure your Facebook account has an email address or use email/password login.',
+            });
             break;
         }
 
         setMessage(errorMessage);
-        toast.error('Login failed', { description: errorMessage });
+        toast.error(t('oauthPage.toasts.loginFailedTitle', { defaultValue: 'Login failed' }), {
+          description: errorMessage,
+        });
 
         setTimeout(() => {
           navigate('/login');
@@ -55,8 +74,16 @@ const OAuthCallback = () => {
 
       if (!accessToken || !refreshToken) {
         setStatus('error');
-        setMessage('Invalid authentication response. Please try again.');
-        toast.error('Login failed', { description: 'Invalid authentication response' });
+        setMessage(
+          t('oauthPage.errors.invalidResponse', {
+            defaultValue: 'Invalid authentication response. Please try again.',
+          }),
+        );
+        toast.error(t('oauthPage.toasts.loginFailedTitle', { defaultValue: 'Login failed' }), {
+          description: t('oauthPage.errors.invalidResponseShort', {
+            defaultValue: 'Invalid authentication response',
+          }),
+        });
 
         setTimeout(() => {
           navigate('/login');
@@ -72,9 +99,16 @@ const OAuthCallback = () => {
         await refreshUser();
 
         setStatus('success');
-        setMessage(`Welcome${name ? `, ${name}` : ''}!`);
-        toast.success('Login successful!', {
-          description: 'You have been signed in successfully.',
+        setMessage(
+          t('oauthPage.successWelcome', {
+            defaultValue: 'Welcome{{name}}!',
+            name: name ? `, ${name}` : '',
+          }),
+        );
+        toast.success(t('oauthPage.toasts.loginSuccessTitle', { defaultValue: 'Login successful!' }), {
+          description: t('oauthPage.toasts.loginSuccessDescription', {
+            defaultValue: 'You have been signed in successfully.',
+          }),
         });
 
         // Redirect based on role
@@ -88,8 +122,16 @@ const OAuthCallback = () => {
         }, 1500);
       } catch (err) {
         setStatus('error');
-        setMessage('Failed to complete authentication. Please try again.');
-        toast.error('Login failed', { description: 'Failed to complete authentication' });
+        setMessage(
+          t('oauthPage.errors.completeFailed', {
+            defaultValue: 'Failed to complete authentication. Please try again.',
+          }),
+        );
+        toast.error(t('oauthPage.toasts.loginFailedTitle', { defaultValue: 'Login failed' }), {
+          description: t('oauthPage.errors.completeFailedShort', {
+            defaultValue: 'Failed to complete authentication',
+          }),
+        });
 
         setTimeout(() => {
           navigate('/login');
@@ -107,7 +149,9 @@ const OAuthCallback = () => {
           <>
             <Loader2 className="w-16 h-16 animate-spin text-primary mx-auto" />
             <div>
-              <h2 className="text-2xl font-bold text-foreground">Signing you in</h2>
+              <h2 className="text-2xl font-bold text-foreground">
+                {t('oauthPage.processingTitle', { defaultValue: 'Signing you in' })}
+              </h2>
               <p className="text-muted-foreground mt-2">{message}</p>
             </div>
           </>
@@ -118,7 +162,9 @@ const OAuthCallback = () => {
             <CheckCircle className="w-16 h-16 text-green-500 mx-auto" />
             <div>
               <h2 className="text-2xl font-bold text-foreground">{message}</h2>
-              <p className="text-muted-foreground mt-2">Redirecting you now...</p>
+              <p className="text-muted-foreground mt-2">
+                {t('oauthPage.successRedirect', { defaultValue: 'Redirecting you now...' })}
+              </p>
             </div>
           </>
         )}
@@ -127,9 +173,13 @@ const OAuthCallback = () => {
           <>
             <XCircle className="w-16 h-16 text-destructive mx-auto" />
             <div>
-              <h2 className="text-2xl font-bold text-foreground">Authentication Failed</h2>
+              <h2 className="text-2xl font-bold text-foreground">
+                {t('oauthPage.errorTitle', { defaultValue: 'Authentication Failed' })}
+              </h2>
               <p className="text-muted-foreground mt-2">{message}</p>
-              <p className="text-sm text-muted-foreground mt-4">Redirecting to login page...</p>
+              <p className="text-sm text-muted-foreground mt-4">
+                {t('oauthPage.errorRedirect', { defaultValue: 'Redirecting to login page...' })}
+              </p>
             </div>
           </>
         )}

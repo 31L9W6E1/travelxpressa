@@ -1,6 +1,7 @@
 import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { findCountryByCode, type CountryConfig } from "../config/countries";
+import { SERVICE_FEE_MNT } from "../config/pricing";
 import { useState, useEffect } from "react";
 import {
   ArrowRight,
@@ -22,9 +23,10 @@ import {
   DollarSign
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { formatMnt } from "../lib/money";
 
 const ReadyToBegin = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const [selectedCountry, setSelectedCountry] = useState<CountryConfig | null>(null);
 
@@ -173,10 +175,10 @@ const ReadyToBegin = () => {
                   </p>
                   <p className="font-medium text-foreground text-sm">
                     {selectedCountry.paymentPricing.currency} {selectedCountry.paymentPricing.baseFee}
-                    {selectedCountry.paymentPricing.serviceFee > 0 &&
+                    {SERVICE_FEE_MNT > 0 &&
                       ` ${t("readyPage.info.serviceFeeSuffix", {
                         defaultValue: "+ {{fee}} service fee",
-                        fee: selectedCountry.paymentPricing.serviceFee,
+                        fee: formatMnt(SERVICE_FEE_MNT, i18n.language),
                       })}`}
                   </p>
                 </div>

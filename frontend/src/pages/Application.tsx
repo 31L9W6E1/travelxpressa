@@ -24,7 +24,9 @@ import {
   CheckCircle2
 } from 'lucide-react';
 import PaymentModal from '@/components/PaymentModal';
-import { Payment, formatMNT } from '@/api/payments';
+import type { Payment } from '@/api/payments';
+import { SERVICE_FEE_MNT } from '@/config/pricing';
+import { formatNumber } from '@/lib/money';
 
 // Form step types
 type StepStatus = 'pending' | 'current' | 'completed';
@@ -132,7 +134,7 @@ const initialFormData: FormData = {
 export default function Application() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [isSaving, setIsSaving] = useState(false);
@@ -1103,7 +1105,9 @@ export default function Application() {
                         })}
                       </p>
                       <div className="flex items-baseline gap-2">
-                        <span className="text-3xl font-bold text-primary">{formatMNT(150000)}</span>
+                        <span className="text-3xl font-bold text-primary">
+                          {formatNumber(SERVICE_FEE_MNT, i18n.language)}
+                        </span>
                         <span className="text-sm text-muted-foreground">MNT</span>
                       </div>
                       <p className="text-xs text-muted-foreground mt-2">
@@ -1417,7 +1421,7 @@ export default function Application() {
           onClose={() => setShowPaymentModal(false)}
           applicationId={applicationId}
           serviceType="VISA_APPLICATION"
-          amount={150000}
+          amount={SERVICE_FEE_MNT}
           description={`${t('applicationPage.title', { defaultValue: 'DS-160 Visa Application' })} - ${formData.personalInfo.surnames} ${formData.personalInfo.givenNames}`}
           onPaymentSuccess={handlePaymentSuccess}
         />

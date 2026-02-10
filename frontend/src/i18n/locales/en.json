@@ -140,11 +140,11 @@
     "news": "News",
     "hero": {
       "trusted": "Trusted by 10,000+ Travelers",
-      "titleLine1": "Your Journey to the",
-      "titleLine2": "United States",
+      "titleLine1": "Your Visa Journey to",
+      "titleLine2": "Top Destinations",
       "titleLine3": "Starts Here",
       "title": "Your Journey to America Starts Here",
-      "subtitle": "TravelXpressa simplifies the DS-160 visa application process. Expert guidance, real-time support, and a seamless experience from start to finish.",
+      "subtitle": "Prepare visa applications for the US, Schengen Area, UK, Canada, Japan, South Korea, Australia, and New Zealand. Step-by-step guidance, document checklists, and support from start to finish.",
       "cta": "Start Your Application",
       "learnMore": "Learn More"
     },
@@ -156,14 +156,14 @@
     },
     "features": {
       "title": "Why Choose TravelXpressa",
-      "subtitle": "We've helped thousands of travelers successfully complete their visa applications",
+      "subtitle": "A practical platform for multi-country visa preparation, built for speed and accuracy",
       "expert": {
         "title": "Expert Guidance",
         "description": "Our experienced team guides you through every step of the DS-160 application"
       },
       "fast": {
         "title": "Fast Processing",
-        "description": "Complete your DS-160 form in under 30 minutes"
+        "description": "Complete your application faster with guided steps and auto-save"
       },
       "secure": {
         "title": "Secure & Private",
@@ -171,11 +171,11 @@
       },
       "support": {
         "title": "Expert Support",
-        "description": "24/7 assistance from visa application specialists"
+        "description": "Get help from our visa support team when you need it"
       },
       "errorPrevention": {
         "title": "Error Prevention",
-        "description": "Built-in validation catches mistakes before submission"
+        "description": "Built-in validation catches common mistakes before submission"
       }
     },
     "featuredArticles": {
@@ -187,7 +187,7 @@
     },
     "latestNews": {
       "title": "Latest News",
-      "subtitle": "Updates from the US Embassy and immigration services",
+      "subtitle": "Updates on visas, embassies, and travel requirements",
       "noNews": "No news available yet. Check back soon!"
     },
     "visaTypes": {
@@ -219,7 +219,7 @@
   "aboutPage": {
     "hero": {
       "titlePrefix": "About",
-      "subtitle": "We simplify the US visa application process by providing a user-friendly platform that guides you through every step of the DS-160 form completion."
+      "subtitle": "We simplify visa application preparation with guided steps, clear checklists, and support for multiple destinations."
     },
     "features": {
       "subtitle": "Our platform is designed to make your visa application experience as smooth as possible.",
@@ -230,19 +230,19 @@
     },
     "howItWorks": {
       "title": "How It Works",
-      "subtitle": "Complete your DS-160 application in three simple steps.",
+      "subtitle": "Prepare your visa application in three simple steps.",
       "steps": {
         "createAccount": {
           "title": "Create Account",
-          "description": "Sign up for free and access our guided DS-160 form builder with auto-save functionality."
+          "description": "Sign up for free and access our guided application builder with auto-save functionality."
         },
         "fillApplication": {
-          "title": "Fill Your Application",
-          "description": "Complete each section with our step-by-step guidance. Get help anytime from our support team."
+          "title": "Choose Destination & Fill Details",
+          "description": "Select where you're applying and complete each section with step-by-step guidance."
         },
         "submitTrack": {
           "title": "Submit & Track",
-          "description": "Review your application, submit to CEAC, and track your visa status all in one place."
+          "description": "Review, export, and track your progress from your dashboard."
         }
       }
     },
@@ -254,9 +254,11 @@
   },
   "learnMorePage": {
     "hero": {
-      "titleLine1": "Visa Statistics &",
-      "titleLine2": "Insights",
-      "subtitle": "Comprehensive data on US visa applications, approval rates, and trends for Mongolian citizens and global travelers."
+      "titleLine1": "Visa Fees &",
+      "titleLine2": "Requirements",
+      "subtitle": "Compare typical government fees, interview requirements, and processing timelines for popular destinations. Our service fee is {{fee}}.",
+      "cta": "Choose Destination",
+      "secondaryCta": "Continue Application"
     },
     "mongoliaStats": {
       "totalApplications": "Total Applications (2023)",
@@ -272,6 +274,23 @@
       "other": "Other Categories"
     },
     "sections": {
+      "fees": {
+        "title": "Fees by Destination",
+        "subtitle": "Government fees vary by visa type and can change. Use this as a quick reference and confirm on official embassy/consulate websites.",
+        "selectedDestination": "Selected destination: {{country}}",
+        "serviceFeeLabel": "Service fee",
+        "serviceFeeNote": "Includes guided form, document checklist, and support.",
+        "table": {
+          "destination": "Destination",
+          "governmentFee": "Typical government fee",
+          "serviceFee": "Service fee",
+          "processing": "Processing time",
+          "interview": "Interview"
+        },
+        "interviewYes": "Usually yes",
+        "interviewNo": "Usually no",
+        "disclaimer": "We are not affiliated with any government agency. Fees and processing timelines are indicative and may change."
+      },
       "mongolia": {
         "title": "Mongolia Visa Data"
       },
@@ -303,7 +322,7 @@
         },
         "ties": {
           "title": "Strong Ties to Home",
-          "description": "Demonstrate employment, property ownership, family ties, or other reasons to return to Mongolia."
+          "description": "Demonstrate reasons you will return home: work, family, study, property, or ongoing commitments."
         },
         "purpose": {
           "title": "Clear Travel Purpose",
@@ -318,14 +337,14 @@
           "description": "Always provide truthful information. Inconsistencies can lead to immediate denial."
         },
         "appearance": {
-          "title": "Professional Appearance",
-          "description": "Dress appropriately and arrive early for your interview to make a positive impression."
+          "title": "Professional Preparation",
+          "description": "Prepare a short explanation of your trip, review your documents, and arrive early for biometrics/interview."
         }
       }
     },
     "cta": {
       "title": "Ready to Apply?",
-      "subtitle": "Start your DS-160 application with TravelXpressa and join the thousands who have successfully obtained their US visa.",
+      "subtitle": "Choose your destination and start a guided application with clear steps and checklists.",
       "primary": "Start Your Application"
     }
   },
@@ -868,9 +887,9 @@
     "payment": {
       "successTitle": "Payment Successful!",
       "successDescription": "Your application has been submitted. Redirecting to your profile...",
-      "feeTitle": "Application Fee",
-      "feeDescription": "Complete your payment to submit your visa application",
-      "feeNote": "Includes professional document review and processing assistance"
+      "feeTitle": "Service Fee",
+      "feeDescription": "Complete payment to submit your application",
+      "feeNote": "Includes document review, processing assistance, and support"
     },
     "buttons": {
       "processing": "Processing...",

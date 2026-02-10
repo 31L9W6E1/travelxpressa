@@ -3,47 +3,17 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* Cloudflare-style Inter font */
-* {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-}
+/*
+===============================
+      Theme Configuration
+===============================
+*/
 
 @theme inline {
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
-  /* Theme-specific colors */
-  --color-surface: var(--surface);
-  --color-surface-secondary: var(--surface-secondary);
-  --color-text-primary: var(--text-primary);
-  --color-text-secondary: var(--text-secondary);
-  --color-text-muted: var(--text-muted);
-  --color-border-primary: var(--border-primary);
-  --color-border-secondary: var(--border-secondary);
+  --font-sans: var(--font-instrument-sans);
+  --font-mono: var(--font-jetbrains-mono);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -52,138 +22,209 @@
   --color-sidebar-primary: var(--sidebar-primary);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
 }
 
-/* Light Theme - Cloudflare Orange */
+/*
+===============================
+      Light Theme (Minimal)
+===============================
+*/
+
 :root {
-  --radius: 0.5rem;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.141 0.005 285.823);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.141 0.005 285.823);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.141 0.005 285.823);
+  --primary: oklch(0.21 0.006 285.885);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.967 0.001 286.375);
+  --secondary-foreground: oklch(0.21 0.006 285.885);
+  --muted: oklch(0.967 0.001 286.375);
+  --muted-foreground: oklch(0.552 0.016 285.938);
+  --accent: oklch(0.967 0.001 286.375);
+  --accent-foreground: oklch(0.21 0.006 285.885);
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.985 0 0);
+  --border: oklch(0.92 0.004 286.32);
+  --input: oklch(0.92 0.004 286.32);
+  --ring: oklch(0.705 0.015 286.067);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --radius: 0.625rem;
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.141 0.005 285.823);
+  --sidebar-primary: oklch(0.21 0.006 285.885);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.967 0.001 286.375);
+  --sidebar-accent-foreground: oklch(0.21 0.006 285.885);
+  --sidebar-border: oklch(0.92 0.004 286.32);
+  --sidebar-ring: oklch(0.705 0.015 286.067);
 
-  /* Core colors - Cloudflare Orange theme */
-  --background: #ffffff;
-  --foreground: #1d1d1d;
-  --card: #ffffff;
-  --card-foreground: #1d1d1d;
-  --popover: #ffffff;
-  --popover-foreground: #1d1d1d;
-  --primary: #f6821f;
-  --primary-foreground: #ffffff;
-  --secondary: #f4f4f4;
-  --secondary-foreground: #1d1d1d;
-  --muted: #f4f4f4;
-  --muted-foreground: #6b7280;
-  --accent: #fff3e6;
-  --accent-foreground: #1d1d1d;
-  --destructive: #dc2626;
-  --destructive-foreground: #ffffff;
-  --border: #e5e5e5;
-  --input: #e5e5e5;
-  --ring: #f6821f;
-
-  /* TravelXpressa Theme Tokens - Cloudflare */
-  --surface: #ffffff;
-  --surface-secondary: #fafafa;
-  --text-primary: #1d1d1d;
-  --text-secondary: #404040;
-  --text-muted: #6b7280;
-  --border-primary: #e5e5e5;
-  --border-secondary: #f0f0f0;
-
-  /* Chart colors - Orange variants */
-  --chart-1: #f6821f;
-  --chart-2: #ff9f43;
-  --chart-3: #ffc078;
-  --chart-4: #e67317;
-  --chart-5: #ffe0b3;
-  --sidebar: #fafafa;
-  --sidebar-foreground: #1d1d1d;
-  --sidebar-primary: #f6821f;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #fff3e6;
-  --sidebar-accent-foreground: #1d1d1d;
-  --sidebar-border: #e5e5e5;
-  --sidebar-ring: #f6821f;
+  /* Font variables */
+  --font-instrument-sans: 'Instrument Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-jetbrains-mono: 'JetBrains Mono', 'SF Mono', 'Monaco', 'Consolas', monospace;
 }
 
-/* Dark Theme - Cloudflare Orange */
+/*
+===============================
+      Dark Theme (Minimal)
+===============================
+*/
+
 .dark {
-  --background: #1d1d1d;
-  --foreground: #f4f4f4;
-  --card: #2d2d2d;
-  --card-foreground: #f4f4f4;
-  --popover: #2d2d2d;
-  --popover-foreground: #f4f4f4;
-  --primary: #f6821f;
-  --primary-foreground: #ffffff;
-  --secondary: #3d3d3d;
-  --secondary-foreground: #f4f4f4;
-  --muted: #3d3d3d;
-  --muted-foreground: #a0a0a0;
-  --accent: #3d2810;
-  --accent-foreground: #f4f4f4;
-  --destructive: #dc2626;
-  --destructive-foreground: #ffffff;
-  --border: #404040;
-  --input: #404040;
-  --ring: #f6821f;
-
-  /* TravelXpressa Theme Tokens - Dark Cloudflare */
-  --surface: #1d1d1d;
-  --surface-secondary: #2d2d2d;
-  --text-primary: #f4f4f4;
-  --text-secondary: #d0d0d0;
-  --text-muted: #a0a0a0;
-  --border-primary: #404040;
-  --border-secondary: #333333;
-
-  /* Chart colors - Dark Orange */
-  --chart-1: #f6821f;
-  --chart-2: #ff9f43;
-  --chart-3: #ffc078;
-  --chart-4: #e67317;
-  --chart-5: #804000;
-  --sidebar: #1d1d1d;
-  --sidebar-foreground: #f4f4f4;
-  --sidebar-primary: #f6821f;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #3d2810;
-  --sidebar-accent-foreground: #f4f4f4;
-  --sidebar-border: #404040;
-  --sidebar-ring: #f6821f;
+  --background: oklch(0.16 0.005 285.823);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.18 0.005 285.823);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.18 0.005 285.823);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.985 0 0);
+  --primary-foreground: oklch(0.21 0.006 285.885);
+  --secondary: oklch(0.274 0.006 286.033);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.274 0.006 286.033);
+  --muted-foreground: oklch(0.705 0.015 286.067);
+  --accent: oklch(0.274 0.006 286.033);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.396 0.141 25.723);
+  --destructive-foreground: oklch(0.637 0.237 25.331);
+  --border: oklch(0.274 0.006 286.033);
+  --input: oklch(0.274 0.006 286.033);
+  --ring: oklch(0.442 0.017 285.786);
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --sidebar: oklch(0.16 0.005 285.823);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.274 0.006 286.033);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(0.274 0.006 286.033);
+  --sidebar-ring: oklch(0.442 0.017 285.786);
 }
 
-@layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-background text-foreground antialiased;
-    transition: background-color 0.3s ease, color 0.3s ease;
-  }
+/*
+===============================
+            Fonts
+===============================
+*/
+
+* {
+  font-family: var(--font-instrument-sans);
 }
 
-/* Smooth transitions for theme changes */
-@layer utilities {
-  .theme-transition {
-    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
-  }
+code, pre, .font-mono {
+  font-family: var(--font-jetbrains-mono) !important;
 }
+
+/*
+===============================
+         Base Styles
+===============================
+*/
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased overscroll-none;
   }
 }
 
-/* News Ticker Animation - Cloudflare style */
-/* Glass morphism ticker bar */
+::selection {
+  background-color: oklch(0.4 0 0);
+  color: #ffffff;
+}
+
+.dark ::selection {
+  background-color: oklch(0.6 0 0);
+  color: #ffffff;
+}
+
+/*
+===============================
+      Scroll Bar Styling
+===============================
+*/
+
+.no-scroll-bar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.no-scroll-bar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Minimal scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: oklch(0.7 0 0);
+  border-radius: 3px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: oklch(0.4 0 0);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.5 0 0);
+}
+
+/*
+===============================
+      News Ticker Animation
+===============================
+*/
+
 .ticker-bar {
-  background: rgba(29, 29, 29, 0.75);
+  background: oklch(0.16 0.005 285.823 / 0.85);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid oklch(0.3 0 0 / 0.3);
 }
 
 .ticker-wrapper {
@@ -212,30 +253,64 @@
   }
 }
 
+/*
+===============================
+      Component Utilities
+===============================
+*/
+
 @layer components {
-
-  /* Cloudflare-style utilities */
-  .cf-gradient {
-    background: linear-gradient(135deg, #f6821f 0%, #ff9f43 100%);
-  }
-
-  .cf-text-gradient {
-    background: linear-gradient(135deg, #f6821f 0%, #ff9f43 100%);
+  /* Gradient text */
+  .gradient-text {
+    background: linear-gradient(135deg, oklch(0.646 0.222 41.116) 0%, oklch(0.769 0.188 70.08) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
-  .cf-shadow {
-    box-shadow: 0 4px 14px 0 rgba(246, 130, 31, 0.39);
+  /* Keep cf-text-gradient for compatibility */
+  .cf-text-gradient {
+    background: linear-gradient(135deg, oklch(0.646 0.222 41.116) 0%, oklch(0.769 0.188 70.08) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 
-  .cf-border-glow {
-    box-shadow: 0 0 0 1px rgba(246, 130, 31, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+  /* Subtle shadow */
+  .subtle-shadow {
+    box-shadow: 0 1px 3px oklch(0 0 0 / 0.06), 0 1px 2px oklch(0 0 0 / 0.04);
+  }
+
+  .dark .subtle-shadow {
+    box-shadow: 0 1px 3px oklch(0 0 0 / 0.2), 0 1px 2px oklch(0 0 0 / 0.15);
+  }
+
+  /* Card hover effect */
+  .hover-lift {
+    transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+  }
+
+  .hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px oklch(0 0 0 / 0.1);
+  }
+
+  .dark .hover-lift:hover {
+    box-shadow: 0 4px 12px oklch(0 0 0 / 0.3);
+  }
+
+  /* Keep cf-shadow for compatibility */
+  .cf-shadow {
+    box-shadow: 0 4px 14px 0 oklch(0 0 0 / 0.15);
   }
 }
 
-/* Page Entry Animations - respects prefers-reduced-motion */
+/*
+===============================
+      Page Animations
+===============================
+*/
+
 @keyframes fade-in-up {
   from {
     opacity: 0;
@@ -256,7 +331,6 @@
   }
 }
 
-/* Animation utilities */
 .animate-fade-in-up {
   animation: fade-in-up 0.5s ease-out forwards;
 }
@@ -271,20 +345,11 @@
 .animation-delay-300 { animation-delay: 300ms; }
 .animation-delay-400 { animation-delay: 400ms; }
 
-/* Card hover lift effect - subtle, performance-safe */
-.hover-lift {
-  transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
-}
-
-.hover-lift:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
 /* Respect prefers-reduced-motion */
 @media (prefers-reduced-motion: reduce) {
   .animate-fade-in-up,
-  .animate-fade-in {
+  .animate-fade-in,
+  .animate-ticker {
     animation: none;
     opacity: 1;
     transform: none;
@@ -293,5 +358,26 @@
   .hover-lift:hover {
     transform: none;
   }
+}
 
+/*
+===============================
+      Minimal Page Layout
+===============================
+*/
+
+.page {
+  @apply flex flex-col gap-4 max-w-[800px] mx-auto;
+}
+
+/* Code blocks */
+pre {
+  padding: 1rem;
+  overflow-x: auto;
+  border-radius: var(--radius);
+  background: oklch(0.967 0.001 286.375);
+}
+
+.dark pre {
+  background: oklch(0.2 0.005 285.823);
 }

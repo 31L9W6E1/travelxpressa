@@ -2,14 +2,17 @@ import { Link } from "react-router-dom";
 import { ArrowRight, TrendingUp, Users, Globe, BarChart3, CheckCircle, Plane } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { useTranslation } from "react-i18next";
 
 const LearnMore = () => {
+  const { t } = useTranslation();
+
   // Mongolian visa statistics
   const mongoliaStats = [
-    { label: "Total Applications (2023)", value: "12,450", change: "+15%" },
-    { label: "Approval Rate", value: "78%", change: "+3%" },
-    { label: "Average Processing", value: "45 days", change: "-5 days" },
-    { label: "B1/B2 Visas Issued", value: "8,200", change: "+12%" }
+    { label: t("learnMorePage.mongoliaStats.totalApplications", { defaultValue: "Total Applications (2023)" }), value: "12,450", change: "+15%" },
+    { label: t("learnMorePage.mongoliaStats.approvalRate", { defaultValue: "Approval Rate" }), value: "78%", change: "+3%" },
+    { label: t("learnMorePage.mongoliaStats.avgProcessing", { defaultValue: "Average Processing" }), value: "45 days", change: "-5 days" },
+    { label: t("learnMorePage.mongoliaStats.b1b2Issued", { defaultValue: "B1/B2 Visas Issued" }), value: "8,200", change: "+12%" }
   ];
 
   // Global visa statistics
@@ -26,11 +29,11 @@ const LearnMore = () => {
 
   // Visa categories breakdown
   const visaCategories = [
-    { type: "B1/B2 Tourist/Business", percentage: 65, count: "8,100" },
-    { type: "F1 Student", percentage: 18, count: "2,240" },
-    { type: "H1B Work", percentage: 8, count: "996" },
-    { type: "J1 Exchange", percentage: 5, count: "622" },
-    { type: "Other Categories", percentage: 4, count: "492" }
+    { type: t("learnMorePage.visaCategories.b1b2", { defaultValue: "B1/B2 Tourist/Business" }), percentage: 65, count: "8,100" },
+    { type: t("learnMorePage.visaCategories.f1", { defaultValue: "F1 Student" }), percentage: 18, count: "2,240" },
+    { type: t("learnMorePage.visaCategories.h1b", { defaultValue: "H1B Work" }), percentage: 8, count: "996" },
+    { type: t("learnMorePage.visaCategories.j1", { defaultValue: "J1 Exchange" }), percentage: 5, count: "622" },
+    { type: t("learnMorePage.visaCategories.other", { defaultValue: "Other Categories" }), percentage: 4, count: "492" }
   ];
 
   return (
@@ -40,12 +43,16 @@ const LearnMore = () => {
         <div className="max-w-7xl mx-auto px-6">
           <div className="max-w-3xl">
             <h1 className="text-5xl md:text-6xl font-bold tracking-tight mb-6">
-              Visa Statistics &
-              <span className="block text-muted-foreground">Insights</span>
+              {t("learnMorePage.hero.titleLine1", { defaultValue: "Visa Statistics &" })}
+              <span className="block text-muted-foreground">
+                {t("learnMorePage.hero.titleLine2", { defaultValue: "Insights" })}
+              </span>
             </h1>
             <p className="text-xl text-muted-foreground mb-8">
-              Comprehensive data on US visa applications, approval rates, and trends
-              for Mongolian citizens and global travelers.
+              {t("learnMorePage.hero.subtitle", {
+                defaultValue:
+                  "Comprehensive data on US visa applications, approval rates, and trends for Mongolian citizens and global travelers.",
+              })}
             </p>
           </div>
         </div>
@@ -61,7 +68,9 @@ const LearnMore = () => {
                 <div className="p-2 bg-secondary rounded-lg">
                   <Globe className="w-6 h-6" />
                 </div>
-                <h2 className="text-2xl font-bold">Mongolia Visa Data</h2>
+                <h2 className="text-2xl font-bold">
+                  {t("learnMorePage.sections.mongolia.title", { defaultValue: "Mongolia Visa Data" })}
+                </h2>
               </div>
 
               <div className="grid grid-cols-2 gap-4 mb-8">
@@ -82,7 +91,9 @@ const LearnMore = () => {
               {/* Visa Categories Breakdown */}
               <Card className="bg-secondary/50">
                 <CardContent className="p-6">
-                  <h3 className="text-lg font-semibold mb-6">Visa Categories Breakdown</h3>
+                  <h3 className="text-lg font-semibold mb-6">
+                    {t("learnMorePage.sections.categories.title", { defaultValue: "Visa Categories Breakdown" })}
+                  </h3>
                   <div className="space-y-4">
                     {visaCategories.map((category, index) => (
                       <div key={index}>
@@ -109,16 +120,24 @@ const LearnMore = () => {
                 <div className="p-2 bg-secondary rounded-lg">
                   <BarChart3 className="w-6 h-6" />
                 </div>
-                <h2 className="text-2xl font-bold">Global Approval Rates</h2>
+                <h2 className="text-2xl font-bold">
+                  {t("learnMorePage.sections.global.title", { defaultValue: "Global Approval Rates" })}
+                </h2>
               </div>
 
               <Card className="bg-secondary/50 overflow-hidden">
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-border">
-                      <th className="text-left p-4 text-sm font-medium text-muted-foreground">Country</th>
-                      <th className="text-right p-4 text-sm font-medium text-muted-foreground">Approval Rate</th>
-                      <th className="text-right p-4 text-sm font-medium text-muted-foreground">Comparison</th>
+                      <th className="text-left p-4 text-sm font-medium text-muted-foreground">
+                        {t("learnMorePage.sections.global.table.country", { defaultValue: "Country" })}
+                      </th>
+                      <th className="text-right p-4 text-sm font-medium text-muted-foreground">
+                        {t("learnMorePage.sections.global.table.approvalRate", { defaultValue: "Approval Rate" })}
+                      </th>
+                      <th className="text-right p-4 text-sm font-medium text-muted-foreground">
+                        {t("learnMorePage.sections.global.table.comparison", { defaultValue: "Comparison" })}
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -133,7 +152,7 @@ const LearnMore = () => {
                           </span>
                           {stat.country === "Mongolia" && (
                             <span className="ml-2 px-2 py-0.5 text-xs bg-primary text-primary-foreground rounded">
-                              You
+                              {t("learnMorePage.sections.global.you", { defaultValue: "You" })}
                             </span>
                           )}
                         </td>
@@ -155,24 +174,35 @@ const LearnMore = () => {
               {/* Key Insights */}
               <Card className="mt-8 bg-secondary/50">
                 <CardContent className="p-6">
-                  <h3 className="text-lg font-semibold mb-4">Key Insights</h3>
+                  <h3 className="text-lg font-semibold mb-4">
+                    {t("learnMorePage.sections.insights.title", { defaultValue: "Key Insights" })}
+                  </h3>
                   <ul className="space-y-3">
                     <li className="flex items-start gap-3">
                       <TrendingUp className="w-5 h-5 text-green-500 dark:text-green-400 mt-0.5" />
                       <span className="text-muted-foreground">
-                        Mongolia's approval rate has increased by 3% compared to the previous year
+                        {t("learnMorePage.sections.insights.item1", {
+                          defaultValue:
+                            "Mongolia's approval rate has increased by 3% compared to the previous year",
+                        })}
                       </span>
                     </li>
                     <li className="flex items-start gap-3">
                       <Users className="w-5 h-5 text-foreground mt-0.5" />
                       <span className="text-muted-foreground">
-                        B1/B2 tourist visas remain the most commonly applied category
+                        {t("learnMorePage.sections.insights.item2", {
+                          defaultValue:
+                            "B1/B2 tourist visas remain the most commonly applied category",
+                        })}
                       </span>
                     </li>
                     <li className="flex items-start gap-3">
                       <CheckCircle className="w-5 h-5 text-foreground mt-0.5" />
                       <span className="text-muted-foreground">
-                        Complete documentation significantly improves approval chances
+                        {t("learnMorePage.sections.insights.item3", {
+                          defaultValue:
+                            "Complete documentation significantly improves approval chances",
+                        })}
                       </span>
                     </li>
                   </ul>
@@ -186,34 +216,54 @@ const LearnMore = () => {
       {/* Tips Section */}
       <section className="py-20 border-b border-border">
         <div className="max-w-7xl mx-auto px-6">
-          <h2 className="text-3xl font-bold mb-12 text-center">Tips to Improve Your Approval Chances</h2>
+          <h2 className="text-3xl font-bold mb-12 text-center">
+            {t("learnMorePage.tips.title", { defaultValue: "Tips to Improve Your Approval Chances" })}
+          </h2>
 
           <div className="grid md:grid-cols-3 gap-6">
             {[
               {
-                title: "Complete Documentation",
-                description: "Ensure all required documents are accurate, up-to-date, and properly organized before your interview."
+                title: t("learnMorePage.tips.items.documentation.title", { defaultValue: "Complete Documentation" }),
+                description: t("learnMorePage.tips.items.documentation.description", {
+                  defaultValue:
+                    "Ensure all required documents are accurate, up-to-date, and properly organized before your interview.",
+                }),
               },
               {
-                title: "Strong Ties to Home",
-                description: "Demonstrate employment, property ownership, family ties, or other reasons to return to Mongolia."
+                title: t("learnMorePage.tips.items.ties.title", { defaultValue: "Strong Ties to Home" }),
+                description: t("learnMorePage.tips.items.ties.description", {
+                  defaultValue:
+                    "Demonstrate employment, property ownership, family ties, or other reasons to return to Mongolia.",
+                }),
               },
               {
-                title: "Clear Travel Purpose",
-                description: "Articulate a specific, legitimate reason for your trip with supporting documentation."
+                title: t("learnMorePage.tips.items.purpose.title", { defaultValue: "Clear Travel Purpose" }),
+                description: t("learnMorePage.tips.items.purpose.description", {
+                  defaultValue:
+                    "Articulate a specific, legitimate reason for your trip with supporting documentation.",
+                }),
               },
               {
-                title: "Financial Stability",
-                description: "Show sufficient funds through bank statements and proof of income to cover your trip expenses."
+                title: t("learnMorePage.tips.items.finances.title", { defaultValue: "Financial Stability" }),
+                description: t("learnMorePage.tips.items.finances.description", {
+                  defaultValue:
+                    "Show sufficient funds through bank statements and proof of income to cover your trip expenses.",
+                }),
               },
               {
-                title: "Honest Answers",
-                description: "Always provide truthful information. Inconsistencies can lead to immediate denial."
+                title: t("learnMorePage.tips.items.honesty.title", { defaultValue: "Honest Answers" }),
+                description: t("learnMorePage.tips.items.honesty.description", {
+                  defaultValue:
+                    "Always provide truthful information. Inconsistencies can lead to immediate denial.",
+                }),
               },
               {
-                title: "Professional Appearance",
-                description: "Dress appropriately and arrive early for your interview to make a positive impression."
-              }
+                title: t("learnMorePage.tips.items.appearance.title", { defaultValue: "Professional Appearance" }),
+                description: t("learnMorePage.tips.items.appearance.description", {
+                  defaultValue:
+                    "Dress appropriately and arrive early for your interview to make a positive impression.",
+                }),
+              },
             ].map((tip, index) => (
               <Card
                 key={index}
@@ -237,13 +287,18 @@ const LearnMore = () => {
         <div className="max-w-7xl mx-auto px-6">
           <Card className="bg-secondary">
             <CardContent className="p-12 text-center">
-              <h2 className="text-4xl font-bold mb-4">Ready to Apply?</h2>
+              <h2 className="text-4xl font-bold mb-4">
+                {t("learnMorePage.cta.title", { defaultValue: "Ready to Apply?" })}
+              </h2>
               <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-                Start your DS-160 application with TravelXpressa and join the thousands who have successfully obtained their US visa.
+                {t("learnMorePage.cta.subtitle", {
+                  defaultValue:
+                    "Start your DS-160 application with TravelXpressa and join the thousands who have successfully obtained their US visa.",
+                })}
               </p>
               <Button asChild size="lg">
                 <Link to="/login" className="inline-flex items-center gap-2">
-                  Start Your Application
+                  {t("learnMorePage.cta.primary", { defaultValue: "Start Your Application" })}
                   <ArrowRight className="w-5 h-5" />
                 </Link>
               </Button>
@@ -258,16 +313,27 @@ const LearnMore = () => {
           <div className="flex flex-col md:flex-row justify-between items-center gap-6">
             <div className="flex items-center gap-2">
               <Plane className="w-6 h-6" />
-              <span className="text-xl font-bold">TravelXpressa</span>
+              <span className="text-xl font-bold">
+                {t("footer.company", { defaultValue: "TravelXpressa" })}
+              </span>
             </div>
             <div className="flex flex-wrap justify-center gap-6 text-sm text-muted-foreground">
-              <Link to="/about" className="hover:text-foreground transition-colors">About</Link>
-              <Link to="/learn-more" className="hover:text-foreground transition-colors">Learn More</Link>
-              <Link to="/privacy" className="hover:text-foreground transition-colors">Privacy Policy</Link>
-              <Link to="/terms" className="hover:text-foreground transition-colors">Terms of Service</Link>
+              <Link to="/about" className="hover:text-foreground transition-colors">
+                {t("footer.links.about", { defaultValue: "About Us" })}
+              </Link>
+              <Link to="/learn-more" className="hover:text-foreground transition-colors">
+                {t("nav.learnMore", { defaultValue: "Learn More" })}
+              </Link>
+              <Link to="/privacy" className="hover:text-foreground transition-colors">
+                {t("footer.links.privacy", { defaultValue: "Privacy Policy" })}
+              </Link>
+              <Link to="/terms" className="hover:text-foreground transition-colors">
+                {t("footer.links.terms", { defaultValue: "Terms of Service" })}
+              </Link>
             </div>
             <p className="text-sm text-muted-foreground">
-              &copy; 2024 TravelXpressa. All rights reserved.
+              &copy; {new Date().getFullYear()} {t("footer.company", { defaultValue: "TravelXpressa" })}.{" "}
+              {t("footer.copyright", { defaultValue: "All rights reserved" })}.
             </p>
           </div>
         </div>

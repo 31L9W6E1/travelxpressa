@@ -21,7 +21,8 @@
     "error": "Error",
     "warning": "Warning",
     "info": "Info",
-    "viewAll": "View All"
+    "viewAll": "View All",
+    "select": "Select"
   },
   "nav": {
     "home": "Home",
@@ -352,6 +353,96 @@
       "saving": "Saving...",
       "saved": "Saved",
       "saveError": "Save failed"
+    }
+  },
+  "applicationPage": {
+    "title": "DS-160 Visa Application",
+    "subtitle": "Complete your nonimmigrant visa application",
+    "loading": "Loading your application...",
+    "notice": {
+      "title": "Important Notice",
+      "description": "Please review all information carefully before submitting. Once submitted, you may need to start a new application to make changes. Providing false information may result in visa denial."
+    },
+    "fields": {
+      "nationalId": "National ID Number"
+    },
+    "placeholders": {
+      "fullNameNative": "Enter in your native script",
+      "nationalId": "ID Number",
+      "passportBookNumber": "Book number (if applicable)",
+      "usAddress": "Hotel or residence address in the US"
+    },
+    "passport": {
+      "expirationHint": "Must be valid for at least 6 months beyond your intended stay"
+    },
+    "travel": {
+      "selectPurpose": "Select purpose",
+      "purposeOptions": {
+        "tourism": "Tourism/Vacation",
+        "business": "Business",
+        "study": "Study",
+        "medical": "Medical Treatment",
+        "conference": "Conference",
+        "family": "Visit Family/Friends"
+      },
+      "payingOptions": {
+        "self": "Self",
+        "employer": "Employer",
+        "family": "Family Member",
+        "sponsor": "Sponsor"
+      }
+    },
+    "payment": {
+      "successTitle": "Payment Successful!",
+      "successDescription": "Your application has been submitted. Redirecting to your profile...",
+      "feeTitle": "Application Fee",
+      "feeDescription": "Complete your payment to submit your visa application",
+      "feeNote": "Includes professional document review and processing assistance"
+    },
+    "buttons": {
+      "processing": "Processing...",
+      "submitted": "Submitted",
+      "paySubmit": "Pay & Submit"
+    },
+    "review": {
+      "labels": {
+        "name": "Name",
+        "dob": "DOB",
+        "birthPlace": "Birth Place",
+        "address": "Address",
+        "passportNumber": "Passport #",
+        "issued": "Issued",
+        "expires": "Expires",
+        "purpose": "Purpose",
+        "arrival": "Arrival"
+      }
+    },
+    "toasts": {
+      "draftLoaded": {
+        "title": "Draft loaded",
+        "description": "Your previous progress has been restored."
+      },
+      "saved": {
+        "title": "Application saved!",
+        "description": "Your progress has been saved. You can continue later."
+      },
+      "saveFailed": {
+        "title": "Save failed",
+        "description": "Failed to save application. Please try again."
+      },
+      "submitted": {
+        "title": "Application submitted!",
+        "description": "Payment successful. Your application has been submitted for review."
+      },
+      "submitFailed": {
+        "title": "Submission failed"
+      },
+      "missingId": "Missing application ID. Please refresh and try again.",
+      "submitFailedAfterPayment": "Payment succeeded but submitting the application failed. Please try again or contact support.",
+      "incomplete": {
+        "title": "Incomplete information",
+        "description": "Please complete Step {{step}} before submitting."
+      }
     }
   },
   "admin": {

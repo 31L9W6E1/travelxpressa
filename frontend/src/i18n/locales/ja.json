@@ -21,7 +21,8 @@
     "error": "エラー",
     "warning": "警告",
     "info": "情報",
-    "viewAll": "すべて見る"
+    "viewAll": "すべて見る",
+    "select": "選択"
   },
   "nav": {
     "home": "ホーム",
@@ -29,6 +30,7 @@
     "about": "会社概要",
     "contact": "お問い合わせ",
     "blog": "ブログ",
+    "news": "ニュース",
     "login": "ログイン",
     "register": "登録",
     "logout": "ログアウト",
@@ -36,7 +38,14 @@
     "admin": "管理者",
     "profile": "プロフィール",
     "settings": "設定",
-    "gallery": "ギャラリー"
+    "learnMore": "詳細を見る",
+    "gallery": "ギャラリー",
+    "apply": "申請する",
+    "applications": "申請一覧",
+    "payments": "支払い",
+    "signIn": "ログイン",
+    "getStarted": "開始する",
+    "signedInAs": "ログイン中:"
   },
   "auth": {
     "welcomeBack": "お帰りなさい",
@@ -345,6 +354,96 @@
       "saving": "保存中...",
       "saved": "保存済み",
       "saveError": "保存失敗"
+    }
+  },
+  "applicationPage": {
+    "title": "DS-160ビザ申請",
+    "subtitle": "非移民ビザ申請を完了してください",
+    "loading": "申請内容を読み込み中...",
+    "notice": {
+      "title": "重要なお知らせ",
+      "description": "送信前にすべての情報をよく確認してください。送信後に変更が必要な場合、新しい申請を開始する必要がある場合があります。虚偽の情報を提供するとビザが拒否される可能性があります。"
+    },
+    "fields": {
+      "nationalId": "国民ID番号"
+    },
+    "placeholders": {
+      "fullNameNative": "母国語で入力してください",
+      "nationalId": "ID番号",
+      "passportBookNumber": "冊子番号（該当する場合）",
+      "usAddress": "米国でのホテルまたは滞在先住所"
+    },
+    "passport": {
+      "expirationHint": "滞在予定期間の後も少なくとも6か月以上有効である必要があります"
+    },
+    "travel": {
+      "selectPurpose": "目的を選択",
+      "purposeOptions": {
+        "tourism": "観光/休暇",
+        "business": "ビジネス",
+        "study": "留学/学業",
+        "medical": "治療",
+        "conference": "会議",
+        "family": "家族/友人訪問"
+      },
+      "payingOptions": {
+        "self": "本人",
+        "employer": "雇用主",
+        "family": "家族",
+        "sponsor": "スポンサー"
+      }
+    },
+    "payment": {
+      "successTitle": "支払いが完了しました！",
+      "successDescription": "申請が送信されました。プロフィールへ移動します...",
+      "feeTitle": "申請料金",
+      "feeDescription": "ビザ申請を送信するには支払いを完了してください",
+      "feeNote": "書類の専門チェックと手続きサポートが含まれます"
+    },
+    "buttons": {
+      "processing": "処理中...",
+      "submitted": "送信済み",
+      "paySubmit": "支払いして送信"
+    },
+    "review": {
+      "labels": {
+        "name": "氏名",
+        "dob": "生年月日",
+        "birthPlace": "出生地",
+        "address": "住所",
+        "passportNumber": "旅券番号",
+        "issued": "発行",
+        "expires": "有効期限",
+        "purpose": "目的",
+        "arrival": "到着"
+      }
+    },
+    "toasts": {
+      "draftLoaded": {
+        "title": "下書きを復元しました",
+        "description": "前回の進捗を復元しました。"
+      },
+      "saved": {
+        "title": "申請を保存しました！",
+        "description": "進捗が保存されました。後で続行できます。"
+      },
+      "saveFailed": {
+        "title": "保存に失敗しました",
+        "description": "申請を保存できませんでした。もう一度お試しください。"
+      },
+      "submitted": {
+        "title": "申請を送信しました！",
+        "description": "支払いが完了し、申請が審査に送信されました。"
+      },
+      "submitFailed": {
+        "title": "送信に失敗しました"
+      },
+      "missingId": "申請IDが見つかりません。更新して再試行してください。",
+      "submitFailedAfterPayment": "支払いは成功しましたが、申請の送信に失敗しました。再試行するかサポートへ連絡してください。",
+      "incomplete": {
+        "title": "情報が不足しています",
+        "description": "送信前にステップ {{step}} を完了してください。"
+      }
     }
   },
   "admin": {

@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { applicationsApi, type VisaType, type Application } from '../api/applications';
 import { findCountryByCode, type CountryCode } from '../config/countries';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import {
   ChevronRight,
   ChevronLeft,
@@ -131,6 +132,7 @@ const initialFormData: FormData = {
 export default function Application() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [isSaving, setIsSaving] = useState(false);
@@ -174,54 +176,73 @@ export default function Application() {
         ) || [];
 
         if (drafts.length > 0) {
-          const draft = drafts[0];
-          setApplicationId(draft.id);
-          setCurrentStep(draft.currentStep || 1);
+          const draftMeta = drafts[0];
+          setApplicationId(draftMeta.id);
 
-          // Load saved form data
-          if (draft.personalInfo || draft.contactInfo || draft.passportInfo || draft.travelInfo) {
-            setFormData({
-              personalInfo: draft.personalInfo ? {
-                surnames: draft.personalInfo.surnames || '',
-                givenNames: draft.personalInfo.givenNames || '',
-                fullNameNative: draft.personalInfo.fullNameNative || '',
-                sex: draft.personalInfo.sex || '',
-                maritalStatus: draft.personalInfo.maritalStatus || '',
-                dateOfBirth: draft.personalInfo.dateOfBirth || '',
-                cityOfBirth: draft.personalInfo.cityOfBirth || '',
-                stateOfBirth: draft.personalInfo.stateOfBirth || '',
-                countryOfBirth: draft.personalInfo.countryOfBirth || '',
-                nationality: draft.personalInfo.nationality || '',
-                nationalId: '',
-              } : initialFormData.personalInfo,
-              contactInfo: draft.contactInfo ? {
-                email: draft.contactInfo.email || '',
-                phone: draft.contactInfo.phone || '',
-                streetAddress: draft.contactInfo.homeAddress?.street || '',
-                city: draft.contactInfo.homeAddress?.city || '',
-                state: draft.contactInfo.homeAddress?.state || '',
-                postalCode: draft.contactInfo.homeAddress?.postalCode || '',
-                country: draft.contactInfo.homeAddress?.country || '',
-              } : initialFormData.contactInfo,
-              passportInfo: draft.passportInfo ? {
-                passportNumber: draft.passportInfo.passportNumber || '',
-                passportBookNumber: draft.passportInfo.passportBookNumber || '',
-                countryOfIssuance: draft.passportInfo.countryOfIssuance || '',
-                cityOfIssuance: draft.passportInfo.cityOfIssuance || '',
-                issuanceDate: draft.passportInfo.issuanceDate || '',
-                expirationDate: draft.passportInfo.expirationDate || '',
-              } : initialFormData.passportInfo,
-              travelInfo: draft.travelInfo ? {
-                purposeOfTrip: draft.travelInfo.purposeOfTrip || '',
-                intendedArrivalDate: draft.travelInfo.intendedArrivalDate || '',
-                intendedLengthOfStay: draft.travelInfo.intendedLengthOfStay || '',
-                usAddress: draft.travelInfo.addressWhileInUS?.street || '',
-                usCity: draft.travelInfo.addressWhileInUS?.city || '',
-                usState: draft.travelInfo.addressWhileInUS?.state || '',
-                payingForTrip: draft.travelInfo.payingForTrip || '',
-              } : initialFormData.travelInfo,
+          // NOTE: The list endpoint intentionally returns only metadata (no decrypted form sections).
+          // Fetch the full application by ID to restore saved form data.
+          const fullDraft = await applicationsApi.getById(draftMeta.id);
+          setCurrentStep(fullDraft.currentStep || 1);
+
+          const nextFormData: FormData = {
+            personalInfo: fullDraft.personalInfo
+              ? {
+                  surnames: fullDraft.personalInfo.surnames || '',
+                  givenNames: fullDraft.personalInfo.givenNames || '',
+                  fullNameNative: fullDraft.personalInfo.fullNameNative || '',
+                  sex: fullDraft.personalInfo.sex || '',
+                  maritalStatus: fullDraft.personalInfo.maritalStatus || '',
+                  dateOfBirth: fullDraft.personalInfo.dateOfBirth || '',
+                  cityOfBirth: fullDraft.personalInfo.cityOfBirth || '',
+                  stateOfBirth: fullDraft.personalInfo.stateOfBirth || '',
+                  countryOfBirth: fullDraft.personalInfo.countryOfBirth || '',
+                  nationality: fullDraft.personalInfo.nationality || '',
+                  nationalId: '',
+                }
+              : initialFormData.personalInfo,
+            contactInfo: fullDraft.contactInfo
+              ? {
+                  email: fullDraft.contactInfo.email || '',
+                  phone: fullDraft.contactInfo.phone || '',
+                  streetAddress: fullDraft.contactInfo.homeAddress?.street || '',
+                  city: fullDraft.contactInfo.homeAddress?.city || '',
+                  state: fullDraft.contactInfo.homeAddress?.state || '',
+                  postalCode: fullDraft.contactInfo.homeAddress?.postalCode || '',
+                  country: fullDraft.contactInfo.homeAddress?.country || '',
+                }
+              : initialFormData.contactInfo,
+            passportInfo: fullDraft.passportInfo
+              ? {
+                  passportNumber: fullDraft.passportInfo.passportNumber || '',
+                  passportBookNumber: fullDraft.passportInfo.passportBookNumber || '',
+                  countryOfIssuance: fullDraft.passportInfo.countryOfIssuance || '',
+                  cityOfIssuance: fullDraft.passportInfo.cityOfIssuance || '',
+                  issuanceDate: fullDraft.passportInfo.issuanceDate || '',
+                  expirationDate: fullDraft.passportInfo.expirationDate || '',
+                }
+              : initialFormData.passportInfo,
+            travelInfo: fullDraft.travelInfo
+              ? {
+                  purposeOfTrip: fullDraft.travelInfo.purposeOfTrip || '',
+                  intendedArrivalDate: fullDraft.travelInfo.intendedArrivalDate || '',
+                  intendedLengthOfStay: fullDraft.travelInfo.intendedLengthOfStay || '',
+                  usAddress: fullDraft.travelInfo.addressWhileInUS?.street || '',
+                  usCity: fullDraft.travelInfo.addressWhileInUS?.city || '',
+                  usState: fullDraft.travelInfo.addressWhileInUS?.state || '',
+                  payingForTrip: fullDraft.travelInfo.payingForTrip || '',
+                }
+              : initialFormData.travelInfo,
+          };
+
+          setFormData(nextFormData);
+
+          const hasAnyRestoredValue = Object.values(nextFormData).some((section) =>
+            Object.values(section).some((v) => String(v || '').trim() !== ''),
+          );
+          if (hasAnyRestoredValue) {
+            toast.info('Draft loaded', {
+              description: 'Your previous progress has been restored.',
             });
-            toast.info('Draft loaded', { description: 'Your previous progress has been restored.' });
           }
         }
       } catch (error) {
@@ -235,11 +256,11 @@ export default function Application() {
   }, []);
 
   const steps: FormStep[] = [
-    { id: 1, name: 'Personal Info', icon: <User className="w-5 h-5" />, status: currentStep === 1 ? 'current' : currentStep > 1 ? 'completed' : 'pending' },
-    { id: 2, name: 'Contact Info', icon: <Phone className="w-5 h-5" />, status: currentStep === 2 ? 'current' : currentStep > 2 ? 'completed' : 'pending' },
-    { id: 3, name: 'Passport', icon: <FileText className="w-5 h-5" />, status: currentStep === 3 ? 'current' : currentStep > 3 ? 'completed' : 'pending' },
-    { id: 4, name: 'Travel Plans', icon: <Plane className="w-5 h-5" />, status: currentStep === 4 ? 'current' : currentStep > 4 ? 'completed' : 'pending' },
-    { id: 5, name: 'Review', icon: <Shield className="w-5 h-5" />, status: currentStep === 5 ? 'current' : 'pending' },
+    { id: 1, name: t('form.steps.personal', { defaultValue: 'Personal Info' }), icon: <User className="w-5 h-5" />, status: currentStep === 1 ? 'current' : currentStep > 1 ? 'completed' : 'pending' },
+    { id: 2, name: t('form.steps.contact', { defaultValue: 'Contact Info' }), icon: <Phone className="w-5 h-5" />, status: currentStep === 2 ? 'current' : currentStep > 2 ? 'completed' : 'pending' },
+    { id: 3, name: t('form.steps.passport', { defaultValue: 'Passport' }), icon: <FileText className="w-5 h-5" />, status: currentStep === 3 ? 'current' : currentStep > 3 ? 'completed' : 'pending' },
+    { id: 4, name: t('form.steps.travel', { defaultValue: 'Travel Plans' }), icon: <Plane className="w-5 h-5" />, status: currentStep === 4 ? 'current' : currentStep > 4 ? 'completed' : 'pending' },
+    { id: 5, name: t('form.steps.review', { defaultValue: 'Review' }), icon: <Shield className="w-5 h-5" />, status: currentStep === 5 ? 'current' : 'pending' },
   ];
 
   const updateFormData = (section: keyof FormData, field: string, value: string) => {
@@ -260,27 +281,27 @@ export default function Application() {
     const newErrors: Record<string, string> = {};
 
     if (step === 1) {
-      if (!formData.personalInfo.surnames) newErrors.surnames = 'Surname is required';
-      if (!formData.personalInfo.givenNames) newErrors.givenNames = 'Given name is required';
-      if (!formData.personalInfo.sex) newErrors.sex = 'Please select your sex';
-      if (!formData.personalInfo.dateOfBirth) newErrors.dateOfBirth = 'Date of birth is required';
-      if (!formData.personalInfo.countryOfBirth) newErrors.countryOfBirth = 'Country of birth is required';
-      if (!formData.personalInfo.nationality) newErrors.nationality = 'Nationality is required';
+      if (!formData.personalInfo.surnames) newErrors.surnames = t('form.validation.required', { defaultValue: 'Required' });
+      if (!formData.personalInfo.givenNames) newErrors.givenNames = t('form.validation.required', { defaultValue: 'Required' });
+      if (!formData.personalInfo.sex) newErrors.sex = t('form.validation.required', { defaultValue: 'Required' });
+      if (!formData.personalInfo.dateOfBirth) newErrors.dateOfBirth = t('form.validation.required', { defaultValue: 'Required' });
+      if (!formData.personalInfo.countryOfBirth) newErrors.countryOfBirth = t('form.validation.required', { defaultValue: 'Required' });
+      if (!formData.personalInfo.nationality) newErrors.nationality = t('form.validation.required', { defaultValue: 'Required' });
     } else if (step === 2) {
-      if (!formData.contactInfo.email) newErrors.email = 'Email is required';
-      if (!formData.contactInfo.phone) newErrors.phone = 'Phone is required';
-      if (!formData.contactInfo.streetAddress) newErrors.streetAddress = 'Address is required';
-      if (!formData.contactInfo.city) newErrors.city = 'City is required';
-      if (!formData.contactInfo.country) newErrors.country = 'Country is required';
+      if (!formData.contactInfo.email) newErrors.email = t('form.validation.required', { defaultValue: 'Required' });
+      if (!formData.contactInfo.phone) newErrors.phone = t('form.validation.required', { defaultValue: 'Required' });
+      if (!formData.contactInfo.streetAddress) newErrors.streetAddress = t('form.validation.required', { defaultValue: 'Required' });
+      if (!formData.contactInfo.city) newErrors.city = t('form.validation.required', { defaultValue: 'Required' });
+      if (!formData.contactInfo.country) newErrors.country = t('form.validation.required', { defaultValue: 'Required' });
     } else if (step === 3) {
-      if (!formData.passportInfo.passportNumber) newErrors.passportNumber = 'Passport number is required';
-      if (!formData.passportInfo.countryOfIssuance) newErrors.countryOfIssuance = 'Country of issuance is required';
-      if (!formData.passportInfo.issuanceDate) newErrors.issuanceDate = 'Issuance date is required';
-      if (!formData.passportInfo.expirationDate) newErrors.expirationDate = 'Expiration date is required';
+      if (!formData.passportInfo.passportNumber) newErrors.passportNumber = t('form.validation.required', { defaultValue: 'Required' });
+      if (!formData.passportInfo.countryOfIssuance) newErrors.countryOfIssuance = t('form.validation.required', { defaultValue: 'Required' });
+      if (!formData.passportInfo.issuanceDate) newErrors.issuanceDate = t('form.validation.required', { defaultValue: 'Required' });
+      if (!formData.passportInfo.expirationDate) newErrors.expirationDate = t('form.validation.required', { defaultValue: 'Required' });
     } else if (step === 4) {
-      if (!formData.travelInfo.purposeOfTrip) newErrors.purposeOfTrip = 'Purpose of trip is required';
-      if (!formData.travelInfo.intendedArrivalDate) newErrors.intendedArrivalDate = 'Arrival date is required';
-      if (!formData.travelInfo.usAddress) newErrors.usAddress = 'US address is required';
+      if (!formData.travelInfo.purposeOfTrip) newErrors.purposeOfTrip = t('form.validation.required', { defaultValue: 'Required' });
+      if (!formData.travelInfo.intendedArrivalDate) newErrors.intendedArrivalDate = t('form.validation.required', { defaultValue: 'Required' });
+      if (!formData.travelInfo.usAddress) newErrors.usAddress = t('form.validation.required', { defaultValue: 'Required' });
     }
 
     setErrors(newErrors);
@@ -362,12 +383,22 @@ export default function Application() {
         setApplicationId(newApp.id);
         await applicationsApi.update(newApp.id, apiData);
       }
-      toast.success('Application saved!', { description: 'Your progress has been saved. You can continue later.' });
+      toast.success(t('applicationPage.toasts.saved.title', { defaultValue: 'Application saved!' }), {
+        description: t('applicationPage.toasts.saved.description', {
+          defaultValue: 'Your progress has been saved. You can continue later.',
+        }),
+      });
     } catch (error: any) {
       console.error('Save error:', error);
-      const errorMessage = error?.message || 'Failed to save application. Please try again.';
+      const errorMessage =
+        error?.message ||
+        t('applicationPage.toasts.saveFailed.description', {
+          defaultValue: 'Failed to save application. Please try again.',
+        });
       setSaveError(errorMessage);
-      toast.error('Save failed', { description: errorMessage });
+      toast.error(t('applicationPage.toasts.saveFailed.title', { defaultValue: 'Save failed' }), {
+        description: errorMessage,
+      });
     } finally {
       setIsSaving(false);
     }
@@ -432,8 +463,10 @@ export default function Application() {
     setShowPaymentModal(false);
 
     if (!applicationId) {
-      toast.error('Submission failed', {
-        description: 'Missing application ID. Please refresh and try again.',
+      toast.error(t('applicationPage.toasts.submitFailed.title', { defaultValue: 'Submission failed' }), {
+        description: t('applicationPage.toasts.missingId', {
+          defaultValue: 'Missing application ID. Please refresh and try again.',
+        }),
       });
       return;
     }
@@ -445,8 +478,10 @@ export default function Application() {
 
       setPaymentComplete(true);
 
-      toast.success('Application submitted!', {
-        description: 'Payment successful. Your application has been submitted for review.',
+      toast.success(t('applicationPage.toasts.submitted.title', { defaultValue: 'Application submitted!' }), {
+        description: t('applicationPage.toasts.submitted.description', {
+          defaultValue: 'Payment successful. Your application has been submitted for review.',
+        }),
         duration: 5000,
       });
 
@@ -456,10 +491,13 @@ export default function Application() {
       }, 2000);
     } catch (error: any) {
       console.error('Submit after payment error:', error);
-      toast.error('Submission failed', {
+      toast.error(t('applicationPage.toasts.submitFailed.title', { defaultValue: 'Submission failed' }), {
         description:
           error?.message ||
-          'Payment succeeded but submitting the application failed. Please try again or contact support.',
+          t('applicationPage.toasts.submitFailedAfterPayment', {
+            defaultValue:
+              'Payment succeeded but submitting the application failed. Please try again or contact support.',
+          }),
       });
     }
   };
@@ -469,7 +507,12 @@ export default function Application() {
     for (let step = 1; step <= 4; step++) {
       if (!validateStep(step)) {
         setCurrentStep(step);
-        toast.error('Incomplete information', { description: `Please complete Step ${step} before submitting.` });
+        toast.error(t('applicationPage.toasts.incomplete.title', { defaultValue: 'Incomplete information' }), {
+          description: t('applicationPage.toasts.incomplete.description', {
+            defaultValue: `Please complete Step ${step} before submitting.`,
+            step,
+          }),
+        });
         return;
       }
     }
@@ -495,9 +538,15 @@ export default function Application() {
       setShowPaymentModal(true);
     } catch (error: any) {
       console.error('Submit error:', error);
-      const errorMessage = error?.message || 'Failed to save application. Please try again.';
+      const errorMessage =
+        error?.message ||
+        t('applicationPage.toasts.saveFailed.description', {
+          defaultValue: 'Failed to save application. Please try again.',
+        });
       setSaveError(errorMessage);
-      toast.error('Submission failed', { description: errorMessage });
+      toast.error(t('applicationPage.toasts.submitFailed.title', { defaultValue: 'Submission failed' }), {
+        description: errorMessage,
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -508,12 +557,14 @@ export default function Application() {
       case 1:
         return (
           <div className="space-y-6">
-            <h3 className="text-xl font-semibold text-foreground mb-6">Personal Information</h3>
+            <h3 className="text-xl font-semibold text-foreground mb-6">
+              {t('form.personal.title', { defaultValue: 'Personal Information' })}
+            </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-foreground mb-2">
-                  Surname(s) / Family Name(s) *
+                  {t('form.personal.surnames', { defaultValue: 'Surnames' })} *
                 </label>
                 <input
                   type="text"
@@ -527,7 +578,7 @@ export default function Application() {
 
               <div>
                 <label className="block text-sm font-medium text-foreground mb-2">
-                  Given Name(s) *
+                  {t('form.personal.givenNames', { defaultValue: 'Given Names' })} *
                 </label>
                 <input
                   type="text"
@@ -541,48 +592,54 @@ export default function Application() {
 
               <div>
                 <label className="block text-sm font-medium text-foreground mb-2">
-                  Full Name in Native Alphabet
+                  {t('form.personal.fullNameNative', { defaultValue: 'Full Name in Native Language' })}
                 </label>
                 <input
                   type="text"
                   value={formData.personalInfo.fullNameNative}
                   onChange={(e) => updateFormData('personalInfo', 'fullNameNative', e.target.value)}
                   className="w-full px-4 py-3 bg-input border border-border rounded-lg text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-ring focus:border-transparent"
-                  placeholder="Enter in your native script"
+                  placeholder={t('applicationPage.placeholders.fullNameNative', { defaultValue: 'Enter in your native script' })}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-foreground mb-2">Sex *</label>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  {t('form.personal.sex', { defaultValue: 'Sex' })} *
+                </label>
                 <select
                   value={formData.personalInfo.sex}
                   onChange={(e) => updateFormData('personalInfo', 'sex', e.target.value)}
                   className="w-full px-4 py-3 bg-input border border-border rounded-lg text-foreground focus:ring-2 focus:ring-ring focus:border-transparent"
                 >
-                  <option value="">Select</option>
-                  <option value="M">Male</option>
-                  <option value="F">Female</option>
+                  <option value="">{t('common.select', { defaultValue: 'Select' })}</option>
+                  <option value="M">{t('form.personal.male', { defaultValue: 'Male' })}</option>
+                  <option value="F">{t('form.personal.female', { defaultValue: 'Female' })}</option>
                 </select>
                 {errors.sex && <p className="mt-1 text-sm text-destructive">{errors.sex}</p>}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-foreground mb-2">Marital Status *</label>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  {t('form.personal.maritalStatus', { defaultValue: 'Marital Status' })} *
+                </label>
                 <select
                   value={formData.personalInfo.maritalStatus}
                   onChange={(e) => updateFormData('personalInfo', 'maritalStatus', e.target.value)}
                   className="w-full px-4 py-3 bg-input border border-border rounded-lg text-foreground focus:ring-2 focus:ring-ring focus:border-transparent"
                 >
-                  <option value="">Select</option>
-                  <option value="SINGLE">Single</option>
-                  <option value="MARRIED">Married</option>
-                  <option value="DIVORCED">Divorced</option>
-                  <option value="WIDOWED">Widowed</option>
+                  <option value="">{t('common.select', { defaultValue: 'Select' })}</option>
+                  <option value="SINGLE">{t('form.personal.single', { defaultValue: 'Single' })}</option>
+                  <option value="MARRIED">{t('form.personal.married', { defaultValue: 'Married' })}</option>
+                  <option value="DIVORCED">{t('form.personal.divorced', { defaultValue: 'Divorced' })}</option>
+                  <option value="WIDOWED">{t('form.personal.widowed', { defaultValue: 'Widowed' })}</option>
                 </select>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-foreground mb-2">Date of Birth *</label>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  {t('form.personal.dateOfBirth', { defaultValue: 'Date of Birth' })} *
+                </label>
                 <input
                   type="date"
                   value={formData.personalInfo.dateOfBirth}
@@ -593,7 +650,9 @@ export default function Application() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-foreground mb-2">City of Birth *</label>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  {t('form.personal.cityOfBirth', { defaultValue: 'City of Birth' })} *
+                </label>
                 <input
                   type="text"
                   value={formData.personalInfo.cityOfBirth}
@@ -604,7 +663,9 @@ export default function Application() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-foreground mb-2">Country of Birth *</label>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  {t('form.personal.countryOfBirth', { defaultValue: 'Country of Birth' })} *
+                </label>
                 <input
                   type="text"
                   value={formData.personalInfo.countryOfBirth}
@@ -616,7 +677,9 @@ export default function Application() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-foreground mb-2">Nationality *</label>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  {t('form.personal.nationality', { defaultValue: 'Nationality' })} *
+                </label>
                 <input
                   type="text"
                   value={formData.personalInfo.nationality}
@@ -628,13 +691,15 @@ export default function Application() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-foreground mb-2">National ID Number</label>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  {t('applicationPage.fields.nationalId', { defaultValue: 'National ID Number' })}
+                </label>
                 <input
                   type="text"
                   value={formData.personalInfo.nationalId}
                   onChange={(e) => updateFormData('personalInfo', 'nationalId', e.target.value)}
                   className="w-full px-4 py-3 bg-input border border-border rounded-lg text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-ring focus:border-transparent"
-                  placeholder="ID Number"
+                  placeholder={t('applicationPage.placeholders.nationalId', { defaultValue: 'ID Number' })}
                 />
               </div>
             </div>
@@ -644,11 +709,15 @@ export default function Application() {
       case 2:
         return (
           <div className="space-y-6">
-            <h3 className="text-xl font-semibold text-foreground mb-6">Contact Information</h3>
+            <h3 className="text-xl font-semibold text-foreground mb-6">
+              {t('form.contact.title', { defaultValue: 'Contact Information' })}
+            </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-foreground mb-2">Email Address *</label>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  {t('form.contact.email', { defaultValue: 'Email' })} *
+                </label>
                 <input
                   type="email"
                   value={formData.contactInfo.email}
@@ -660,7 +729,9 @@ export default function Application() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-foreground mb-2">Phone Number *</label>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  {t('form.contact.phone', { defaultValue: 'Phone' })} *
+                </label>
                 <input
                   type="tel"
                   value={formData.contactInfo.phone}
@@ -672,7 +743,9 @@ export default function Application() {
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-foreground mb-2">Street Address *</label>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  {t('form.contact.street', { defaultValue: 'Street' })} *
+                </label>
                 <input
                   type="text"
                   value={formData.contactInfo.streetAddress}
@@ -684,7 +757,9 @@ export default function Application() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-foreground mb-2">City *</label>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  {t('form.contact.city', { defaultValue: 'City' })} *
+                </label>
                 <input
                   type="text"
                   value={formData.contactInfo.city}
@@ -696,7 +771,9 @@ export default function Application() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-foreground mb-2">State/Province</label>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  {t('form.contact.state', { defaultValue: 'State' })}
+                </label>
                 <input
                   type="text"
                   value={formData.contactInfo.state}
@@ -707,7 +784,9 @@ export default function Application() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-foreground mb-2">Postal Code</label>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  {t('form.contact.postalCode', { defaultValue: 'Postal Code' })}
+                </label>
                 <input
                   type="text"
                   value={formData.contactInfo.postalCode}
@@ -718,7 +797,9 @@ export default function Application() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-foreground mb-2">Country *</label>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  {t('form.contact.country', { defaultValue: 'Country' })} *
+                </label>
                 <input
                   type="text"
                   value={formData.contactInfo.country}
@@ -735,11 +816,15 @@ export default function Application() {
       case 3:
         return (
           <div className="space-y-6">
-            <h3 className="text-xl font-semibold text-foreground mb-6">Passport Information</h3>
+            <h3 className="text-xl font-semibold text-foreground mb-6">
+              {t('form.passport.title', { defaultValue: 'Passport Information' })}
+            </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-foreground mb-2">Passport Number *</label>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  {t('form.passport.passportNumber', { defaultValue: 'Passport Number' })} *
+                </label>
                 <input
                   type="text"
                   value={formData.passportInfo.passportNumber}
@@ -751,18 +836,22 @@ export default function Application() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-foreground mb-2">Passport Book Number</label>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  {t('form.passport.bookNumber', { defaultValue: 'Passport Book Number' })}
+                </label>
                 <input
                   type="text"
                   value={formData.passportInfo.passportBookNumber}
                   onChange={(e) => updateFormData('passportInfo', 'passportBookNumber', e.target.value)}
                   className="w-full px-4 py-3 bg-input border border-border rounded-lg text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-ring focus:border-transparent"
-                  placeholder="Book number (if applicable)"
+                  placeholder={t('applicationPage.placeholders.passportBookNumber', { defaultValue: 'Book number (if applicable)' })}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-foreground mb-2">Country of Issuance *</label>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  {t('form.passport.countryOfIssuance', { defaultValue: 'Country of Issuance' })} *
+                </label>
                 <input
                   type="text"
                   value={formData.passportInfo.countryOfIssuance}
@@ -774,7 +863,9 @@ export default function Application() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-foreground mb-2">City of Issuance</label>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  {t('form.passport.cityOfIssuance', { defaultValue: 'City of Issuance' })}
+                </label>
                 <input
                   type="text"
                   value={formData.passportInfo.cityOfIssuance}
@@ -785,7 +876,9 @@ export default function Application() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-foreground mb-2">Issuance Date *</label>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  {t('form.passport.issuanceDate', { defaultValue: 'Issuance Date' })} *
+                </label>
                 <input
                   type="date"
                   value={formData.passportInfo.issuanceDate}
@@ -796,7 +889,9 @@ export default function Application() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-foreground mb-2">Expiration Date *</label>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  {t('form.passport.expirationDate', { defaultValue: 'Expiration Date' })} *
+                </label>
                 <input
                   type="date"
                   value={formData.passportInfo.expirationDate}
@@ -804,7 +899,12 @@ export default function Application() {
                   className="w-full px-4 py-3 bg-input border border-border rounded-lg text-foreground focus:ring-2 focus:ring-ring focus:border-transparent"
                 />
                 {errors.expirationDate && <p className="mt-1 text-sm text-destructive">{errors.expirationDate}</p>}
-                <p className="mt-1 text-xs text-muted-foreground">Must be valid for at least 6 months beyond your intended stay</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {t('applicationPage.passport.expirationHint', {
+                    defaultValue:
+                      'Must be valid for at least 6 months beyond your intended stay',
+                  })}
+                </p>
               </div>
             </div>
           </div>
@@ -813,29 +913,49 @@ export default function Application() {
       case 4:
         return (
           <div className="space-y-6">
-            <h3 className="text-xl font-semibold text-foreground mb-6">Travel Information</h3>
+            <h3 className="text-xl font-semibold text-foreground mb-6">
+              {t('form.travel.title', { defaultValue: 'Travel Information' })}
+            </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-foreground mb-2">Purpose of Trip *</label>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  {t('form.travel.purposeOfTrip', { defaultValue: 'Purpose of Trip' })} *
+                </label>
                 <select
                   value={formData.travelInfo.purposeOfTrip}
                   onChange={(e) => updateFormData('travelInfo', 'purposeOfTrip', e.target.value)}
                   className="w-full px-4 py-3 bg-input border border-border rounded-lg text-foreground focus:ring-2 focus:ring-ring focus:border-transparent"
                 >
-                  <option value="">Select purpose</option>
-                  <option value="TOURISM">Tourism/Vacation</option>
-                  <option value="BUSINESS">Business</option>
-                  <option value="STUDY">Study</option>
-                  <option value="MEDICAL">Medical Treatment</option>
-                  <option value="CONFERENCE">Conference</option>
-                  <option value="FAMILY">Visit Family/Friends</option>
+                  <option value="">
+                    {t('applicationPage.travel.selectPurpose', { defaultValue: 'Select purpose' })}
+                  </option>
+                  <option value="TOURISM">
+                    {t('applicationPage.travel.purposeOptions.tourism', { defaultValue: 'Tourism/Vacation' })}
+                  </option>
+                  <option value="BUSINESS">
+                    {t('applicationPage.travel.purposeOptions.business', { defaultValue: 'Business' })}
+                  </option>
+                  <option value="STUDY">
+                    {t('applicationPage.travel.purposeOptions.study', { defaultValue: 'Study' })}
+                  </option>
+                  <option value="MEDICAL">
+                    {t('applicationPage.travel.purposeOptions.medical', { defaultValue: 'Medical Treatment' })}
+                  </option>
+                  <option value="CONFERENCE">
+                    {t('applicationPage.travel.purposeOptions.conference', { defaultValue: 'Conference' })}
+                  </option>
+                  <option value="FAMILY">
+                    {t('applicationPage.travel.purposeOptions.family', { defaultValue: 'Visit Family/Friends' })}
+                  </option>
                 </select>
                 {errors.purposeOfTrip && <p className="mt-1 text-sm text-destructive">{errors.purposeOfTrip}</p>}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-foreground mb-2">Intended Arrival Date *</label>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  {t('form.travel.intendedArrival', { defaultValue: 'Intended Arrival Date' })} *
+                </label>
                 <input
                   type="date"
                   value={formData.travelInfo.intendedArrivalDate}
@@ -846,7 +966,9 @@ export default function Application() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-foreground mb-2">Length of Stay</label>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  {t('form.travel.lengthOfStay', { defaultValue: 'Length of Stay' })}
+                </label>
                 <input
                   type="text"
                   value={formData.travelInfo.intendedLengthOfStay}
@@ -857,19 +979,23 @@ export default function Application() {
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-foreground mb-2">US Address *</label>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  {t('form.travel.usAddress', { defaultValue: 'US Address' })} *
+                </label>
                 <input
                   type="text"
                   value={formData.travelInfo.usAddress}
                   onChange={(e) => updateFormData('travelInfo', 'usAddress', e.target.value)}
                   className="w-full px-4 py-3 bg-input border border-border rounded-lg text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-ring focus:border-transparent"
-                  placeholder="Hotel or residence address in the US"
+                  placeholder={t('applicationPage.placeholders.usAddress', { defaultValue: 'Hotel or residence address in the US' })}
                 />
                 {errors.usAddress && <p className="mt-1 text-sm text-destructive">{errors.usAddress}</p>}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-foreground mb-2">City</label>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  {t('form.contact.city', { defaultValue: 'City' })}
+                </label>
                 <input
                   type="text"
                   value={formData.travelInfo.usCity}
@@ -880,7 +1006,9 @@ export default function Application() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-foreground mb-2">State</label>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  {t('form.contact.state', { defaultValue: 'State' })}
+                </label>
                 <input
                   type="text"
                   value={formData.travelInfo.usState}
@@ -891,17 +1019,29 @@ export default function Application() {
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-foreground mb-2">Who is paying for your trip?</label>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  {t('form.travel.payingForTrip', { defaultValue: 'Who is paying for your trip?' })}
+                </label>
                 <select
                   value={formData.travelInfo.payingForTrip}
                   onChange={(e) => updateFormData('travelInfo', 'payingForTrip', e.target.value)}
                   className="w-full px-4 py-3 bg-input border border-border rounded-lg text-foreground focus:ring-2 focus:ring-ring focus:border-transparent"
                 >
-                  <option value="">Select</option>
-                  <option value="SELF">Self</option>
-                  <option value="EMPLOYER">Employer</option>
-                  <option value="FAMILY">Family Member</option>
-                  <option value="SPONSOR">Sponsor</option>
+                  <option value="">
+                    {t('common.select', { defaultValue: 'Select' })}
+                  </option>
+                  <option value="SELF">
+                    {t('applicationPage.travel.payingOptions.self', { defaultValue: 'Self' })}
+                  </option>
+                  <option value="EMPLOYER">
+                    {t('applicationPage.travel.payingOptions.employer', { defaultValue: 'Employer' })}
+                  </option>
+                  <option value="FAMILY">
+                    {t('applicationPage.travel.payingOptions.family', { defaultValue: 'Family Member' })}
+                  </option>
+                  <option value="SPONSOR">
+                    {t('applicationPage.travel.payingOptions.sponsor', { defaultValue: 'Sponsor' })}
+                  </option>
                 </select>
               </div>
             </div>
@@ -911,7 +1051,9 @@ export default function Application() {
       case 5:
         return (
           <div className="space-y-6">
-            <h3 className="text-xl font-semibold text-foreground mb-6">Review & Submit</h3>
+            <h3 className="text-xl font-semibold text-foreground mb-6">
+              {t('form.review.title', { defaultValue: 'Review & Submit' })}
+            </h3>
 
             <div className="space-y-6">
               {/* Payment Success State */}
@@ -922,9 +1064,14 @@ export default function Application() {
                       <CheckCircle2 className="w-6 h-6 text-green-600" />
                     </div>
                     <div>
-                      <h4 className="text-green-700 dark:text-green-400 font-semibold text-lg">Payment Successful!</h4>
+                      <h4 className="text-green-700 dark:text-green-400 font-semibold text-lg">
+                        {t('applicationPage.payment.successTitle', { defaultValue: 'Payment Successful!' })}
+                      </h4>
                       <p className="text-sm text-green-600 dark:text-green-500">
-                        Your application has been submitted. Redirecting to your profile...
+                        {t('applicationPage.payment.successDescription', {
+                          defaultValue:
+                            'Your application has been submitted. Redirecting to your profile...',
+                        })}
                       </p>
                     </div>
                   </div>
@@ -939,16 +1086,24 @@ export default function Application() {
                       <CreditCard className="w-6 h-6 text-primary" />
                     </div>
                     <div className="flex-1">
-                      <h4 className="text-foreground font-semibold text-lg mb-1">Application Fee</h4>
+                      <h4 className="text-foreground font-semibold text-lg mb-1">
+                        {t('applicationPage.payment.feeTitle', { defaultValue: 'Application Fee' })}
+                      </h4>
                       <p className="text-sm text-muted-foreground mb-3">
-                        Complete your payment to submit your visa application
+                        {t('applicationPage.payment.feeDescription', {
+                          defaultValue:
+                            'Complete your payment to submit your visa application',
+                        })}
                       </p>
                       <div className="flex items-baseline gap-2">
                         <span className="text-3xl font-bold text-primary">{formatMNT(150000)}</span>
                         <span className="text-sm text-muted-foreground">MNT</span>
                       </div>
                       <p className="text-xs text-muted-foreground mt-2">
-                        Includes professional document review and processing assistance
+                        {t('applicationPage.payment.feeNote', {
+                          defaultValue:
+                            'Includes professional document review and processing assistance',
+                        })}
                       </p>
                     </div>
                   </div>
@@ -959,13 +1114,37 @@ export default function Application() {
               <div className="bg-muted/50 border border-border rounded-xl p-6">
                 <h4 className="text-lg font-medium text-foreground mb-4 flex items-center gap-2">
                   <User className="w-5 h-5" />
-                  Personal Information
+                  {t('form.personal.title', { defaultValue: 'Personal Information' })}
                 </h4>
                 <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div><span className="text-muted-foreground">Name:</span> <span className="text-foreground ml-2">{formData.personalInfo.surnames} {formData.personalInfo.givenNames}</span></div>
-                  <div><span className="text-muted-foreground">DOB:</span> <span className="text-foreground ml-2">{formData.personalInfo.dateOfBirth}</span></div>
-                  <div><span className="text-muted-foreground">Nationality:</span> <span className="text-foreground ml-2">{formData.personalInfo.nationality}</span></div>
-                  <div><span className="text-muted-foreground">Birth Place:</span> <span className="text-foreground ml-2">{formData.personalInfo.cityOfBirth}, {formData.personalInfo.countryOfBirth}</span></div>
+                  <div>
+                    <span className="text-muted-foreground">
+                      {t('applicationPage.review.labels.name', { defaultValue: 'Name' })}:
+                    </span>{' '}
+                    <span className="text-foreground ml-2">
+                      {formData.personalInfo.surnames} {formData.personalInfo.givenNames}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">
+                      {t('applicationPage.review.labels.dob', { defaultValue: 'DOB' })}:
+                    </span>{' '}
+                    <span className="text-foreground ml-2">{formData.personalInfo.dateOfBirth}</span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">
+                      {t('form.personal.nationality', { defaultValue: 'Nationality' })}:
+                    </span>{' '}
+                    <span className="text-foreground ml-2">{formData.personalInfo.nationality}</span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">
+                      {t('applicationPage.review.labels.birthPlace', { defaultValue: 'Birth Place' })}:
+                    </span>{' '}
+                    <span className="text-foreground ml-2">
+                      {formData.personalInfo.cityOfBirth}, {formData.personalInfo.countryOfBirth}
+                    </span>
+                  </div>
                 </div>
               </div>
 
@@ -973,12 +1152,29 @@ export default function Application() {
               <div className="bg-muted/50 border border-border rounded-xl p-6">
                 <h4 className="text-lg font-medium text-foreground mb-4 flex items-center gap-2">
                   <Phone className="w-5 h-5" />
-                  Contact Information
+                  {t('form.contact.title', { defaultValue: 'Contact Information' })}
                 </h4>
                 <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div><span className="text-muted-foreground">Email:</span> <span className="text-foreground ml-2">{formData.contactInfo.email}</span></div>
-                  <div><span className="text-muted-foreground">Phone:</span> <span className="text-foreground ml-2">{formData.contactInfo.phone}</span></div>
-                  <div className="col-span-2"><span className="text-muted-foreground">Address:</span> <span className="text-foreground ml-2">{formData.contactInfo.streetAddress}, {formData.contactInfo.city}, {formData.contactInfo.country}</span></div>
+                  <div>
+                    <span className="text-muted-foreground">
+                      {t('form.contact.email', { defaultValue: 'Email' })}:
+                    </span>{' '}
+                    <span className="text-foreground ml-2">{formData.contactInfo.email}</span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">
+                      {t('form.contact.phone', { defaultValue: 'Phone' })}:
+                    </span>{' '}
+                    <span className="text-foreground ml-2">{formData.contactInfo.phone}</span>
+                  </div>
+                  <div className="col-span-2">
+                    <span className="text-muted-foreground">
+                      {t('applicationPage.review.labels.address', { defaultValue: 'Address' })}:
+                    </span>{' '}
+                    <span className="text-foreground ml-2">
+                      {formData.contactInfo.streetAddress}, {formData.contactInfo.city}, {formData.contactInfo.country}
+                    </span>
+                  </div>
                 </div>
               </div>
 
@@ -986,13 +1182,33 @@ export default function Application() {
               <div className="bg-muted/50 border border-border rounded-xl p-6">
                 <h4 className="text-lg font-medium text-foreground mb-4 flex items-center gap-2">
                   <FileText className="w-5 h-5" />
-                  Passport Information
+                  {t('form.passport.title', { defaultValue: 'Passport Information' })}
                 </h4>
                 <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div><span className="text-muted-foreground">Passport #:</span> <span className="text-foreground ml-2">{formData.passportInfo.passportNumber}</span></div>
-                  <div><span className="text-muted-foreground">Country:</span> <span className="text-foreground ml-2">{formData.passportInfo.countryOfIssuance}</span></div>
-                  <div><span className="text-muted-foreground">Issued:</span> <span className="text-foreground ml-2">{formData.passportInfo.issuanceDate}</span></div>
-                  <div><span className="text-muted-foreground">Expires:</span> <span className="text-foreground ml-2">{formData.passportInfo.expirationDate}</span></div>
+                  <div>
+                    <span className="text-muted-foreground">
+                      {t('applicationPage.review.labels.passportNumber', { defaultValue: 'Passport #' })}:
+                    </span>{' '}
+                    <span className="text-foreground ml-2">{formData.passportInfo.passportNumber}</span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">
+                      {t('form.contact.country', { defaultValue: 'Country' })}:
+                    </span>{' '}
+                    <span className="text-foreground ml-2">{formData.passportInfo.countryOfIssuance}</span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">
+                      {t('applicationPage.review.labels.issued', { defaultValue: 'Issued' })}:
+                    </span>{' '}
+                    <span className="text-foreground ml-2">{formData.passportInfo.issuanceDate}</span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">
+                      {t('applicationPage.review.labels.expires', { defaultValue: 'Expires' })}:
+                    </span>{' '}
+                    <span className="text-foreground ml-2">{formData.passportInfo.expirationDate}</span>
+                  </div>
                 </div>
               </div>
 
@@ -1000,12 +1216,29 @@ export default function Application() {
               <div className="bg-muted/50 border border-border rounded-xl p-6">
                 <h4 className="text-lg font-medium text-foreground mb-4 flex items-center gap-2">
                   <Plane className="w-5 h-5" />
-                  Travel Plans
+                  {t('form.travel.title', { defaultValue: 'Travel Plans' })}
                 </h4>
                 <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div><span className="text-muted-foreground">Purpose:</span> <span className="text-foreground ml-2">{formData.travelInfo.purposeOfTrip}</span></div>
-                  <div><span className="text-muted-foreground">Arrival:</span> <span className="text-foreground ml-2">{formData.travelInfo.intendedArrivalDate}</span></div>
-                  <div className="col-span-2"><span className="text-muted-foreground">US Address:</span> <span className="text-foreground ml-2">{formData.travelInfo.usAddress}, {formData.travelInfo.usCity} {formData.travelInfo.usState}</span></div>
+                  <div>
+                    <span className="text-muted-foreground">
+                      {t('applicationPage.review.labels.purpose', { defaultValue: 'Purpose' })}:
+                    </span>{' '}
+                    <span className="text-foreground ml-2">{formData.travelInfo.purposeOfTrip}</span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">
+                      {t('applicationPage.review.labels.arrival', { defaultValue: 'Arrival' })}:
+                    </span>{' '}
+                    <span className="text-foreground ml-2">{formData.travelInfo.intendedArrivalDate}</span>
+                  </div>
+                  <div className="col-span-2">
+                    <span className="text-muted-foreground">
+                      {t('form.travel.usAddress', { defaultValue: 'US Address' })}:
+                    </span>{' '}
+                    <span className="text-foreground ml-2">
+                      {formData.travelInfo.usAddress}, {formData.travelInfo.usCity} {formData.travelInfo.usState}
+                    </span>
+                  </div>
                 </div>
               </div>
 
@@ -1015,9 +1248,14 @@ export default function Application() {
                   <div className="flex items-start gap-3">
                     <AlertCircle className="w-6 h-6 text-amber-500 flex-shrink-0" />
                     <div>
-                      <h4 className="text-foreground font-medium mb-1">Important Notice</h4>
+                      <h4 className="text-foreground font-medium mb-1">
+                        {t('applicationPage.notice.title', { defaultValue: 'Important Notice' })}
+                      </h4>
                       <p className="text-sm text-muted-foreground">
-                        Please review all information carefully before submitting. Once submitted, you may need to start a new application to make changes. Providing false information may result in visa denial.
+                        {t('applicationPage.notice.description', {
+                          defaultValue:
+                            'Please review all information carefully before submitting. Once submitted, you may need to start a new application to make changes. Providing false information may result in visa denial.',
+                        })}
                       </p>
                     </div>
                   </div>
@@ -1038,7 +1276,9 @@ export default function Application() {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-12 h-12 animate-spin text-primary mx-auto mb-4" />
-          <p className="text-muted-foreground">Loading your application...</p>
+          <p className="text-muted-foreground">
+            {t('applicationPage.loading', { defaultValue: 'Loading your application...' })}
+          </p>
         </div>
       </div>
     );
@@ -1049,8 +1289,14 @@ export default function Application() {
       <div className="max-w-5xl mx-auto px-4 pt-24 pb-8">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">DS-160 Visa Application</h1>
-          <p className="text-muted-foreground">Complete your nonimmigrant visa application</p>
+          <h1 className="text-3xl font-bold text-foreground mb-2">
+            {t('applicationPage.title', { defaultValue: 'DS-160 Visa Application' })}
+          </h1>
+          <p className="text-muted-foreground">
+            {t('applicationPage.subtitle', {
+              defaultValue: 'Complete your nonimmigrant visa application',
+            })}
+          </p>
         </div>
 
         {/* Error Banner */}
@@ -1107,7 +1353,7 @@ export default function Application() {
               className="flex items-center gap-2 px-6 py-3 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <ChevronLeft className="w-5 h-5" />
-              Previous
+              {t('common.previous', { defaultValue: 'Previous' })}
             </button>
 
             <div className="flex items-center gap-4">
@@ -1117,7 +1363,7 @@ export default function Application() {
                 className="flex items-center gap-2 px-6 py-3 text-primary hover:bg-primary/10 rounded-lg transition-all disabled:opacity-50"
               >
                 {isSaving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
-                Save Draft
+                {t('form.actions.saveDraft', { defaultValue: 'Save Draft' })}
               </button>
 
               {currentStep < 5 ? (
@@ -1125,7 +1371,7 @@ export default function Application() {
                   onClick={handleNext}
                   className="flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg font-semibold hover:bg-primary/90 transition-all"
                 >
-                  Next
+                  {t('common.next', { defaultValue: 'Next' })}
                   <ChevronRight className="w-5 h-5" />
                 </button>
               ) : (
@@ -1137,17 +1383,17 @@ export default function Application() {
                   {isSubmitting ? (
                     <>
                       <Loader2 className="w-5 h-5 animate-spin" />
-                      Processing...
+                      {t('applicationPage.buttons.processing', { defaultValue: 'Processing...' })}
                     </>
                   ) : paymentComplete ? (
                     <>
                       <CheckCircle2 className="w-5 h-5" />
-                      Submitted
+                      {t('applicationPage.buttons.submitted', { defaultValue: 'Submitted' })}
                     </>
                   ) : (
                     <>
                       <CreditCard className="w-5 h-5" />
-                      Pay & Submit
+                      {t('applicationPage.buttons.paySubmit', { defaultValue: 'Pay & Submit' })}
                     </>
                   )}
                 </button>
@@ -1165,7 +1411,7 @@ export default function Application() {
           applicationId={applicationId}
           serviceType="VISA_APPLICATION"
           amount={150000}
-          description={`DS-160 Visa Application - ${formData.personalInfo.surnames} ${formData.personalInfo.givenNames}`}
+          description={`${t('applicationPage.title', { defaultValue: 'DS-160 Visa Application' })} - ${formData.personalInfo.surnames} ${formData.personalInfo.givenNames}`}
           onPaymentSuccess={handlePaymentSuccess}
         />
       )}

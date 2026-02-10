@@ -21,7 +21,8 @@
     "error": "오류",
     "warning": "경고",
     "info": "정보",
-    "viewAll": "전체 보기"
+    "viewAll": "전체 보기",
+    "select": "선택"
   },
   "nav": {
     "home": "홈",
@@ -29,6 +30,7 @@
     "about": "소개",
     "contact": "연락처",
     "blog": "블로그",
+    "news": "뉴스",
     "login": "로그인",
     "register": "회원가입",
     "logout": "로그아웃",
@@ -36,7 +38,14 @@
     "admin": "관리자",
     "profile": "프로필",
     "settings": "설정",
-    "gallery": "갤러리"
+    "learnMore": "자세히 알아보기",
+    "gallery": "갤러리",
+    "apply": "신청하기",
+    "applications": "신청서",
+    "payments": "결제",
+    "signIn": "로그인",
+    "getStarted": "시작하기",
+    "signedInAs": "로그인 사용자:"
   },
   "auth": {
     "welcomeBack": "다시 오신 것을 환영합니다",
@@ -345,6 +354,96 @@
       "saving": "저장 중...",
       "saved": "저장됨",
       "saveError": "저장 실패"
+    }
+  },
+  "applicationPage": {
+    "title": "DS-160 비자 신청서",
+    "subtitle": "비이민 비자 신청서를 작성하세요",
+    "loading": "신청서를 불러오는 중...",
+    "notice": {
+      "title": "중요 안내",
+      "description": "제출하기 전에 모든 정보를 꼼꼼히 확인하세요. 제출 후 수정이 필요하면 새 신청서를 시작해야 할 수 있습니다. 허위 정보 제공 시 비자가 거절될 수 있습니다."
+    },
+    "fields": {
+      "nationalId": "국민 신분증 번호"
+    },
+    "placeholders": {
+      "fullNameNative": "모국어로 입력하세요",
+      "nationalId": "ID 번호",
+      "passportBookNumber": "책 번호(해당 시)",
+      "usAddress": "미국 내 호텔 또는 거주 주소"
+    },
+    "passport": {
+      "expirationHint": "예정 체류 기간 이후 최소 6개월 이상 유효해야 합니다"
+    },
+    "travel": {
+      "selectPurpose": "목적 선택",
+      "purposeOptions": {
+        "tourism": "관광/휴가",
+        "business": "비즈니스",
+        "study": "유학/학업",
+        "medical": "의료",
+        "conference": "컨퍼런스",
+        "family": "가족/친구 방문"
+      },
+      "payingOptions": {
+        "self": "본인",
+        "employer": "고용주",
+        "family": "가족",
+        "sponsor": "스폰서"
+      }
+    },
+    "payment": {
+      "successTitle": "결제 성공!",
+      "successDescription": "신청서가 제출되었습니다. 프로필로 이동 중...",
+      "feeTitle": "신청 수수료",
+      "feeDescription": "비자 신청서를 제출하려면 결제를 완료하세요",
+      "feeNote": "전문 서류 검토 및 처리 지원이 포함됩니다"
+    },
+    "buttons": {
+      "processing": "처리 중...",
+      "submitted": "제출됨",
+      "paySubmit": "결제 후 제출"
+    },
+    "review": {
+      "labels": {
+        "name": "이름",
+        "dob": "생년월일",
+        "birthPlace": "출생지",
+        "address": "주소",
+        "passportNumber": "여권 번호",
+        "issued": "발급",
+        "expires": "만료",
+        "purpose": "목적",
+        "arrival": "입국"
+      }
+    },
+    "toasts": {
+      "draftLoaded": {
+        "title": "초안 불러오기 완료",
+        "description": "이전 진행 상황이 복원되었습니다."
+      },
+      "saved": {
+        "title": "신청서가 저장되었습니다!",
+        "description": "진행 상황이 저장되었습니다. 나중에 계속할 수 있습니다."
+      },
+      "saveFailed": {
+        "title": "저장 실패",
+        "description": "신청서를 저장하지 못했습니다. 다시 시도해주세요."
+      },
+      "submitted": {
+        "title": "신청서가 제출되었습니다!",
+        "description": "결제 성공. 신청서가 검토를 위해 제출되었습니다."
+      },
+      "submitFailed": {
+        "title": "제출 실패"
+      },
+      "missingId": "신청서 ID가 없습니다. 새로고침 후 다시 시도해주세요.",
+      "submitFailedAfterPayment": "결제는 성공했지만 신청서 제출에 실패했습니다. 다시 시도하거나 지원팀에 문의하세요.",
+      "incomplete": {
+        "title": "정보가 부족합니다",
+        "description": "제출하기 전에 {{step}}단계를 완료해주세요."
+      }
     }
   },
   "admin": {

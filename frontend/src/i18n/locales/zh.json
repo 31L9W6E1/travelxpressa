@@ -21,7 +21,8 @@
     "error": "错误",
     "warning": "警告",
     "info": "信息",
-    "viewAll": "查看全部"
+    "viewAll": "查看全部",
+    "select": "选择"
   },
   "nav": {
     "home": "首页",
@@ -29,6 +30,7 @@
     "about": "关于我们",
     "contact": "联系我们",
     "blog": "博客",
+    "news": "新闻",
     "login": "登录",
     "register": "注册",
     "logout": "退出",
@@ -36,7 +38,14 @@
     "admin": "管理",
     "profile": "个人资料",
     "settings": "设置",
-    "gallery": "图库"
+    "learnMore": "了解更多",
+    "gallery": "图库",
+    "apply": "申请",
+    "applications": "申请记录",
+    "payments": "支付",
+    "signIn": "登录",
+    "getStarted": "开始",
+    "signedInAs": "登录为"
   },
   "auth": {
     "welcomeBack": "欢迎回来",
@@ -345,6 +354,96 @@
       "saving": "保存中...",
       "saved": "已保存",
       "saveError": "保存失败"
+    }
+  },
+  "applicationPage": {
+    "title": "DS-160签证申请",
+    "subtitle": "完成您的非移民签证申请",
+    "loading": "正在加载您的申请...",
+    "notice": {
+      "title": "重要提示",
+      "description": "提交前请仔细核对所有信息。提交后如需修改，可能需要重新创建新的申请。提供虚假信息可能导致签证被拒。"
+    },
+    "fields": {
+      "nationalId": "身份证/国民身份证号"
+    },
+    "placeholders": {
+      "fullNameNative": "请使用母语输入",
+      "nationalId": "身份证号",
+      "passportBookNumber": "护照本号（如适用）",
+      "usAddress": "美国境内酒店或居住地址"
+    },
+    "passport": {
+      "expirationHint": "护照有效期需至少覆盖计划停留期后6个月"
+    },
+    "travel": {
+      "selectPurpose": "请选择目的",
+      "purposeOptions": {
+        "tourism": "旅游/度假",
+        "business": "商务",
+        "study": "学习",
+        "medical": "医疗",
+        "conference": "会议",
+        "family": "探亲/访友"
+      },
+      "payingOptions": {
+        "self": "本人",
+        "employer": "雇主",
+        "family": "家庭成员",
+        "sponsor": "资助人"
+      }
+    },
+    "payment": {
+      "successTitle": "支付成功！",
+      "successDescription": "您的申请已提交。正在跳转到个人资料页...",
+      "feeTitle": "申请费用",
+      "feeDescription": "完成支付以提交您的签证申请",
+      "feeNote": "包含专业材料审核和流程协助"
+    },
+    "buttons": {
+      "processing": "处理中...",
+      "submitted": "已提交",
+      "paySubmit": "支付并提交"
+    },
+    "review": {
+      "labels": {
+        "name": "姓名",
+        "dob": "出生日期",
+        "birthPlace": "出生地",
+        "address": "地址",
+        "passportNumber": "护照号",
+        "issued": "签发",
+        "expires": "到期",
+        "purpose": "目的",
+        "arrival": "抵达"
+      }
+    },
+    "toasts": {
+      "draftLoaded": {
+        "title": "草稿已恢复",
+        "description": "已为您恢复之前的进度。"
+      },
+      "saved": {
+        "title": "申请已保存！",
+        "description": "您的进度已保存，稍后可继续。"
+      },
+      "saveFailed": {
+        "title": "保存失败",
+        "description": "无法保存申请，请重试。"
+      },
+      "submitted": {
+        "title": "申请已提交！",
+        "description": "支付成功，您的申请已提交审核。"
+      },
+      "submitFailed": {
+        "title": "提交失败"
+      },
+      "missingId": "缺少申请ID，请刷新后重试。",
+      "submitFailedAfterPayment": "支付成功但提交申请失败。请重试或联系支持。",
+      "incomplete": {
+        "title": "信息不完整",
+        "description": "提交前请先完成第 {{step}} 步。"
+      }
     }
   },
   "admin": {

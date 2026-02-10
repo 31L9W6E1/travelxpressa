@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   Shield,
   Clock,
@@ -13,34 +14,48 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
 const About = () => {
+  const { t } = useTranslation();
+
   const features = [
     {
       icon: Shield,
-      title: "Secure & Private",
-      description: "Your personal information is encrypted and securely stored. We never share your data with third parties."
+      title: t("home.features.secure.title", { defaultValue: "Secure & Private" }),
+      description: t("home.features.secure.description", {
+        defaultValue:
+          "Your personal information is encrypted and securely stored. We never share your data with third parties.",
+      }),
     },
     {
       icon: Clock,
-      title: "Save Time",
-      description: "Our guided process helps you complete your DS-160 form faster with fewer errors than doing it alone."
+      title: t("aboutPage.features.saveTime.title", { defaultValue: "Save Time" }),
+      description: t("aboutPage.features.saveTime.description", {
+        defaultValue:
+          "Our guided process helps you complete your DS-160 form faster with fewer errors than doing it alone.",
+      }),
     },
     {
       icon: Users,
-      title: "Expert Support",
-      description: "Our team of visa experts is available to answer your questions and guide you through the process."
+      title: t("home.features.support.title", { defaultValue: "Expert Support" }),
+      description: t("home.features.support.description", {
+        defaultValue:
+          "Our team of visa experts is available to answer your questions and guide you through the process.",
+      }),
     },
     {
       icon: CheckCircle,
-      title: "Error Prevention",
-      description: "Built-in validation catches common mistakes before submission, reducing the chance of delays."
+      title: t("home.features.errorPrevention.title", { defaultValue: "Error Prevention" }),
+      description: t("home.features.errorPrevention.description", {
+        defaultValue:
+          "Built-in validation catches common mistakes before submission, reducing the chance of delays.",
+      }),
     }
   ];
 
   const stats = [
-    { value: "50,000+", label: "Applications Completed" },
-    { value: "98%", label: "Success Rate" },
-    { value: "24/7", label: "Support Available" },
-    { value: "4.9/5", label: "Customer Rating" }
+    { value: "50,000+", label: t("home.stats.applicationsCompleted", { defaultValue: "Applications Completed" }) },
+    { value: "98%", label: t("home.stats.successRate", { defaultValue: "Success Rate" }) },
+    { value: "24/7", label: t("home.stats.supportAvailable", { defaultValue: "Support Available" }) },
+    { value: "4.9/5", label: t("home.stats.customerRating", { defaultValue: "Customer Rating" }) }
   ];
 
   return (
@@ -50,19 +65,21 @@ const About = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-secondary border border-border rounded-full text-muted-foreground text-sm mb-6">
             <Plane className="w-4 h-4" />
-            Trusted by thousands worldwide
+            {t("home.hero.trusted", { defaultValue: "Trusted by thousands worldwide" })}
           </div>
 
           <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-6">
-            About{" "}
+            {t("aboutPage.hero.titlePrefix", { defaultValue: "About" })}{" "}
             <span className="text-muted-foreground">
-              TravelXpressa
+              {t("footer.company", { defaultValue: "TravelXpressa" })}
             </span>
           </h1>
 
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-10">
-            We simplify the US visa application process by providing a user-friendly platform
-            that guides you through every step of the DS-160 form completion.
+            {t("aboutPage.hero.subtitle", {
+              defaultValue:
+                "We simplify the US visa application process by providing a user-friendly platform that guides you through every step of the DS-160 form completion.",
+            })}
           </p>
         </div>
       </section>
@@ -88,10 +105,13 @@ const About = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              Why Choose Us
+              {t("home.features.title", { defaultValue: "Why Choose Us" })}
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Our platform is designed to make your visa application experience as smooth as possible.
+              {t("aboutPage.features.subtitle", {
+                defaultValue:
+                  "Our platform is designed to make your visa application experience as smooth as possible.",
+              })}
             </p>
           </div>
 
@@ -123,10 +143,12 @@ const About = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              How It Works
+              {t("aboutPage.howItWorks.title", { defaultValue: "How It Works" })}
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Complete your DS-160 application in three simple steps.
+              {t("aboutPage.howItWorks.subtitle", {
+                defaultValue: "Complete your DS-160 application in three simple steps.",
+              })}
             </p>
           </div>
 
@@ -138,10 +160,13 @@ const About = () => {
                 </div>
                 <FileText className="w-10 h-10 text-foreground mb-4" />
                 <h3 className="text-xl font-semibold text-foreground mb-3">
-                  Create Account
+                  {t("aboutPage.howItWorks.steps.createAccount.title", { defaultValue: "Create Account" })}
                 </h3>
                 <p className="text-muted-foreground">
-                  Sign up for free and access our guided DS-160 form builder with auto-save functionality.
+                  {t("aboutPage.howItWorks.steps.createAccount.description", {
+                    defaultValue:
+                      "Sign up for free and access our guided DS-160 form builder with auto-save functionality.",
+                  })}
                 </p>
               </CardContent>
             </Card>
@@ -153,10 +178,13 @@ const About = () => {
                 </div>
                 <Headphones className="w-10 h-10 text-foreground mb-4" />
                 <h3 className="text-xl font-semibold text-foreground mb-3">
-                  Fill Your Application
+                  {t("aboutPage.howItWorks.steps.fillApplication.title", { defaultValue: "Fill Your Application" })}
                 </h3>
                 <p className="text-muted-foreground">
-                  Complete each section with our step-by-step guidance. Get help anytime from our support team.
+                  {t("aboutPage.howItWorks.steps.fillApplication.description", {
+                    defaultValue:
+                      "Complete each section with our step-by-step guidance. Get help anytime from our support team.",
+                  })}
                 </p>
               </CardContent>
             </Card>
@@ -168,10 +196,13 @@ const About = () => {
                 </div>
                 <Award className="w-10 h-10 text-foreground mb-4" />
                 <h3 className="text-xl font-semibold text-foreground mb-3">
-                  Submit & Track
+                  {t("aboutPage.howItWorks.steps.submitTrack.title", { defaultValue: "Submit & Track" })}
                 </h3>
                 <p className="text-muted-foreground">
-                  Review your application, submit to CEAC, and track your visa status all in one place.
+                  {t("aboutPage.howItWorks.steps.submitTrack.description", {
+                    defaultValue:
+                      "Review your application, submit to CEAC, and track your visa status all in one place.",
+                  })}
                 </p>
               </CardContent>
             </Card>
@@ -185,17 +216,24 @@ const About = () => {
           <Card className="bg-secondary">
             <CardContent className="p-12">
               <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-                Ready to Start Your Application?
+                {t("aboutPage.cta.title", { defaultValue: "Ready to Start Your Application?" })}
               </h2>
               <p className="text-muted-foreground mb-8 max-w-2xl mx-auto">
-                Join thousands of successful applicants who have used our platform to complete their DS-160 forms.
+                {t("aboutPage.cta.subtitle", {
+                  defaultValue:
+                    "Join thousands of successful applicants who have used our platform to complete their DS-160 forms.",
+                })}
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button asChild size="lg">
-                  <Link to="/login">Get Started Free</Link>
+                  <Link to="/login">
+                    {t("aboutPage.cta.primary", { defaultValue: "Get Started Free" })}
+                  </Link>
                 </Button>
                 <Button asChild variant="outline" size="lg">
-                  <Link to="/learn-more">Learn More</Link>
+                  <Link to="/learn-more">
+                    {t("nav.learnMore", { defaultValue: "Learn More" })}
+                  </Link>
                 </Button>
               </div>
             </CardContent>
@@ -209,16 +247,27 @@ const About = () => {
           <div className="flex flex-col md:flex-row justify-between items-center gap-6">
             <div className="flex items-center gap-2">
               <Plane className="w-6 h-6" />
-              <span className="text-xl font-bold">TravelXpressa</span>
+              <span className="text-xl font-bold">
+                {t("footer.company", { defaultValue: "TravelXpressa" })}
+              </span>
             </div>
             <div className="flex flex-wrap justify-center gap-6 text-sm text-muted-foreground">
-              <Link to="/about" className="hover:text-foreground transition-colors">About</Link>
-              <Link to="/learn-more" className="hover:text-foreground transition-colors">Learn More</Link>
-              <Link to="/privacy" className="hover:text-foreground transition-colors">Privacy Policy</Link>
-              <Link to="/terms" className="hover:text-foreground transition-colors">Terms of Service</Link>
+              <Link to="/about" className="hover:text-foreground transition-colors">
+                {t("footer.links.about", { defaultValue: "About Us" })}
+              </Link>
+              <Link to="/learn-more" className="hover:text-foreground transition-colors">
+                {t("nav.learnMore", { defaultValue: "Learn More" })}
+              </Link>
+              <Link to="/privacy" className="hover:text-foreground transition-colors">
+                {t("footer.links.privacy", { defaultValue: "Privacy Policy" })}
+              </Link>
+              <Link to="/terms" className="hover:text-foreground transition-colors">
+                {t("footer.links.terms", { defaultValue: "Terms of Service" })}
+              </Link>
             </div>
             <p className="text-sm text-muted-foreground">
-              &copy; 2024 TravelXpressa. All rights reserved.
+              &copy; {new Date().getFullYear()} {t("footer.company", { defaultValue: "TravelXpressa" })}.{" "}
+              {t("footer.copyright", { defaultValue: "All rights reserved" })}.
             </p>
           </div>
         </div>

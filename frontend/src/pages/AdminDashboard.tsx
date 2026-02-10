@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import {
   Users,
@@ -261,11 +261,41 @@ const applicationStatusRingsConfig = {
   },
 } satisfies ChartConfig;
 
+type AdminTab =
+  | "overview"
+  | "users"
+  | "applications"
+  | "tracking"
+  | "payments"
+  | "analytics"
+  | "gallery"
+  | "cms";
+
+const getAdminTabFromSection = (section?: string): AdminTab => {
+  switch (section) {
+    case "overview":
+    case "users":
+    case "applications":
+    case "tracking":
+    case "payments":
+    case "analytics":
+    case "gallery":
+    case "cms":
+      return section;
+    case "application":
+      return "applications";
+    default:
+      return "overview";
+  }
+};
+
 const AdminDashboard = () => {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState<
-    "overview" | "users" | "applications" | "tracking" | "payments" | "analytics" | "gallery" | "cms"
-  >("overview");
+  const navigate = useNavigate();
+  const { section } = useParams<{ section?: string }>();
+  const tabFromUrl = getAdminTabFromSection(section);
+
+  const [activeTab, setActiveTab] = useState<AdminTab>(tabFromUrl);
   const [users, setUsers] = useState<UserData[]>([]);
   const [applications, setApplications] = useState<ApplicationData[]>([]);
   const [stats, setStats] = useState<Stats | null>(null);
@@ -384,6 +414,21 @@ const AdminDashboard = () => {
       fetchPosts();
     }
   }, [user]);
+
+  useEffect(() => {
+    const nextTab = getAdminTabFromSection(section);
+    setActiveTab(nextTab);
+
+    // Canonicalize URL so each section has a stable /admin/<tab> path.
+    if (!section || section !== nextTab) {
+      navigate(`/admin/${nextTab}`, { replace: true });
+    }
+  }, [section, navigate]);
+
+  const handleTabChange = (nextTab: AdminTab) => {
+    setActiveTab(nextTab);
+    navigate(`/admin/${nextTab}`);
+  };
 
   const fetchDashboardData = async () => {
     setLoading(true);
@@ -647,7 +692,7 @@ const AdminDashboard = () => {
         {/* Tabs */}
         <Tabs
           value={activeTab}
-          onValueChange={(v) => setActiveTab(v as any)}
+          onValueChange={(v) => handleTabChange(v as AdminTab)}
           className="space-y-6"
         >
           <TabsList className="bg-secondary flex-wrap h-auto gap-1 p-1">

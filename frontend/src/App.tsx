@@ -159,6 +159,14 @@ function App() {
               path="/admin"
               element={
                 <AdminRoute>
+                  <Navigate to="/admin/overview" replace />
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="/admin/:section"
+              element={
+                <AdminRoute>
                   <ErrorBoundary>
                     <AdminDashboard />
                   </ErrorBoundary>

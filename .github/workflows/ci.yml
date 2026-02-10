@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        workspace: [backend, tanstack-form-course]
+        workspace: [backend, frontend]
     steps:
       - uses: actions/checkout@v4
 
@@ -116,14 +116,14 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          cache-dependency-path: tanstack-form-course/package-lock.json
+          cache-dependency-path: frontend/package-lock.json
 
       - name: Install dependencies
-        working-directory: tanstack-form-course
+        working-directory: frontend
         run: npm ci
 
       - name: Run tests
-        working-directory: tanstack-form-course
+        working-directory: frontend
         run: npm test || true
         env:
           VITE_API_URL: http://localhost:3000
@@ -162,7 +162,7 @@ jobs:
       - name: Build and push frontend
         uses: docker/build-push-action@v5
         with:
-          context: ./tanstack-form-course
+          context: ./frontend
           push: true
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/frontend:${{ github.sha }},${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/frontend:latest
           cache-from: type=gha
@@ -191,7 +191,7 @@ jobs:
         run: npm audit --audit-level=high || true
 
       - name: Run npm audit (frontend)
-        working-directory: tanstack-form-course
+        working-directory: frontend
         run: npm audit --audit-level=high || true
 
   # Deploy to staging

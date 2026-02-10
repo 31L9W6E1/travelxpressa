@@ -6,9 +6,11 @@ import type { Post } from '@/api/posts';
 import { Button } from '@/components/ui/button';
 import { normalizeImageUrl } from '@/api/upload';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '../contexts/AuthContext';
 
 const BlogPost = () => {
   const { t, i18n } = useTranslation();
+  const { user } = useAuth();
   const { slug } = useParams<{ slug: string }>();
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
@@ -173,7 +175,9 @@ const BlogPost = () => {
             })}
           </p>
           <Button asChild size="lg">
-            <Link to="/login">{t('nav.getStarted', { defaultValue: 'Get Started' })}</Link>
+            <Link to={user ? (user.role === 'ADMIN' ? '/admin' : '/application') : '/login'}>
+              {t('nav.getStarted', { defaultValue: 'Get Started' })}
+            </Link>
           </Button>
         </div>
       </div>

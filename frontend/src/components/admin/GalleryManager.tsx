@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { toast } from 'sonner';
 import {
   Image as ImageIcon,
@@ -76,6 +76,7 @@ const GalleryManager = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [imageToDelete, setImageToDelete] = useState<GalleryImage | null>(null);
   const [copiedUrl, setCopiedUrl] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const fetchGallery = async () => {
     setLoading(true);
@@ -88,6 +89,9 @@ const GalleryManager = () => {
     } catch (error: any) {
       // If gallery endpoint doesn't exist, show empty state
       console.error('Gallery fetch error:', error);
+      if (error?.response?.status === 401 || error?.response?.status === 403) {
+        toast.error('Please log in as an admin to view the gallery.');
+      }
       setImages([]);
       setStats(null);
     } finally {
@@ -200,6 +204,16 @@ const GalleryManager = () => {
 
   return (
     <div className="space-y-6">
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        multiple
+        onChange={handleUpload}
+        className="hidden"
+        disabled={uploading}
+      />
+
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
@@ -289,26 +303,17 @@ const GalleryManager = () => {
               </Button>
 
               {/* Upload Button */}
-              <label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={handleUpload}
-                  className="hidden"
-                  disabled={uploading}
-                />
-                <Button asChild disabled={uploading}>
-                  <span>
-                    {uploading ? (
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    ) : (
-                      <Plus className="w-4 h-4 mr-2" />
-                    )}
-                    Upload
-                  </span>
-                </Button>
-              </label>
+              <Button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+              >
+                {uploading ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Plus className="w-4 h-4 mr-2" />
+                )}
+                Upload
+              </Button>
             </div>
           </div>
         </CardHeader>
@@ -323,21 +328,14 @@ const GalleryManager = () => {
                   : 'Upload your first image to get started'}
               </p>
               {!searchTerm && (
-                <label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    onChange={handleUpload}
-                    className="hidden"
-                  />
-                  <Button variant="outline" asChild>
-                    <span>
-                      <Upload className="w-4 h-4 mr-2" />
-                      Upload Images
-                    </span>
-                  </Button>
-                </label>
+                <Button
+                  variant="outline"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading}
+                >
+                  <Upload className="w-4 h-4 mr-2" />
+                  Upload Images
+                </Button>
               )}
             </div>
           ) : viewMode === 'grid' ? (
@@ -356,6 +354,10 @@ const GalleryManager = () => {
                     src={getFullImageUrl(image.url)}
                     alt={image.filename}
                     className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105"
+                    onError={(e) => {
+                      // If an image can't be loaded, show the placeholder background instead of a broken icon.
+                      (e.currentTarget as HTMLImageElement).style.display = 'none';
+                    }}
                   />
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors" />
                   <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
@@ -418,6 +420,9 @@ const GalleryManager = () => {
                         src={getFullImageUrl(image.url)}
                         alt={image.filename}
                         className="w-full h-full object-cover"
+                        onError={(e) => {
+                          (e.currentTarget as HTMLImageElement).style.display = 'none';
+                        }}
                       />
                     </div>
                     <div className="flex-1 min-w-0">
@@ -501,6 +506,10 @@ const GalleryManager = () => {
                 src={getFullImageUrl(selectedImage.url)}
                 alt={selectedImage.filename}
                 className="w-full h-full object-contain"
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).style.display = 'none';
+                  toast.error('Failed to load image preview.');
+                }}
               />
             )}
           </div>

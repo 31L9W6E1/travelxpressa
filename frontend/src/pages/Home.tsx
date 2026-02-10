@@ -161,13 +161,15 @@ const Home = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background text-foreground font-sans">
+      <div className="min-h-screen bg-background text-foreground font-sans">
       {/* News Ticker - Glass morphism style */}
-      <div className="fixed top-16 left-0 right-0 z-40 ticker-bar text-white overflow-hidden">
+      <div className="fixed top-16 left-0 right-0 z-40 ticker-bar text-gray-300 overflow-hidden">
         <div className="flex items-center h-10">
-          <div className="flex-shrink-0 px-4 bg-primary/90 backdrop-blur-sm h-full flex items-center gap-2 z-10">
-            <Bell className="w-3.5 h-3.5" />
-            <span className="text-xs font-semibold uppercase tracking-wide">{t("home.news")}</span>
+          <div className="flex-shrink-0 px-4 bg-primary/20 backdrop-blur-sm h-full flex items-center gap-2 z-10 text-gray-200">
+            <Bell className="w-3.5 h-3.5 text-gray-200" />
+            <span className="text-xs font-semibold uppercase tracking-wide text-gray-200">
+              {t("home.news")}
+            </span>
           </div>
           <div className="ticker-wrapper flex-1">
             <div className="animate-ticker">

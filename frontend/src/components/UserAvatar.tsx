@@ -1,4 +1,4 @@
-import { getInitials, getAvatarColor } from '@/lib/utils';
+import { generateAvatarDataUrl } from '@/lib/utils';
 
 interface UserAvatarProps {
   name?: string | null;
@@ -15,16 +15,21 @@ const sizeClasses = {
 };
 
 export function UserAvatar({ name, email, size = 'md', className = '' }: UserAvatarProps) {
-  const identifier = name || email || 'unknown';
-  const initials = getInitials(name, email);
-  const colors = getAvatarColor(identifier);
+  const identifier = name || email || 'User';
+  const src = generateAvatarDataUrl(name, email);
 
   return (
     <div
-      className={`${sizeClasses[size]} rounded-xl flex items-center justify-center font-semibold ${className}`}
-      style={{ backgroundColor: colors.bg, color: colors.fg }}
+      className={`${sizeClasses[size]} rounded-xl overflow-hidden ${className}`}
+      aria-label={identifier || 'User avatar'}
     >
-      {initials}
+      <img
+        src={src}
+        alt={identifier || 'User avatar'}
+        className="w-full h-full object-cover"
+        loading="lazy"
+        draggable={false}
+      />
     </div>
   );
 }

@@ -234,37 +234,38 @@ const AdminDashboard = () => {
   const applicationChartConfig = {
     submitted: {
       label: t("dashboard.status.Submitted", "Submitted"),
-      color: "hsl(var(--chart-1))",
+      // Our Tailwind theme uses OKLCH values (e.g. `--chart-1: oklch(...)`), so don't wrap in `hsl(...)`.
+      color: "var(--chart-1)",
     },
     approved: {
       label: t("dashboard.status.Approved", "Approved"),
-      color: "hsl(var(--chart-2))",
+      color: "var(--chart-2)",
     },
     pending: {
       label: t("dashboard.status.pending", "Pending"),
-      color: "hsl(var(--chart-3))",
+      color: "var(--chart-3)",
     },
     rejected: {
       label: t("dashboard.status.Rejected", "Rejected"),
-      color: "hsl(var(--chart-4))",
+      color: "var(--chart-4)",
     },
   } satisfies ChartConfig;
 
   const userGrowthConfig = {
     users: {
       label: t("dashboard.tabs.users", "Users"),
-      color: "hsl(var(--chart-1))",
+      color: "var(--chart-1)",
     },
   } satisfies ChartConfig;
 
   const applicationsUsersChartConfig = {
     applications: {
       label: t("dashboard.stats.applications", "Applications"),
-      color: "hsl(var(--chart-1))",
+      color: "var(--chart-1)",
     },
     users: {
       label: t("dashboard.tabs.users", "Users"),
-      color: "hsl(var(--chart-2))",
+      color: "var(--chart-2)",
     },
   } satisfies ChartConfig;
 

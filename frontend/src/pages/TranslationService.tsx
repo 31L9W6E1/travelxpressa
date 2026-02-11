@@ -1,7 +1,7 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import { FileText, Languages, Send, Sparkles } from "lucide-react";
+import { FileText, Languages, Paperclip, Send, Sparkles, Upload, X } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { createInquiry } from "@/api/inquiries";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -39,7 +39,10 @@ const TranslationService = () => {
     fileLinks: "",
     notes: "",
   });
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [isDraggingFiles, setIsDraggingFiles] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const price = useMemo(() => {
     const perPage = fileTypePricing[form.fileType] || fileTypePricing.other;
@@ -48,9 +51,40 @@ const TranslationService = () => {
     return { perPage, subtotal, total };
   }, [form.fileType, form.pages, form.urgency]);
 
+  const addSelectedFiles = (files: FileList | null) => {
+    if (!files?.length) return;
+
+    setSelectedFiles((prev) => {
+      const next = [...prev];
+      for (const file of Array.from(files)) {
+        const exists = next.some(
+          (existing) =>
+            existing.name === file.name &&
+            existing.size === file.size &&
+            existing.lastModified === file.lastModified,
+        );
+        if (!exists) next.push(file);
+      }
+      return next;
+    });
+  };
+
+  const removeSelectedFile = (index: number) => {
+    setSelectedFiles((prev) => prev.filter((_, idx) => idx !== index));
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+  };
+
   const onSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (!form.name.trim() || !form.email.trim() || !form.phone.trim()) {
+    const contactName = (user?.name || form.name).trim();
+    const contactEmail = (user?.email || form.email).trim();
+
+    if (!contactName || !contactEmail || !form.phone.trim()) {
       toast.error(
         t("translationService.validation.required", {
           defaultValue: "Name, email, and phone are required.",
@@ -69,13 +103,18 @@ const TranslationService = () => {
         `Pages: ${Math.max(1, Number(form.pages || 1))}`,
         `Speed: ${form.urgency}`,
         `Estimated fee: ${toMnt(price.total)}`,
+        `Attached files: ${
+          selectedFiles.length
+            ? selectedFiles.map((file) => `${file.name} (${formatFileSize(file.size)})`).join(", ")
+            : "-"
+        }`,
         `File links: ${form.fileLinks || "-"}`,
         `Notes: ${form.notes || "-"}`,
       ].join("\n");
 
       await createInquiry({
-        name: form.name.trim(),
-        email: form.email.trim(),
+        name: contactName,
+        email: contactEmail,
         phone: form.phone.trim(),
         serviceType: "TRANSLATION_SERVICE",
         message,
@@ -94,6 +133,7 @@ const TranslationService = () => {
         pages: 1,
         urgency: "standard",
       }));
+      setSelectedFiles([]);
     } catch (error: any) {
       toast.error(error?.message || "Failed to submit translation request");
     } finally {
@@ -131,31 +171,46 @@ const TranslationService = () => {
               <CardDescription>
                 {t("translationService.form.description", {
                   defaultValue:
-                    "Provide file details and links. You can send final files later by support chat or email.",
+                    "Provide file details and upload your files. You can also include cloud links if needed.",
                 })}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <form className="space-y-5" onSubmit={onSubmit}>
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="name">{t("common.name", { defaultValue: "Name" })}</Label>
-                    <Input
-                      id="name"
-                      value={form.name}
-                      onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
-                    />
+                {user && (
+                  <div className="rounded-lg border border-dashed border-border px-4 py-3 bg-secondary/40">
+                    <p className="text-sm font-medium text-foreground">
+                      {t("translationService.form.accountLinked", {
+                        defaultValue: "Request will be submitted using your signed-in account.",
+                      })}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {user.name} • {user.email}
+                    </p>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="email">{t("common.email", { defaultValue: "Email" })}</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={form.email}
-                      onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
-                    />
+                )}
+
+                {!user && (
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="name">{t("common.name", { defaultValue: "Name" })}</Label>
+                      <Input
+                        id="name"
+                        value={form.name}
+                        onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="email">{t("common.email", { defaultValue: "Email" })}</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        value={form.email}
+                        onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
+                      />
+                    </div>
                   </div>
-                </div>
+                )}
 
                 <div className="grid md:grid-cols-2 gap-4">
                   <div className="space-y-2">
@@ -254,9 +309,99 @@ const TranslationService = () => {
                   </div>
                 </div>
 
+                <div className="space-y-3">
+                  <Label>{t("translationService.form.files", { defaultValue: "Upload Files" })}</Label>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    multiple
+                    className="hidden"
+                    onChange={(e) => addSelectedFiles(e.target.files)}
+                  />
+                  <div
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => fileInputRef.current?.click()}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        fileInputRef.current?.click();
+                      }
+                    }}
+                    onDragEnter={(event) => {
+                      event.preventDefault();
+                      event.stopPropagation();
+                      setIsDraggingFiles(true);
+                    }}
+                    onDragOver={(event) => {
+                      event.preventDefault();
+                      event.stopPropagation();
+                      setIsDraggingFiles(true);
+                    }}
+                    onDragLeave={(event) => {
+                      event.preventDefault();
+                      event.stopPropagation();
+                      setIsDraggingFiles(false);
+                    }}
+                    onDrop={(event) => {
+                      event.preventDefault();
+                      event.stopPropagation();
+                      setIsDraggingFiles(false);
+                      addSelectedFiles(event.dataTransfer.files);
+                    }}
+                    className={`rounded-lg border border-dashed px-4 py-6 text-center cursor-pointer transition-colors ${
+                      isDraggingFiles
+                        ? "border-primary bg-primary/10"
+                        : "border-border hover:border-primary/60 hover:bg-secondary/40"
+                    }`}
+                  >
+                    <Upload className="w-5 h-5 mx-auto mb-2 text-muted-foreground" />
+                    <p className="text-sm font-medium text-foreground">
+                      {t("translationService.form.dragDrop", {
+                        defaultValue: "Drag and drop files here, or click to select",
+                      })}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {t("translationService.form.dragDropHint", {
+                        defaultValue: "Accepted: PDF, DOC, DOCX, JPG, PNG",
+                      })}
+                    </p>
+                  </div>
+
+                  {selectedFiles.length > 0 && (
+                    <div className="space-y-2">
+                      {selectedFiles.map((file, index) => (
+                        <div
+                          key={`${file.name}-${file.lastModified}-${index}`}
+                          className="flex items-center justify-between gap-3 rounded-md border border-border px-3 py-2"
+                        >
+                          <div className="min-w-0 flex items-center gap-2">
+                            <Paperclip className="w-4 h-4 text-muted-foreground shrink-0" />
+                            <div className="min-w-0">
+                              <p className="text-sm text-foreground truncate">{file.name}</p>
+                              <p className="text-xs text-muted-foreground">
+                                {formatFileSize(file.size)}
+                              </p>
+                            </div>
+                          </div>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => removeSelectedFile(index)}
+                            aria-label={t("common.remove", { defaultValue: "Remove file" })}
+                          >
+                            <X className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
                 <div className="space-y-2">
                   <Label htmlFor="fileLinks">
-                    {t("translationService.form.fileLinks", { defaultValue: "File Link(s)" })}
+                    {t("translationService.form.fileLinks", { defaultValue: "Cloud Link(s) (Optional)" })}
                   </Label>
                   <Input
                     id="fileLinks"

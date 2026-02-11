@@ -2,21 +2,28 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts/ThemeContext";
 import {
-  Menu,
-  X,
-  Plane,
-  LogOut,
-  Settings,
-  FileText,
-  CreditCard,
-  Sun,
-  Moon,
-  MessageSquare,
   Bell,
-  User,
+  BookOpen,
   ChevronDown,
+  ChevronsLeft,
+  ChevronsRight,
+  CreditCard,
+  FileText,
+  Image,
+  Info,
+  Languages,
+  LogOut,
+  Menu,
+  MessageSquare,
+  Moon,
+  Newspaper,
+  Plane,
+  Settings,
+  Sun,
+  User,
+  X,
 } from "lucide-react";
-import { useState, useRef, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { UserAvatar } from "./UserAvatar";
 import { useTranslation } from "react-i18next";
 import LanguageSwitcher from "./LanguageSwitcher";
@@ -29,16 +36,18 @@ type NotificationItem = {
   to: string;
 };
 
-const navItemClass =
-  "flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors";
+const navItemBaseClass =
+  "flex items-center gap-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors";
 
 const Navbar = () => {
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const { t } = useTranslation();
+
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
 
   const notificationDesktopRef = useRef<HTMLDivElement>(null);
@@ -70,6 +79,14 @@ const Navbar = () => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isNotificationOpen, isUserMenuOpen]);
+
+  useEffect(() => {
+    const width = isSidebarCollapsed ? "88px" : "240px";
+    document.documentElement.style.setProperty("--sidebar-width", width);
+    return () => {
+      document.documentElement.style.setProperty("--sidebar-width", "240px");
+    };
+  }, [isSidebarCollapsed]);
 
   useEffect(() => {
     const loadNotifications = async () => {
@@ -280,40 +297,95 @@ const Navbar = () => {
     </div>
   );
 
+  const desktopLinkClass = `${navItemBaseClass} ${isSidebarCollapsed ? "px-2 justify-center" : "px-3"}`;
+  const mobileLinkClass = `${navItemBaseClass} px-3`;
+
   return (
     <>
-      <aside className="hidden md:flex fixed inset-y-0 left-0 z-40 w-[240px] bg-background border-r border-border flex-col">
-        <div className="h-16 px-4 flex items-center border-b border-dashed border-border/70">
-          <Link to="/" className="flex items-center gap-2 min-w-0">
+      <aside
+        className="hidden md:flex fixed inset-y-0 left-0 z-40 bg-background border-r border-border flex-col transition-[width] duration-300"
+        style={{ width: isSidebarCollapsed ? "88px" : "240px" }}
+      >
+        <div className="h-16 px-3 flex items-center justify-between border-b border-dashed border-border/70">
+          <Link to="/" className={`flex items-center ${isSidebarCollapsed ? "justify-center w-full" : "gap-2 min-w-0"}`}>
             <Plane className="w-6 h-6 text-foreground shrink-0" />
-            <span className="text-lg font-bold text-foreground tracking-tight truncate">TravelXpressa</span>
+            {!isSidebarCollapsed && (
+              <span className="text-lg font-bold text-foreground tracking-tight truncate">TravelXpressa</span>
+            )}
           </Link>
+          {!isSidebarCollapsed && (
+            <button
+              onClick={() => setIsSidebarCollapsed(true)}
+              className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+              aria-label="Collapse sidebar"
+            >
+              <ChevronsLeft className="w-4 h-4" />
+            </button>
+          )}
+          {isSidebarCollapsed && (
+            <button
+              onClick={() => setIsSidebarCollapsed(false)}
+              className="absolute top-4 right-2 p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+              aria-label="Expand sidebar"
+            >
+              <ChevronsRight className="w-4 h-4" />
+            </button>
+          )}
         </div>
 
         <nav className="flex-1 overflow-y-auto p-3 space-y-1">
-          <Link to="/about" className={navItemClass}>
-            {t("nav.about")}
+          {!isSidebarCollapsed && (
+            <div className="px-3 pb-2">
+              <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-muted-foreground">
+                {t("nav.menu", { defaultValue: "Main Menu" })}
+              </p>
+            </div>
+          )}
+
+          <Link to="/about" className={desktopLinkClass} title={t("nav.about")}>
+            <Info className="w-4 h-4 shrink-0" />
+            {!isSidebarCollapsed && <span>{t("nav.about")}</span>}
           </Link>
-          <Link to="/learn-more" className={navItemClass}>
-            {t("nav.learnMore")}
+          <Link to="/learn-more" className={desktopLinkClass} title={t("nav.learnMore")}>
+            <BookOpen className="w-4 h-4 shrink-0" />
+            {!isSidebarCollapsed && <span>{t("nav.learnMore")}</span>}
           </Link>
-          <Link to="/translation-service" className={navItemClass}>
-            {t("nav.translationService", { defaultValue: "Translation Service" })}
+          <Link
+            to="/translation-service"
+            className={desktopLinkClass}
+            title={t("nav.translationService", { defaultValue: "Translation Service" })}
+          >
+            <Languages className="w-4 h-4 shrink-0" />
+            {!isSidebarCollapsed && (
+              <span>{t("nav.translationService", { defaultValue: "Translation Service" })}</span>
+            )}
           </Link>
-          <Link to="/gallery" className={navItemClass}>
-            {t("nav.gallery", { defaultValue: "Gallery" })}
+          <Link to="/gallery" className={desktopLinkClass} title={t("nav.gallery", { defaultValue: "Gallery" })}>
+            <Image className="w-4 h-4 shrink-0" />
+            {!isSidebarCollapsed && <span>{t("nav.gallery", { defaultValue: "Gallery" })}</span>}
+          </Link>
+          <Link to="/news" className={desktopLinkClass} title={t("nav.news", { defaultValue: "News" })}>
+            <Newspaper className="w-4 h-4 shrink-0" />
+            {!isSidebarCollapsed && <span>{t("nav.news", { defaultValue: "News" })}</span>}
+          </Link>
+          <Link to="/blog" className={desktopLinkClass} title={t("nav.articles", { defaultValue: "Articles" })}>
+            <FileText className="w-4 h-4 shrink-0" />
+            {!isSidebarCollapsed && <span>{t("nav.articles", { defaultValue: "Articles" })}</span>}
           </Link>
 
           {user && user.role !== "ADMIN" && (
-            <Link to="/select-country" className={navItemClass}>
-              <FileText className="w-4 h-4" />
-              {t("nav.apply")}
-            </Link>
+            <>
+              <div className="my-2 border-t border-dashed border-border/70" />
+              <Link to="/select-country" className={desktopLinkClass} title={t("nav.apply")}>
+                <FileText className="w-4 h-4 shrink-0" />
+                {!isSidebarCollapsed && <span>{t("nav.apply")}</span>}
+              </Link>
+            </>
           )}
         </nav>
       </aside>
 
-      <header className="hidden md:flex fixed top-0 left-[240px] right-0 z-30 h-16 bg-background/90 backdrop-blur-md border-b border-dashed border-border/70 px-6 items-center justify-end">
+      <header className="hidden md:flex fixed top-0 left-[var(--sidebar-width,240px)] right-0 z-30 h-16 bg-background/90 backdrop-blur-md border-b border-dashed border-border/70 px-6 items-center justify-end transition-[left] duration-300">
         <div className="flex items-center gap-2">
           {user && (
             <div className="relative" ref={notificationDesktopRef}>
@@ -370,10 +442,7 @@ const Navbar = () => {
               </button>
             ) : (
               <div className="flex items-center gap-2">
-                <Link
-                  to="/login"
-                  className="px-4 py-2 text-muted-foreground hover:text-foreground transition-colors"
-                >
+                <Link to="/login" className="px-4 py-2 text-muted-foreground hover:text-foreground transition-colors">
                   {t("nav.signIn")}
                 </Link>
                 <Link
@@ -483,9 +552,7 @@ const Navbar = () => {
         </div>
       </div>
 
-      {isMenuOpen && (
-        <div className="md:hidden fixed inset-0 z-40 bg-black/40" onClick={closeMobileMenu} />
-      )}
+      {isMenuOpen && <div className="md:hidden fixed inset-0 z-40 bg-black/40" onClick={closeMobileMenu} />}
 
       <aside
         className={`md:hidden fixed top-0 left-0 bottom-0 z-50 w-[240px] bg-background border-r border-border transform transition-transform duration-300 ${
@@ -507,24 +574,45 @@ const Navbar = () => {
         </div>
 
         <nav className="flex-1 overflow-y-auto p-3 space-y-1">
-          <Link to="/about" className={navItemClass} onClick={closeMobileMenu}>
-            {t("nav.about")}
+          <div className="px-3 pb-2">
+            <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-muted-foreground">
+              {t("nav.menu", { defaultValue: "Main Menu" })}
+            </p>
+          </div>
+
+          <Link to="/about" className={mobileLinkClass} onClick={closeMobileMenu}>
+            <Info className="w-4 h-4 shrink-0" />
+            <span>{t("nav.about")}</span>
           </Link>
-          <Link to="/learn-more" className={navItemClass} onClick={closeMobileMenu}>
-            {t("nav.learnMore")}
+          <Link to="/learn-more" className={mobileLinkClass} onClick={closeMobileMenu}>
+            <BookOpen className="w-4 h-4 shrink-0" />
+            <span>{t("nav.learnMore")}</span>
           </Link>
-          <Link to="/translation-service" className={navItemClass} onClick={closeMobileMenu}>
-            {t("nav.translationService", { defaultValue: "Translation Service" })}
+          <Link to="/translation-service" className={mobileLinkClass} onClick={closeMobileMenu}>
+            <Languages className="w-4 h-4 shrink-0" />
+            <span>{t("nav.translationService", { defaultValue: "Translation Service" })}</span>
           </Link>
-          <Link to="/gallery" className={navItemClass} onClick={closeMobileMenu}>
-            {t("nav.gallery", { defaultValue: "Gallery" })}
+          <Link to="/gallery" className={mobileLinkClass} onClick={closeMobileMenu}>
+            <Image className="w-4 h-4 shrink-0" />
+            <span>{t("nav.gallery", { defaultValue: "Gallery" })}</span>
+          </Link>
+          <Link to="/news" className={mobileLinkClass} onClick={closeMobileMenu}>
+            <Newspaper className="w-4 h-4 shrink-0" />
+            <span>{t("nav.news", { defaultValue: "News" })}</span>
+          </Link>
+          <Link to="/blog" className={mobileLinkClass} onClick={closeMobileMenu}>
+            <FileText className="w-4 h-4 shrink-0" />
+            <span>{t("nav.articles", { defaultValue: "Articles" })}</span>
           </Link>
 
           {user && user.role !== "ADMIN" && (
-            <Link to="/select-country" className={navItemClass} onClick={closeMobileMenu}>
-              <FileText className="w-4 h-4" />
-              {t("nav.apply")}
-            </Link>
+            <>
+              <div className="my-2 border-t border-dashed border-border/70" />
+              <Link to="/select-country" className={mobileLinkClass} onClick={closeMobileMenu}>
+                <FileText className="w-4 h-4 shrink-0" />
+                <span>{t("nav.apply")}</span>
+              </Link>
+            </>
           )}
         </nav>
       </aside>

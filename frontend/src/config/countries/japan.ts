@@ -31,21 +31,21 @@ export const japanConfig: CountryConfig = {
   requiredDocuments: [
     'Valid Passport',
     'Passport-size Photo (4.5cm x 4.5cm, white background)',
-    'Visa Application Form',
-    'Flight Itinerary',
-    'Hotel Reservations or Invitation Letter',
-    'Bank Statements (3 months)',
-    'Employment Certificate',
+    'Visa Application Form (prepared after applicant fills form data)',
+    'Flight Itinerary (service supported)',
+    'Hotel Reservations (service supported)',
+    'Invitation Letter / Guarantee Letter (optional)',
+    'Bank Statements (6 months summary)',
+    'Employment Certificate or School Certificate',
     'Income Tax Return',
-    'Daily Schedule/Itinerary',
-    'Guarantee Letter (if applicable)'
+    'Travel Itinerary (service supported)'
   ],
   interviewRequired: false,
   processingTimeline: '5-7 business days for tourist visa, longer for work/student visas',
   paymentPricing: {
-    baseFee: 3000,
-    currency: 'JPY',
-    serviceFee: 5000
+    baseFee: 104000,
+    currency: 'MNT',
+    serviceFee: 218400
   },
   helpText: {
     ties: 'Provide evidence of ties to Mongolia: employment, property ownership, family.',
@@ -54,7 +54,7 @@ export const japanConfig: CountryConfig = {
     history: 'Previous travel to developed countries strengthens your application.',
     guarantor: 'Japanese guarantor or inviter can significantly help your application.'
   },
-  embassyRequirements: 'Apply through authorized travel agency in Mongolia. Direct application at Embassy not accepted for most visa types.',
+  embassyRequirements: 'Applications can be processed via online submission and VAC/Embassy channel based on case requirements.',
   localizedTerms: {
     en: {
       visa: 'Visa',

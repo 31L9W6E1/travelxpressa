@@ -66,7 +66,17 @@ export interface TravelInfo {
   intendedLengthOfStay: string;
   addressWhileInUS?: USAddress;
   noUSAddressYet?: boolean;
-  destinationCountry?: 'USA' | 'JAPAN' | 'SCHENGEN' | 'UK' | 'CANADA' | 'AUSTRALIA' | 'OTHER';
+  destinationCountry?:
+    | 'USA'
+    | 'JAPAN'
+    | 'SCHENGEN'
+    | 'UK'
+    | 'CANADA'
+    | 'AUSTRALIA'
+    | 'IRELAND'
+    | 'NEW_ZEALAND'
+    | 'KOREA'
+    | 'OTHER';
   supportServices?: {
     hotelBooking?: boolean;
     preFlightBooking?: boolean;
@@ -74,6 +84,11 @@ export interface TravelInfo {
     declarationFormAssistance?: boolean;
   };
   supportNotes?: string;
+  hasInviter?: boolean;
+  inviterName?: string;
+  inviterRelationship?: string;
+  inviterAddress?: string;
+  inviterPhone?: string;
   payingForTrip: string;
   travelingWithOthers: boolean;
   companions?: Array<{

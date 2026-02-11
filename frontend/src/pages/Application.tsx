@@ -81,7 +81,34 @@ interface TravelInfo {
   usAddress: string;
   usCity: string;
   usState: string;
+  noAddressYet: boolean;
   payingForTrip: string;
+  hasInviter: boolean;
+  inviterName: string;
+  inviterRelationship: string;
+  inviterAddress: string;
+  inviterPhone: string;
+  needFlightItinerary: boolean;
+  needHotelReservation: boolean;
+  needTravelItinerary: boolean;
+}
+
+interface FamilyInfo {
+  fatherSurnames: string;
+  fatherGivenNames: string;
+  motherSurnames: string;
+  motherGivenNames: string;
+  hasSpouse: boolean;
+  spouseFullName: string;
+  hasChildren: boolean;
+  numberOfChildren: string;
+}
+
+interface WorkEducationInfo {
+  primaryOccupation: string;
+  employerOrSchoolName: string;
+  monthlySalary: string;
+  jobDuties: string;
 }
 
 interface FormData {
@@ -89,6 +116,8 @@ interface FormData {
   contactInfo: ContactInfo;
   passportInfo: PassportInfo;
   travelInfo: TravelInfo;
+  familyInfo: FamilyInfo;
+  workEducation: WorkEducationInfo;
 }
 
 const initialFormData: FormData = {
@@ -129,7 +158,32 @@ const initialFormData: FormData = {
     usAddress: '',
     usCity: '',
     usState: '',
+    noAddressYet: false,
     payingForTrip: '',
+    hasInviter: false,
+    inviterName: '',
+    inviterRelationship: '',
+    inviterAddress: '',
+    inviterPhone: '',
+    needFlightItinerary: false,
+    needHotelReservation: false,
+    needTravelItinerary: false,
+  },
+  familyInfo: {
+    fatherSurnames: '',
+    fatherGivenNames: '',
+    motherSurnames: '',
+    motherGivenNames: '',
+    hasSpouse: false,
+    spouseFullName: '',
+    hasChildren: false,
+    numberOfChildren: '',
+  },
+  workEducation: {
+    primaryOccupation: '',
+    employerOrSchoolName: '',
+    monthlySalary: '',
+    jobDuties: '',
   },
 };
 
@@ -227,7 +281,7 @@ export default function Application() {
         // NOTE: The list endpoint intentionally returns only metadata (no decrypted form sections).
         // Fetch the full application by ID to restore saved form data.
         const fullDraft = await applicationsApi.getById(draftMeta.id);
-        setCurrentStep(fullDraft.currentStep || 1);
+        setCurrentStep(Math.min(fullDraft.currentStep || 1, 7));
 
         const nextFormData: FormData = {
           personalInfo: fullDraft.personalInfo
@@ -274,9 +328,38 @@ export default function Application() {
                 usAddress: fullDraft.travelInfo.addressWhileInUS?.street || '',
                 usCity: fullDraft.travelInfo.addressWhileInUS?.city || '',
                 usState: fullDraft.travelInfo.addressWhileInUS?.state || '',
+                noAddressYet: Boolean((fullDraft.travelInfo as any).noUSAddressYet),
                 payingForTrip: fullDraft.travelInfo.payingForTrip || '',
+                hasInviter: Boolean((fullDraft.travelInfo as any).hasInviter),
+                inviterName: String((fullDraft.travelInfo as any).inviterName || ''),
+                inviterRelationship: String((fullDraft.travelInfo as any).inviterRelationship || ''),
+                inviterAddress: String((fullDraft.travelInfo as any).inviterAddress || ''),
+                inviterPhone: String((fullDraft.travelInfo as any).inviterPhone || ''),
+                needFlightItinerary: Boolean((fullDraft.travelInfo as any).supportServices?.preFlightBooking),
+                needHotelReservation: Boolean((fullDraft.travelInfo as any).supportServices?.hotelBooking),
+                needTravelItinerary: Boolean((fullDraft.travelInfo as any).supportServices?.travelItinerary),
               }
             : initialFormData.travelInfo,
+          familyInfo: fullDraft.familyInfo
+            ? {
+                fatherSurnames: fullDraft.familyInfo.fatherSurnames || '',
+                fatherGivenNames: fullDraft.familyInfo.fatherGivenNames || '',
+                motherSurnames: fullDraft.familyInfo.motherSurnames || '',
+                motherGivenNames: fullDraft.familyInfo.motherGivenNames || '',
+                hasSpouse: Boolean(fullDraft.familyInfo.hasSpouse),
+                spouseFullName: fullDraft.familyInfo.spouseFullName || '',
+                hasChildren: Boolean(fullDraft.familyInfo.hasChildren),
+                numberOfChildren: String(fullDraft.familyInfo.children?.length || ''),
+              }
+            : initialFormData.familyInfo,
+          workEducation: fullDraft.workEducation
+            ? {
+                primaryOccupation: fullDraft.workEducation.primaryOccupation || '',
+                employerOrSchoolName: fullDraft.workEducation.presentEmployerName || '',
+                monthlySalary: fullDraft.workEducation.monthlySalary || '',
+                jobDuties: fullDraft.workEducation.jobDuties || '',
+              }
+            : initialFormData.workEducation,
         };
 
         setFormData(nextFormData);
@@ -319,10 +402,12 @@ export default function Application() {
     { id: 2, name: t('form.steps.contact', { defaultValue: 'Contact Info' }), icon: <Phone className="w-5 h-5" />, status: currentStep === 2 ? 'current' : currentStep > 2 ? 'completed' : 'pending' },
     { id: 3, name: t('form.steps.passport', { defaultValue: 'Passport' }), icon: <FileText className="w-5 h-5" />, status: currentStep === 3 ? 'current' : currentStep > 3 ? 'completed' : 'pending' },
     { id: 4, name: t('form.steps.travel', { defaultValue: 'Travel Plans' }), icon: <Plane className="w-5 h-5" />, status: currentStep === 4 ? 'current' : currentStep > 4 ? 'completed' : 'pending' },
-    { id: 5, name: t('form.steps.review', { defaultValue: 'Review' }), icon: <Shield className="w-5 h-5" />, status: currentStep === 5 ? 'current' : 'pending' },
+    { id: 5, name: t('form.steps.family', { defaultValue: 'Family' }), icon: <Users className="w-5 h-5" />, status: currentStep === 5 ? 'current' : currentStep > 5 ? 'completed' : 'pending' },
+    { id: 6, name: t('form.steps.work', { defaultValue: 'Work' }), icon: <Briefcase className="w-5 h-5" />, status: currentStep === 6 ? 'current' : currentStep > 6 ? 'completed' : 'pending' },
+    { id: 7, name: t('form.steps.review', { defaultValue: 'Review' }), icon: <Shield className="w-5 h-5" />, status: currentStep === 7 ? 'current' : 'pending' },
   ];
 
-  const updateFormData = (section: keyof FormData, field: string, value: string) => {
+  const updateFormData = (section: keyof FormData, field: string, value: any) => {
     setFormData(prev => ({
       ...prev,
       [section]: {
@@ -360,7 +445,23 @@ export default function Application() {
     } else if (step === 4) {
       if (!formData.travelInfo.purposeOfTrip) newErrors.purposeOfTrip = t('form.validation.required', { defaultValue: 'Required' });
       if (!formData.travelInfo.intendedArrivalDate) newErrors.intendedArrivalDate = t('form.validation.required', { defaultValue: 'Required' });
-      if (!formData.travelInfo.usAddress) newErrors.usAddress = t('form.validation.required', { defaultValue: 'Required' });
+      if (!formData.travelInfo.noAddressYet && !formData.travelInfo.usAddress) {
+        newErrors.usAddress = t('form.validation.required', { defaultValue: 'Required' });
+      }
+      if (formData.travelInfo.hasInviter && !formData.travelInfo.inviterName) {
+        newErrors.inviterName = t('form.validation.required', { defaultValue: 'Required' });
+      }
+    } else if (step === 5) {
+      if (!formData.familyInfo.fatherSurnames) newErrors.fatherSurnames = t('form.validation.required', { defaultValue: 'Required' });
+      if (!formData.familyInfo.fatherGivenNames) newErrors.fatherGivenNames = t('form.validation.required', { defaultValue: 'Required' });
+      if (!formData.familyInfo.motherSurnames) newErrors.motherSurnames = t('form.validation.required', { defaultValue: 'Required' });
+      if (!formData.familyInfo.motherGivenNames) newErrors.motherGivenNames = t('form.validation.required', { defaultValue: 'Required' });
+      if (formData.familyInfo.hasSpouse && !formData.familyInfo.spouseFullName) {
+        newErrors.spouseFullName = t('form.validation.required', { defaultValue: 'Required' });
+      }
+    } else if (step === 6) {
+      if (!formData.workEducation.primaryOccupation) newErrors.primaryOccupation = t('form.validation.required', { defaultValue: 'Required' });
+      if (!formData.workEducation.employerOrSchoolName) newErrors.employerOrSchoolName = t('form.validation.required', { defaultValue: 'Required' });
     }
 
     setErrors(newErrors);
@@ -369,7 +470,7 @@ export default function Application() {
 
   const handleNext = () => {
     if (validateStep(currentStep)) {
-      setCurrentStep(prev => Math.min(prev + 1, 5));
+      setCurrentStep(prev => Math.min(prev + 1, 7));
     }
   };
 
@@ -428,8 +529,42 @@ export default function Application() {
             city: formData.travelInfo.usCity || '',
             state: formData.travelInfo.usState || '',
           },
+          noUSAddressYet: formData.travelInfo.noAddressYet,
+          destinationCountry: selectedCountryCode,
+          hasInviter: formData.travelInfo.hasInviter,
+          inviterName: formData.travelInfo.inviterName || undefined,
+          inviterRelationship: formData.travelInfo.inviterRelationship || undefined,
+          inviterAddress: formData.travelInfo.inviterAddress || undefined,
+          inviterPhone: formData.travelInfo.inviterPhone || undefined,
+          supportServices: {
+            hotelBooking: formData.travelInfo.needHotelReservation,
+            preFlightBooking: formData.travelInfo.needFlightItinerary,
+            travelItinerary: formData.travelInfo.needTravelItinerary,
+          },
           payingForTrip: formData.travelInfo.payingForTrip || '',
           travelingWithOthers: false,
+        },
+        familyInfo: {
+          fatherSurnames: formData.familyInfo.fatherSurnames || '',
+          fatherGivenNames: formData.familyInfo.fatherGivenNames || '',
+          motherSurnames: formData.familyInfo.motherSurnames || '',
+          motherGivenNames: formData.familyInfo.motherGivenNames || '',
+          hasSpouse: formData.familyInfo.hasSpouse,
+          spouseFullName: formData.familyInfo.hasSpouse ? formData.familyInfo.spouseFullName : undefined,
+          hasChildren: formData.familyInfo.hasChildren,
+          children:
+            formData.familyInfo.hasChildren && Number(formData.familyInfo.numberOfChildren) > 0
+              ? Array.from({ length: Number(formData.familyInfo.numberOfChildren) }).map((_, idx) => ({
+                  fullName: `Child ${idx + 1}`,
+                  relationship: 'CHILD',
+                }))
+              : [],
+        },
+        workEducation: {
+          primaryOccupation: formData.workEducation.primaryOccupation || '',
+          presentEmployerName: formData.workEducation.employerOrSchoolName || '',
+          monthlySalary: formData.workEducation.monthlySalary || undefined,
+          jobDuties: formData.workEducation.jobDuties || undefined,
         },
       };
 
@@ -466,7 +601,7 @@ export default function Application() {
   // Prepare application data for submission (reusable)
   const prepareApplicationData = () => {
     return {
-      currentStep: 5,
+      currentStep: 7,
       personalInfo: {
         surnames: formData.personalInfo.surnames,
         givenNames: formData.personalInfo.givenNames,
@@ -511,8 +646,42 @@ export default function Application() {
           city: formData.travelInfo.usCity,
           state: formData.travelInfo.usState,
         },
+        noUSAddressYet: formData.travelInfo.noAddressYet,
+        destinationCountry: selectedCountryCode,
+        hasInviter: formData.travelInfo.hasInviter,
+        inviterName: formData.travelInfo.inviterName || undefined,
+        inviterRelationship: formData.travelInfo.inviterRelationship || undefined,
+        inviterAddress: formData.travelInfo.inviterAddress || undefined,
+        inviterPhone: formData.travelInfo.inviterPhone || undefined,
+        supportServices: {
+          hotelBooking: formData.travelInfo.needHotelReservation,
+          preFlightBooking: formData.travelInfo.needFlightItinerary,
+          travelItinerary: formData.travelInfo.needTravelItinerary,
+        },
         payingForTrip: formData.travelInfo.payingForTrip,
         travelingWithOthers: false,
+      },
+      familyInfo: {
+        fatherSurnames: formData.familyInfo.fatherSurnames,
+        fatherGivenNames: formData.familyInfo.fatherGivenNames,
+        motherSurnames: formData.familyInfo.motherSurnames,
+        motherGivenNames: formData.familyInfo.motherGivenNames,
+        hasSpouse: formData.familyInfo.hasSpouse,
+        spouseFullName: formData.familyInfo.hasSpouse ? formData.familyInfo.spouseFullName : undefined,
+        hasChildren: formData.familyInfo.hasChildren,
+        children:
+          formData.familyInfo.hasChildren && Number(formData.familyInfo.numberOfChildren) > 0
+            ? Array.from({ length: Number(formData.familyInfo.numberOfChildren) }).map((_, idx) => ({
+                fullName: `Child ${idx + 1}`,
+                relationship: 'CHILD',
+              }))
+            : [],
+      },
+      workEducation: {
+        primaryOccupation: formData.workEducation.primaryOccupation,
+        presentEmployerName: formData.workEducation.employerOrSchoolName,
+        monthlySalary: formData.workEducation.monthlySalary || undefined,
+        jobDuties: formData.workEducation.jobDuties || undefined,
       },
     };
   };
@@ -563,7 +732,7 @@ export default function Application() {
 
   const handleSubmit = async () => {
     // Validate all steps before submission
-    for (let step = 1; step <= 4; step++) {
+    for (let step = 1; step <= 6; step++) {
       if (!validateStep(step)) {
         setCurrentStep(step);
         toast.error(t('applicationPage.toasts.incomplete.title', { defaultValue: 'Incomplete information' }), {
@@ -1038,44 +1207,177 @@ export default function Application() {
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-foreground mb-2">
-                  {t('form.travel.usAddress', { defaultValue: 'US Address' })} *
+                <label className="inline-flex items-center gap-2 text-sm font-medium text-foreground">
+                  <input
+                    type="checkbox"
+                    checked={formData.travelInfo.noAddressYet}
+                    onChange={(e) => updateFormData('travelInfo', 'noAddressYet', e.target.checked)}
+                    className="w-4 h-4 rounded border-border"
+                  />
+                  {t('applicationPage.travel.noAddressYet', {
+                    defaultValue:
+                      "I don't have an exact destination address yet (your team will assist with hotel/itinerary).",
+                  })}
                 </label>
-                <input
-                  type="text"
-                  value={formData.travelInfo.usAddress}
-                  onChange={(e) => updateFormData('travelInfo', 'usAddress', e.target.value)}
-                  className="w-full px-4 py-3 bg-input border border-border rounded-lg text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-ring focus:border-transparent"
-                  placeholder={t('applicationPage.placeholders.usAddress', { defaultValue: 'Hotel or residence address in the US' })}
-                />
-                {errors.usAddress && <p className="mt-1 text-sm text-destructive">{errors.usAddress}</p>}
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-2">
-                  {t('form.contact.city', { defaultValue: 'City' })}
-                </label>
-                <input
-                  type="text"
-                  value={formData.travelInfo.usCity}
-                  onChange={(e) => updateFormData('travelInfo', 'usCity', e.target.value)}
-                  className="w-full px-4 py-3 bg-input border border-border rounded-lg text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-ring focus:border-transparent"
-                  placeholder="New York"
-                />
+              {!formData.travelInfo.noAddressYet && (
+                <>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-foreground mb-2">
+                      {selectedCountryCode === 'USA'
+                        ? t('form.travel.usAddress', { defaultValue: 'US Address' })
+                        : t('applicationPage.travel.destinationAddress', { defaultValue: 'Destination Address' })}{' '}
+                      *
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.travelInfo.usAddress}
+                      onChange={(e) => updateFormData('travelInfo', 'usAddress', e.target.value)}
+                      className="w-full px-4 py-3 bg-input border border-border rounded-lg text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-ring focus:border-transparent"
+                      placeholder={
+                        selectedCountryCode === 'USA'
+                          ? t('applicationPage.placeholders.usAddress', { defaultValue: 'Hotel or residence address in the US' })
+                          : t('applicationPage.travel.destinationAddressPlaceholder', { defaultValue: 'Hotel or residence address in destination country' })
+                      }
+                    />
+                    {errors.usAddress && <p className="mt-1 text-sm text-destructive">{errors.usAddress}</p>}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-2">
+                      {t('form.contact.city', { defaultValue: 'City' })}
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.travelInfo.usCity}
+                      onChange={(e) => updateFormData('travelInfo', 'usCity', e.target.value)}
+                      className="w-full px-4 py-3 bg-input border border-border rounded-lg text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-ring focus:border-transparent"
+                      placeholder={selectedCountryCode === 'USA' ? 'New York' : 'Tokyo'}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-2">
+                      {t('form.contact.state', { defaultValue: 'State/Region' })}
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.travelInfo.usState}
+                      onChange={(e) => updateFormData('travelInfo', 'usState', e.target.value)}
+                      className="w-full px-4 py-3 bg-input border border-border rounded-lg text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-ring focus:border-transparent"
+                      placeholder={selectedCountryCode === 'USA' ? 'NY' : 'Tokyo'}
+                    />
+                  </div>
+                </>
+              )}
+
+              <div className="md:col-span-2 rounded-lg border border-border p-4">
+                <p className="text-sm font-medium text-foreground mb-3">
+                  {t('applicationPage.travel.supportServices', {
+                    defaultValue: 'Travel support services (our team can prepare these)',
+                  })}
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <label className="inline-flex items-center gap-2 text-sm text-foreground">
+                    <input
+                      type="checkbox"
+                      checked={formData.travelInfo.needFlightItinerary}
+                      onChange={(e) => updateFormData('travelInfo', 'needFlightItinerary', e.target.checked)}
+                      className="w-4 h-4 rounded border-border"
+                    />
+                    {t('applicationPage.travel.needFlightItinerary', { defaultValue: 'Flight itinerary (we will do it)' })}
+                  </label>
+                  <label className="inline-flex items-center gap-2 text-sm text-foreground">
+                    <input
+                      type="checkbox"
+                      checked={formData.travelInfo.needHotelReservation}
+                      onChange={(e) => updateFormData('travelInfo', 'needHotelReservation', e.target.checked)}
+                      className="w-4 h-4 rounded border-border"
+                    />
+                    {t('applicationPage.travel.needHotelReservation', { defaultValue: 'Hotel reservation (we will do it)' })}
+                  </label>
+                  <label className="inline-flex items-center gap-2 text-sm text-foreground">
+                    <input
+                      type="checkbox"
+                      checked={formData.travelInfo.needTravelItinerary}
+                      onChange={(e) => updateFormData('travelInfo', 'needTravelItinerary', e.target.checked)}
+                      className="w-4 h-4 rounded border-border"
+                    />
+                    {t('applicationPage.travel.needTravelItinerary', { defaultValue: 'Travel itinerary (we will do it)' })}
+                  </label>
+                </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-2">
-                  {t('form.contact.state', { defaultValue: 'State' })}
-                </label>
+              <div className="md:col-span-2 flex items-center gap-2">
                 <input
-                  type="text"
-                  value={formData.travelInfo.usState}
-                  onChange={(e) => updateFormData('travelInfo', 'usState', e.target.value)}
-                  className="w-full px-4 py-3 bg-input border border-border rounded-lg text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-ring focus:border-transparent"
-                  placeholder="NY"
+                  id="hasInviter"
+                  type="checkbox"
+                  checked={formData.travelInfo.hasInviter}
+                  onChange={(e) => updateFormData('travelInfo', 'hasInviter', e.target.checked)}
+                  className="w-4 h-4 rounded border-border"
                 />
+                <label htmlFor="hasInviter" className="text-sm font-medium text-foreground">
+                  {t('applicationPage.travel.hasInviter', { defaultValue: 'I have an inviter / guarantor' })}
+                </label>
               </div>
+
+              {formData.travelInfo.hasInviter && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-2">
+                      {t('applicationPage.travel.inviterName', { defaultValue: 'Inviter Full Name' })} *
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.travelInfo.inviterName}
+                      onChange={(e) => updateFormData('travelInfo', 'inviterName', e.target.value)}
+                      className="w-full px-4 py-3 bg-input border border-border rounded-lg text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-ring focus:border-transparent"
+                      placeholder="Inviter full name"
+                    />
+                    {errors.inviterName && <p className="mt-1 text-sm text-destructive">{errors.inviterName}</p>}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-2">
+                      {t('applicationPage.travel.inviterRelationship', { defaultValue: 'Relationship' })}
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.travelInfo.inviterRelationship}
+                      onChange={(e) => updateFormData('travelInfo', 'inviterRelationship', e.target.value)}
+                      className="w-full px-4 py-3 bg-input border border-border rounded-lg text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-ring focus:border-transparent"
+                      placeholder="Friend / Relative / Employer"
+                    />
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-foreground mb-2">
+                      {t('applicationPage.travel.inviterAddress', { defaultValue: 'Inviter Address' })}
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.travelInfo.inviterAddress}
+                      onChange={(e) => updateFormData('travelInfo', 'inviterAddress', e.target.value)}
+                      className="w-full px-4 py-3 bg-input border border-border rounded-lg text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-ring focus:border-transparent"
+                      placeholder="Inviter address"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-2">
+                      {t('applicationPage.travel.inviterPhone', { defaultValue: 'Inviter Phone' })}
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.travelInfo.inviterPhone}
+                      onChange={(e) => updateFormData('travelInfo', 'inviterPhone', e.target.value)}
+                      className="w-full px-4 py-3 bg-input border border-border rounded-lg text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-ring focus:border-transparent"
+                      placeholder="+81 ..."
+                    />
+                  </div>
+                </>
+              )}
 
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-foreground mb-2">
@@ -1108,6 +1410,196 @@ export default function Application() {
         );
 
       case 5:
+        return (
+          <div className="space-y-6">
+            <h3 className="text-xl font-semibold text-foreground mb-6">
+              {t('form.family.title', { defaultValue: 'Family Information' })}
+            </h3>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  {t('form.family.fatherSurname', { defaultValue: "Father's Surname" })} *
+                </label>
+                <input
+                  type="text"
+                  value={formData.familyInfo.fatherSurnames}
+                  onChange={(e) => updateFormData('familyInfo', 'fatherSurnames', e.target.value.toUpperCase())}
+                  className="w-full px-4 py-3 bg-input border border-border rounded-lg text-foreground focus:ring-2 focus:ring-ring focus:border-transparent uppercase"
+                  placeholder="SMITH"
+                />
+                {errors.fatherSurnames && <p className="mt-1 text-sm text-destructive">{errors.fatherSurnames}</p>}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  {t('form.family.fatherGivenName', { defaultValue: "Father's Given Name" })} *
+                </label>
+                <input
+                  type="text"
+                  value={formData.familyInfo.fatherGivenNames}
+                  onChange={(e) => updateFormData('familyInfo', 'fatherGivenNames', e.target.value.toUpperCase())}
+                  className="w-full px-4 py-3 bg-input border border-border rounded-lg text-foreground focus:ring-2 focus:ring-ring focus:border-transparent uppercase"
+                  placeholder="JOHN"
+                />
+                {errors.fatherGivenNames && <p className="mt-1 text-sm text-destructive">{errors.fatherGivenNames}</p>}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  {t('form.family.motherSurname', { defaultValue: "Mother's Surname" })} *
+                </label>
+                <input
+                  type="text"
+                  value={formData.familyInfo.motherSurnames}
+                  onChange={(e) => updateFormData('familyInfo', 'motherSurnames', e.target.value.toUpperCase())}
+                  className="w-full px-4 py-3 bg-input border border-border rounded-lg text-foreground focus:ring-2 focus:ring-ring focus:border-transparent uppercase"
+                  placeholder="DOE"
+                />
+                {errors.motherSurnames && <p className="mt-1 text-sm text-destructive">{errors.motherSurnames}</p>}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  {t('form.family.motherGivenName', { defaultValue: "Mother's Given Name" })} *
+                </label>
+                <input
+                  type="text"
+                  value={formData.familyInfo.motherGivenNames}
+                  onChange={(e) => updateFormData('familyInfo', 'motherGivenNames', e.target.value.toUpperCase())}
+                  className="w-full px-4 py-3 bg-input border border-border rounded-lg text-foreground focus:ring-2 focus:ring-ring focus:border-transparent uppercase"
+                  placeholder="JANE"
+                />
+                {errors.motherGivenNames && <p className="mt-1 text-sm text-destructive">{errors.motherGivenNames}</p>}
+              </div>
+
+              <div className="md:col-span-2 flex flex-wrap gap-6">
+                <label className="flex items-center gap-2 text-sm text-foreground">
+                  <input
+                    type="checkbox"
+                    checked={formData.familyInfo.hasSpouse}
+                    onChange={(e) => updateFormData('familyInfo', 'hasSpouse', e.target.checked)}
+                    className="w-4 h-4 rounded border-border"
+                  />
+                  {t('form.family.hasSpouse', { defaultValue: 'I have a spouse' })}
+                </label>
+
+                <label className="flex items-center gap-2 text-sm text-foreground">
+                  <input
+                    type="checkbox"
+                    checked={formData.familyInfo.hasChildren}
+                    onChange={(e) => updateFormData('familyInfo', 'hasChildren', e.target.checked)}
+                    className="w-4 h-4 rounded border-border"
+                  />
+                  {t('form.family.hasChildren', { defaultValue: 'I have children' })}
+                </label>
+              </div>
+
+              {formData.familyInfo.hasSpouse && (
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-foreground mb-2">
+                    {t('form.family.spouseName', { defaultValue: 'Spouse Full Name' })} *
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.familyInfo.spouseFullName}
+                    onChange={(e) => updateFormData('familyInfo', 'spouseFullName', e.target.value)}
+                    className="w-full px-4 py-3 bg-input border border-border rounded-lg text-foreground focus:ring-2 focus:ring-ring focus:border-transparent"
+                    placeholder="Spouse full name"
+                  />
+                  {errors.spouseFullName && <p className="mt-1 text-sm text-destructive">{errors.spouseFullName}</p>}
+                </div>
+              )}
+
+              {formData.familyInfo.hasChildren && (
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-2">
+                    {t('form.family.numberOfChildren', { defaultValue: 'Number of Children' })}
+                  </label>
+                  <input
+                    type="number"
+                    min={1}
+                    value={formData.familyInfo.numberOfChildren}
+                    onChange={(e) => updateFormData('familyInfo', 'numberOfChildren', e.target.value)}
+                    className="w-full px-4 py-3 bg-input border border-border rounded-lg text-foreground focus:ring-2 focus:ring-ring focus:border-transparent"
+                    placeholder="1"
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+        );
+
+      case 6:
+        return (
+          <div className="space-y-6">
+            <h3 className="text-xl font-semibold text-foreground mb-6">
+              {t('form.work.title', { defaultValue: 'Work / Education Information' })}
+            </h3>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  {t('form.work.primaryOccupation', { defaultValue: 'Primary Occupation' })} *
+                </label>
+                <select
+                  value={formData.workEducation.primaryOccupation}
+                  onChange={(e) => updateFormData('workEducation', 'primaryOccupation', e.target.value)}
+                  className="w-full px-4 py-3 bg-input border border-border rounded-lg text-foreground focus:ring-2 focus:ring-ring focus:border-transparent"
+                >
+                  <option value="">{t('common.select', { defaultValue: 'Select' })}</option>
+                  <option value="STUDENT">{t('form.work.options.student', { defaultValue: 'Student' })}</option>
+                  <option value="EMPLOYED">{t('form.work.options.employed', { defaultValue: 'Employed' })}</option>
+                  <option value="SELF_EMPLOYED">{t('form.work.options.selfEmployed', { defaultValue: 'Self-Employed' })}</option>
+                  <option value="UNEMPLOYED">{t('form.work.options.unemployed', { defaultValue: 'Unemployed' })}</option>
+                  <option value="OTHER">{t('form.work.options.other', { defaultValue: 'Other' })}</option>
+                </select>
+                {errors.primaryOccupation && <p className="mt-1 text-sm text-destructive">{errors.primaryOccupation}</p>}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  {t('form.work.orgName', { defaultValue: 'Employer / School Name' })} *
+                </label>
+                <input
+                  type="text"
+                  value={formData.workEducation.employerOrSchoolName}
+                  onChange={(e) => updateFormData('workEducation', 'employerOrSchoolName', e.target.value)}
+                  className="w-full px-4 py-3 bg-input border border-border rounded-lg text-foreground focus:ring-2 focus:ring-ring focus:border-transparent"
+                  placeholder="Organization name"
+                />
+                {errors.employerOrSchoolName && <p className="mt-1 text-sm text-destructive">{errors.employerOrSchoolName}</p>}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  {t('form.work.monthlyIncome', { defaultValue: 'Monthly Income (optional)' })}
+                </label>
+                <input
+                  type="text"
+                  value={formData.workEducation.monthlySalary}
+                  onChange={(e) => updateFormData('workEducation', 'monthlySalary', e.target.value)}
+                  className="w-full px-4 py-3 bg-input border border-border rounded-lg text-foreground focus:ring-2 focus:ring-ring focus:border-transparent"
+                  placeholder="e.g. 2,500,000 MNT"
+                />
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  {t('form.work.duties', { defaultValue: 'Job / Study Details' })}
+                </label>
+                <textarea
+                  value={formData.workEducation.jobDuties}
+                  onChange={(e) => updateFormData('workEducation', 'jobDuties', e.target.value)}
+                  className="w-full min-h-[120px] px-4 py-3 bg-input border border-border rounded-lg text-foreground focus:ring-2 focus:ring-ring focus:border-transparent"
+                  placeholder={t('form.work.dutiesPlaceholder', { defaultValue: 'Describe your role, program, or responsibilities' })}
+                />
+              </div>
+            </div>
+          </div>
+        );
+
+      case 7:
         return (
           <div className="space-y-6">
             <h3 className="text-xl font-semibold text-foreground mb-6">
@@ -1297,10 +1789,127 @@ export default function Application() {
                       {t('form.travel.usAddress', { defaultValue: 'US Address' })}:
                     </span>{' '}
                     <span className="text-foreground ml-2">
-                      {formData.travelInfo.usAddress}, {formData.travelInfo.usCity} {formData.travelInfo.usState}
+                      {formData.travelInfo.noAddressYet
+                        ? t('applicationPage.travel.noAddressSelected', {
+                            defaultValue: 'Address will be arranged with hotel/itinerary support.',
+                          })
+                        : `${formData.travelInfo.usAddress}, ${formData.travelInfo.usCity} ${formData.travelInfo.usState}`}
+                    </span>
+                  </div>
+                  {formData.travelInfo.hasInviter && (
+                    <div className="col-span-2">
+                      <span className="text-muted-foreground">
+                        {t('applicationPage.travel.inviterName', { defaultValue: 'Inviter' })}:
+                      </span>{' '}
+                      <span className="text-foreground ml-2">
+                        {formData.travelInfo.inviterName}
+                        {formData.travelInfo.inviterRelationship ? ` (${formData.travelInfo.inviterRelationship})` : ''}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Family Summary */}
+              <div className="bg-muted/50 border border-border rounded-xl p-6">
+                <h4 className="text-lg font-medium text-foreground mb-4 flex items-center gap-2">
+                  <Users className="w-5 h-5" />
+                  {t('form.family.title', { defaultValue: 'Family Information' })}
+                </h4>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="text-muted-foreground">{t('form.family.fatherGivenName', { defaultValue: "Father" })}:</span>{' '}
+                    <span className="text-foreground ml-2">
+                      {formData.familyInfo.fatherSurnames} {formData.familyInfo.fatherGivenNames}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">{t('form.family.motherGivenName', { defaultValue: "Mother" })}:</span>{' '}
+                    <span className="text-foreground ml-2">
+                      {formData.familyInfo.motherSurnames} {formData.familyInfo.motherGivenNames}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">{t('form.family.hasSpouse', { defaultValue: 'Spouse' })}:</span>{' '}
+                    <span className="text-foreground ml-2">
+                      {formData.familyInfo.hasSpouse
+                        ? formData.familyInfo.spouseFullName || t('common.yes', { defaultValue: 'Yes' })
+                        : t('common.no', { defaultValue: 'No' })}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">{t('form.family.hasChildren', { defaultValue: 'Children' })}:</span>{' '}
+                    <span className="text-foreground ml-2">
+                      {formData.familyInfo.hasChildren
+                        ? formData.familyInfo.numberOfChildren || t('common.yes', { defaultValue: 'Yes' })
+                        : t('common.no', { defaultValue: 'No' })}
                     </span>
                   </div>
                 </div>
+              </div>
+
+              {/* Work Summary */}
+              <div className="bg-muted/50 border border-border rounded-xl p-6">
+                <h4 className="text-lg font-medium text-foreground mb-4 flex items-center gap-2">
+                  <Briefcase className="w-5 h-5" />
+                  {t('form.work.title', { defaultValue: 'Work / Education Information' })}
+                </h4>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="text-muted-foreground">{t('form.work.primaryOccupation', { defaultValue: 'Occupation' })}:</span>{' '}
+                    <span className="text-foreground ml-2">{formData.workEducation.primaryOccupation}</span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">{t('form.work.orgName', { defaultValue: 'Employer / School' })}:</span>{' '}
+                    <span className="text-foreground ml-2">{formData.workEducation.employerOrSchoolName}</span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">{t('form.work.monthlyIncome', { defaultValue: 'Monthly Income' })}:</span>{' '}
+                    <span className="text-foreground ml-2">{formData.workEducation.monthlySalary || '-'}</span>
+                  </div>
+                  <div className="col-span-2">
+                    <span className="text-muted-foreground">{t('form.work.duties', { defaultValue: 'Details' })}:</span>{' '}
+                    <span className="text-foreground ml-2">{formData.workEducation.jobDuties || '-'}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Japan Requirements */}
+              {selectedCountryCode === 'JAPAN' && (
+                <div className="bg-primary/5 border border-primary/20 rounded-xl p-6">
+                  <h4 className="text-lg font-medium text-foreground mb-4">
+                    {t('applicationPage.japan.requiredDocsTitle', { defaultValue: 'Required Documents (Japan)' })}
+                  </h4>
+                  <ul className="space-y-2 text-sm text-muted-foreground list-disc pl-5">
+                    <li>Valid Passport</li>
+                    <li>Passport-size Photo (4.5cm x 4.5cm, white background)</li>
+                    <li>Visa Application Form (prepared after user information is complete)</li>
+                    <li>Flight Itinerary (we will do it if selected)</li>
+                    <li>Hotel Reservations (we will do it if selected)</li>
+                    <li>Invitation / Guarantee Letter (optional)</li>
+                    <li>Bank Statements (6 months summary)</li>
+                    <li>Employment Certificate or School Certificate</li>
+                    <li>Income Tax Return</li>
+                    <li>Travel Itinerary (we will do it if selected)</li>
+                  </ul>
+                  <div className="mt-4 text-sm text-foreground">
+                    <p>Online visa fee: <strong>104,000 MNT</strong></p>
+                    <p>Service fee formula: <strong>104,000 x 2 + 5% = 218,400 MNT</strong></p>
+                    <p>Application channels: <strong>Online</strong> and <strong>VAC/Embassy</strong>.</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Document Submission Notice */}
+              <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-6">
+                <p className="text-sm text-foreground">
+                  {t('applicationPage.docs.emailNotice', {
+                    defaultValue: 'No document upload is required here. You can send supporting files by email:',
+                  })}{' '}
+                  <a href="mailto:example@email.com" className="font-semibold text-blue-600 dark:text-blue-400 underline">
+                    example@email.com
+                  </a>
+                </p>
               </div>
 
               {/* Warning */}
@@ -1440,7 +2049,7 @@ export default function Application() {
                 {t('form.actions.saveDraft', { defaultValue: 'Save Draft' })}
               </button>
 
-              {currentStep < 5 ? (
+              {currentStep < 7 ? (
                 <button
                   onClick={handleNext}
                   className="flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg font-semibold hover:bg-primary/90 transition-all"

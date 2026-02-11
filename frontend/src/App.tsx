@@ -92,7 +92,7 @@ function App() {
         <div className="min-h-screen bg-background">
           <Navbar />
 
-          <main className="pt-16 md:pt-0 md:pl-[240px]">
+          <main className="pt-16 md:pt-16 md:pl-[240px]">
             <Routes>
             {/* 
               "/" is the FIRST page that loads

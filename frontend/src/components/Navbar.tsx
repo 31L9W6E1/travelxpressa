@@ -14,6 +14,7 @@ import {
   MessageSquare,
   Bell,
   User,
+  ChevronDown,
 } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { UserAvatar } from "./UserAvatar";
@@ -37,22 +38,38 @@ const Navbar = () => {
   const { t } = useTranslation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
+
   const notificationDesktopRef = useRef<HTMLDivElement>(null);
   const notificationMobileRef = useRef<HTMLDivElement>(null);
+  const userMenuDesktopRef = useRef<HTMLDivElement>(null);
+  const userMenuMobileRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (!isNotificationOpen) return;
       const target = event.target as Node;
-      const clickedDesktop = notificationDesktopRef.current?.contains(target);
-      const clickedMobile = notificationMobileRef.current?.contains(target);
-      if (!clickedDesktop && !clickedMobile) setIsNotificationOpen(false);
+
+      if (isNotificationOpen) {
+        const clickedNotificationDesktop = notificationDesktopRef.current?.contains(target);
+        const clickedNotificationMobile = notificationMobileRef.current?.contains(target);
+        if (!clickedNotificationDesktop && !clickedNotificationMobile) {
+          setIsNotificationOpen(false);
+        }
+      }
+
+      if (isUserMenuOpen) {
+        const clickedUserDesktop = userMenuDesktopRef.current?.contains(target);
+        const clickedUserMobile = userMenuMobileRef.current?.contains(target);
+        if (!clickedUserDesktop && !clickedUserMobile) {
+          setIsUserMenuOpen(false);
+        }
+      }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isNotificationOpen]);
+  }, [isNotificationOpen, isUserMenuOpen]);
 
   useEffect(() => {
     const loadNotifications = async () => {
@@ -127,6 +144,142 @@ const Navbar = () => {
 
   const closeMobileMenu = () => setIsMenuOpen(false);
 
+  const closeAllMenus = () => {
+    setIsUserMenuOpen(false);
+    setIsNotificationOpen(false);
+  };
+
+  const renderNotifications = (isMobile: boolean) => (
+    <>
+      {notifications.length === 0 ? (
+        <p className="px-4 py-6 text-sm text-muted-foreground text-center">
+          {t("nav.noNotifications", { defaultValue: "No new notifications" })}
+        </p>
+      ) : (
+        notifications.map((item) => (
+          <Link
+            key={item.id}
+            to={item.to}
+            onClick={() => {
+              setIsNotificationOpen(false);
+              if (isMobile) closeMobileMenu();
+            }}
+            className="block px-4 py-3 hover:bg-secondary transition-colors border-b last:border-b-0 border-border"
+          >
+            <p className="text-sm text-card-foreground font-medium">{item.title}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">{item.subtitle}</p>
+          </Link>
+        ))
+      )}
+    </>
+  );
+
+  const renderUserMenu = (isMobile: boolean) => (
+    <div className="py-1">
+      {user?.role === "ADMIN" && (
+        <Link
+          to="/admin"
+          onClick={() => {
+            closeAllMenus();
+            if (isMobile) closeMobileMenu();
+          }}
+          className="flex items-center gap-3 px-4 py-2.5 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+        >
+          <Settings className="w-4 h-4" />
+          {t("nav.admin")}
+        </Link>
+      )}
+
+      {user && (
+        <Link
+          to="/contactsupport"
+          onClick={() => {
+            closeAllMenus();
+            if (isMobile) closeMobileMenu();
+          }}
+          className="flex items-center gap-3 px-4 py-2.5 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+        >
+          <MessageSquare className="w-4 h-4" />
+          {t("nav.support", { defaultValue: "Support" })}
+        </Link>
+      )}
+
+      {user ? (
+        <>
+          <Link
+            to="/profile"
+            onClick={() => {
+              closeAllMenus();
+              if (isMobile) closeMobileMenu();
+            }}
+            className="flex items-center gap-3 px-4 py-2.5 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+          >
+            <User className="w-4 h-4" />
+            {t("nav.profile")}
+          </Link>
+          <Link
+            to="/profile"
+            onClick={() => {
+              closeAllMenus();
+              if (isMobile) closeMobileMenu();
+            }}
+            className="flex items-center gap-3 px-4 py-2.5 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+          >
+            <FileText className="w-4 h-4" />
+            {t("nav.applications")}
+          </Link>
+          <Link
+            to="/profile"
+            onClick={() => {
+              closeAllMenus();
+              if (isMobile) closeMobileMenu();
+            }}
+            className="flex items-center gap-3 px-4 py-2.5 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+          >
+            <CreditCard className="w-4 h-4" />
+            {t("nav.payments")}
+          </Link>
+          <div className="border-t border-border mt-1 pt-1">
+            <button
+              onClick={() => {
+                void logout();
+                closeAllMenus();
+                if (isMobile) closeMobileMenu();
+              }}
+              className="flex items-center gap-3 w-full px-4 py-2.5 text-destructive hover:bg-secondary transition-colors"
+            >
+              <LogOut className="w-4 h-4" />
+              {t("nav.logout")}
+            </button>
+          </div>
+        </>
+      ) : (
+        <>
+          <Link
+            to="/login"
+            onClick={() => {
+              closeAllMenus();
+              if (isMobile) closeMobileMenu();
+            }}
+            className="block px-4 py-2.5 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+          >
+            {t("nav.signIn")}
+          </Link>
+          <Link
+            to="/login"
+            onClick={() => {
+              closeAllMenus();
+              if (isMobile) closeMobileMenu();
+            }}
+            className="block px-4 py-2.5 text-primary-foreground bg-primary hover:opacity-90 transition-opacity rounded-md mx-2 text-center font-medium"
+          >
+            {t("nav.getStarted")}
+          </Link>
+        </>
+      )}
+    </div>
+  );
+
   return (
     <>
       <aside className="hidden md:flex fixed inset-y-0 left-0 z-40 w-[240px] bg-background border-r border-border flex-col">
@@ -137,18 +290,19 @@ const Navbar = () => {
           </Link>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-3 space-y-1">
-          <Link to="/about" className={navItemClass}>{t("nav.about")}</Link>
-          <Link to="/learn-more" className={navItemClass}>{t("nav.learnMore")}</Link>
-          <Link to="/translation-service" className={navItemClass}>{t("nav.translationService", { defaultValue: "Translation Service" })}</Link>
-          <Link to="/gallery" className={navItemClass}>{t("nav.gallery", { defaultValue: "Gallery" })}</Link>
-
-          {user && (
-            <Link to="/contactsupport" className={navItemClass}>
-              <MessageSquare className="w-4 h-4" />
-              {t("nav.support", { defaultValue: "Support" })}
-            </Link>
-          )}
+        <nav className="flex-1 overflow-y-auto p-3 space-y-1">
+          <Link to="/about" className={navItemClass}>
+            {t("nav.about")}
+          </Link>
+          <Link to="/learn-more" className={navItemClass}>
+            {t("nav.learnMore")}
+          </Link>
+          <Link to="/translation-service" className={navItemClass}>
+            {t("nav.translationService", { defaultValue: "Translation Service" })}
+          </Link>
+          <Link to="/gallery" className={navItemClass}>
+            {t("nav.gallery", { defaultValue: "Gallery" })}
+          </Link>
 
           {user && user.role !== "ADMIN" && (
             <Link to="/select-country" className={navItemClass}>
@@ -156,123 +310,95 @@ const Navbar = () => {
               {t("nav.apply")}
             </Link>
           )}
+        </nav>
+      </aside>
 
-          {user?.role === "ADMIN" && (
-            <Link to="/admin" className={navItemClass}>
-              <Settings className="w-4 h-4" />
-              {t("nav.admin")}
-            </Link>
-          )}
-
+      <header className="hidden md:flex fixed top-0 left-[240px] right-0 z-30 h-16 bg-background/90 backdrop-blur-md border-b border-dashed border-border/70 px-6 items-center justify-end">
+        <div className="flex items-center gap-2">
           {user && (
-            <>
-              <div className="my-3 border-t border-dashed border-border/70" />
-              <Link to="/profile" className={navItemClass}>
-                <User className="w-4 h-4" />
-                {t("nav.profile")}
-              </Link>
-              <Link to="/profile" className={navItemClass}>
-                <FileText className="w-4 h-4" />
-                {t("nav.applications")}
-              </Link>
-              <Link to="/profile" className={navItemClass}>
-                <CreditCard className="w-4 h-4" />
-                {t("nav.payments")}
-              </Link>
-            </>
-          )}
-        </div>
-
-        <div className="p-3 border-t border-dashed border-border/70 space-y-3">
-          <div className="flex items-center justify-between">
-            <LanguageSwitcher />
-
-            <div className="flex items-center gap-1">
+            <div className="relative" ref={notificationDesktopRef}>
               <button
-                onClick={toggleTheme}
-                className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
-                aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+                onClick={() => {
+                  setIsNotificationOpen((prev) => !prev);
+                  setIsUserMenuOpen(false);
+                }}
+                className="relative p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+                aria-label="Notifications"
               >
-                {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                <Bell className="w-5 h-5" />
+                {notifications.length > 0 && (
+                  <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 rounded-full bg-primary text-primary-foreground text-[10px] leading-4 text-center">
+                    {notifications.length > 9 ? "9+" : notifications.length}
+                  </span>
+                )}
               </button>
-
-              {user && (
-                <div className="relative" ref={notificationDesktopRef}>
-                  <button
-                    onClick={() => setIsNotificationOpen((prev) => !prev)}
-                    className="relative p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
-                    aria-label="Notifications"
-                  >
-                    <Bell className="w-4 h-4" />
-                    {notifications.length > 0 && (
-                      <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 rounded-full bg-primary text-primary-foreground text-[10px] leading-4 text-center">
-                        {notifications.length > 9 ? "9+" : notifications.length}
-                      </span>
-                    )}
-                  </button>
-
-                  {isNotificationOpen && (
-                    <div className="absolute bottom-11 right-0 w-72 bg-card border border-border rounded-lg shadow-xl overflow-hidden">
-                      <div className="px-4 py-3 border-b border-border">
-                        <p className="text-sm font-medium text-card-foreground">
-                          {t("nav.notifications", { defaultValue: "Notifications" })}
-                        </p>
-                      </div>
-                      <div className="max-h-80 overflow-y-auto">
-                        {notifications.length === 0 ? (
-                          <p className="px-4 py-6 text-sm text-muted-foreground text-center">
-                            {t("nav.noNotifications", { defaultValue: "No new notifications" })}
-                          </p>
-                        ) : (
-                          notifications.map((item) => (
-                            <Link
-                              key={item.id}
-                              to={item.to}
-                              onClick={() => setIsNotificationOpen(false)}
-                              className="block px-4 py-3 hover:bg-secondary transition-colors border-b last:border-b-0 border-border"
-                            >
-                              <p className="text-sm text-card-foreground font-medium">{item.title}</p>
-                              <p className="text-xs text-muted-foreground mt-0.5">{item.subtitle}</p>
-                            </Link>
-                          ))
-                        )}
-                      </div>
-                    </div>
-                  )}
+              {isNotificationOpen && (
+                <div className="absolute right-0 mt-2 w-72 bg-card border border-border rounded-lg shadow-xl overflow-hidden">
+                  <div className="px-4 py-3 border-b border-border">
+                    <p className="text-sm font-medium text-card-foreground">
+                      {t("nav.notifications", { defaultValue: "Notifications" })}
+                    </p>
+                  </div>
+                  <div className="max-h-80 overflow-y-auto">{renderNotifications(false)}</div>
                 </div>
               )}
             </div>
-          </div>
-
-          {user ? (
-            <>
-              <div className="flex items-center gap-3 px-2 py-1">
-                <UserAvatar name={user.name} email={user.email} size="sm" />
-                <div className="min-w-0">
-                  <p className="text-sm font-medium text-foreground truncate">{user.name || user.email?.split("@")[0]}</p>
-                  <p className="text-xs text-muted-foreground truncate">{user.email}</p>
-                </div>
-              </div>
-              <button
-                onClick={() => void logout()}
-                className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-destructive hover:bg-secondary transition-colors text-sm"
-              >
-                <LogOut className="w-4 h-4" />
-                {t("nav.logout")}
-              </button>
-            </>
-          ) : (
-            <div className="space-y-2">
-              <Link to="/login" className="block px-3 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors text-sm">
-                {t("nav.signIn")}
-              </Link>
-              <Link to="/login" className="block px-3 py-2 rounded-lg bg-primary text-primary-foreground font-medium text-sm text-center hover:opacity-90 transition-opacity">
-                {t("nav.getStarted")}
-              </Link>
-            </div>
           )}
+
+          <LanguageSwitcher />
+
+          <button
+            onClick={toggleTheme}
+            className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+            aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+          >
+            {theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+          </button>
+
+          <div className="relative" ref={userMenuDesktopRef}>
+            {user ? (
+              <button
+                onClick={() => {
+                  setIsUserMenuOpen((prev) => !prev);
+                  setIsNotificationOpen(false);
+                }}
+                className="flex items-center gap-2 px-3 py-2 rounded-lg text-foreground hover:bg-secondary transition-colors"
+              >
+                <UserAvatar name={user.name} email={user.email} size="sm" />
+                <span className="text-sm font-medium max-w-28 truncate">{user.name || user.email?.split("@")[0]}</span>
+                <ChevronDown className={`w-4 h-4 transition-transform ${isUserMenuOpen ? "rotate-180" : ""}`} />
+              </button>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Link
+                  to="/login"
+                  className="px-4 py-2 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {t("nav.signIn")}
+                </Link>
+                <Link
+                  to="/login"
+                  className="px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:opacity-90 transition-opacity"
+                >
+                  {t("nav.getStarted")}
+                </Link>
+              </div>
+            )}
+
+            {isUserMenuOpen && (
+              <div className="absolute right-0 mt-2 w-56 bg-card border border-border rounded-lg shadow-xl overflow-hidden">
+                {user && (
+                  <div className="px-4 py-3 border-b border-border">
+                    <p className="text-sm text-card-foreground font-medium truncate">{user.name}</p>
+                    <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                  </div>
+                )}
+                {renderUserMenu(false)}
+              </div>
+            )}
+          </div>
         </div>
-      </aside>
+      </header>
 
       <div className="md:hidden fixed top-0 left-0 right-0 z-50 h-16 bg-background/90 backdrop-blur-md border-b border-dashed border-border/70 px-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -293,7 +419,10 @@ const Navbar = () => {
           {user && (
             <div className="relative" ref={notificationMobileRef}>
               <button
-                onClick={() => setIsNotificationOpen((prev) => !prev)}
+                onClick={() => {
+                  setIsNotificationOpen((prev) => !prev);
+                  setIsUserMenuOpen(false);
+                }}
                 className="relative p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
                 aria-label="Notifications"
               >
@@ -307,28 +436,12 @@ const Navbar = () => {
 
               {isNotificationOpen && (
                 <div className="absolute right-0 mt-2 w-72 bg-card border border-border rounded-lg shadow-xl overflow-hidden">
-                  <div className="max-h-80 overflow-y-auto">
-                    {notifications.length === 0 ? (
-                      <p className="px-4 py-6 text-sm text-muted-foreground text-center">
-                        {t("nav.noNotifications", { defaultValue: "No new notifications" })}
-                      </p>
-                    ) : (
-                      notifications.map((item) => (
-                        <Link
-                          key={item.id}
-                          to={item.to}
-                          onClick={() => {
-                            setIsNotificationOpen(false);
-                            closeMobileMenu();
-                          }}
-                          className="block px-4 py-3 hover:bg-secondary transition-colors border-b last:border-b-0 border-border"
-                        >
-                          <p className="text-sm text-card-foreground font-medium">{item.title}</p>
-                          <p className="text-xs text-muted-foreground mt-0.5">{item.subtitle}</p>
-                        </Link>
-                      ))
-                    )}
+                  <div className="px-4 py-3 border-b border-border">
+                    <p className="text-sm font-medium text-card-foreground">
+                      {t("nav.notifications", { defaultValue: "Notifications" })}
+                    </p>
                   </div>
+                  <div className="max-h-80 overflow-y-auto">{renderNotifications(true)}</div>
                 </div>
               )}
             </div>
@@ -343,6 +456,30 @@ const Navbar = () => {
           >
             {theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
           </button>
+
+          <div className="relative" ref={userMenuMobileRef}>
+            <button
+              onClick={() => {
+                setIsUserMenuOpen((prev) => !prev);
+                setIsNotificationOpen(false);
+              }}
+              className="flex items-center gap-1 p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+            >
+              {user ? <UserAvatar name={user.name} email={user.email} size="sm" /> : <User className="w-5 h-5" />}
+            </button>
+
+            {isUserMenuOpen && (
+              <div className="absolute right-0 mt-2 w-56 bg-card border border-border rounded-lg shadow-xl overflow-hidden">
+                {user && (
+                  <div className="px-4 py-3 border-b border-border">
+                    <p className="text-sm text-card-foreground font-medium truncate">{user.name}</p>
+                    <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                  </div>
+                )}
+                {renderUserMenu(true)}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -360,23 +497,28 @@ const Navbar = () => {
             <Plane className="w-5 h-5 text-foreground" />
             <span className="text-base font-semibold text-foreground">TravelXpressa</span>
           </Link>
-          <button className="p-2 rounded-lg text-foreground hover:bg-secondary" onClick={closeMobileMenu} aria-label="Close menu">
+          <button
+            className="p-2 rounded-lg text-foreground hover:bg-secondary"
+            onClick={closeMobileMenu}
+            aria-label="Close menu"
+          >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-3 space-y-1">
-          <Link to="/about" className={navItemClass} onClick={closeMobileMenu}>{t("nav.about")}</Link>
-          <Link to="/learn-more" className={navItemClass} onClick={closeMobileMenu}>{t("nav.learnMore")}</Link>
-          <Link to="/translation-service" className={navItemClass} onClick={closeMobileMenu}>{t("nav.translationService", { defaultValue: "Translation Service" })}</Link>
-          <Link to="/gallery" className={navItemClass} onClick={closeMobileMenu}>{t("nav.gallery", { defaultValue: "Gallery" })}</Link>
-
-          {user && (
-            <Link to="/contactsupport" className={navItemClass} onClick={closeMobileMenu}>
-              <MessageSquare className="w-4 h-4" />
-              {t("nav.support", { defaultValue: "Support" })}
-            </Link>
-          )}
+        <nav className="flex-1 overflow-y-auto p-3 space-y-1">
+          <Link to="/about" className={navItemClass} onClick={closeMobileMenu}>
+            {t("nav.about")}
+          </Link>
+          <Link to="/learn-more" className={navItemClass} onClick={closeMobileMenu}>
+            {t("nav.learnMore")}
+          </Link>
+          <Link to="/translation-service" className={navItemClass} onClick={closeMobileMenu}>
+            {t("nav.translationService", { defaultValue: "Translation Service" })}
+          </Link>
+          <Link to="/gallery" className={navItemClass} onClick={closeMobileMenu}>
+            {t("nav.gallery", { defaultValue: "Gallery" })}
+          </Link>
 
           {user && user.role !== "ADMIN" && (
             <Link to="/select-country" className={navItemClass} onClick={closeMobileMenu}>
@@ -384,65 +526,7 @@ const Navbar = () => {
               {t("nav.apply")}
             </Link>
           )}
-
-          {user?.role === "ADMIN" && (
-            <Link to="/admin" className={navItemClass} onClick={closeMobileMenu}>
-              <Settings className="w-4 h-4" />
-              {t("nav.admin")}
-            </Link>
-          )}
-
-          {user && (
-            <>
-              <div className="my-3 border-t border-dashed border-border/70" />
-              <Link to="/profile" className={navItemClass} onClick={closeMobileMenu}>
-                <User className="w-4 h-4" />
-                {t("nav.profile")}
-              </Link>
-              <Link to="/profile" className={navItemClass} onClick={closeMobileMenu}>
-                <FileText className="w-4 h-4" />
-                {t("nav.applications")}
-              </Link>
-              <Link to="/profile" className={navItemClass} onClick={closeMobileMenu}>
-                <CreditCard className="w-4 h-4" />
-                {t("nav.payments")}
-              </Link>
-            </>
-          )}
-        </div>
-
-        <div className="p-3 border-t border-dashed border-border/70 space-y-2">
-          {user ? (
-            <>
-              <div className="flex items-center gap-3 px-2 py-1">
-                <UserAvatar name={user.name} email={user.email} size="sm" />
-                <div className="min-w-0">
-                  <p className="text-sm font-medium text-foreground truncate">{user.name || user.email?.split("@")[0]}</p>
-                  <p className="text-xs text-muted-foreground truncate">{user.email}</p>
-                </div>
-              </div>
-              <button
-                onClick={() => {
-                  void logout();
-                  closeMobileMenu();
-                }}
-                className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-destructive hover:bg-secondary transition-colors text-sm"
-              >
-                <LogOut className="w-4 h-4" />
-                {t("nav.logout")}
-              </button>
-            </>
-          ) : (
-            <div className="space-y-2">
-              <Link to="/login" className="block px-3 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors text-sm" onClick={closeMobileMenu}>
-                {t("nav.signIn")}
-              </Link>
-              <Link to="/login" className="block px-3 py-2 rounded-lg bg-primary text-primary-foreground font-medium text-sm text-center hover:opacity-90 transition-opacity" onClick={closeMobileMenu}>
-                {t("nav.getStarted")}
-              </Link>
-            </div>
-          )}
-        </div>
+        </nav>
       </aside>
     </>
   );

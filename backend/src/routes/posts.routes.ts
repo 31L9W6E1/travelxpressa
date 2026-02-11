@@ -29,6 +29,10 @@ const normalizeLocale = (value?: string): string => {
 };
 const normalizeValue = (value: unknown): string => String(value || '').trim().toLowerCase();
 const isPublishedStatus = (value: unknown): boolean => normalizeValue(value) === 'published';
+const isPubliclyVisibleStatus = (value: unknown): boolean => {
+  const normalized = normalizeValue(value);
+  return normalized === '' || normalized === 'published';
+};
 const isSchemaCompatibilityError = (error: unknown): boolean => {
   const code = (error as { code?: string })?.code;
   const message = normalizeValue((error as { message?: string })?.message);
@@ -36,7 +40,60 @@ const isSchemaCompatibilityError = (error: unknown): boolean => {
 };
 const pickBestTranslation = (translations: any[] | undefined): any | null => {
   if (!Array.isArray(translations) || translations.length === 0) return null;
-  return translations.find((item: any) => isPublishedStatus(item.status)) || translations[0];
+  return translations.find((item: any) => isPubliclyVisibleStatus(item.status)) || translations[0];
+};
+
+type PostColumnInfo = { column_name: string };
+type LegacyPostRow = {
+  id: string | null;
+  title: string | null;
+  slug: string | null;
+  excerpt: string | null;
+  imageUrl: string | null;
+  category: string | null;
+  tags: unknown;
+  authorName: string | null;
+  publishedAt: Date | string | null;
+  createdAt: Date | string | null;
+  status: string | null;
+};
+
+const getPostColumnSet = async (): Promise<Set<string>> => {
+  const rows = await prisma.$queryRawUnsafe<PostColumnInfo[]>(
+    `SELECT column_name
+     FROM information_schema.columns
+     WHERE table_schema = 'public' AND table_name = 'Post'`
+  );
+  return new Set(rows.map((row) => row.column_name));
+};
+
+const buildPostSelectSql = (columns: Set<string>): string => {
+  const has = (name: string): boolean => columns.has(name);
+  const col = (name: string, fallbackSql: string): string => (has(name) ? `"${name}"` : `${fallbackSql} AS "${name}"`);
+
+  return [
+    col('id', `''::text`),
+    col('title', `''::text`),
+    col('slug', `''::text`),
+    col('excerpt', `NULL`),
+    col('imageUrl', `NULL`),
+    col('category', `NULL`),
+    col('tags', `NULL`),
+    col('authorName', `NULL`),
+    col('publishedAt', `NULL`),
+    col('createdAt', `NOW()`),
+    col('status', `'published'::text`),
+  ].join(', ');
+};
+
+const queryLegacyPostRows = async (): Promise<LegacyPostRow[]> => {
+  const columns = await getPostColumnSet();
+  const selectSql = buildPostSelectSql(columns);
+  const orderBySql = columns.has('createdAt') ? `"createdAt" DESC` : `1`;
+
+  return await prisma.$queryRawUnsafe<LegacyPostRow[]>(
+    `SELECT ${selectSql} FROM "Post" ORDER BY ${orderBySql}`
+  );
 };
 
 // ==================== PUBLIC ROUTES ====================
@@ -121,16 +178,12 @@ router.get('/', async (req: Request, res: Response) => {
             status: 'published',
           }));
         } catch (innerError) {
-          if (!(useTranslation && isSchemaCompatibilityError(innerError))) throw innerError;
-          logger.warn('Using translation-disabled fallback for /api/posts');
-          const fallbackRows = await prisma.post.findMany({
-            orderBy: { createdAt: 'desc' },
-            select: baseSelect,
-          });
-
-          return fallbackRows.map((row: any) => ({
+          if (!isSchemaCompatibilityError(innerError)) throw innerError;
+          logger.warn('Using legacy raw fallback for /api/posts');
+          const legacyRows = await queryLegacyPostRows();
+          return legacyRows.map((row: LegacyPostRow) => ({
             ...row,
-            status: 'published',
+            status: row.status || 'published',
             translations: [],
           }));
         }
@@ -140,7 +193,7 @@ router.get('/', async (req: Request, res: Response) => {
     const posts = await getPostsWithFallback();
 
     const filteredPosts = posts.filter((post: any) => {
-      if (!isPublishedStatus(post.status)) return false;
+      if (!isPubliclyVisibleStatus(post.status)) return false;
       if (!categoryFilter) return true;
       return normalizeValue(post.category) === categoryFilter;
     });
@@ -263,15 +316,12 @@ router.get('/featured', async (_req: Request, res: Response) => {
           });
           return fallbackRows.map((row: any) => ({ ...row, status: 'published' }));
         } catch (innerError) {
-          if (!(useTranslation && isSchemaCompatibilityError(innerError))) throw innerError;
-          logger.warn('Using translation-disabled fallback for /api/posts/featured');
-          const fallbackRows = await prisma.post.findMany({
-            orderBy: { createdAt: 'desc' },
-            select: baseSelect,
-          });
-          return fallbackRows.map((row: any) => ({
+          if (!isSchemaCompatibilityError(innerError)) throw innerError;
+          logger.warn('Using legacy raw fallback for /api/posts/featured');
+          const legacyRows = await queryLegacyPostRows();
+          return legacyRows.map((row: LegacyPostRow) => ({
             ...row,
-            status: 'published',
+            status: row.status || 'published',
             translations: [],
           }));
         }
@@ -309,7 +359,7 @@ router.get('/featured', async (_req: Request, res: Response) => {
         createdAt: post.createdAt,
       };
     };
-    const publishedPosts = allPosts.filter((post) => isPublishedStatus((post as any).status));
+    const publishedPosts = allPosts.filter((post) => isPubliclyVisibleStatus((post as any).status));
     const blogPosts = publishedPosts
       .filter((post) => normalizeValue((post as any).category) === 'blog')
       .slice(0, 4);
@@ -352,7 +402,7 @@ router.get('/:slug', async (req: Request, res: Response) => {
           },
         });
 
-        if (localizedBySlug && isPublishedStatus(localizedBySlug.status) && isPublishedStatus(localizedBySlug.post.status)) {
+        if (localizedBySlug && isPubliclyVisibleStatus(localizedBySlug.status) && isPubliclyVisibleStatus(localizedBySlug.post.status)) {
           return res.json({
             success: true,
             data: {
@@ -441,7 +491,7 @@ router.get('/:slug', async (req: Request, res: Response) => {
 
     const post = await getPostWithFallback();
 
-    if (!post || !isPublishedStatus(post.status)) {
+    if (!post || !isPubliclyVisibleStatus(post.status)) {
       return res.status(404).json({
         success: false,
         message: 'Post not found',

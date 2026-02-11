@@ -265,7 +265,11 @@ code, pre, .font-mono {
 @layer components {
   /* Gradient text */
   .gradient-text {
-    background: linear-gradient(135deg, oklch(0.646 0.222 41.116) 0%, oklch(0.769 0.188 70.08) 100%);
+    background: linear-gradient(
+      135deg,
+      var(--primary) 0%,
+      color-mix(in oklch, var(--primary) 72%, white 28%) 100%
+    );
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -273,7 +277,11 @@ code, pre, .font-mono {
 
   /* Keep cf-text-gradient for compatibility */
   .cf-text-gradient {
-    background: linear-gradient(135deg, oklch(0.646 0.222 41.116) 0%, oklch(0.769 0.188 70.08) 100%);
+    background: linear-gradient(
+      135deg,
+      var(--primary) 0%,
+      color-mix(in oklch, var(--primary) 72%, white 28%) 100%
+    );
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;

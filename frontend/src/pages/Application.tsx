@@ -27,11 +27,17 @@ import {
 import PaymentModal from '@/components/PaymentModal';
 import type { Payment } from '@/api/payments';
 import { convertCurrency, isFxCurrencySupported } from '@/config/fx';
-import { calculateServiceFee, FALLBACK_SERVICE_FEE_MNT } from '@/config/pricing';
+import {
+  calculateExpressServiceFee,
+  calculateServiceFee,
+  FALLBACK_SERVICE_FEE_MNT,
+} from '@/config/pricing';
 import { formatNumber } from '@/lib/money';
 
 // Form step types
 type StepStatus = 'pending' | 'current' | 'completed';
+type ServiceSpeed = 'STANDARD' | 'EXPRESS';
+type SecurityAnswer = 'YES' | 'NO' | '';
 
 interface FormStep {
   id: number;
@@ -91,17 +97,25 @@ interface TravelInfo {
   needFlightItinerary: boolean;
   needHotelReservation: boolean;
   needTravelItinerary: boolean;
+  serviceSpeed: ServiceSpeed;
 }
 
 interface FamilyInfo {
   fatherSurnames: string;
   fatherGivenNames: string;
+  fatherDateOfBirth: string;
   motherSurnames: string;
   motherGivenNames: string;
+  motherDateOfBirth: string;
   hasSpouse: boolean;
   spouseFullName: string;
+  spouseDateOfBirth: string;
   hasChildren: boolean;
   numberOfChildren: string;
+  children: Array<{
+    fullName: string;
+    dateOfBirth: string;
+  }>;
 }
 
 interface WorkEducationInfo {
@@ -118,6 +132,10 @@ interface FormData {
   travelInfo: TravelInfo;
   familyInfo: FamilyInfo;
   workEducation: WorkEducationInfo;
+  securityCheck: {
+    hasBeenArrested: SecurityAnswer;
+    arrestDetails: string;
+  };
 }
 
 const initialFormData: FormData = {
@@ -168,16 +186,21 @@ const initialFormData: FormData = {
     needFlightItinerary: false,
     needHotelReservation: false,
     needTravelItinerary: false,
+    serviceSpeed: 'STANDARD',
   },
   familyInfo: {
     fatherSurnames: '',
     fatherGivenNames: '',
+    fatherDateOfBirth: '',
     motherSurnames: '',
     motherGivenNames: '',
+    motherDateOfBirth: '',
     hasSpouse: false,
     spouseFullName: '',
+    spouseDateOfBirth: '',
     hasChildren: false,
     numberOfChildren: '',
+    children: [],
   },
   workEducation: {
     primaryOccupation: '',
@@ -185,7 +208,13 @@ const initialFormData: FormData = {
     monthlySalary: '',
     jobDuties: '',
   },
+  securityCheck: {
+    hasBeenArrested: '',
+    arrestDetails: '',
+  },
 };
+
+const LOCAL_DRAFT_SNAPSHOT_KEY = 'applicationDraftSnapshot';
 
 export default function Application() {
   const { user } = useAuth();
@@ -222,8 +251,12 @@ export default function Application() {
     const currency = countryConfig?.paymentPricing?.currency;
     if (!baseFee || !currency) return FALLBACK_SERVICE_FEE_MNT;
 
-    const serviceFeeInCurrency = calculateServiceFee(baseFee);
-    if (!serviceFeeInCurrency) return FALLBACK_SERVICE_FEE_MNT;
+    const standardServiceFee = calculateServiceFee(baseFee);
+    if (!standardServiceFee) return FALLBACK_SERVICE_FEE_MNT;
+    const serviceFeeInCurrency =
+      formData.travelInfo.serviceSpeed === 'EXPRESS'
+        ? calculateExpressServiceFee(standardServiceFee)
+        : standardServiceFee;
 
     if (!isFxCurrencySupported(currency) || !isFxCurrencySupported("MNT")) {
       return FALLBACK_SERVICE_FEE_MNT;
@@ -250,6 +283,134 @@ export default function Application() {
     return visaTypeMap[countryCode] || 'OTHER';
   };
 
+  const applyRestoredFormData = useCallback(
+    (restored: FormData, restoredAppId?: string | null, restoredStep?: number) => {
+      if (restoredAppId) {
+        setApplicationId(restoredAppId);
+      }
+      if (restoredStep) {
+        setCurrentStep(Math.min(restoredStep, 7));
+      }
+      setFormData({
+        ...initialFormData,
+        ...restored,
+        travelInfo: {
+          ...initialFormData.travelInfo,
+          ...restored.travelInfo,
+          serviceSpeed:
+            restored.travelInfo?.serviceSpeed === 'EXPRESS' ? 'EXPRESS' : 'STANDARD',
+        },
+        familyInfo: {
+          ...initialFormData.familyInfo,
+          ...restored.familyInfo,
+          children: restored.familyInfo?.children || [],
+        },
+        securityCheck: {
+          ...initialFormData.securityCheck,
+          ...restored.securityCheck,
+          hasBeenArrested:
+            restored.securityCheck?.hasBeenArrested === 'YES' ||
+            restored.securityCheck?.hasBeenArrested === 'NO'
+              ? restored.securityCheck.hasBeenArrested
+              : '',
+        },
+      });
+    },
+    [],
+  );
+
+  const restoreFromLocalSnapshot = useCallback(() => {
+    try {
+      const raw = localStorage.getItem(LOCAL_DRAFT_SNAPSHOT_KEY);
+      if (!raw) return false;
+      const parsed = JSON.parse(raw) as {
+        applicationId?: string | null;
+        currentStep?: number;
+        selectedCountryCode?: CountryCode;
+        formData?: FormData;
+      };
+      if (!parsed.formData) return false;
+      if (
+        parsed.selectedCountryCode &&
+        parsed.selectedCountryCode !== selectedCountryCode
+      ) {
+        return false;
+      }
+      applyRestoredFormData(parsed.formData, parsed.applicationId, parsed.currentStep);
+      toast.info(
+        t('applicationPage.toasts.draftLoaded.title', {
+          defaultValue: 'Draft loaded',
+        }),
+        {
+          description: t('applicationPage.toasts.localDraftLoaded.description', {
+            defaultValue: 'Restored your latest locally saved draft.',
+          }),
+        },
+      );
+      return true;
+    } catch {
+      return false;
+    }
+  }, [applyRestoredFormData, selectedCountryCode, t]);
+
+  const saveLocalSnapshot = useCallback(
+    (nextApplicationId: string | null, nextStep: number, nextFormData: FormData) => {
+      try {
+        localStorage.setItem(
+          LOCAL_DRAFT_SNAPSHOT_KEY,
+          JSON.stringify({
+            applicationId: nextApplicationId,
+            currentStep: nextStep,
+            selectedCountryCode,
+            formData: nextFormData,
+            updatedAt: new Date().toISOString(),
+          }),
+        );
+      } catch {
+        // Ignore localStorage quota errors.
+      }
+    },
+    [selectedCountryCode],
+  );
+
+  const buildSecurityInfoPayload = useCallback(() => {
+    const hasBeenArrested = formData.securityCheck.hasBeenArrested === 'YES';
+    return {
+      hasCommunicableDisease: false,
+      hasMentalOrPhysicalDisorder: false,
+      isDrugAbuser: false,
+      hasBeenArrested,
+      arrestDetails: hasBeenArrested ? formData.securityCheck.arrestDetails || undefined : undefined,
+      hasViolatedControlledSubstancesLaw: false,
+      isEngagedInProstitution: false,
+      isInvolvedInMoneyLaundering: false,
+      hasCommittedHumanTrafficking: false,
+      hasBenefitedFromTrafficking: false,
+      hasAidedHumanTrafficking: false,
+      seeksEspionage: false,
+      seeksToEngageInTerrorism: false,
+      hasProvidedTerroristSupport: false,
+      isTerroristOrganizationMember: false,
+      isRelatedToTerrorist: false,
+      hasParticipatedInGenocide: false,
+      hasParticipatedInTorture: false,
+      hasParticipatedInExtrajudicialKillings: false,
+      hasRecruitedChildSoldiers: false,
+      hasViolatedReligiousFreedom: false,
+      hasEnforcedPopulationControls: false,
+      hasInvolvedInOrganTrafficking: false,
+      hasSoughtVisaByFraud: false,
+      hasBeenRemovedOrDeported: false,
+      hasWithheldCustodyOfUSCitizen: false,
+      hasVotedInUSIllegally: false,
+      hasRenouncedUSCitizenshipToAvoidTax: false,
+      hasBeenInUS: false,
+      hasBeenIssuedUSVisa: false,
+      hasBeenRefusedUSVisa: false,
+      hasImmigrantPetitionFiled: false,
+    };
+  }, [formData.securityCheck.arrestDetails, formData.securityCheck.hasBeenArrested]);
+
   const restoreLatestDraft = useCallback(
     async (options?: { initial?: boolean; notifyIfMissing?: boolean }) => {
       const initial = options?.initial ?? false;
@@ -269,6 +430,10 @@ export default function Application() {
           ) || [];
 
         if (drafts.length === 0) {
+          const restoredLocally = restoreFromLocalSnapshot();
+          if (restoredLocally) {
+            return;
+          }
           if (notifyIfMissing) {
             toast.info(
               t('applicationPage.toasts.noDraft.title', { defaultValue: 'No saved draft found' }),
@@ -364,18 +529,30 @@ export default function Application() {
                 needFlightItinerary: Boolean((fullDraft.travelInfo as any).supportServices?.preFlightBooking),
                 needHotelReservation: Boolean((fullDraft.travelInfo as any).supportServices?.hotelBooking),
                 needTravelItinerary: Boolean((fullDraft.travelInfo as any).supportServices?.travelItinerary),
+                serviceSpeed:
+                  (fullDraft.travelInfo as any).serviceSpeed === 'EXPRESS'
+                    ? 'EXPRESS'
+                    : 'STANDARD',
               }
             : initialFormData.travelInfo,
           familyInfo: fullDraft.familyInfo
             ? {
                 fatherSurnames: fullDraft.familyInfo.fatherSurnames || '',
                 fatherGivenNames: fullDraft.familyInfo.fatherGivenNames || '',
+                fatherDateOfBirth: fullDraft.familyInfo.fatherDateOfBirth || '',
                 motherSurnames: fullDraft.familyInfo.motherSurnames || '',
                 motherGivenNames: fullDraft.familyInfo.motherGivenNames || '',
+                motherDateOfBirth: fullDraft.familyInfo.motherDateOfBirth || '',
                 hasSpouse: Boolean(fullDraft.familyInfo.hasSpouse),
                 spouseFullName: fullDraft.familyInfo.spouseFullName || '',
+                spouseDateOfBirth: fullDraft.familyInfo.spouseDateOfBirth || '',
                 hasChildren: Boolean(fullDraft.familyInfo.hasChildren),
                 numberOfChildren: String(fullDraft.familyInfo.children?.length || ''),
+                children:
+                  (fullDraft.familyInfo.children || []).map((child: any) => ({
+                    fullName: child?.fullName || '',
+                    dateOfBirth: child?.dateOfBirth || '',
+                  })) || [],
               }
             : initialFormData.familyInfo,
           workEducation: fullDraft.workEducation
@@ -386,9 +563,17 @@ export default function Application() {
                 jobDuties: fullDraft.workEducation.jobDuties || '',
               }
             : initialFormData.workEducation,
+          securityCheck: fullDraft.securityInfo
+            ? {
+                hasBeenArrested:
+                  (fullDraft.securityInfo as any).hasBeenArrested === true ? 'YES' : 'NO',
+                arrestDetails: (fullDraft.securityInfo as any).arrestDetails || '',
+              }
+            : initialFormData.securityCheck,
         };
 
-        setFormData(nextFormData);
+        applyRestoredFormData(nextFormData, draftMeta.id, Math.min(fullDraft.currentStep || 1, 7));
+        saveLocalSnapshot(draftMeta.id, Math.min(fullDraft.currentStep || 1, 7), nextFormData);
 
         const hasAnyRestoredValue = Object.values(nextFormData).some((section) =>
           Object.values(section).some((v) => String(v || '').trim() !== ''),
@@ -415,13 +600,60 @@ export default function Application() {
         }
       }
     },
-    [selectedCountryCode, t],
+    [applyRestoredFormData, restoreFromLocalSnapshot, saveLocalSnapshot, selectedCountryCode, t],
   );
 
   // Load existing draft application on mount
   useEffect(() => {
     void restoreLatestDraft({ initial: true });
   }, [restoreLatestDraft]);
+
+  useEffect(() => {
+    if (!formData.familyInfo.hasChildren) {
+      if (formData.familyInfo.numberOfChildren !== '' || formData.familyInfo.children.length > 0) {
+        setFormData((prev) => ({
+          ...prev,
+          familyInfo: {
+            ...prev.familyInfo,
+            numberOfChildren: '',
+            children: [],
+          },
+        }));
+      }
+      return;
+    }
+
+    const count = Number(formData.familyInfo.numberOfChildren || '0');
+    if (!Number.isFinite(count) || count < 1) {
+      if (formData.familyInfo.children.length > 0) {
+        setFormData((prev) => ({
+          ...prev,
+          familyInfo: {
+            ...prev.familyInfo,
+            children: [],
+          },
+        }));
+      }
+      return;
+    }
+
+    const normalizedCount = Math.min(Math.max(Math.floor(count), 0), 10);
+    if (formData.familyInfo.children.length === normalizedCount) return;
+
+    setFormData((prev) => {
+      const nextChildren = Array.from({ length: normalizedCount }).map((_, index) => ({
+        fullName: prev.familyInfo.children[index]?.fullName || '',
+        dateOfBirth: prev.familyInfo.children[index]?.dateOfBirth || '',
+      }));
+      return {
+        ...prev,
+        familyInfo: {
+          ...prev.familyInfo,
+          children: nextChildren,
+        },
+      };
+    });
+  }, [formData.familyInfo.children.length, formData.familyInfo.hasChildren, formData.familyInfo.numberOfChildren]);
 
   const steps: FormStep[] = [
     { id: 1, name: t('form.steps.personal', { defaultValue: 'Personal Info' }), icon: <User className="w-5 h-5" />, status: currentStep === 1 ? 'current' : currentStep > 1 ? 'completed' : 'pending' },
@@ -444,6 +676,27 @@ export default function Application() {
     // Clear error when user types
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
+    }
+  };
+
+  const updateChildInfo = (index: number, field: 'fullName' | 'dateOfBirth', value: string) => {
+    setFormData((prev) => {
+      const nextChildren = [...prev.familyInfo.children];
+      nextChildren[index] = {
+        fullName: nextChildren[index]?.fullName || '',
+        dateOfBirth: nextChildren[index]?.dateOfBirth || '',
+        [field]: value,
+      };
+      return {
+        ...prev,
+        familyInfo: {
+          ...prev.familyInfo,
+          children: nextChildren,
+        },
+      };
+    });
+    if (errors.children) {
+      setErrors((prev) => ({ ...prev, children: '' }));
     }
   };
 
@@ -480,14 +733,44 @@ export default function Application() {
     } else if (step === 5) {
       if (!formData.familyInfo.fatherSurnames) newErrors.fatherSurnames = t('form.validation.required', { defaultValue: 'Required' });
       if (!formData.familyInfo.fatherGivenNames) newErrors.fatherGivenNames = t('form.validation.required', { defaultValue: 'Required' });
+      if (!formData.familyInfo.fatherDateOfBirth) newErrors.fatherDateOfBirth = t('form.validation.required', { defaultValue: 'Required' });
       if (!formData.familyInfo.motherSurnames) newErrors.motherSurnames = t('form.validation.required', { defaultValue: 'Required' });
       if (!formData.familyInfo.motherGivenNames) newErrors.motherGivenNames = t('form.validation.required', { defaultValue: 'Required' });
+      if (!formData.familyInfo.motherDateOfBirth) newErrors.motherDateOfBirth = t('form.validation.required', { defaultValue: 'Required' });
       if (formData.familyInfo.hasSpouse && !formData.familyInfo.spouseFullName) {
         newErrors.spouseFullName = t('form.validation.required', { defaultValue: 'Required' });
+      }
+      if (formData.familyInfo.hasSpouse && !formData.familyInfo.spouseDateOfBirth) {
+        newErrors.spouseDateOfBirth = t('form.validation.required', { defaultValue: 'Required' });
+      }
+      if (formData.familyInfo.hasChildren) {
+        const count = Number(formData.familyInfo.numberOfChildren || '0');
+        if (!Number.isFinite(count) || count < 1) {
+          newErrors.numberOfChildren = t('form.validation.required', { defaultValue: 'Required' });
+        } else {
+          const missingChildData = formData.familyInfo.children.some(
+            (child) => !child.fullName.trim() || !child.dateOfBirth,
+          );
+          if (missingChildData) {
+            newErrors.children = t('applicationPage.family.childrenValidation', {
+              defaultValue: 'Please complete each child full name and date of birth.',
+            });
+          }
+        }
       }
     } else if (step === 6) {
       if (!formData.workEducation.primaryOccupation) newErrors.primaryOccupation = t('form.validation.required', { defaultValue: 'Required' });
       if (!formData.workEducation.employerOrSchoolName) newErrors.employerOrSchoolName = t('form.validation.required', { defaultValue: 'Required' });
+    } else if (step === 7) {
+      if (!formData.securityCheck.hasBeenArrested) {
+        newErrors.securityAnswer = t('form.validation.required', { defaultValue: 'Required' });
+      }
+      if (
+        formData.securityCheck.hasBeenArrested === 'YES' &&
+        !formData.securityCheck.arrestDetails.trim()
+      ) {
+        newErrors.arrestDetails = t('form.validation.required', { defaultValue: 'Required' });
+      }
     }
 
     setErrors(newErrors);
@@ -567,21 +850,29 @@ export default function Application() {
             preFlightBooking: formData.travelInfo.needFlightItinerary,
             travelItinerary: formData.travelInfo.needTravelItinerary,
           },
+          serviceSpeed: formData.travelInfo.serviceSpeed || 'STANDARD',
           payingForTrip: formData.travelInfo.payingForTrip || '',
           travelingWithOthers: false,
         },
         familyInfo: {
           fatherSurnames: formData.familyInfo.fatherSurnames || '',
           fatherGivenNames: formData.familyInfo.fatherGivenNames || '',
+          fatherDateOfBirth: formData.familyInfo.fatherDateOfBirth || undefined,
           motherSurnames: formData.familyInfo.motherSurnames || '',
           motherGivenNames: formData.familyInfo.motherGivenNames || '',
+          motherDateOfBirth: formData.familyInfo.motherDateOfBirth || undefined,
           hasSpouse: formData.familyInfo.hasSpouse,
           spouseFullName: formData.familyInfo.hasSpouse ? formData.familyInfo.spouseFullName : undefined,
+          spouseDateOfBirth:
+            formData.familyInfo.hasSpouse && formData.familyInfo.spouseDateOfBirth
+              ? formData.familyInfo.spouseDateOfBirth
+              : undefined,
           hasChildren: formData.familyInfo.hasChildren,
           children:
             formData.familyInfo.hasChildren && Number(formData.familyInfo.numberOfChildren) > 0
-              ? Array.from({ length: Number(formData.familyInfo.numberOfChildren) }).map((_, idx) => ({
-                  fullName: `Child ${idx + 1}`,
+              ? formData.familyInfo.children.map((child) => ({
+                  fullName: child.fullName || undefined,
+                  dateOfBirth: child.dateOfBirth || undefined,
                   relationship: 'CHILD',
                 }))
               : [],
@@ -592,7 +883,10 @@ export default function Application() {
           monthlySalary: formData.workEducation.monthlySalary || undefined,
           jobDuties: formData.workEducation.jobDuties || undefined,
         },
+        securityInfo: buildSecurityInfoPayload(),
       };
+
+      let nextApplicationId = applicationId;
 
       if (applicationId) {
         // Update existing application
@@ -602,7 +896,9 @@ export default function Application() {
         const newApp = await applicationsApi.create({ visaType: getVisaTypeForCountry(selectedCountryCode) });
         setApplicationId(newApp.id);
         await applicationsApi.update(newApp.id, apiData);
+        nextApplicationId = newApp.id;
       }
+      saveLocalSnapshot(nextApplicationId || null, currentStep, formData);
       toast.success(t('applicationPage.toasts.saved.title', { defaultValue: 'Application saved!' }), {
         description: t('applicationPage.toasts.saved.description', {
           defaultValue: 'Your progress has been saved. You can continue later.',
@@ -684,21 +980,29 @@ export default function Application() {
           preFlightBooking: formData.travelInfo.needFlightItinerary,
           travelItinerary: formData.travelInfo.needTravelItinerary,
         },
+        serviceSpeed: formData.travelInfo.serviceSpeed,
         payingForTrip: formData.travelInfo.payingForTrip,
         travelingWithOthers: false,
       },
       familyInfo: {
         fatherSurnames: formData.familyInfo.fatherSurnames,
         fatherGivenNames: formData.familyInfo.fatherGivenNames,
+        fatherDateOfBirth: formData.familyInfo.fatherDateOfBirth || undefined,
         motherSurnames: formData.familyInfo.motherSurnames,
         motherGivenNames: formData.familyInfo.motherGivenNames,
+        motherDateOfBirth: formData.familyInfo.motherDateOfBirth || undefined,
         hasSpouse: formData.familyInfo.hasSpouse,
         spouseFullName: formData.familyInfo.hasSpouse ? formData.familyInfo.spouseFullName : undefined,
+        spouseDateOfBirth:
+          formData.familyInfo.hasSpouse && formData.familyInfo.spouseDateOfBirth
+            ? formData.familyInfo.spouseDateOfBirth
+            : undefined,
         hasChildren: formData.familyInfo.hasChildren,
         children:
           formData.familyInfo.hasChildren && Number(formData.familyInfo.numberOfChildren) > 0
-            ? Array.from({ length: Number(formData.familyInfo.numberOfChildren) }).map((_, idx) => ({
-                fullName: `Child ${idx + 1}`,
+            ? formData.familyInfo.children.map((child) => ({
+                fullName: child.fullName || undefined,
+                dateOfBirth: child.dateOfBirth || undefined,
                 relationship: 'CHILD',
               }))
             : [],
@@ -709,6 +1013,7 @@ export default function Application() {
         monthlySalary: formData.workEducation.monthlySalary || undefined,
         jobDuties: formData.workEducation.jobDuties || undefined,
       },
+      securityInfo: buildSecurityInfoPayload(),
     };
   };
 
@@ -729,6 +1034,7 @@ export default function Application() {
       // Payment is only half of "submit". We must explicitly submit the application
       // so it becomes visible to admins as SUBMITTED and shows up in dashboard charts.
       await applicationsApi.submit(applicationId);
+      localStorage.removeItem(LOCAL_DRAFT_SNAPSHOT_KEY);
 
       setPaymentComplete(true);
 
@@ -758,7 +1064,7 @@ export default function Application() {
 
   const handleSubmit = async () => {
     // Validate all steps before submission
-    for (let step = 1; step <= 6; step++) {
+    for (let step = 1; step <= 7; step++) {
       if (!validateStep(step)) {
         setCurrentStep(step);
         toast.error(t('applicationPage.toasts.incomplete.title', { defaultValue: 'Incomplete information' }), {
@@ -787,11 +1093,13 @@ export default function Application() {
 
       // Save all form data before showing payment
       await applicationsApi.update(appId, apiData);
+      saveLocalSnapshot(appId, 7, formData);
 
       if (PAYMENT_REQUIRED) {
         setShowPaymentModal(true);
       } else {
         await applicationsApi.submit(appId);
+        localStorage.removeItem(LOCAL_DRAFT_SNAPSHOT_KEY);
         setPaymentComplete(true);
         toast.success(t('applicationPage.toasts.submitted.title', { defaultValue: 'Application submitted!' }), {
           description: t('applicationPage.toasts.submitted.description', {
@@ -1348,6 +1656,58 @@ export default function Application() {
                 </div>
               </div>
 
+              <div className="md:col-span-2 rounded-lg border border-border p-4">
+                <p className="text-sm font-medium text-foreground mb-3">
+                  {t('applicationPage.travel.serviceSpeedTitle', {
+                    defaultValue: 'Processing option',
+                  })}
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <label className="flex items-start gap-3 rounded-lg border border-border p-3 cursor-pointer hover:bg-muted/40">
+                    <input
+                      type="radio"
+                      name="serviceSpeed"
+                      checked={formData.travelInfo.serviceSpeed === 'STANDARD'}
+                      onChange={() => updateFormData('travelInfo', 'serviceSpeed', 'STANDARD')}
+                      className="mt-1"
+                    />
+                    <div>
+                      <p className="font-medium text-foreground">
+                        {t('applicationPage.travel.serviceSpeed.standard', {
+                          defaultValue: 'Standard',
+                        })}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {t('applicationPage.travel.serviceSpeed.standardDesc', {
+                          defaultValue: 'Regular review queue.',
+                        })}
+                      </p>
+                    </div>
+                  </label>
+                  <label className="flex items-start gap-3 rounded-lg border border-border p-3 cursor-pointer hover:bg-muted/40">
+                    <input
+                      type="radio"
+                      name="serviceSpeed"
+                      checked={formData.travelInfo.serviceSpeed === 'EXPRESS'}
+                      onChange={() => updateFormData('travelInfo', 'serviceSpeed', 'EXPRESS')}
+                      className="mt-1"
+                    />
+                    <div>
+                      <p className="font-medium text-foreground">
+                        {t('applicationPage.travel.serviceSpeed.express', {
+                          defaultValue: 'Express (+15%)',
+                        })}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {t('applicationPage.travel.serviceSpeed.expressDesc', {
+                          defaultValue: 'Priority handling for urgent timelines.',
+                        })}
+                      </p>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
               <div className="md:col-span-2 flex items-center gap-2">
                 <input
                   id="hasInviter"
@@ -1486,6 +1846,19 @@ export default function Application() {
 
               <div>
                 <label className="block text-sm font-medium text-foreground mb-2">
+                  {t('applicationPage.family.fatherDob', { defaultValue: "Father's Date of Birth" })} *
+                </label>
+                <input
+                  type="date"
+                  value={formData.familyInfo.fatherDateOfBirth}
+                  onChange={(e) => updateFormData('familyInfo', 'fatherDateOfBirth', e.target.value)}
+                  className="w-full px-4 py-3 bg-input border border-border rounded-lg text-foreground focus:ring-2 focus:ring-ring focus:border-transparent"
+                />
+                {errors.fatherDateOfBirth && <p className="mt-1 text-sm text-destructive">{errors.fatherDateOfBirth}</p>}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
                   {t('form.family.motherSurname', { defaultValue: "Mother's Surname" })} *
                 </label>
                 <input
@@ -1512,6 +1885,19 @@ export default function Application() {
                 {errors.motherGivenNames && <p className="mt-1 text-sm text-destructive">{errors.motherGivenNames}</p>}
               </div>
 
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  {t('applicationPage.family.motherDob', { defaultValue: "Mother's Date of Birth" })} *
+                </label>
+                <input
+                  type="date"
+                  value={formData.familyInfo.motherDateOfBirth}
+                  onChange={(e) => updateFormData('familyInfo', 'motherDateOfBirth', e.target.value)}
+                  className="w-full px-4 py-3 bg-input border border-border rounded-lg text-foreground focus:ring-2 focus:ring-ring focus:border-transparent"
+                />
+                {errors.motherDateOfBirth && <p className="mt-1 text-sm text-destructive">{errors.motherDateOfBirth}</p>}
+              </div>
+
               <div className="md:col-span-2 flex flex-wrap gap-6">
                 <label className="flex items-center gap-2 text-sm text-foreground">
                   <input
@@ -1535,35 +1921,88 @@ export default function Application() {
               </div>
 
               {formData.familyInfo.hasSpouse && (
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-foreground mb-2">
-                    {t('form.family.spouseName', { defaultValue: 'Spouse Full Name' })} *
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.familyInfo.spouseFullName}
-                    onChange={(e) => updateFormData('familyInfo', 'spouseFullName', e.target.value)}
-                    className="w-full px-4 py-3 bg-input border border-border rounded-lg text-foreground focus:ring-2 focus:ring-ring focus:border-transparent"
-                    placeholder="Spouse full name"
-                  />
-                  {errors.spouseFullName && <p className="mt-1 text-sm text-destructive">{errors.spouseFullName}</p>}
-                </div>
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-2">
+                      {t('form.family.spouseName', { defaultValue: 'Spouse Full Name' })} *
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.familyInfo.spouseFullName}
+                      onChange={(e) => updateFormData('familyInfo', 'spouseFullName', e.target.value)}
+                      className="w-full px-4 py-3 bg-input border border-border rounded-lg text-foreground focus:ring-2 focus:ring-ring focus:border-transparent"
+                      placeholder="Spouse full name"
+                    />
+                    {errors.spouseFullName && <p className="mt-1 text-sm text-destructive">{errors.spouseFullName}</p>}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-2">
+                      {t('applicationPage.family.spouseDob', { defaultValue: 'Spouse Date of Birth' })} *
+                    </label>
+                    <input
+                      type="date"
+                      value={formData.familyInfo.spouseDateOfBirth}
+                      onChange={(e) => updateFormData('familyInfo', 'spouseDateOfBirth', e.target.value)}
+                      className="w-full px-4 py-3 bg-input border border-border rounded-lg text-foreground focus:ring-2 focus:ring-ring focus:border-transparent"
+                    />
+                    {errors.spouseDateOfBirth && <p className="mt-1 text-sm text-destructive">{errors.spouseDateOfBirth}</p>}
+                  </div>
+                </>
               )}
 
               {formData.familyInfo.hasChildren && (
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">
-                    {t('form.family.numberOfChildren', { defaultValue: 'Number of Children' })}
-                  </label>
-                  <input
-                    type="number"
-                    min={1}
-                    value={formData.familyInfo.numberOfChildren}
-                    onChange={(e) => updateFormData('familyInfo', 'numberOfChildren', e.target.value)}
-                    className="w-full px-4 py-3 bg-input border border-border rounded-lg text-foreground focus:ring-2 focus:ring-ring focus:border-transparent"
-                    placeholder="1"
-                  />
-                </div>
+                <>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-foreground mb-2">
+                      {t('form.family.numberOfChildren', { defaultValue: 'Number of Children' })}
+                    </label>
+                    <input
+                      type="number"
+                      min={1}
+                      max={10}
+                      value={formData.familyInfo.numberOfChildren}
+                      onChange={(e) => updateFormData('familyInfo', 'numberOfChildren', e.target.value)}
+                      className="w-full md:w-1/3 px-4 py-3 bg-input border border-border rounded-lg text-foreground focus:ring-2 focus:ring-ring focus:border-transparent"
+                      placeholder="1"
+                    />
+                    {errors.numberOfChildren && <p className="mt-1 text-sm text-destructive">{errors.numberOfChildren}</p>}
+                  </div>
+                  {formData.familyInfo.children.map((child, index) => (
+                    <div key={`child-${index}`} className="md:col-span-2 rounded-lg border border-border p-4">
+                      <p className="text-sm font-medium text-foreground mb-3">
+                        {t('applicationPage.family.childTitle', {
+                          defaultValue: 'Child {{index}}',
+                          index: index + 1,
+                        })}
+                      </p>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-foreground mb-2">
+                            {t('applicationPage.family.childName', { defaultValue: 'Full Name' })} *
+                          </label>
+                          <input
+                            type="text"
+                            value={child.fullName}
+                            onChange={(e) => updateChildInfo(index, 'fullName', e.target.value)}
+                            className="w-full px-4 py-3 bg-input border border-border rounded-lg text-foreground focus:ring-2 focus:ring-ring focus:border-transparent"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-foreground mb-2">
+                            {t('applicationPage.family.childDob', { defaultValue: 'Date of Birth' })} *
+                          </label>
+                          <input
+                            type="date"
+                            value={child.dateOfBirth}
+                            onChange={(e) => updateChildInfo(index, 'dateOfBirth', e.target.value)}
+                            className="w-full px-4 py-3 bg-input border border-border rounded-lg text-foreground focus:ring-2 focus:ring-ring focus:border-transparent"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  {errors.children && <p className="md:col-span-2 mt-1 text-sm text-destructive">{errors.children}</p>}
+                </>
               )}
             </div>
           </div>
@@ -1702,6 +2141,64 @@ export default function Application() {
                 </div>
               )}
 
+              {!paymentComplete && (
+                <div className="bg-muted/50 border border-border rounded-xl p-6">
+                  <h4 className="text-lg font-medium text-foreground mb-3 flex items-center gap-2">
+                    <Shield className="w-5 h-5" />
+                    {t('applicationPage.security.title', {
+                      defaultValue: 'Security Question',
+                    })}
+                  </h4>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    {t('applicationPage.security.question', {
+                      defaultValue: 'Have you ever been arrested or convicted?',
+                    })}
+                  </p>
+                  <div className="flex flex-wrap gap-6">
+                    <label className="inline-flex items-center gap-2 text-sm text-foreground">
+                      <input
+                        type="radio"
+                        name="securityQuestion"
+                        checked={formData.securityCheck.hasBeenArrested === 'NO'}
+                        onChange={() => updateFormData('securityCheck', 'hasBeenArrested', 'NO')}
+                      />
+                      {t('common.no', { defaultValue: 'No' })}
+                    </label>
+                    <label className="inline-flex items-center gap-2 text-sm text-foreground">
+                      <input
+                        type="radio"
+                        name="securityQuestion"
+                        checked={formData.securityCheck.hasBeenArrested === 'YES'}
+                        onChange={() => updateFormData('securityCheck', 'hasBeenArrested', 'YES')}
+                      />
+                      {t('common.yes', { defaultValue: 'Yes' })}
+                    </label>
+                  </div>
+                  {errors.securityAnswer && (
+                    <p className="mt-2 text-sm text-destructive">{errors.securityAnswer}</p>
+                  )}
+                  {formData.securityCheck.hasBeenArrested === 'YES' && (
+                    <div className="mt-4">
+                      <label className="block text-sm font-medium text-foreground mb-2">
+                        {t('applicationPage.security.details', {
+                          defaultValue: 'Please provide details',
+                        })}
+                      </label>
+                      <textarea
+                        value={formData.securityCheck.arrestDetails}
+                        onChange={(e) =>
+                          updateFormData('securityCheck', 'arrestDetails', e.target.value)
+                        }
+                        className="w-full min-h-[100px] px-4 py-3 bg-input border border-border rounded-lg text-foreground focus:ring-2 focus:ring-ring focus:border-transparent"
+                      />
+                      {errors.arrestDetails && (
+                        <p className="mt-1 text-sm text-destructive">{errors.arrestDetails}</p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* Personal Info Summary */}
               <div className="bg-muted/50 border border-border rounded-xl p-6">
                 <h4 className="text-lg font-medium text-foreground mb-4 flex items-center gap-2">
@@ -1823,6 +2320,16 @@ export default function Application() {
                     </span>{' '}
                     <span className="text-foreground ml-2">{formData.travelInfo.intendedArrivalDate}</span>
                   </div>
+                  <div>
+                    <span className="text-muted-foreground">
+                      {t('applicationPage.review.labels.processingOption', { defaultValue: 'Processing' })}:
+                    </span>{' '}
+                    <span className="text-foreground ml-2">
+                      {formData.travelInfo.serviceSpeed === 'EXPRESS'
+                        ? t('applicationPage.travel.serviceSpeed.express', { defaultValue: 'Express (+15%)' })
+                        : t('applicationPage.travel.serviceSpeed.standard', { defaultValue: 'Standard' })}
+                    </span>
+                  </div>
                   <div className="col-span-2">
                     <span className="text-muted-foreground">
                       {t('form.travel.usAddress', { defaultValue: 'US Address' })}:
@@ -1869,6 +2376,14 @@ export default function Application() {
                     </span>
                   </div>
                   <div>
+                    <span className="text-muted-foreground">{t('applicationPage.family.fatherDob', { defaultValue: "Father's Date of Birth" })}:</span>{' '}
+                    <span className="text-foreground ml-2">{formData.familyInfo.fatherDateOfBirth || '-'}</span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">{t('applicationPage.family.motherDob', { defaultValue: "Mother's Date of Birth" })}:</span>{' '}
+                    <span className="text-foreground ml-2">{formData.familyInfo.motherDateOfBirth || '-'}</span>
+                  </div>
+                  <div>
                     <span className="text-muted-foreground">{t('form.family.hasSpouse', { defaultValue: 'Spouse' })}:</span>{' '}
                     <span className="text-foreground ml-2">
                       {formData.familyInfo.hasSpouse
@@ -1876,6 +2391,12 @@ export default function Application() {
                         : t('common.no', { defaultValue: 'No' })}
                     </span>
                   </div>
+                  {formData.familyInfo.hasSpouse && (
+                    <div>
+                      <span className="text-muted-foreground">{t('applicationPage.family.spouseDob', { defaultValue: 'Spouse Date of Birth' })}:</span>{' '}
+                      <span className="text-foreground ml-2">{formData.familyInfo.spouseDateOfBirth || '-'}</span>
+                    </div>
+                  )}
                   <div>
                     <span className="text-muted-foreground">{t('form.family.hasChildren', { defaultValue: 'Children' })}:</span>{' '}
                     <span className="text-foreground ml-2">

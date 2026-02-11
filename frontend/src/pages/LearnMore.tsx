@@ -112,7 +112,7 @@ const LearnMore = () => {
             <p className="text-xl text-muted-foreground mb-8">
               {t("learnMorePage.hero.subtitle", {
                 defaultValue:
-                  "Compare typical government fees, interview requirements, and processing timelines for popular destinations. Service fee is calculated as (fee × 2) + 5%. Express adds +15%.",
+                  "Compare typical government fees, interview requirements, and processing timelines for popular destinations. Service pricing depends on destination complexity and support level.",
               })}
             </p>
 

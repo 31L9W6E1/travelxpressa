@@ -54,11 +54,21 @@ const UserProfile = () => {
 
   const fetchApplications = async () => {
     try {
-      const response = await api.get("/api/applications");
-      const apps = response.data.data || [];
+      const response = await api.get("/api/applications", {
+        params: { page: 1, limit: 100, sortOrder: "desc" },
+      });
+      const apps = (response.data.data || []).sort((a: Application, b: Application) => {
+        const aTime = new Date(a.updatedAt || a.createdAt).getTime();
+        const bTime = new Date(b.updatedAt || b.createdAt).getTime();
+        return bTime - aTime;
+      });
       setApplications(apps);
       if (apps.length > 0) {
-        setActiveApplication(apps[0]);
+        const preferred =
+          apps.find((app: Application) =>
+            ["SUBMITTED", "UNDER_REVIEW", "APPROVED", "REJECTED"].includes(app.status),
+          ) || apps[0];
+        setActiveApplication(preferred);
       }
     } catch (error) {
       console.error("Error fetching applications:", error);

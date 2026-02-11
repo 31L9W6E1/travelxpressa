@@ -260,7 +260,7 @@
     "hero": {
       "titleLine1": "Visa Fees &",
       "titleLine2": "Requirements",
-      "subtitle": "Compare typical government fees, interview requirements, and processing timelines for popular destinations. Service fee is calculated as (government fee x 2) + 5%. Express adds +15%.",
+      "subtitle": "Compare typical government fees, interview requirements, and processing timelines for popular destinations. Service pricing depends on destination complexity and support level.",
       "cta": "Choose Destination",
       "secondaryCta": "Continue Application"
     },
@@ -873,6 +873,13 @@
     },
     "travel": {
       "selectPurpose": "Select purpose",
+      "serviceSpeedTitle": "Processing option",
+      "serviceSpeed": {
+        "standard": "Standard",
+        "standardDesc": "Regular review queue.",
+        "express": "Express (+15%)",
+        "expressDesc": "Priority handling for urgent timelines."
+      },
       "purposeOptions": {
         "tourism": "Tourism/Vacation",
         "business": "Business",
@@ -888,6 +895,20 @@
         "sponsor": "Sponsor"
       }
     },
+    "family": {
+      "fatherDob": "Father's Date of Birth",
+      "motherDob": "Mother's Date of Birth",
+      "spouseDob": "Spouse Date of Birth",
+      "childTitle": "Child {{index}}",
+      "childName": "Full Name",
+      "childDob": "Date of Birth",
+      "childrenValidation": "Please complete each child full name and date of birth."
+    },
+    "security": {
+      "title": "Security Question",
+      "question": "Have you ever been arrested or convicted?",
+      "details": "Please provide details"
+    },
     "payment": {
       "successTitle": "Payment Successful!",
       "successDescription": "Your application has been submitted. Redirecting to your profile...",
@@ -898,7 +919,9 @@
     "buttons": {
       "processing": "Processing...",
       "submitted": "Submitted",
-      "paySubmit": "Pay & Submit"
+      "paySubmit": "Pay & Submit",
+      "restoreDraft": "Restore Draft",
+      "submit": "Submit Application"
     },
     "review": {
       "labels": {
@@ -910,13 +933,17 @@
         "issued": "Issued",
         "expires": "Expires",
         "purpose": "Purpose",
-        "arrival": "Arrival"
+        "arrival": "Arrival",
+        "processingOption": "Processing"
       }
     },
     "toasts": {
       "draftLoaded": {
         "title": "Draft loaded",
         "description": "Your previous progress has been restored."
+      },
+      "localDraftLoaded": {
+        "description": "Restored your latest locally saved draft."
       },
       "saved": {
         "title": "Application saved!",

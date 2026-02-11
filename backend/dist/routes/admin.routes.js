@@ -8,11 +8,29 @@ const errorHandler_1 = require("../middleware/errorHandler");
 const security_1 = require("../middleware/security");
 const schemas_1 = require("../validation/schemas");
 const types_1 = require("../types");
+const encryption_1 = require("../utils/encryption");
 const logger_1 = require("../utils/logger");
 // Helper to safely extract string param
 const getIdParam = (req) => {
     const id = req.params.id;
     return Array.isArray(id) ? id[0] : id;
+};
+const safeDecryptJson = (value) => {
+    if (!value)
+        return null;
+    try {
+        return JSON.parse((0, encryption_1.decrypt)(value));
+    }
+    catch {
+        // Fallback for legacy/plain JSON values (or corrupted ciphertext).
+        try {
+            return JSON.parse(value);
+        }
+        catch {
+            // Avoid throwing for corrupted/legacy values; admin UI can still show metadata.
+            return null;
+        }
+    }
 };
 const router = (0, express_1.Router)();
 // All admin routes require authentication and admin role
@@ -507,9 +525,19 @@ router.get('/applications/:id', (0, validate_1.validate)({ params: schemas_1.idP
     if (!application) {
         throw new errorHandler_1.NotFoundError('Application not found');
     }
+    const decryptedApplication = {
+        ...application,
+        personalInfo: safeDecryptJson(application.personalInfo),
+        contactInfo: safeDecryptJson(application.contactInfo),
+        passportInfo: safeDecryptJson(application.passportInfo),
+        travelInfo: safeDecryptJson(application.travelInfo),
+        familyInfo: safeDecryptJson(application.familyInfo),
+        workEducation: safeDecryptJson(application.workEducation),
+        securityInfo: safeDecryptJson(application.securityInfo),
+    };
     res.json({
         success: true,
-        data: application,
+        data: decryptedApplication,
     });
 }));
 /**

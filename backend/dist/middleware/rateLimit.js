@@ -97,11 +97,13 @@ function rateLimit(options = {}) {
 }
 /**
  * Strict rate limit for authentication endpoints
+ * Only counts failed requests (4xx/5xx) - successful logins don't count against the limit
  */
 exports.authRateLimit = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
     maxRequests: config_1.config.rateLimit.authMaxRequests,
     message: 'Too many authentication attempts, please try again later',
+    skipSuccessfulRequests: true, // Don't count successful requests (2xx/3xx)
     onLimitReached: (req) => {
         logger_1.logger.security('Auth rate limit exceeded', {
             ip: req.ip,

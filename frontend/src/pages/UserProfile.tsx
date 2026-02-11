@@ -476,7 +476,7 @@ const UserProfile = () => {
                 {t('userProfile.supportDescription', 'Our support team is available 24/7 to assist with your application.')}
               </p>
               <Button asChild variant="outline" className="w-full">
-                <Link to="/form">{t('userProfile.contactSupport', 'Contact Support')}</Link>
+                <Link to="/contactsupport">{t('userProfile.contactSupport', 'Contact Support')}</Link>
               </Button>
             </Card>
           </div>

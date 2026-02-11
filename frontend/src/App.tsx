@@ -26,6 +26,7 @@ import ReadyToBegin from "./pages/ReadyToBegin";
 import UserProfile from "./pages/UserProfile";
 import UserInbox from "./pages/UserInbox";
 import UserSecuritySettings from "./pages/UserSecuritySettings";
+import ContactSupport from "./pages/ContactSupport";
 import LearnMore from "./pages/LearnMore";
 import CountrySelect from "./pages/CountrySelect";
 import OAuthCallback from "./pages/OAuthCallback";
@@ -155,6 +156,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <UserSecuritySettings />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/contactsupport"
+              element={
+                <ProtectedRoute>
+                  <ContactSupport />
                 </ProtectedRoute>
               }
             />

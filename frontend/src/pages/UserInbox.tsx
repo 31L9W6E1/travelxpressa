@@ -14,6 +14,13 @@ import {
   Search,
 } from "lucide-react";
 import api from "@/api/client";
+import {
+  ChatThread,
+  ProgressUpdatePayload,
+  decodeProgressUpdate,
+  fetchThreadById,
+  fetchThreads,
+} from "@/api/chat";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -46,6 +53,18 @@ type InboxItem = {
   createdAt: string;
   updatedAt: string;
   currentStep?: number;
+  progress?: ProgressUpdatePayload;
+};
+
+const getLatestProgressForThread = (
+  thread: ChatThread,
+): ProgressUpdatePayload | null => {
+  const messages = thread.messages || [];
+  for (let i = messages.length - 1; i >= 0; i -= 1) {
+    const parsed = decodeProgressUpdate(messages[i].content);
+    if (parsed) return parsed;
+  }
+  return null;
 };
 
 const getStatusVariant = (status: string) => {
@@ -71,15 +90,19 @@ const UserInbox = () => {
   const [loading, setLoading] = useState(true);
   const [applications, setApplications] = useState<UserApplication[]>([]);
   const [inquiries, setInquiries] = useState<UserInquiry[]>([]);
+  const [applicationProgressById, setApplicationProgressById] = useState<
+    Record<string, ProgressUpdatePayload>
+  >({});
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"all" | "application" | "inquiry">("all");
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [appsRes, inquiriesRes] = await Promise.allSettled([
+      const [appsRes, inquiriesRes, threadsRes] = await Promise.allSettled([
         api.get("/api/applications"),
         api.get("/api/inquiries/user"),
+        fetchThreads(),
       ]);
 
       if (appsRes.status === "fulfilled") {
@@ -94,6 +117,34 @@ const UserInbox = () => {
         setInquiries(Array.isArray(inquiryData) ? inquiryData : []);
       } else {
         setInquiries([]);
+      }
+
+      if (threadsRes.status === "fulfilled") {
+        const threads = (threadsRes.value || []).filter((t) => !!t.applicationId);
+        const details = await Promise.allSettled(
+          threads.map((thread) => fetchThreadById(thread.id)),
+        );
+
+        const progressByApp: Record<string, ProgressUpdatePayload> = {};
+        details.forEach((detail) => {
+          if (detail.status !== "fulfilled") return;
+          const thread = detail.value;
+          const latestProgress = getLatestProgressForThread(thread);
+          const applicationId = latestProgress?.applicationId || thread.applicationId;
+          if (!latestProgress || !applicationId) return;
+
+          const existing = progressByApp[applicationId];
+          if (
+            !existing ||
+            new Date(latestProgress.updatedAt).getTime() > new Date(existing.updatedAt).getTime()
+          ) {
+            progressByApp[applicationId] = latestProgress;
+          }
+        });
+
+        setApplicationProgressById(progressByApp);
+      } else {
+        setApplicationProgressById({});
       }
     } finally {
       setLoading(false);
@@ -110,10 +161,14 @@ const UserInbox = () => {
       source: "application",
       status: app.status,
       title: `${app.visaType} ${t("userInbox.labels.application", "Application")}`,
-      subtitle: `${t("userInbox.labels.step", "Step")} ${app.currentStep || 0}/9`,
+      subtitle:
+        applicationProgressById[app.id]?.note ||
+        `${t("userInbox.labels.step", "Step")} ${app.currentStep || 0}/9`,
       createdAt: app.createdAt,
-      updatedAt: app.updatedAt || app.createdAt,
+      updatedAt:
+        applicationProgressById[app.id]?.updatedAt || app.updatedAt || app.createdAt,
       currentStep: app.currentStep,
+      progress: applicationProgressById[app.id],
     }));
 
     const inquiryItems: InboxItem[] = inquiries.map((inq) => ({
@@ -129,7 +184,7 @@ const UserInbox = () => {
     return [...appItems, ...inquiryItems].sort(
       (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
     );
-  }, [applications, inquiries, t]);
+  }, [applicationProgressById, applications, inquiries, t]);
 
   const filteredItems = useMemo(() => {
     return items.filter((item) => {
@@ -269,19 +324,66 @@ const UserInbox = () => {
                     </div>
 
                     <div className="flex items-center gap-3">
-                      {item.source === "application" && typeof item.currentStep === "number" && (
-                        <div className="w-40">
-                          <div className="h-2 rounded bg-muted overflow-hidden">
-                            <div
-                              className="h-full bg-primary transition-all"
-                              style={{ width: `${Math.round((item.currentStep / 9) * 100)}%` }}
-                            />
+                      {item.source === "application" &&
+                        item.progress && (
+                          <div className="w-72 grid grid-cols-2 gap-2 text-xs">
+                            <div>
+                              <p className="text-muted-foreground">Appointment</p>
+                              <div className="h-1.5 rounded bg-muted overflow-hidden">
+                                <div
+                                  className="h-full bg-primary transition-all"
+                                  style={{ width: `${item.progress.appointmentPdf}%` }}
+                                />
+                              </div>
+                              <p className="mt-1">{item.progress.appointmentPdf}%</p>
+                            </div>
+                            <div>
+                              <p className="text-muted-foreground">DS-160</p>
+                              <div className="h-1.5 rounded bg-muted overflow-hidden">
+                                <div
+                                  className="h-full bg-primary transition-all"
+                                  style={{ width: `${item.progress.ds160}%` }}
+                                />
+                              </div>
+                              <p className="mt-1">{item.progress.ds160}%</p>
+                            </div>
+                            <div>
+                              <p className="text-muted-foreground">Materials</p>
+                              <div className="h-1.5 rounded bg-muted overflow-hidden">
+                                <div
+                                  className="h-full bg-primary transition-all"
+                                  style={{ width: `${item.progress.materialCheck}%` }}
+                                />
+                              </div>
+                              <p className="mt-1">{item.progress.materialCheck}%</p>
+                            </div>
+                            <div>
+                              <p className="text-muted-foreground">Consultation</p>
+                              <div className="h-1.5 rounded bg-muted overflow-hidden">
+                                <div
+                                  className="h-full bg-primary transition-all"
+                                  style={{ width: `${item.progress.visaConsultation}%` }}
+                                />
+                              </div>
+                              <p className="mt-1">{item.progress.visaConsultation}%</p>
+                            </div>
                           </div>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            {t("userInbox.labels.step", "Step")} {item.currentStep}/9
-                          </p>
-                        </div>
-                      )}
+                        )}
+                      {item.source === "application" &&
+                        !item.progress &&
+                        typeof item.currentStep === "number" && (
+                          <div className="w-40">
+                            <div className="h-2 rounded bg-muted overflow-hidden">
+                              <div
+                                className="h-full bg-primary transition-all"
+                                style={{ width: `${Math.round((item.currentStep / 9) * 100)}%` }}
+                              />
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {t("userInbox.labels.step", "Step")} {item.currentStep}/9
+                            </p>
+                          </div>
+                        )}
                       <p className="text-xs text-muted-foreground whitespace-nowrap">
                         {new Date(item.updatedAt).toLocaleString()}
                       </p>
@@ -299,7 +401,7 @@ const UserInbox = () => {
                 </Link>
               </Button>
               <Button asChild variant="outline">
-                <Link to="/form">
+                <Link to="/contactsupport">
                   <CheckCircle2 className="w-4 h-4 mr-2" />
                   {t("userInbox.actions.contactSupport", "Contact Support")}
                 </Link>

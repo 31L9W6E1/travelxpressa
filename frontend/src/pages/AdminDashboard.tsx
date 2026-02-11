@@ -30,6 +30,7 @@ import {
   Activity,
   FolderOpen,
   TrendingDown,
+  MessageSquare,
 } from "lucide-react";
 import {
   ChartContainer,
@@ -1348,6 +1349,11 @@ const AdminDashboard = () => {
                               <Button variant="ghost" size="icon" asChild>
                                 <Link to={`/admin/users/${u.id}`}>
                                   <Eye className="w-4 h-4" />
+                                </Link>
+                              </Button>
+                              <Button variant="ghost" size="icon" asChild>
+                                <Link to={`/contactsupport?userId=${u.id}`}>
+                                  <MessageSquare className="w-4 h-4" />
                                 </Link>
                               </Button>
                               <Button variant="ghost" size="icon">

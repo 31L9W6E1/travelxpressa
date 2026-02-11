@@ -16,13 +16,34 @@ router.use(authenticateToken);
 router.post(
   '/threads',
   asyncHandler(async (req: Request, res: Response) => {
-    const userId = (req as AuthenticatedRequest).user.userId;
+    const requesterId = (req as AuthenticatedRequest).user.userId;
+    const requesterRole = (req as AuthenticatedRequest).user.role;
     const { applicationId, subject } = req.body;
+    const requestedUserId = typeof req.body?.userId === 'string' ? req.body.userId : undefined;
+
+    const targetUserId =
+      ['ADMIN', 'AGENT'].includes(requesterRole) && requestedUserId
+        ? requestedUserId
+        : requesterId;
+
+    if (targetUserId !== requesterId && !['ADMIN', 'AGENT'].includes(requesterRole)) {
+      throw new BadRequestError('Only admins can create threads for other users');
+    }
+
+    if (targetUserId !== requesterId) {
+      const targetUser = await prisma.user.findUnique({
+        where: { id: targetUserId },
+        select: { id: true },
+      });
+      if (!targetUser) {
+        throw new NotFoundError('Target user not found');
+      }
+    }
 
     // Check if user already has an open thread
     const existingThread = await prisma.chatThread.findFirst({
       where: {
-        userId,
+        userId: targetUserId,
         status: 'OPEN',
       },
     });
@@ -37,7 +58,7 @@ router.post(
 
     const thread = await prisma.chatThread.create({
       data: {
-        userId,
+        userId: targetUserId,
         applicationId: applicationId || null,
         subject: subject || 'Support Request',
         status: 'OPEN',
@@ -59,7 +80,11 @@ router.post(
       },
     });
 
-    logger.info('Chat thread created', { threadId: thread.id, userId });
+    logger.info('Chat thread created', {
+      threadId: thread.id,
+      userId: targetUserId,
+      createdBy: requesterId,
+    });
 
     res.status(201).json({
       success: true,

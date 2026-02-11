@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts/ThemeContext";
-import { Menu, X, Plane, User, LogOut, Settings, FileText, CreditCard, ChevronDown, Sun, Moon } from "lucide-react";
+import { Menu, X, Plane, User, LogOut, Settings, FileText, CreditCard, ChevronDown, Sun, Moon, MessageSquare } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { UserAvatar } from "./UserAvatar";
 import { useTranslation } from 'react-i18next';
@@ -60,6 +60,15 @@ const Navbar = () => {
               >
                 {t('nav.gallery', { defaultValue: 'Gallery' })}
               </Link>
+              {user && (
+                <Link
+                  to="/contactsupport"
+                  className="px-4 py-2 text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2"
+                >
+                  <MessageSquare className="w-4 h-4" />
+                  {t('nav.support', { defaultValue: 'Support' })}
+                </Link>
+              )}
               {user && user.role !== "ADMIN" && (
                 <Link
                   to="/application"
@@ -150,6 +159,14 @@ const Navbar = () => {
                         <CreditCard className="w-4 h-4" />
                         {t('nav.payments')}
                       </Link>
+                      <Link
+                        to="/contactsupport"
+                        onClick={() => setIsDropdownOpen(false)}
+                        className="flex items-center gap-3 px-4 py-2.5 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+                      >
+                        <MessageSquare className="w-4 h-4" />
+                        {t('nav.support', { defaultValue: 'Support' })}
+                      </Link>
                     </div>
                     <div className="border-t border-border py-1">
                       <button
@@ -234,6 +251,15 @@ const Navbar = () => {
               >
                 {t('nav.gallery', { defaultValue: 'Gallery' })}
               </Link>
+              {user && (
+                <Link
+                  to="/contactsupport"
+                  className="px-4 py-3 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  {t('nav.support', { defaultValue: 'Support' })}
+                </Link>
+              )}
               {user && (
                 <>
                   <Link

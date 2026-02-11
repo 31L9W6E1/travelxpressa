@@ -20,6 +20,22 @@ const getIdParam = (req) => {
 const router = (0, express_1.Router)();
 // All routes require authentication
 router.use(auth_1.authenticateToken);
+const safeDecryptJson = (value) => {
+    if (!value)
+        return null;
+    try {
+        return JSON.parse((0, encryption_1.decrypt)(value));
+    }
+    catch {
+        // Fallback for legacy/plain JSON values (or corrupted ciphertext).
+        try {
+            return JSON.parse(value);
+        }
+        catch {
+            return null;
+        }
+    }
+};
 /**
  * Create a new DS-160 application
  */
@@ -96,10 +112,13 @@ router.get('/:id', (0, validate_1.validate)({ params: schemas_1.idParamSchema })
     // Decrypt sensitive fields if present
     const decryptedData = {
         ...application,
-        personalInfo: application.personalInfo ? JSON.parse((0, encryption_1.decrypt)(application.personalInfo)) : null,
-        contactInfo: application.contactInfo ? JSON.parse((0, encryption_1.decrypt)(application.contactInfo)) : null,
-        passportInfo: application.passportInfo ? JSON.parse((0, encryption_1.decrypt)(application.passportInfo)) : null,
-        travelInfo: application.travelInfo ? JSON.parse((0, encryption_1.decrypt)(application.travelInfo)) : null,
+        personalInfo: safeDecryptJson(application.personalInfo),
+        contactInfo: safeDecryptJson(application.contactInfo),
+        passportInfo: safeDecryptJson(application.passportInfo),
+        travelInfo: safeDecryptJson(application.travelInfo),
+        familyInfo: safeDecryptJson(application.familyInfo),
+        workEducation: safeDecryptJson(application.workEducation),
+        securityInfo: safeDecryptJson(application.securityInfo),
     };
     res.json({
         success: true,
@@ -112,7 +131,7 @@ router.get('/:id', (0, validate_1.validate)({ params: schemas_1.idParamSchema })
 router.patch('/:id', (0, validate_1.validate)({ params: schemas_1.idParamSchema, body: schemas_1.updateApplicationSchema }), (0, security_1.auditLog)('UPDATE_APPLICATION'), (0, errorHandler_1.asyncHandler)(async (req, res) => {
     const id = getIdParam(req);
     const userId = req.user.userId;
-    const { currentStep, personalInfo, contactInfo, passportInfo, travelInfo } = req.body;
+    const { currentStep, personalInfo, contactInfo, passportInfo, travelInfo, familyInfo, workEducation, securityInfo, } = req.body;
     const application = await prisma_1.prisma.application.findUnique({
         where: { id },
     });
@@ -140,6 +159,15 @@ router.patch('/:id', (0, validate_1.validate)({ params: schemas_1.idParamSchema,
     }
     if (travelInfo) {
         updateData.travelInfo = (0, encryption_1.encrypt)(JSON.stringify(travelInfo));
+    }
+    if (familyInfo) {
+        updateData.familyInfo = (0, encryption_1.encrypt)(JSON.stringify(familyInfo));
+    }
+    if (workEducation) {
+        updateData.workEducation = (0, encryption_1.encrypt)(JSON.stringify(workEducation));
+    }
+    if (securityInfo) {
+        updateData.securityInfo = (0, encryption_1.encrypt)(JSON.stringify(securityInfo));
     }
     // Update status to IN_PROGRESS if it was DRAFT
     if (application.status === types_1.ApplicationStatus.DRAFT) {

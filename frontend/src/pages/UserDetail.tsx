@@ -19,7 +19,8 @@ import {
   AlertCircle,
   Lock,
   Unlock,
-  Trash2
+  Trash2,
+  MessageSquare
 } from "lucide-react";
 
 interface UserDetailData {
@@ -193,6 +194,13 @@ const UserDetail = () => {
               </div>
             </div>
             <div className="flex items-center gap-3">
+              <Link
+                to={`/contactsupport?userId=${userData.id}`}
+                className="px-4 py-2 bg-secondary border border-border text-foreground rounded-lg hover:bg-secondary/80 transition-colors flex items-center gap-2"
+              >
+                <MessageSquare className="w-4 h-4" />
+                {t('userDetail.messageUser', 'Message User')}
+              </Link>
               <button className="px-4 py-2 bg-secondary border border-border text-foreground rounded-lg hover:bg-secondary/80 transition-colors flex items-center gap-2">
                 <Unlock className="w-4 h-4" />
                 {t('userDetail.resetPassword', 'Reset Password')}

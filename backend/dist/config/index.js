@@ -42,7 +42,7 @@ exports.config = {
     rateLimit: {
         windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000', 10), // 15 minutes
         maxRequests: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '100', 10),
-        authMaxRequests: parseInt(process.env.AUTH_RATE_LIMIT_MAX || '50', 10),
+        authMaxRequests: parseInt(process.env.AUTH_RATE_LIMIT_MAX || '200', 10), // Increased from 50 to 200
     },
     // Session
     sessionSecret: process.env.SESSION_SECRET || 'dev-session-secret',

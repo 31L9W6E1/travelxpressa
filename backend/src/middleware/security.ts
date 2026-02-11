@@ -6,6 +6,34 @@ import { logger } from '../utils/logger';
 // CSRF token store (use Redis in production)
 const csrfTokens = new Map<string, { token: string; expires: number }>();
 
+function toOrigin(url: string): string | null {
+  try {
+    return new URL(url).origin;
+  } catch {
+    return null;
+  }
+}
+
+function getTrustedOrigins(): Set<string> {
+  const origins = new Set<string>();
+
+  config.corsOrigin
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean)
+    .forEach((origin) => {
+      const parsed = toOrigin(origin);
+      if (parsed) origins.add(parsed);
+    });
+
+  const frontendOrigin = toOrigin(config.frontendUrl);
+  if (frontendOrigin) {
+    origins.add(frontendOrigin);
+  }
+
+  return origins;
+}
+
 /**
  * Security headers middleware
  */
@@ -91,23 +119,46 @@ export function csrfProtection(req: Request, res: Response, next: NextFunction):
     return next();
   }
 
-  const sessionId = req.cookies?.sessionId || req.headers['x-session-id'] as string;
-  const csrfToken = req.headers['x-csrf-token'] as string || req.body?._csrf;
-
-  if (!sessionId || !csrfToken) {
-    logger.security('CSRF token missing', { ip: req.ip, path: req.path });
-    res.status(403).json({
-      success: false,
-      error: 'CSRF token required',
-    });
-    return;
+  // Only enforce CSRF checks for cookie-authenticated requests.
+  // This prevents breaking non-cookie API flows (e.g., login/register forms).
+  const sessionId =
+    (req.cookies?.sessionId as string | undefined) ||
+    (req.cookies?.refreshToken as string | undefined) ||
+    (req.headers['x-session-id'] as string | undefined);
+  if (!sessionId) {
+    return next();
   }
 
-  if (!verifyCSRFToken(sessionId, csrfToken)) {
-    logger.security('CSRF token invalid', { ip: req.ip, path: req.path });
+  const csrfToken = (req.headers['x-csrf-token'] as string | undefined) || req.body?._csrf;
+  if (csrfToken) {
+    if (!verifyCSRFToken(sessionId, csrfToken)) {
+      logger.security('CSRF token invalid', { ip: req.ip, path: req.path });
+      res.status(403).json({
+        success: false,
+        error: 'Invalid CSRF token',
+      });
+      return;
+    }
+
+    return next();
+  }
+
+  // Fallback hardening for browsers: require trusted Origin/Referer for cookie auth requests.
+  const originHeader = req.get('origin');
+  const refererHeader = req.get('referer');
+  const requestOrigin = originHeader || (refererHeader ? toOrigin(refererHeader) : null);
+  const trustedOrigins = getTrustedOrigins();
+
+  if (!requestOrigin || !trustedOrigins.has(requestOrigin)) {
+    logger.security('CSRF origin check failed', {
+      ip: req.ip,
+      path: req.path,
+      method: req.method,
+      requestOrigin: requestOrigin || 'missing',
+    });
     res.status(403).json({
       success: false,
-      error: 'Invalid CSRF token',
+      error: 'Invalid request origin',
     });
     return;
   }

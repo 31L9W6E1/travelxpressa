@@ -8,7 +8,7 @@ import { config } from './config';
 import { logger } from './utils/logger';
 
 // Middleware
-import { securityHeaders, requestId, preventParamPollution, detectSuspiciousActivity } from './middleware/security';
+import { securityHeaders, requestId, preventParamPollution, detectSuspiciousActivity, csrfProtection } from './middleware/security';
 import { apiRateLimit, authRateLimit } from './middleware/rateLimit';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import { sanitizeBody } from './middleware/validate';
@@ -106,7 +106,7 @@ app.get('/ready', async (_req, res) => {
 
 // API routes with rate limiting (disabled in development)
 if (config.isProduction) {
-  app.use('/api/auth', authRateLimit, authRoutes);
+  app.use('/api/auth', authRateLimit, csrfProtection, authRoutes);
   app.use('/api', apiRateLimit, inquiryRoutes);
   app.use('/api/admin', apiRateLimit, adminRoutes);
   app.use('/api', apiRateLimit, userRoutes);
@@ -117,7 +117,7 @@ if (config.isProduction) {
   app.use('/api/payments', apiRateLimit, paymentRoutes);
 } else {
   // Development - no rate limiting
-  app.use('/api/auth', authRoutes);
+  app.use('/api/auth', csrfProtection, authRoutes);
   app.use('/api', inquiryRoutes);
   app.use('/api/admin', adminRoutes);
   app.use('/api', userRoutes);

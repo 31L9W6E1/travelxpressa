@@ -32,6 +32,17 @@ const safeDecryptJson = (value) => {
         }
     }
 };
+const buildDocumentsPayload = (photoUrl, updatedAt) => {
+    if (!photoUrl)
+        return null;
+    return {
+        photo: {
+            fileName: photoUrl.split('/').pop() || 'uploaded-photo',
+            fileUrl: photoUrl,
+            uploadedAt: updatedAt ? updatedAt.toISOString() : undefined,
+        },
+    };
+};
 const router = (0, express_1.Router)();
 // All admin routes require authentication and admin role
 router.use(auth_1.authenticateToken);
@@ -534,6 +545,7 @@ router.get('/applications/:id', (0, validate_1.validate)({ params: schemas_1.idP
         familyInfo: safeDecryptJson(application.familyInfo),
         workEducation: safeDecryptJson(application.workEducation),
         securityInfo: safeDecryptJson(application.securityInfo),
+        documents: buildDocumentsPayload(application.photoUrl, application.updatedAt),
     };
     res.json({
         success: true,

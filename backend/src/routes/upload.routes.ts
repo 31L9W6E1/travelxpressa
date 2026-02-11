@@ -9,16 +9,29 @@ import { logger } from '../utils/logger';
 
 const router = Router();
 
-// Create uploads directory if it doesn't exist
-const uploadsDir = path.join(process.cwd(), 'uploads', 'images');
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
-}
+const uploadsRootDir = path.join(process.cwd(), 'uploads');
+const imageUploadsDir = path.join(uploadsRootDir, 'images');
+const fileUploadsDir = path.join(uploadsRootDir, 'files');
+
+// Create upload directories if they don't exist.
+[uploadsRootDir, imageUploadsDir, fileUploadsDir].forEach((dir) => {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+});
+
+const isImageMime = (mimeType: string) => mimeType.startsWith('image/');
 
 // Configure multer for local storage
 const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => {
-    cb(null, uploadsDir);
+  destination: (req, file, cb) => {
+    const isDocumentUpload = req.originalUrl.includes('/document');
+    if (isDocumentUpload) {
+      cb(null, fileUploadsDir);
+      return;
+    }
+
+    cb(null, isImageMime(file.mimetype) ? imageUploadsDir : fileUploadsDir);
   },
   filename: (_req, file, cb) => {
     // Generate unique filename with original extension
@@ -34,19 +47,28 @@ const upload = multer({
     fileSize: 10 * 1024 * 1024, // 10MB limit
   },
   fileFilter: (_req, file, cb) => {
-    // Accept only images
-    const allowedMimes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    // Accept images + common supporting document formats.
+    const allowedMimes = [
+      'image/jpeg',
+      'image/jpg',
+      'image/png',
+      'image/gif',
+      'image/webp',
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    ];
     if (allowedMimes.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error('Invalid file type. Only JPEG, PNG, GIF, and WebP are allowed.'));
+      cb(new Error('Invalid file type. Allowed: JPEG, PNG, GIF, WebP, PDF, DOC, DOCX.'));
     }
   },
 });
 
 const listGalleryImages = () => {
   // Read all files from uploads directory
-  const files = fs.readdirSync(uploadsDir);
+  const files = fs.readdirSync(imageUploadsDir);
 
   // Get file stats for each file
   const images = files
@@ -55,7 +77,7 @@ const listGalleryImages = () => {
       return ['.jpg', '.jpeg', '.png', '.gif', '.webp'].includes(ext);
     })
     .map((filename) => {
-      const filePath = path.join(uploadsDir, filename);
+      const filePath = path.join(imageUploadsDir, filename);
       const stats = fs.statSync(filePath);
       const ext = path.extname(filename).toLowerCase().slice(1);
 
@@ -83,53 +105,72 @@ const listGalleryImages = () => {
 };
 
 // POST /api/upload/image - Upload image locally (admin only)
+const handleFileUpload = async (req: Request, res: Response) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: 'No file provided',
+      });
+    }
+
+    // Build the URL for the uploaded file.
+    const filename = req.file.filename;
+    const uploadPath = req.originalUrl.includes('/document')
+      ? 'files'
+      : isImageMime(req.file.mimetype)
+        ? 'images'
+        : 'files';
+    const fileUrl = `/uploads/${uploadPath}/${filename}`;
+
+    logger.info('File uploaded locally', {
+      filename,
+      mimeType: req.file.mimetype,
+      path: uploadPath,
+    });
+
+    res.json({
+      success: true,
+      data: {
+        url: fileUrl,
+        filename: filename,
+      },
+      message: 'File uploaded successfully',
+    });
+  } catch (error) {
+    logger.error('Error uploading file', error as Error);
+
+    // Handle multer errors
+    if (error instanceof multer.MulterError) {
+      if (error.code === 'LIMIT_FILE_SIZE') {
+        return res.status(400).json({
+          success: false,
+          message: 'File too large. Maximum size is 10MB.',
+        });
+      }
+    }
+
+    res.status(500).json({
+      success: false,
+      message: error instanceof Error ? error.message : 'Failed to upload file',
+    });
+  }
+};
+
 router.post(
   '/image',
   authenticateToken,
   requireRole(UserRole.ADMIN),
   upload.single('image'),
-  async (req: Request, res: Response) => {
-    try {
-      if (!req.file) {
-        return res.status(400).json({
-          success: false,
-          message: 'No image file provided',
-        });
-      }
+  handleFileUpload
+);
 
-      // Build the URL for the uploaded image
-      const filename = req.file.filename;
-      const imageUrl = `/uploads/images/${filename}`;
-
-      logger.info('Image uploaded locally', { filename });
-
-      res.json({
-        success: true,
-        data: {
-          url: imageUrl,
-          filename: filename,
-        },
-        message: 'Image uploaded successfully',
-      });
-    } catch (error) {
-      logger.error('Error uploading image', error as Error);
-
-      // Handle multer errors
-      if (error instanceof multer.MulterError) {
-        if (error.code === 'LIMIT_FILE_SIZE') {
-          return res.status(400).json({
-            success: false,
-            message: 'File too large. Maximum size is 10MB.',
-          });
-        }
-      }
-
-      res.status(500).json({
-        success: false,
-        message: error instanceof Error ? error.message : 'Failed to upload image',
-      });
-    }
-  }
+// POST /api/upload/document - Upload application documents (authenticated users)
+router.post(
+  '/document',
+  authenticateToken,
+  upload.single('image'),
+  handleFileUpload
 );
 
 // GET /api/upload/public-gallery - Get uploaded images (public read-only)
@@ -190,18 +231,20 @@ router.delete(
 
       // Sanitize filename to prevent directory traversal
       const sanitizedFilename = path.basename(filename);
-      const filePath = path.join(uploadsDir, sanitizedFilename);
+      const imagePath = path.join(imageUploadsDir, sanitizedFilename);
+      const filePath = path.join(fileUploadsDir, sanitizedFilename);
+      const targetPath = fs.existsSync(imagePath) ? imagePath : filePath;
 
       // Check if file exists
-      if (!fs.existsSync(filePath)) {
+      if (!fs.existsSync(targetPath)) {
         return res.status(404).json({
           success: false,
-          message: 'Image not found',
+          message: 'File not found',
         });
       }
 
       // Delete the file
-      fs.unlinkSync(filePath);
+      fs.unlinkSync(targetPath);
 
       logger.info('Image deleted', { filename: sanitizedFilename });
 

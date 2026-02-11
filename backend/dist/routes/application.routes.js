@@ -36,6 +36,17 @@ const safeDecryptJson = (value) => {
         }
     }
 };
+const buildDocumentsPayload = (photoUrl, updatedAt) => {
+    if (!photoUrl)
+        return null;
+    return {
+        photo: {
+            fileName: photoUrl.split('/').pop() || 'uploaded-photo',
+            fileUrl: photoUrl,
+            uploadedAt: updatedAt ? updatedAt.toISOString() : undefined,
+        },
+    };
+};
 /**
  * Create a new DS-160 application
  */
@@ -119,6 +130,7 @@ router.get('/:id', (0, validate_1.validate)({ params: schemas_1.idParamSchema })
         familyInfo: safeDecryptJson(application.familyInfo),
         workEducation: safeDecryptJson(application.workEducation),
         securityInfo: safeDecryptJson(application.securityInfo),
+        documents: buildDocumentsPayload(application.photoUrl, application.updatedAt),
     };
     res.json({
         success: true,
@@ -131,7 +143,7 @@ router.get('/:id', (0, validate_1.validate)({ params: schemas_1.idParamSchema })
 router.patch('/:id', (0, validate_1.validate)({ params: schemas_1.idParamSchema, body: schemas_1.updateApplicationSchema }), (0, security_1.auditLog)('UPDATE_APPLICATION'), (0, errorHandler_1.asyncHandler)(async (req, res) => {
     const id = getIdParam(req);
     const userId = req.user.userId;
-    const { currentStep, personalInfo, contactInfo, passportInfo, travelInfo, familyInfo, workEducation, securityInfo, } = req.body;
+    const { currentStep, personalInfo, contactInfo, passportInfo, travelInfo, familyInfo, workEducation, securityInfo, documents, } = req.body;
     const application = await prisma_1.prisma.application.findUnique({
         where: { id },
     });
@@ -168,6 +180,14 @@ router.patch('/:id', (0, validate_1.validate)({ params: schemas_1.idParamSchema,
     }
     if (securityInfo) {
         updateData.securityInfo = (0, encryption_1.encrypt)(JSON.stringify(securityInfo));
+    }
+    // Backward-compatible documents persistence:
+    // current schema stores only a `photoUrl`, so map documents.photo.fileUrl.
+    if (documents && typeof documents === 'object') {
+        const photoFileUrl = documents?.photo?.fileUrl;
+        if (typeof photoFileUrl === 'string' && photoFileUrl.trim()) {
+            updateData.photoUrl = photoFileUrl.trim();
+        }
     }
     // Update status to IN_PROGRESS if it was DRAFT
     if (application.status === types_1.ApplicationStatus.DRAFT) {

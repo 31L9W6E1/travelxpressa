@@ -1,10 +1,13 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Loader2, Upload, X } from "lucide-react";
 import api from "@/api/client";
-import { getFallbackImageUrl, getFullImageUrl } from "@/api/upload";
+import { getFallbackImageUrl, getFullImageUrl, uploadImage } from "@/api/upload";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 // Placeholder images - will be replaced with API/CMS data later
 const galleryImages = [
@@ -109,33 +112,36 @@ type GalleryItem = {
 
 const Gallery = () => {
   const { t } = useTranslation();
+  const { user } = useAuth();
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedImage, setSelectedImage] = useState<GalleryItem | null>(null);
   const [uploadedImages, setUploadedImages] = useState<GalleryItem[] | null>(null);
+  const [isPublishing, setIsPublishing] = useState(false);
+  const uploadInputRef = useRef<HTMLInputElement>(null);
+
+  const fetchPublicGallery = useCallback(async () => {
+    const res = await api.get("/api/upload/public-gallery");
+    const images = res.data?.data?.images;
+    if (!Array.isArray(images)) return [];
+
+    return images.map((img: any) => {
+      const filename = String(img?.filename || "");
+      const url = String(img?.url || "");
+      return {
+        id: filename || url || crypto.randomUUID(),
+        src: getFullImageUrl(url),
+        alt: filename || t("gallery.uploadedImage", "Uploaded image"),
+        category: "uploads",
+      } satisfies GalleryItem;
+    });
+  }, [t]);
 
   useEffect(() => {
     let cancelled = false;
 
-    const fetchPublicGallery = async () => {
+    const load = async () => {
       try {
-        const res = await api.get("/api/upload/public-gallery");
-        const images = res.data?.data?.images;
-        if (!Array.isArray(images)) {
-          if (!cancelled) setUploadedImages([]);
-          return;
-        }
-
-        const mapped: GalleryItem[] = images.map((img: any) => {
-          const filename = String(img?.filename || "");
-          const url = String(img?.url || "");
-          return {
-            id: filename || url || crypto.randomUUID(),
-            src: getFullImageUrl(url),
-            alt: filename || t("gallery.uploadedImage", "Uploaded image"),
-            category: "uploads",
-          };
-        });
-
+        const mapped = await fetchPublicGallery();
         if (!cancelled) setUploadedImages(mapped);
       } catch {
         // If the backend gallery isn't configured yet, keep placeholders.
@@ -143,11 +149,11 @@ const Gallery = () => {
       }
     };
 
-    void fetchPublicGallery();
+    void load();
     return () => {
       cancelled = true;
     };
-  }, [t]);
+  }, [fetchPublicGallery]);
 
   const usingUploads = (uploadedImages?.length ?? 0) > 0;
 
@@ -170,6 +176,40 @@ const Gallery = () => {
       ? galleryItems
       : galleryItems.filter((img) => img.category === selectedCategory);
 
+  const handlePublishPhotos = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files?.length) return;
+
+    setIsPublishing(true);
+    try {
+      const results = await Promise.all(
+        Array.from(files).map(async (file) => {
+          try {
+            await uploadImage(file);
+            return true;
+          } catch {
+            return false;
+          }
+        })
+      );
+
+      const successCount = results.filter(Boolean).length;
+      if (successCount > 0) {
+        toast.success(`Published ${successCount} photo${successCount > 1 ? "s" : ""}`);
+      } else {
+        toast.error("Failed to publish photos");
+      }
+
+      const mapped = await fetchPublicGallery();
+      setUploadedImages(mapped);
+    } catch (error: any) {
+      toast.error(error?.message || "Failed to publish photos");
+    } finally {
+      setIsPublishing(false);
+      event.target.value = "";
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground pt-20">
       {/* Header Section */}
@@ -188,6 +228,37 @@ const Gallery = () => {
                 "Discover the beauty of destinations awaiting your journey to the United States"
               )}
             </p>
+
+            {user?.role === "ADMIN" && (
+              <div className="mt-6 flex items-center justify-center gap-3">
+                <input
+                  ref={uploadInputRef}
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  className="hidden"
+                  onChange={handlePublishPhotos}
+                  disabled={isPublishing}
+                />
+                <Button
+                  onClick={() => uploadInputRef.current?.click()}
+                  disabled={isPublishing}
+                  className="min-w-[180px]"
+                >
+                  {isPublishing ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Publishing...
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="w-4 h-4 mr-2" />
+                      Publish Photos
+                    </>
+                  )}
+                </Button>
+              </div>
+            )}
           </div>
 
           {/* Category Filter */}

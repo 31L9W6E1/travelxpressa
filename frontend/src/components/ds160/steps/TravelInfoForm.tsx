@@ -25,6 +25,15 @@ export default function TravelInfoForm({ data, onSave, onNext, onPrev }: TravelI
     specificPurpose: data?.specificPurpose || '',
     intendedArrivalDate: data?.intendedArrivalDate || '',
     intendedLengthOfStay: data?.intendedLengthOfStay || '',
+    noUSAddressYet: data?.noUSAddressYet || false,
+    destinationCountry: data?.destinationCountry || 'USA',
+    supportServices: {
+      hotelBooking: data?.supportServices?.hotelBooking || false,
+      preFlightBooking: data?.supportServices?.preFlightBooking || false,
+      travelItinerary: data?.supportServices?.travelItinerary || false,
+      declarationFormAssistance: data?.supportServices?.declarationFormAssistance || false,
+    },
+    supportNotes: data?.supportNotes || '',
     addressWhileInUS: {
       street: data?.addressWhileInUS?.street || '',
       city: data?.addressWhileInUS?.city || '',
@@ -43,6 +52,15 @@ export default function TravelInfoForm({ data, onSave, onNext, onPrev }: TravelI
         ...prev,
         addressWhileInUS: {
           ...prev.addressWhileInUS,
+          [subField]: value,
+        },
+      }));
+    } else if (field.startsWith('supportServices.')) {
+      const subField = field.replace('supportServices.', '');
+      setFormData(prev => ({
+        ...prev,
+        supportServices: {
+          ...prev.supportServices,
           [subField]: value,
         },
       }));
@@ -162,54 +180,155 @@ export default function TravelInfoForm({ data, onSave, onNext, onPrev }: TravelI
       {/* US Address Section */}
       <div className="border-b pb-6">
         <h3 className="text-lg font-medium text-gray-900 mb-4">Address in the United States</h3>
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Street Address *
-            </label>
-            <input
-              type="text"
-              value={formData.addressWhileInUS.street}
-              onChange={(e) => handleChange('addressWhileInUS.street', e.target.value)}
-              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="123 Main Street"
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="space-y-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">City *</label>
-              <input
-                type="text"
-                value={formData.addressWhileInUS.city}
-                onChange={(e) => handleChange('addressWhileInUS.city', e.target.value)}
-                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="New York"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">State *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Destination Country
+              </label>
               <select
-                value={formData.addressWhileInUS.state}
-                onChange={(e) => handleChange('addressWhileInUS.state', e.target.value)}
+                value={formData.destinationCountry}
+                onChange={(e) => handleChange('destinationCountry', e.target.value)}
                 className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
-                <option value="">Select state</option>
-                {US_STATES.map((state) => (
-                  <option key={state} value={state}>{state}</option>
-                ))}
+                <option value="USA">USA</option>
+                <option value="JAPAN">Japan</option>
+                <option value="SCHENGEN">Schengen</option>
+                <option value="UK">United Kingdom</option>
+                <option value="CANADA">Canada</option>
+                <option value="AUSTRALIA">Australia</option>
+                <option value="OTHER">Other</option>
               </select>
+            </div>
+            <div className="flex items-center gap-2 rounded-lg border px-3 py-2">
+              <input
+                id="noUSAddressYet"
+                type="checkbox"
+                checked={formData.noUSAddressYet}
+                onChange={(e) => handleChange('noUSAddressYet', e.target.checked)}
+                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+              <label htmlFor="noUSAddressYet" className="text-sm text-gray-700">
+                I do not have a U.S. address yet (need hotel/itinerary support)
+              </label>
+            </div>
+          </div>
+
+          {!formData.noUSAddressYet ? (
+            <>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Street Address *
+                </label>
+                <input
+                  type="text"
+                  value={formData.addressWhileInUS.street}
+                  onChange={(e) => handleChange('addressWhileInUS.street', e.target.value)}
+                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="123 Main Street"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">City *</label>
+                  <input
+                    type="text"
+                    value={formData.addressWhileInUS.city}
+                    onChange={(e) => handleChange('addressWhileInUS.city', e.target.value)}
+                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="New York"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">State *</label>
+                  <select
+                    value={formData.addressWhileInUS.state}
+                    onChange={(e) => handleChange('addressWhileInUS.state', e.target.value)}
+                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="">Select state</option>
+                    {US_STATES.map((state) => (
+                      <option key={state} value={state}>{state}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">ZIP Code</label>
+                  <input
+                    type="text"
+                    value={formData.addressWhileInUS.zipCode}
+                    onChange={(e) => handleChange('addressWhileInUS.zipCode', e.target.value)}
+                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="10001"
+                  />
+                </div>
+              </div>
+            </>
+          ) : (
+            <div>
+              <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-3">
+                Address can be provided later. Enable support services below so your team can prepare hotel booking
+                and itinerary documents.
+              </p>
+            </div>
+          )}
+
+          <div className="rounded-lg border p-4 space-y-3">
+            <h4 className="text-sm font-semibold text-gray-800">Support Services Needed</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              <label className="flex items-center gap-2 text-sm text-gray-700">
+                <input
+                  type="checkbox"
+                  checked={formData.supportServices.hotelBooking}
+                  onChange={(e) => handleChange('supportServices.hotelBooking', e.target.checked)}
+                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                Hotel booking support
+              </label>
+              <label className="flex items-center gap-2 text-sm text-gray-700">
+                <input
+                  type="checkbox"
+                  checked={formData.supportServices.travelItinerary}
+                  onChange={(e) => handleChange('supportServices.travelItinerary', e.target.checked)}
+                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                Travel itinerary preparation
+              </label>
+              <label className="flex items-center gap-2 text-sm text-gray-700">
+                <input
+                  type="checkbox"
+                  checked={formData.supportServices.preFlightBooking}
+                  onChange={(e) => handleChange('supportServices.preFlightBooking', e.target.checked)}
+                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                Pre-flight booking support
+              </label>
+              {(formData.destinationCountry === 'JAPAN' || formData.destinationCountry === 'OTHER') && (
+                <label className="flex items-center gap-2 text-sm text-gray-700">
+                  <input
+                    type="checkbox"
+                    checked={formData.supportServices.declarationFormAssistance}
+                    onChange={(e) => handleChange('supportServices.declarationFormAssistance', e.target.checked)}
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  Declaration form / VFS form assistance
+                </label>
+              )}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">ZIP Code</label>
-              <input
-                type="text"
-                value={formData.addressWhileInUS.zipCode}
-                onChange={(e) => handleChange('addressWhileInUS.zipCode', e.target.value)}
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Additional support notes
+              </label>
+              <textarea
+                value={formData.supportNotes}
+                onChange={(e) => handleChange('supportNotes', e.target.value)}
+                rows={2}
                 className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="10001"
+                placeholder="Any specific hotel area, itinerary preferences, or VFS/Japan form requirements..."
               />
             </div>
           </div>

@@ -30,6 +30,18 @@ const safeDecryptJson = (value?: string | null) => {
   }
 };
 
+const buildDocumentsPayload = (photoUrl?: string | null, updatedAt?: Date) => {
+  if (!photoUrl) return null;
+
+  return {
+    photo: {
+      fileName: photoUrl.split('/').pop() || 'uploaded-photo',
+      fileUrl: photoUrl,
+      uploadedAt: updatedAt ? updatedAt.toISOString() : undefined,
+    },
+  };
+};
+
 const router = Router();
 
 // All admin routes require authentication and admin role
@@ -642,6 +654,7 @@ router.get(
       familyInfo: safeDecryptJson(application.familyInfo),
       workEducation: safeDecryptJson(application.workEducation),
       securityInfo: safeDecryptJson(application.securityInfo),
+      documents: buildDocumentsPayload(application.photoUrl, application.updatedAt),
     };
 
     res.json({

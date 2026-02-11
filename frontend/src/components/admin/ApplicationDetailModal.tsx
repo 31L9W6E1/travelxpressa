@@ -104,6 +104,15 @@ interface TravelInfo {
   specificPurpose?: string;
   intendedArrivalDate?: string;
   intendedLengthOfStay?: string;
+  noUSAddressYet?: boolean;
+  destinationCountry?: string;
+  supportServices?: {
+    hotelBooking?: boolean;
+    preFlightBooking?: boolean;
+    travelItinerary?: boolean;
+    declarationFormAssistance?: boolean;
+  };
+  supportNotes?: string;
   payingForTrip?: string;
   travelingWithOthers?: boolean;
   addressWhileInUS?: Address;
@@ -141,6 +150,8 @@ interface FamilyInfo {
   spouseCountryOfBirth?: string;
   children?: Child[];
   immediateRelativesInUS?: Relative[];
+  hasOtherRelativesInUS?: boolean;
+  otherRelativesInUS?: Relative[];
 }
 
 interface Education {
@@ -166,6 +177,31 @@ interface WorkEducation {
   presentEmployerPhone?: string;
   education?: Education[];
   languages?: string[];
+  wasPreviouslyEmployed?: boolean;
+  previousEmployment?: Array<{
+    employerName?: string;
+    employerAddress?: string;
+    city?: string;
+    state?: string;
+    postalCode?: string;
+    country?: string;
+    phone?: string;
+    jobTitle?: string;
+    supervisorSurname?: string;
+    supervisorGivenName?: string;
+    startDate?: string;
+    endDate?: string;
+    duties?: string;
+  }>;
+  hasAttendedEducation?: boolean;
+  belongsToClanOrTribe?: boolean;
+  clanOrTribeName?: string;
+  hasVisitedCountriesLastFiveYears?: boolean;
+  countriesVisited?: string[];
+  belongsToProfessionalOrg?: boolean;
+  professionalOrgs?: string[];
+  hasSpecializedSkills?: boolean;
+  specializedSkillsDescription?: string;
   hasServedInMilitary?: boolean;
   militaryService?: MilitaryService;
 }
@@ -183,6 +219,29 @@ interface SecurityInfo {
   hasBeenInUS?: boolean;
   hasBeenIssuedUSVisa?: boolean;
   hasBeenRefusedUSVisa?: boolean;
+  isEngagedInProstitution?: boolean;
+  isInvolvedInMoneyLaundering?: boolean;
+  hasCommittedHumanTrafficking?: boolean;
+  hasBenefitedFromTrafficking?: boolean;
+  hasAidedHumanTrafficking?: boolean;
+  isRelatedToTerrorist?: boolean;
+  hasParticipatedInGenocide?: boolean;
+  hasParticipatedInTorture?: boolean;
+  hasParticipatedInExtrajudicialKillings?: boolean;
+  hasRecruitedChildSoldiers?: boolean;
+  hasViolatedReligiousFreedom?: boolean;
+  hasEnforcedPopulationControls?: boolean;
+  hasInvolvedInOrganTrafficking?: boolean;
+  hasSoughtVisaByFraud?: boolean;
+  hasBeenRemovedOrDeported?: boolean;
+  hasWithheldCustodyOfUSCitizen?: boolean;
+  hasVotedInUSIllegally?: boolean;
+  hasRenouncedUSCitizenshipToAvoidTax?: boolean;
+  hasImmigrantPetitionFiled?: boolean;
+  arrestDetails?: string;
+  refusalDetails?: string;
+  lastVisaDetails?: string;
+  petitionDetails?: string;
   usVisitDetails?: string;
   [key: string]: unknown;
 }
@@ -353,32 +412,24 @@ export default function ApplicationDetailModal({
         familyInfo.motherSurnames ||
         familyInfo.hasSpouse ||
         (familyInfo.children && familyInfo.children.length > 0) ||
-        (familyInfo.immediateRelativesInUS && familyInfo.immediateRelativesInUS.length > 0)),
+        (familyInfo.immediateRelativesInUS && familyInfo.immediateRelativesInUS.length > 0) ||
+        (familyInfo.otherRelativesInUS && familyInfo.otherRelativesInUS.length > 0)),
   );
   const hasWorkStructuredData = Boolean(
     workEducation &&
       (workEducation.primaryOccupation ||
         workEducation.presentEmployerName ||
+        (workEducation.previousEmployment && workEducation.previousEmployment.length > 0) ||
         (workEducation.education && workEducation.education.length > 0) ||
         (workEducation.languages && workEducation.languages.length > 0) ||
+        (workEducation.countriesVisited && workEducation.countriesVisited.length > 0) ||
+        (workEducation.professionalOrgs && workEducation.professionalOrgs.length > 0) ||
+        workEducation.specializedSkillsDescription ||
         workEducation.hasServedInMilitary),
   );
   const hasSecurityStructuredData = Boolean(
     securityInfo &&
-      [
-        'hasCommunicableDisease',
-        'hasMentalOrPhysicalDisorder',
-        'isDrugAbuser',
-        'hasBeenArrested',
-        'hasViolatedControlledSubstancesLaw',
-        'seeksEspionage',
-        'seeksToEngageInTerrorism',
-        'hasProvidedTerroristSupport',
-        'isTerroristOrganizationMember',
-        'hasBeenInUS',
-        'hasBeenIssuedUSVisa',
-        'hasBeenRefusedUSVisa',
-      ].some((key) => typeof securityInfo[key] === 'boolean'),
+      Object.values(securityInfo).some((value) => typeof value === 'boolean'),
   );
   const hasDocumentsStructuredData = Boolean(
     documents &&
@@ -581,7 +632,8 @@ export default function ApplicationDetailModal({
 
             {/* Tabs for different sections */}
             <Tabs defaultValue="personal" className="w-full">
-              <TabsList className="w-full justify-start flex-wrap h-auto mb-4 gap-1">
+              <div className="mb-4 overflow-x-auto pb-1">
+                <TabsList className="inline-flex w-max min-w-full justify-start h-auto gap-1 whitespace-nowrap">
                 <TabsTrigger value="personal" className="text-xs flex-none">
                   <User className="w-3 h-3 mr-1" />
                   Personal
@@ -614,7 +666,8 @@ export default function ApplicationDetailModal({
                   <FileText className="w-3 h-3 mr-1" />
                   Docs
                 </TabsTrigger>
-              </TabsList>
+                </TabsList>
+              </div>
 
               {/* Personal Information */}
               <TabsContent value="personal">
@@ -756,10 +809,12 @@ export default function ApplicationDetailModal({
                           <InfoRow label="Specific Purpose" value={travelInfo.specificPurpose} />
                           <InfoRow label="Intended Arrival" value={formatDate(travelInfo.intendedArrivalDate)} icon={Calendar} />
                           <InfoRow label="Length of Stay" value={travelInfo.intendedLengthOfStay} />
+                          <InfoRow label="Destination Country" value={travelInfo.destinationCountry || 'USA'} icon={Globe} />
+                          <InfoRow label="No U.S. Address Yet" value={travelInfo.noUSAddressYet ? 'Yes' : 'No'} />
                           <InfoRow label="Paying for Trip" value={travelInfo.payingForTrip} />
                           <InfoRow label="Traveling with Others" value={travelInfo.travelingWithOthers ? 'Yes' : 'No'} />
                         </div>
-                        {travelInfo.addressWhileInUS && (
+                        {!travelInfo.noUSAddressYet && travelInfo.addressWhileInUS && (
                           <>
                             <Separator />
                             <div>
@@ -770,6 +825,45 @@ export default function ApplicationDetailModal({
                                 <InfoRow label="State" value={travelInfo.addressWhileInUS.state} />
                                 <InfoRow label="ZIP Code" value={travelInfo.addressWhileInUS.zipCode} />
                               </div>
+                            </div>
+                          </>
+                        )}
+                        {travelInfo.noUSAddressYet && (
+                          <>
+                            <Separator />
+                            <p className="text-sm text-amber-700 dark:text-amber-300 bg-amber-500/10 border border-amber-500/20 rounded-lg p-3">
+                              Applicant selected no U.S. address yet. Travel support services may be required.
+                            </p>
+                          </>
+                        )}
+                        {travelInfo.supportServices && (
+                          <>
+                            <Separator />
+                            <div>
+                              <h4 className="font-medium mb-3">Requested Support Services</h4>
+                              <div className="flex flex-wrap gap-2 pl-4">
+                                {travelInfo.supportServices.hotelBooking && <Badge variant="secondary">Hotel Booking</Badge>}
+                                {travelInfo.supportServices.travelItinerary && <Badge variant="secondary">Travel Itinerary</Badge>}
+                                {travelInfo.supportServices.preFlightBooking && <Badge variant="secondary">Pre-Flight Booking</Badge>}
+                                {travelInfo.supportServices.declarationFormAssistance && (
+                                  <Badge variant="secondary">Declaration/VFS Form Assistance</Badge>
+                                )}
+                                {!travelInfo.supportServices.hotelBooking &&
+                                  !travelInfo.supportServices.travelItinerary &&
+                                  !travelInfo.supportServices.preFlightBooking &&
+                                  !travelInfo.supportServices.declarationFormAssistance && (
+                                    <p className="text-sm text-muted-foreground">No support services selected</p>
+                                  )}
+                              </div>
+                            </div>
+                          </>
+                        )}
+                        {travelInfo.supportNotes && (
+                          <>
+                            <Separator />
+                            <div>
+                              <h4 className="font-medium mb-3">Support Notes</h4>
+                              <p className="text-sm text-muted-foreground pl-4">{travelInfo.supportNotes}</p>
                             </div>
                           </>
                         )}
@@ -879,12 +973,32 @@ export default function ApplicationDetailModal({
                             </div>
                           </>
                         )}
+                        {familyInfo.otherRelativesInUS && familyInfo.otherRelativesInUS.length > 0 && (
+                          <>
+                            <Separator />
+                            <div>
+                              <h4 className="font-medium mb-3">Other Relatives in US</h4>
+                              <div className="space-y-2 pl-4">
+                                {familyInfo.otherRelativesInUS.map((rel: Relative, i: number) => (
+                                  <div key={i} className="p-3 bg-muted/50 rounded">
+                                    <p className="font-medium">{rel.fullName}</p>
+                                    <p className="text-sm text-muted-foreground">
+                                      {rel.relationship} | Status: {rel.status}
+                                    </p>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          </>
+                        )}
                       </div>
                       ) : (
                         <JsonFallback data={familyInfo} />
                       )
                     ) : (
-                      <p className="text-muted-foreground text-center py-8">No family information provided</p>
+                      <p className="text-muted-foreground text-center py-8">
+                        Family section is not completed yet by the applicant.
+                      </p>
                     )}
                   </CardContent>
                 </Card>
@@ -945,6 +1059,83 @@ export default function ApplicationDetailModal({
                             </div>
                           </>
                         )}
+                        {workEducation.previousEmployment && workEducation.previousEmployment.length > 0 && (
+                          <>
+                            <Separator />
+                            <div>
+                              <h4 className="font-medium mb-3">Previous Employment</h4>
+                              <div className="space-y-2 pl-4">
+                                {workEducation.previousEmployment.map((job, i: number) => (
+                                  <div key={i} className="p-3 bg-muted/50 rounded space-y-1">
+                                    <p className="font-medium">{job.employerName || 'Employer'}</p>
+                                    <p className="text-sm text-muted-foreground">
+                                      {job.jobTitle || '-'} | {formatDate(job.startDate)} - {formatDate(job.endDate)}
+                                    </p>
+                                    {job.duties && (
+                                      <p className="text-sm text-muted-foreground">{job.duties}</p>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          </>
+                        )}
+                        {workEducation.countriesVisited && workEducation.countriesVisited.length > 0 && (
+                          <>
+                            <Separator />
+                            <div>
+                              <h4 className="font-medium mb-3">Countries Visited (Last 5 Years)</h4>
+                              <div className="flex flex-wrap gap-2 pl-4">
+                                {workEducation.countriesVisited.map((country: string, i: number) => (
+                                  <Badge key={i} variant="secondary">{country}</Badge>
+                                ))}
+                              </div>
+                            </div>
+                          </>
+                        )}
+                        {workEducation.professionalOrgs && workEducation.professionalOrgs.length > 0 && (
+                          <>
+                            <Separator />
+                            <div>
+                              <h4 className="font-medium mb-3">Professional Organizations</h4>
+                              <div className="flex flex-wrap gap-2 pl-4">
+                                {workEducation.professionalOrgs.map((org: string, i: number) => (
+                                  <Badge key={i} variant="secondary">{org}</Badge>
+                                ))}
+                              </div>
+                            </div>
+                          </>
+                        )}
+                        {(workEducation.hasSpecializedSkills || workEducation.specializedSkillsDescription) && (
+                          <>
+                            <Separator />
+                            <div>
+                              <h4 className="font-medium mb-3">Specialized Skills</h4>
+                              <div className="pl-4">
+                                <InfoRow
+                                  label="Has Specialized Skills"
+                                  value={workEducation.hasSpecializedSkills ? 'Yes' : 'No'}
+                                />
+                                {workEducation.specializedSkillsDescription && (
+                                  <p className="text-sm text-muted-foreground mt-1">
+                                    {workEducation.specializedSkillsDescription}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          </>
+                        )}
+                        {workEducation.belongsToClanOrTribe && (
+                          <>
+                            <Separator />
+                            <div>
+                              <h4 className="font-medium mb-3">Clan / Tribe</h4>
+                              <p className="text-sm text-muted-foreground pl-4">
+                                {workEducation.clanOrTribeName || 'Provided'}
+                              </p>
+                            </div>
+                          </>
+                        )}
                         {workEducation.hasServedInMilitary && workEducation.militaryService && (
                           <>
                             <Separator />
@@ -964,7 +1155,9 @@ export default function ApplicationDetailModal({
                         <JsonFallback data={workEducation} />
                       )
                     ) : (
-                      <p className="text-muted-foreground text-center py-8">No work/education information provided</p>
+                      <p className="text-muted-foreground text-center py-8">
+                        Work and education section is not completed yet by the applicant.
+                      </p>
                     )}
                   </CardContent>
                 </Card>
@@ -989,13 +1182,32 @@ export default function ApplicationDetailModal({
                           { key: 'isDrugAbuser', label: 'Drug abuser' },
                           { key: 'hasBeenArrested', label: 'Has been arrested' },
                           { key: 'hasViolatedControlledSubstancesLaw', label: 'Violated controlled substances law' },
+                          { key: 'isEngagedInProstitution', label: 'Engaged in prostitution' },
+                          { key: 'isInvolvedInMoneyLaundering', label: 'Involved in money laundering' },
+                          { key: 'hasCommittedHumanTrafficking', label: 'Committed human trafficking offense' },
+                          { key: 'hasBenefitedFromTrafficking', label: 'Benefited from trafficking activities' },
+                          { key: 'hasAidedHumanTrafficking', label: 'Aided human trafficking' },
                           { key: 'seeksEspionage', label: 'Seeks to engage in espionage' },
                           { key: 'seeksToEngageInTerrorism', label: 'Seeks to engage in terrorism' },
                           { key: 'hasProvidedTerroristSupport', label: 'Has provided terrorist support' },
                           { key: 'isTerroristOrganizationMember', label: 'Terrorist organization member' },
+                          { key: 'isRelatedToTerrorist', label: 'Related to terrorist activity individual' },
+                          { key: 'hasParticipatedInGenocide', label: 'Participated in genocide' },
+                          { key: 'hasParticipatedInTorture', label: 'Participated in torture' },
+                          { key: 'hasParticipatedInExtrajudicialKillings', label: 'Participated in extrajudicial killings' },
+                          { key: 'hasRecruitedChildSoldiers', label: 'Recruited child soldiers' },
+                          { key: 'hasViolatedReligiousFreedom', label: 'Violated religious freedom' },
+                          { key: 'hasEnforcedPopulationControls', label: 'Enforced population controls' },
+                          { key: 'hasInvolvedInOrganTrafficking', label: 'Involved in organ trafficking' },
+                          { key: 'hasSoughtVisaByFraud', label: 'Sought visa by fraud' },
+                          { key: 'hasBeenRemovedOrDeported', label: 'Removed or deported from any country' },
+                          { key: 'hasWithheldCustodyOfUSCitizen', label: 'Withheld custody of U.S. citizen child' },
+                          { key: 'hasVotedInUSIllegally', label: 'Voted in U.S. illegally' },
+                          { key: 'hasRenouncedUSCitizenshipToAvoidTax', label: 'Renounced U.S. citizenship to avoid tax' },
                           { key: 'hasBeenInUS', label: 'Has been in US before' },
                           { key: 'hasBeenIssuedUSVisa', label: 'Has been issued US visa' },
                           { key: 'hasBeenRefusedUSVisa', label: 'Has been refused US visa' },
+                          { key: 'hasImmigrantPetitionFiled', label: 'Has immigrant petition filed' },
                         ].map(({ key, label }) => (
                           <div key={key} className="flex items-center justify-between py-2 border-b">
                             <span className="text-sm">{label}</span>
@@ -1020,12 +1232,46 @@ export default function ApplicationDetailModal({
                             </p>
                           </div>
                         )}
+                        {securityInfo.arrestDetails && (
+                          <div className="mt-4">
+                            <Label>Arrest Details</Label>
+                            <p className="text-sm text-muted-foreground mt-1 p-3 bg-muted/50 rounded">
+                              {securityInfo.arrestDetails}
+                            </p>
+                          </div>
+                        )}
+                        {securityInfo.lastVisaDetails && (
+                          <div className="mt-4">
+                            <Label>Last U.S. Visa Details</Label>
+                            <p className="text-sm text-muted-foreground mt-1 p-3 bg-muted/50 rounded">
+                              {securityInfo.lastVisaDetails}
+                            </p>
+                          </div>
+                        )}
+                        {securityInfo.refusalDetails && (
+                          <div className="mt-4">
+                            <Label>Visa Refusal Details</Label>
+                            <p className="text-sm text-muted-foreground mt-1 p-3 bg-muted/50 rounded">
+                              {securityInfo.refusalDetails}
+                            </p>
+                          </div>
+                        )}
+                        {securityInfo.petitionDetails && (
+                          <div className="mt-4">
+                            <Label>Immigrant Petition Details</Label>
+                            <p className="text-sm text-muted-foreground mt-1 p-3 bg-muted/50 rounded">
+                              {securityInfo.petitionDetails}
+                            </p>
+                          </div>
+                        )}
                       </div>
                       ) : (
                         <JsonFallback data={securityInfo} />
                       )
                     ) : (
-                      <p className="text-muted-foreground text-center py-8">No security information provided</p>
+                      <p className="text-muted-foreground text-center py-8">
+                        Security section is not completed yet by the applicant.
+                      </p>
                     )}
                   </CardContent>
                 </Card>
@@ -1106,7 +1352,9 @@ export default function ApplicationDetailModal({
                           </div>
                         )}
                         {!documents.photo && !documents.invitationLetter && !documents.additionalDocuments?.length && (
-                          <p className="text-muted-foreground text-center py-8">No documents uploaded</p>
+                          <p className="text-muted-foreground text-center py-8">
+                            No documents uploaded yet.
+                          </p>
                         )}
                       </div>
                       ) : (
@@ -1132,7 +1380,9 @@ export default function ApplicationDetailModal({
                         </div>
                       </div>
                     ) : (
-                      <p className="text-muted-foreground text-center py-8">No documents uploaded</p>
+                      <p className="text-muted-foreground text-center py-8">
+                        No documents uploaded yet.
+                      </p>
                     )}
                   </CardContent>
                 </Card>

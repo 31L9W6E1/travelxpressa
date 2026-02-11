@@ -38,6 +38,27 @@ export const uploadImage = async (file: File): Promise<UploadResponse> => {
 };
 
 /**
+ * Upload an application document for the current authenticated user.
+ * This endpoint is intended for DS-160 document step uploads.
+ */
+export const uploadApplicationFile = async (file: File): Promise<UploadResponse> => {
+  try {
+    const formData = new FormData();
+    formData.append('image', file);
+
+    const response = await api.post('/api/upload/document', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    throw handleApiError(error);
+  }
+};
+
+/**
  * Delete an image from the server
  * @param filename - The filename of the image to delete
  */

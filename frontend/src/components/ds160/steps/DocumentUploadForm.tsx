@@ -5,6 +5,8 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
+import { toast } from 'sonner';
+import { uploadApplicationFile } from '@/api/upload';
 
 export interface DocumentInfo {
   photo?: {
@@ -228,28 +230,18 @@ export default function DocumentUploadForm({ data, onSave, onNext, onPrev }: Doc
   const [invitationProgress, setInvitationProgress] = useState(0);
   const [additionalProgress, setAdditionalProgress] = useState(0);
 
-  // Simulate file upload (in production, this would upload to a server)
-  const simulateUpload = async (file: File, onProgress: (progress: number) => void): Promise<string> => {
-    return new Promise((resolve) => {
-      let progress = 0;
-      const interval = setInterval(() => {
-        progress += 10;
-        onProgress(progress);
-        if (progress >= 100) {
-          clearInterval(interval);
-          // In production, return the actual URL from the server
-          const url = URL.createObjectURL(file);
-          resolve(url);
-        }
-      }, 100);
-    });
+  const uploadToServer = async (file: File, onProgress: (progress: number) => void): Promise<string> => {
+    onProgress(15);
+    const response = await uploadApplicationFile(file);
+    onProgress(100);
+    return response.data.url;
   };
 
   const handlePhotoUpload = async (file: File) => {
     setUploadingPhoto(true);
     setPhotoProgress(0);
     try {
-      const fileUrl = await simulateUpload(file, setPhotoProgress);
+      const fileUrl = await uploadToServer(file, setPhotoProgress);
       setFormData(prev => ({
         ...prev,
         photo: {
@@ -259,6 +251,9 @@ export default function DocumentUploadForm({ data, onSave, onNext, onPrev }: Doc
           uploadedAt: new Date().toISOString(),
         }
       }));
+      toast.success('Photo uploaded');
+    } catch (error: any) {
+      toast.error(error?.message || 'Failed to upload photo');
     } finally {
       setUploadingPhoto(false);
     }
@@ -268,7 +263,7 @@ export default function DocumentUploadForm({ data, onSave, onNext, onPrev }: Doc
     setUploadingInvitation(true);
     setInvitationProgress(0);
     try {
-      const fileUrl = await simulateUpload(file, setInvitationProgress);
+      const fileUrl = await uploadToServer(file, setInvitationProgress);
       setFormData(prev => ({
         ...prev,
         invitationLetter: {
@@ -278,6 +273,9 @@ export default function DocumentUploadForm({ data, onSave, onNext, onPrev }: Doc
           uploadedAt: new Date().toISOString(),
         }
       }));
+      toast.success('Invitation letter uploaded');
+    } catch (error: any) {
+      toast.error(error?.message || 'Failed to upload invitation letter');
     } finally {
       setUploadingInvitation(false);
     }
@@ -287,7 +285,7 @@ export default function DocumentUploadForm({ data, onSave, onNext, onPrev }: Doc
     setUploadingAdditional(true);
     setAdditionalProgress(0);
     try {
-      const fileUrl = await simulateUpload(file, setAdditionalProgress);
+      const fileUrl = await uploadToServer(file, setAdditionalProgress);
       setFormData(prev => ({
         ...prev,
         additionalDocuments: [
@@ -301,30 +299,23 @@ export default function DocumentUploadForm({ data, onSave, onNext, onPrev }: Doc
           }
         ]
       }));
+      toast.success('Document uploaded');
+    } catch (error: any) {
+      toast.error(error?.message || 'Failed to upload supporting document');
     } finally {
       setUploadingAdditional(false);
     }
   };
 
   const removePhoto = () => {
-    if (formData.photo?.fileUrl) {
-      URL.revokeObjectURL(formData.photo.fileUrl);
-    }
     setFormData(prev => ({ ...prev, photo: undefined }));
   };
 
   const removeInvitation = () => {
-    if (formData.invitationLetter?.fileUrl) {
-      URL.revokeObjectURL(formData.invitationLetter.fileUrl);
-    }
     setFormData(prev => ({ ...prev, invitationLetter: undefined }));
   };
 
   const removeAdditionalDocument = (index: number) => {
-    const doc = formData.additionalDocuments?.[index];
-    if (doc?.fileUrl) {
-      URL.revokeObjectURL(doc.fileUrl);
-    }
     setFormData(prev => ({
       ...prev,
       additionalDocuments: prev.additionalDocuments?.filter((_, i) => i !== index)

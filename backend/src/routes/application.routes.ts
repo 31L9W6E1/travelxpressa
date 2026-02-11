@@ -41,6 +41,18 @@ const safeDecryptJson = (value?: string | null) => {
   }
 };
 
+const buildDocumentsPayload = (photoUrl?: string | null, updatedAt?: Date) => {
+  if (!photoUrl) return null;
+
+  return {
+    photo: {
+      fileName: photoUrl.split('/').pop() || 'uploaded-photo',
+      fileUrl: photoUrl,
+      uploadedAt: updatedAt ? updatedAt.toISOString() : undefined,
+    },
+  };
+};
+
 /**
  * Create a new DS-160 application
  */
@@ -148,6 +160,7 @@ router.get(
       familyInfo: safeDecryptJson(application.familyInfo),
       workEducation: safeDecryptJson(application.workEducation),
       securityInfo: safeDecryptJson(application.securityInfo),
+      documents: buildDocumentsPayload(application.photoUrl, application.updatedAt),
     };
 
     res.json({
@@ -176,6 +189,7 @@ router.patch(
       familyInfo,
       workEducation,
       securityInfo,
+      documents,
     } = req.body;
 
     const application = await prisma.application.findUnique({
@@ -225,6 +239,15 @@ router.patch(
 
     if (securityInfo) {
       updateData.securityInfo = encrypt(JSON.stringify(securityInfo));
+    }
+
+    // Backward-compatible documents persistence:
+    // current schema stores only a `photoUrl`, so map documents.photo.fileUrl.
+    if (documents && typeof documents === 'object') {
+      const photoFileUrl = (documents as any)?.photo?.fileUrl;
+      if (typeof photoFileUrl === 'string' && photoFileUrl.trim()) {
+        updateData.photoUrl = photoFileUrl.trim();
+      }
     }
 
     // Update status to IN_PROGRESS if it was DRAFT

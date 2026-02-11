@@ -64,7 +64,16 @@ export interface TravelInfo {
   specificPurpose?: string;
   intendedArrivalDate: string;
   intendedLengthOfStay: string;
-  addressWhileInUS: USAddress;
+  addressWhileInUS?: USAddress;
+  noUSAddressYet?: boolean;
+  destinationCountry?: 'USA' | 'JAPAN' | 'SCHENGEN' | 'UK' | 'CANADA' | 'AUSTRALIA' | 'OTHER';
+  supportServices?: {
+    hotelBooking?: boolean;
+    preFlightBooking?: boolean;
+    travelItinerary?: boolean;
+    declarationFormAssistance?: boolean;
+  };
+  supportNotes?: string;
   payingForTrip: string;
   travelingWithOthers: boolean;
   companions?: Array<{

@@ -64,16 +64,16 @@ router.get('/', async (req: Request, res: Response) => {
       category: true,
       tags: true,
       authorName: true,
-      publishedAt: true,
       createdAt: true,
     };
 
     const getPostsWithFallback = async () => {
       try {
         return await prisma.post.findMany({
-          orderBy: { publishedAt: 'desc' },
+          orderBy: { createdAt: 'desc' },
           select: {
             ...baseSelect,
+            publishedAt: true,
             status: true,
             ...(useTranslation
               ? {
@@ -146,11 +146,20 @@ router.get('/', async (req: Request, res: Response) => {
     });
 
     const localizedPosts = filteredPosts.map((post: any) => {
-      if (!useTranslation) return post;
+      if (!useTranslation) {
+        const { status, translations, ...base } = post;
+        return {
+          ...base,
+          publishedAt: post.publishedAt ?? post.createdAt,
+        };
+      }
       const translation = pickBestTranslation(post.translations);
       if (!translation) {
-        const { translations, ...base } = post;
-        return base;
+        const { status, translations, ...base } = post;
+        return {
+          ...base,
+          publishedAt: post.publishedAt ?? post.createdAt,
+        };
       }
       return {
         id: post.id,
@@ -161,7 +170,7 @@ router.get('/', async (req: Request, res: Response) => {
         category: post.category,
         tags: translation.tags ?? post.tags,
         authorName: post.authorName,
-        publishedAt: post.publishedAt,
+        publishedAt: post.publishedAt ?? post.createdAt,
         createdAt: post.createdAt,
       };
     });
@@ -201,16 +210,16 @@ router.get('/featured', async (_req: Request, res: Response) => {
       category: true,
       tags: true,
       authorName: true,
-      publishedAt: true,
       createdAt: true,
     };
 
     const getFeaturedWithFallback = async () => {
       try {
         return await prisma.post.findMany({
-          orderBy: { publishedAt: 'desc' },
+          orderBy: { createdAt: 'desc' },
           select: {
             ...baseSelect,
+            publishedAt: true,
             status: true,
             ...(useTranslation
               ? {
@@ -272,11 +281,20 @@ router.get('/featured', async (_req: Request, res: Response) => {
     const allPosts = await getFeaturedWithFallback();
 
     const mapLocalized = (post: any) => {
-      if (!useTranslation) return post;
+      if (!useTranslation) {
+        const { status, translations, ...base } = post;
+        return {
+          ...base,
+          publishedAt: post.publishedAt ?? post.createdAt,
+        };
+      }
       const translation = pickBestTranslation(post.translations);
       if (!translation) {
-        const { translations, ...base } = post;
-        return base;
+        const { status, translations, ...base } = post;
+        return {
+          ...base,
+          publishedAt: post.publishedAt ?? post.createdAt,
+        };
       }
       return {
         id: post.id,
@@ -287,7 +305,7 @@ router.get('/featured', async (_req: Request, res: Response) => {
         category: post.category,
         tags: translation.tags ?? post.tags,
         authorName: post.authorName,
-        publishedAt: post.publishedAt,
+        publishedAt: post.publishedAt ?? post.createdAt,
         createdAt: post.createdAt,
       };
     };
@@ -381,7 +399,6 @@ router.get('/:slug', async (req: Request, res: Response) => {
             imageUrl: true,
             category: true,
             tags: true,
-            publishedAt: true,
             authorName: true,
             createdAt: true,
             updatedAt: true,
@@ -443,12 +460,12 @@ router.get('/:slug', async (req: Request, res: Response) => {
         const { translations, ...base } = post as any;
         return {
           ...base,
-          title: translation.title || post.title,
-          slug: translation.slug || post.slug,
-          excerpt: translation.excerpt ?? post.excerpt,
-          content: translation.content || post.content,
-          tags: translation.tags ?? post.tags,
-          publishedAt: translation.publishedAt ?? post.publishedAt,
+          title: translation.title || (post as any).title,
+          slug: translation.slug || (post as any).slug,
+          excerpt: translation.excerpt ?? (post as any).excerpt,
+          content: translation.content || (post as any).content,
+          tags: translation.tags ?? (post as any).tags,
+          publishedAt: translation.publishedAt ?? (post as any).publishedAt ?? (post as any).createdAt,
         };
       })(),
     });

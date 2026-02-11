@@ -234,7 +234,7 @@ const Home = () => {
                 <div className="grid grid-cols-2 gap-6">
                   <div className="text-center p-5 rounded-xl bg-secondary/50">
                     <div className="text-4xl md:text-5xl font-bold cf-text-gradient mb-2">
-                      50K+
+                      1000K
                     </div>
                     <div className="text-sm text-muted-foreground font-medium">
                       {t("home.stats.applicationsCompleted")}

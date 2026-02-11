@@ -20,6 +20,8 @@ const LearnMore = () => {
   const { t, i18n } = useTranslation();
   const [selectedCountryCode, setSelectedCountryCode] =
     useState<CountryCode | null>(null);
+  const [hoveredCountryCode, setHoveredCountryCode] =
+    useState<CountryCode | null>(null);
 
   useEffect(() => {
     const stored = localStorage.getItem("selectedCountry");
@@ -44,13 +46,15 @@ const LearnMore = () => {
     return formatCurrencyCodeAmount(displayCurrency, Math.round(converted), i18n.language);
   };
 
+  const activeCountryCode = hoveredCountryCode || selectedCountryCode;
+
   const selectedDestination = useMemo(() => {
-    if (selectedCountryCode) {
-      const cfg = countryConfigs[selectedCountryCode];
+    if (activeCountryCode) {
+      const cfg = countryConfigs[activeCountryCode];
       if (cfg && cfg.code !== "KOREA") return cfg;
     }
     return destinations[0] ?? null;
-  }, [selectedCountryCode, destinations]);
+  }, [activeCountryCode, destinations]);
 
   const selectedGovernmentFeeLabel = selectedDestination
     ? toDisplayCurrency(
@@ -179,6 +183,14 @@ const LearnMore = () => {
                   <p className="text-2xl font-bold">
                     {selectedServiceFeeLabel || t("common.na", { defaultValue: "N/A" })}
                   </p>
+                  {selectedDestination && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {t("learnMorePage.sections.fees.currentDestination", {
+                        defaultValue: "For {{country}}",
+                        country: selectedDestination.name,
+                      })}
+                    </p>
+                  )}
                   <p className="text-xs text-muted-foreground mt-1">
                     {t("learnMorePage.sections.fees.serviceFeeNote", {
                       defaultValue:
@@ -236,8 +248,14 @@ const LearnMore = () => {
                     return (
                       <tr
                         key={dest.code}
-                        className={`border-b border-border/50 ${
-                          isSelected ? "bg-primary/10" : ""
+                        onMouseEnter={() => setHoveredCountryCode(dest.code as CountryCode)}
+                        onMouseLeave={() => setHoveredCountryCode(null)}
+                        onClick={() => {
+                          setSelectedCountryCode(dest.code as CountryCode);
+                          localStorage.setItem("selectedCountry", dest.code);
+                        }}
+                        className={`cursor-pointer border-b border-border/50 ${
+                          isSelected ? "bg-primary/10" : "hover:bg-primary/5"
                         }`}
                       >
                         <td className="p-4">

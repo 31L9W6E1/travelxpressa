@@ -304,7 +304,7 @@ const UserProfile = () => {
                 <h3 className="text-xl font-semibold text-foreground mb-2">{t('userProfile.noApplicationsYet', 'No Applications Yet')}</h3>
                 <p className="text-muted-foreground mb-6">{t('userProfile.startYourApplication', 'Start your DS-160 visa application today.')}</p>
                 <Button asChild>
-                  <Link to="/application" className="inline-flex items-center gap-2">
+                  <Link to="/select-country" className="inline-flex items-center gap-2">
                     {t('userProfile.startApplication', 'Start Application')}
                     <ChevronRight className="w-4 h-4" />
                   </Link>
@@ -440,7 +440,7 @@ const UserProfile = () => {
                   <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
                 </Link>
                 <Link
-                  to="/application"
+                  to="/select-country"
                   className="flex items-center justify-between p-3 bg-secondary/50 rounded-xl border border-border hover:bg-secondary hover:border-muted-foreground transition-all group"
                 >
                   <div className="flex items-center gap-3">

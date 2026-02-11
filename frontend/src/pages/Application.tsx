@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { applicationsApi, type VisaType, type Application } from '../api/applications';
-import { findCountryByCode, type CountryCode } from '../config/countries';
+import { findCountryByCode, countryConfigs, type CountryCode } from '../config/countries';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import {
@@ -202,6 +202,7 @@ export default function Application() {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [paymentComplete, setPaymentComplete] = useState(false);
   const [isRestoringDraft, setIsRestoringDraft] = useState(false);
+  const PAYMENT_REQUIRED = false;
 
   // Get selected country from localStorage (set in CountrySelect page)
   // Note: Korea is currently not offered, so fall back to USA if it was previously selected.
@@ -209,6 +210,12 @@ export default function Application() {
   const selectedCountryCode: CountryCode =
     storedCountryCode && storedCountryCode !== 'KOREA' ? storedCountryCode : 'USA';
   const countryConfig = findCountryByCode(selectedCountryCode);
+
+  useEffect(() => {
+    if (!storedCountryCode || storedCountryCode === 'KOREA') {
+      navigate('/select-country', { replace: true });
+    }
+  }, [navigate, storedCountryCode]);
 
   const serviceFeeAmountMnt = (() => {
     const baseFee = countryConfig?.paymentPricing?.baseFee;
@@ -255,7 +262,7 @@ export default function Application() {
           setIsRestoringDraft(true);
         }
 
-        const response = await applicationsApi.getAll(1, 10);
+        const response = await applicationsApi.getAll(1, 100);
         const drafts =
           response.data?.filter(
             (app: Application) => app.status === 'DRAFT' || app.status === 'IN_PROGRESS',
@@ -275,13 +282,32 @@ export default function Application() {
           return;
         }
 
-        const draftMeta = drafts[0];
+        const latestDrafts = [...drafts].sort((a, b) => {
+          const aTime = new Date(a.updatedAt || a.createdAt).getTime();
+          const bTime = new Date(b.updatedAt || b.createdAt).getTime();
+          return bTime - aTime;
+        });
+
+        const preferredDraft =
+          latestDrafts.find((app) => app.visaType === getVisaTypeForCountry(selectedCountryCode)) ||
+          latestDrafts[0];
+
+        const draftMeta = preferredDraft;
         setApplicationId(draftMeta.id);
 
         // NOTE: The list endpoint intentionally returns only metadata (no decrypted form sections).
         // Fetch the full application by ID to restore saved form data.
         const fullDraft = await applicationsApi.getById(draftMeta.id);
         setCurrentStep(Math.min(fullDraft.currentStep || 1, 7));
+
+        const restoredDestination = (fullDraft.travelInfo as any)?.destinationCountry as CountryCode | undefined;
+        if (
+          restoredDestination &&
+          restoredDestination !== 'KOREA' &&
+          Object.prototype.hasOwnProperty.call(countryConfigs, restoredDestination)
+        ) {
+          localStorage.setItem('selectedCountry', restoredDestination);
+        }
 
         const nextFormData: FormData = {
           personalInfo: fullDraft.personalInfo
@@ -389,7 +415,7 @@ export default function Application() {
         }
       }
     },
-    [t],
+    [selectedCountryCode, t],
   );
 
   // Load existing draft application on mount
@@ -762,8 +788,21 @@ export default function Application() {
       // Save all form data before showing payment
       await applicationsApi.update(appId, apiData);
 
-      // Show payment modal instead of directly submitting
-      setShowPaymentModal(true);
+      if (PAYMENT_REQUIRED) {
+        setShowPaymentModal(true);
+      } else {
+        await applicationsApi.submit(appId);
+        setPaymentComplete(true);
+        toast.success(t('applicationPage.toasts.submitted.title', { defaultValue: 'Application submitted!' }), {
+          description: t('applicationPage.toasts.submitted.description', {
+            defaultValue: 'Your application has been submitted for review.',
+          }),
+          duration: 5000,
+        });
+        setTimeout(() => {
+          navigate('/profile');
+        }, 1500);
+      }
     } catch (error: any) {
       console.error('Submit error:', error);
       const errorMessage =
@@ -2073,10 +2112,15 @@ export default function Application() {
                       <CheckCircle2 className="w-5 h-5" />
                       {t('applicationPage.buttons.submitted', { defaultValue: 'Submitted' })}
                     </>
-                  ) : (
+                  ) : PAYMENT_REQUIRED ? (
                     <>
                       <CreditCard className="w-5 h-5" />
                       {t('applicationPage.buttons.paySubmit', { defaultValue: 'Pay & Submit' })}
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-5 h-5" />
+                      {t('applicationPage.buttons.submit', { defaultValue: 'Submit Application' })}
                     </>
                   )}
                 </button>
@@ -2087,7 +2131,7 @@ export default function Application() {
       </div>
 
       {/* Payment Modal */}
-	      {applicationId && (
+	      {PAYMENT_REQUIRED && applicationId && (
 	        <PaymentModal
 	          isOpen={showPaymentModal}
 	          onClose={() => setShowPaymentModal(false)}

@@ -71,7 +71,7 @@ const Navbar = () => {
               )}
               {user && user.role !== "ADMIN" && (
                 <Link
-                  to="/application"
+                  to="/select-country"
                   className="px-4 py-2 text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2"
                 >
                   <FileText className="w-4 h-4" />
@@ -271,7 +271,7 @@ const Navbar = () => {
                   </Link>
                   {user.role !== "ADMIN" && (
                     <Link
-                      to="/application"
+                      to="/select-country"
                       className="px-4 py-3 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
                       onClick={() => setIsMenuOpen(false)}
                     >

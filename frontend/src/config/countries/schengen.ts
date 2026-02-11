@@ -40,7 +40,7 @@ export const schengenConfig: CountryConfig = {
   interviewRequired: true,
   processingTimeline: '15-30 calendar days, may extend to 60 days in peak season',
   paymentPricing: {
-    baseFee: 80,
+    baseFee: 90,
     currency: 'EUR',
     serviceFee: 50
   },

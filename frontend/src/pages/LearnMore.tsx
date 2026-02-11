@@ -112,7 +112,7 @@ const LearnMore = () => {
             <p className="text-xl text-muted-foreground mb-8">
               {t("learnMorePage.hero.subtitle", {
                 defaultValue:
-                  "Compare typical government fees, interview requirements, and processing timelines for popular destinations. Service pricing depends on destination complexity and support level.",
+                  "Compare government fees, interview requirements, and processing timelines for major destinations. We focus on practical pre-check guidance before payment, then provide case-level document support after onboarding.",
               })}
             </p>
 
@@ -127,6 +127,13 @@ const LearnMore = () => {
                 <Link to="/application">
                   {t("learnMorePage.hero.secondaryCta", {
                     defaultValue: "Continue Application",
+                  })}
+                </Link>
+              </Button>
+              <Button asChild variant="outline" size="lg">
+                <Link to="/translation-service">
+                  {t("learnMorePage.hero.translationCta", {
+                    defaultValue: "Translation Service",
                   })}
                 </Link>
               </Button>
@@ -194,7 +201,7 @@ const LearnMore = () => {
                   <p className="text-xs text-muted-foreground mt-1">
                     {t("learnMorePage.sections.fees.serviceFeeNote", {
                       defaultValue:
-                        "Includes guided form, document checklist, and support.",
+                        "Includes guided form support, checklist review, and case communication.",
                     })}
                   </p>
                 </div>
@@ -388,7 +395,13 @@ const LearnMore = () => {
                     <li>
                       {t("learnMorePage.sections.fees.notes.item3", {
                         defaultValue:
-                          "Express service (if selected) increases the service fee by 15%.",
+                          "Express support depends on document readiness and appointment availability.",
+                      })}
+                    </li>
+                    <li>
+                      {t("learnMorePage.sections.fees.notes.item4", {
+                        defaultValue:
+                          "Translation requests are handled as a separate service with per-page pricing.",
                       })}
                     </li>
                   </ul>
@@ -396,6 +409,63 @@ const LearnMore = () => {
               </Card>
             </div>
           )}
+        </div>
+      </section>
+
+      {/* Official Sources */}
+      <section className="py-16 border-b border-border">
+        <div className="max-w-7xl mx-auto px-6">
+          <h2 className="text-2xl md:text-3xl font-bold mb-3">
+            {t("learnMorePage.sources.title", { defaultValue: "Official Reference Links" })}
+          </h2>
+          <p className="text-muted-foreground mb-6">
+            {t("learnMorePage.sources.subtitle", {
+              defaultValue:
+                "Always verify final requirements and fee updates directly with official immigration portals.",
+            })}
+          </p>
+          <div className="grid md:grid-cols-2 gap-4">
+            {[
+              {
+                label: "United Kingdom (Standard Visitor)",
+                href: "https://www.gov.uk/standard-visitor/apply-standard-visitor-visa",
+              },
+              {
+                label: "Canada (Visitor Visa)",
+                href: "https://www.canada.ca/en/immigration-refugees-citizenship/services/visit-canada/apply-visitor-visa.html",
+              },
+              {
+                label: "Australia (Visitor 600)",
+                href: "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/visitor-600",
+              },
+              {
+                label: "Japan VFS (Mongolia)",
+                href: "https://visa.vfsglobal.com/mng/en/jpn",
+              },
+              {
+                label: "Ireland VFS (Mongolia)",
+                href: "https://visa.vfsglobal.com/mng/en/irl/",
+              },
+              {
+                label: "Germany VFS (Ulaanbaatar)",
+                href: "https://visa.vfsglobal.com/mng/en/deu/attend-centre/ulaanbaatar",
+              },
+            ].map((item) => (
+              <Card key={item.href} className="bg-secondary/40">
+                <CardContent className="p-4">
+                  <a
+                    href={item.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm font-medium text-foreground hover:text-primary transition-colors"
+                  >
+                    {item.label}
+                  </a>
+                  <p className="text-xs text-muted-foreground mt-1 break-all">{item.href}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </div>
       </section>
 

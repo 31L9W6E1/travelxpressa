@@ -41,8 +41,9 @@ export const usaConfig: CountryConfig = {
   interviewRequired: true,
   processingTimeline: 'Appointment availability varies by location; visa processing is typically 1-2 weeks after interview',
   paymentPricing: {
-    baseFee: 180,
-    currency: 'USD',
+    // Displayed in MNT for local clarity (approx equivalent to current government fee board rates).
+    baseFee: 666000,
+    currency: 'MNT',
     serviceFee: 50
   },
   helpText: {

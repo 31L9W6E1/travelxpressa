@@ -561,7 +561,7 @@ export default function ApplicationDetailModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[98vw] max-w-7xl h-[95vh] p-0 flex flex-col">
+      <DialogContent className="w-[98vw] max-w-[96vw] h-[96vh] p-0 flex flex-col">
         <DialogHeader className="p-6 pb-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0">
@@ -632,37 +632,37 @@ export default function ApplicationDetailModal({
 
             {/* Tabs for different sections */}
             <Tabs defaultValue="personal" className="w-full">
-              <div className="mb-4 overflow-x-auto pb-1">
-                <TabsList className="inline-flex w-max min-w-full justify-start h-auto gap-1 whitespace-nowrap">
-                <TabsTrigger value="personal" className="text-xs flex-none">
+              <div className="mb-4">
+                <TabsList className="grid w-full grid-cols-4 md:grid-cols-8 h-auto gap-1 p-1">
+                <TabsTrigger value="personal" className="text-xs whitespace-nowrap">
                   <User className="w-3 h-3 mr-1" />
                   Personal
                 </TabsTrigger>
-                <TabsTrigger value="contact" className="text-xs flex-none">
+                <TabsTrigger value="contact" className="text-xs whitespace-nowrap">
                   <Phone className="w-3 h-3 mr-1" />
                   Contact
                 </TabsTrigger>
-                <TabsTrigger value="passport" className="text-xs flex-none">
+                <TabsTrigger value="passport" className="text-xs whitespace-nowrap">
                   <BookOpen className="w-3 h-3 mr-1" />
                   Passport
                 </TabsTrigger>
-                <TabsTrigger value="travel" className="text-xs flex-none">
+                <TabsTrigger value="travel" className="text-xs whitespace-nowrap">
                   <Plane className="w-3 h-3 mr-1" />
                   Travel
                 </TabsTrigger>
-                <TabsTrigger value="family" className="text-xs flex-none">
+                <TabsTrigger value="family" className="text-xs whitespace-nowrap">
                   <Users className="w-3 h-3 mr-1" />
                   Family
                 </TabsTrigger>
-                <TabsTrigger value="work" className="text-xs flex-none">
+                <TabsTrigger value="work" className="text-xs whitespace-nowrap">
                   <Briefcase className="w-3 h-3 mr-1" />
                   Work
                 </TabsTrigger>
-                <TabsTrigger value="security" className="text-xs flex-none">
+                <TabsTrigger value="security" className="text-xs whitespace-nowrap">
                   <Shield className="w-3 h-3 mr-1" />
                   Security
                 </TabsTrigger>
-                <TabsTrigger value="docs" className="text-xs flex-none">
+                <TabsTrigger value="docs" className="text-xs whitespace-nowrap">
                   <FileText className="w-3 h-3 mr-1" />
                   Docs
                 </TabsTrigger>

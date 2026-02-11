@@ -28,6 +28,7 @@ import UserInbox from "./pages/UserInbox";
 import UserSecuritySettings from "./pages/UserSecuritySettings";
 import ContactSupport from "./pages/ContactSupport";
 import LearnMore from "./pages/LearnMore";
+import TranslationService from "./pages/TranslationService";
 import CountrySelect from "./pages/CountrySelect";
 import OAuthCallback from "./pages/OAuthCallback";
 
@@ -117,6 +118,7 @@ function App() {
             <Route path="/gallery" element={<Gallery />} />
             <Route path="/test" element={<Test />} />
             <Route path="/learn-more" element={<LearnMore />} />
+            <Route path="/translation-service" element={<TranslationService />} />
             
             {/* Protected routes - require authentication */}
             <Route

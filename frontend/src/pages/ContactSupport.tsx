@@ -309,7 +309,7 @@ const ContactSupport = () => {
   );
 
   return (
-    <div className="min-h-screen bg-background pt-20">
+    <div className="min-h-screen bg-gradient-to-b from-background via-background to-secondary/20 pt-20">
       <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">
         <Link
           to={isAdmin ? "/admin/overview" : "/profile"}
@@ -357,7 +357,7 @@ const ContactSupport = () => {
         </div>
 
         <div className="grid grid-cols-1 xl:grid-cols-[340px_1fr] gap-6">
-          <Card className="h-[78vh] flex flex-col">
+          <Card className="h-[78vh] flex flex-col bg-card/70 backdrop-blur-sm border-border/70 shadow-sm">
             <CardHeader className="space-y-3">
               <CardTitle>{isAdmin ? "User Threads" : "Your Threads"}</CardTitle>
               <Input
@@ -425,7 +425,7 @@ const ContactSupport = () => {
             </CardContent>
           </Card>
 
-          <Card className="h-[78vh] flex flex-col">
+          <Card className="h-[78vh] flex flex-col bg-card/70 backdrop-blur-sm border-border/70 shadow-sm">
             {!selectedThreadId ? (
               <CardContent className="h-full flex items-center justify-center">
                 <div className="text-center text-muted-foreground">
@@ -498,7 +498,7 @@ const ContactSupport = () => {
                   )}
 
                   {isAdmin && selectedThread.status !== "CLOSED" && (
-                    <div className="rounded-lg border border-border p-3 space-y-3 bg-secondary/30">
+                    <div className="rounded-lg border border-border/70 p-3 space-y-3 bg-secondary/20 backdrop-blur-sm">
                       <p className="font-medium text-sm">Send Live Progress Update</p>
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                         <Input
@@ -600,7 +600,7 @@ const ContactSupport = () => {
                               className={`max-w-[80%] rounded-lg px-3 py-2 ${
                                 isMine
                                   ? "bg-primary text-primary-foreground"
-                                  : "bg-secondary text-secondary-foreground"
+                                  : "bg-secondary/70 text-secondary-foreground border border-border/60"
                               }`}
                             >
                               {!isMine && isAdmin && (

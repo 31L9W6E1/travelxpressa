@@ -87,13 +87,26 @@ const GalleryManager = () => {
         setStats(response.data.data.stats || null);
       }
     } catch (error: any) {
-      // If gallery endpoint doesn't exist, show empty state
+      // Fallback to public gallery feed so admins can still preview live images.
       console.error('Gallery fetch error:', error);
       if (error?.response?.status === 401 || error?.response?.status === 403) {
         toast.error('Please log in as an admin to view the gallery.');
       }
-      setImages([]);
-      setStats(null);
+      try {
+        const publicRes = await api.get('/api/upload/public-gallery');
+        if (publicRes.data?.success) {
+          const publicImages = publicRes.data?.data?.images || [];
+          setImages(publicImages);
+          setStats(publicRes.data?.data?.stats || null);
+          toast.info('Showing public gallery preview. Admin upload requires a valid admin session.');
+        } else {
+          setImages([]);
+          setStats(null);
+        }
+      } catch {
+        setImages([]);
+        setStats(null);
+      }
     } finally {
       setLoading(false);
     }
@@ -312,7 +325,7 @@ const GalleryManager = () => {
                 ) : (
                   <Plus className="w-4 h-4 mr-2" />
                 )}
-                Upload
+                Publish Photo
               </Button>
             </div>
           </div>

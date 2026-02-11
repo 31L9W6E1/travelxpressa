@@ -57,9 +57,12 @@ router.get(
   asyncHandler(async (req: Request, res: Response) => {
     const { page = 1, limit = 20, sortOrder = 'desc' } = req.query as any;
     const status = req.query.status as string | undefined;
+    const serviceType = req.query.serviceType as string | undefined;
     const skip = (page - 1) * limit;
 
-    const whereClause = status ? { status } : {};
+    const whereClause: Record<string, string> = {};
+    if (status) whereClause.status = status;
+    if (serviceType) whereClause.serviceType = serviceType;
 
     const [inquiries, total] = await Promise.all([
       prisma.inquiry.findMany({

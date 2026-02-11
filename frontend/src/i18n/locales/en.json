@@ -54,10 +54,13 @@
     "settings": "Settings",
     "learnMore": "Learn More",
     "gallery": "Gallery",
+    "translationService": "Translation Service",
     "apply": "Apply",
     "applications": "Applications",
     "payments": "Payments",
     "support": "Support",
+    "notifications": "Notifications",
+    "noNotifications": "No new notifications",
     "signIn": "Sign In",
     "getStarted": "Get Started",
     "signedInAs": "Signed in as"
@@ -1134,6 +1137,15 @@
     "noApplications": "No applications yet",
     "inquiries": "Inquiries",
     "noInquiries": "No inquiries yet"
+  },
+  "translationService": {
+    "badge": "Professional Translation",
+    "title": "Document Translation Service",
+    "subtitle": "Submit your translation request for visa, legal, and academic documents.",
+    "pricing": {
+      "title": "Pricing Estimate",
+      "description": "1 page = 25,000₮ to 40,000₮ depending on file type."
+    }
   },
   "userProfile": {
     "loading": "Loading your profile...",

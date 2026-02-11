@@ -54,10 +54,13 @@
     "settings": "Тохиргоо",
     "learnMore": "Дэлгэрэнгүй",
     "gallery": "Галерей",
+    "translationService": "Орчуулгын үйлчилгээ",
     "apply": "Өргөдөл гаргах",
     "applications": "Өргөдлүүд",
     "payments": "Төлбөрүүд",
     "support": "Дэмжлэг",
+    "notifications": "Мэдэгдэл",
+    "noNotifications": "Шинэ мэдэгдэл алга",
     "signIn": "Нэвтрэх",
     "getStarted": "Эхлэх",
     "signedInAs": "Нэвтэрсэн:"
@@ -1135,6 +1138,15 @@
     "noApplications": "Өргөдөл байхгүй",
     "inquiries": "Хүсэлтүүд",
     "noInquiries": "Хүсэлт байхгүй"
+  },
+  "translationService": {
+    "badge": "Мэргэжлийн орчуулга",
+    "title": "Баримт бичгийн орчуулгын үйлчилгээ",
+    "subtitle": "Виз, хууль, боловсролын баримтын орчуулгын хүсэлтээ илгээнэ үү.",
+    "pricing": {
+      "title": "Үнийн тооцоо",
+      "description": "1 хуудас = 25,000₮ - 40,000₮ (баримтын төрлөөс хамаарна)."
+    }
   },
   "userProfile": {
     "loading": "Таны профайлыг ачаалж байна...",

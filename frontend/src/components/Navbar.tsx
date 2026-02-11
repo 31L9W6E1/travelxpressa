@@ -1,11 +1,19 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts/ThemeContext";
-import { Menu, X, Plane, User, LogOut, Settings, FileText, CreditCard, ChevronDown, Sun, Moon, MessageSquare } from "lucide-react";
+import { Menu, X, Plane, User, LogOut, Settings, FileText, CreditCard, ChevronDown, Sun, Moon, MessageSquare, Bell } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { UserAvatar } from "./UserAvatar";
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from "./LanguageSwitcher";
+import api from "@/api/client";
+
+type NotificationItem = {
+  id: string;
+  title: string;
+  subtitle: string;
+  to: string;
+};
 
 const Navbar = () => {
   const { user, logout } = useAuth();
@@ -13,19 +21,100 @@ const Navbar = () => {
   const { t } = useTranslation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const notificationDesktopRef = useRef<HTMLDivElement>(null);
+  const notificationMobileRef = useRef<HTMLDivElement>(null);
 
-  // Close user dropdown when clicking outside
+  // Close popovers when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (isDropdownOpen && dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsDropdownOpen(false);
       }
+      if (isNotificationOpen) {
+        const target = event.target as Node;
+        const clickedDesktop = notificationDesktopRef.current?.contains(target);
+        const clickedMobile = notificationMobileRef.current?.contains(target);
+        if (!clickedDesktop && !clickedMobile) setIsNotificationOpen(false);
+      }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isDropdownOpen]);
+  }, [isDropdownOpen, isNotificationOpen]);
+
+  useEffect(() => {
+    const loadNotifications = async () => {
+      if (!user) {
+        setNotifications([]);
+        return;
+      }
+
+      try {
+        if (user.role === "ADMIN") {
+          const [pendingInquiriesRes, openThreadsRes] = await Promise.all([
+            api.get("/api/admin/inquiries", { params: { limit: 5, status: "PENDING" } }),
+            api.get("/api/chat/threads"),
+          ]);
+
+          const pendingInquiries = pendingInquiriesRes.data?.data || [];
+          const openThreads = (openThreadsRes.data?.data || []).filter((thread: any) => thread.status === "OPEN");
+
+          const next: NotificationItem[] = [];
+          for (const item of pendingInquiries.slice(0, 3)) {
+            next.push({
+              id: `inq-${item.id}`,
+              title: item.name || item.email || "Pending Inquiry",
+              subtitle: `Translation/Support request pending`,
+              to: "/admin/requests",
+            });
+          }
+          for (const item of openThreads.slice(0, 2)) {
+            next.push({
+              id: `thread-${item.id}`,
+              title: item.user?.name || item.user?.email || "Open support thread",
+              subtitle: "Needs admin response",
+              to: `/contactsupport?threadId=${item.id}`,
+            });
+          }
+          setNotifications(next);
+          return;
+        }
+
+        const [myInquiriesRes, myThreadsRes] = await Promise.all([
+          api.get("/api/user/inquiries/user", { params: { limit: 5 } }),
+          api.get("/api/chat/threads"),
+        ]);
+        const myInquiries = myInquiriesRes.data?.data || [];
+        const myThreads = myThreadsRes.data?.data || [];
+        const next: NotificationItem[] = [];
+
+        for (const item of myInquiries.slice(0, 3)) {
+          next.push({
+            id: `my-inq-${item.id}`,
+            title: `${item.serviceType || "Request"} • ${item.status || "Pending"}`,
+            subtitle: "Check your inbox for updates",
+            to: "/profile/inbox",
+          });
+        }
+        for (const item of myThreads.slice(0, 2)) {
+          next.push({
+            id: `my-thread-${item.id}`,
+            title: item.subject || "Support conversation",
+            subtitle: item.status === "OPEN" ? "Thread is active" : `Status: ${item.status}`,
+            to: `/contactsupport?threadId=${item.id}`,
+          });
+        }
+        setNotifications(next);
+      } catch {
+        setNotifications([]);
+      }
+    };
+
+    void loadNotifications();
+  }, [user]);
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border theme-transition">
@@ -53,6 +142,12 @@ const Navbar = () => {
                 className="px-4 py-2 text-muted-foreground hover:text-foreground transition-colors"
               >
                 {t('nav.learnMore')}
+              </Link>
+              <Link
+                to="/translation-service"
+                className="px-4 py-2 text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {t('nav.translationService', { defaultValue: 'Translation Service' })}
               </Link>
               <Link
                 to="/gallery"
@@ -108,6 +203,52 @@ const Navbar = () => {
                 <Moon className="w-5 h-5" />
               )}
             </button>
+
+            {user && (
+              <div className="relative" ref={notificationDesktopRef}>
+                <button
+                  onClick={() => setIsNotificationOpen((prev) => !prev)}
+                  className="relative p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+                  aria-label="Notifications"
+                >
+                  <Bell className="w-5 h-5" />
+                  {notifications.length > 0 && (
+                    <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 rounded-full bg-primary text-primary-foreground text-[10px] leading-4 text-center">
+                      {notifications.length > 9 ? "9+" : notifications.length}
+                    </span>
+                  )}
+                </button>
+
+                {isNotificationOpen && (
+                  <div className="absolute right-0 mt-2 w-80 bg-card border border-border rounded-lg shadow-xl overflow-hidden">
+                    <div className="px-4 py-3 border-b border-border">
+                      <p className="text-sm font-medium text-card-foreground">
+                        {t("nav.notifications", { defaultValue: "Notifications" })}
+                      </p>
+                    </div>
+                    <div className="max-h-80 overflow-y-auto">
+                      {notifications.length === 0 ? (
+                        <p className="px-4 py-6 text-sm text-muted-foreground text-center">
+                          {t("nav.noNotifications", { defaultValue: "No new notifications" })}
+                        </p>
+                      ) : (
+                        notifications.map((item) => (
+                          <Link
+                            key={item.id}
+                            to={item.to}
+                            onClick={() => setIsNotificationOpen(false)}
+                            className="block px-4 py-3 hover:bg-secondary transition-colors border-b last:border-b-0 border-border"
+                          >
+                            <p className="text-sm text-card-foreground font-medium">{item.title}</p>
+                            <p className="text-xs text-muted-foreground mt-0.5">{item.subtitle}</p>
+                          </Link>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
 
             {user ? (
               <div className="relative" ref={dropdownRef}>
@@ -203,6 +344,48 @@ const Navbar = () => {
 
           {/* Mobile: Language + Theme Toggle + Menu button */}
           <div className="md:hidden flex items-center space-x-1">
+            {user && (
+              <div className="relative" ref={notificationMobileRef}>
+                <button
+                  onClick={() => setIsNotificationOpen((prev) => !prev)}
+                  className="p-2 text-foreground hover:bg-secondary rounded-lg transition-colors relative"
+                  aria-label="Notifications"
+                >
+                  <Bell className="w-5 h-5" />
+                  {notifications.length > 0 && (
+                    <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 rounded-full bg-primary text-primary-foreground text-[10px] leading-4 text-center">
+                      {notifications.length > 9 ? "9+" : notifications.length}
+                    </span>
+                  )}
+                </button>
+                {isNotificationOpen && (
+                  <div className="absolute right-0 mt-2 w-72 bg-card border border-border rounded-lg shadow-xl overflow-hidden">
+                    <div className="max-h-80 overflow-y-auto">
+                      {notifications.length === 0 ? (
+                        <p className="px-4 py-6 text-sm text-muted-foreground text-center">
+                          {t("nav.noNotifications", { defaultValue: "No new notifications" })}
+                        </p>
+                      ) : (
+                        notifications.map((item) => (
+                          <Link
+                            key={item.id}
+                            to={item.to}
+                            onClick={() => {
+                              setIsNotificationOpen(false);
+                              setIsMenuOpen(false);
+                            }}
+                            className="block px-4 py-3 hover:bg-secondary transition-colors border-b last:border-b-0 border-border"
+                          >
+                            <p className="text-sm text-card-foreground font-medium">{item.title}</p>
+                            <p className="text-xs text-muted-foreground mt-0.5">{item.subtitle}</p>
+                          </Link>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
             {/* Mobile Language Switcher */}
             <LanguageSwitcher />
 
@@ -243,6 +426,13 @@ const Navbar = () => {
                 onClick={() => setIsMenuOpen(false)}
               >
                 {t('nav.learnMore')}
+              </Link>
+              <Link
+                to="/translation-service"
+                className="px-4 py-3 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                {t('nav.translationService', { defaultValue: 'Translation Service' })}
               </Link>
               <Link
                 to="/gallery"

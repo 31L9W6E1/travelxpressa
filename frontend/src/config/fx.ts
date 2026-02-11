@@ -4,24 +4,24 @@
 // Update these periodically as needed.
 //
 // Rates are expressed as: 1 USD = X <CURRENCY>
-export const FX_LAST_UPDATED_ISO = "2026-02-10";
+export const FX_LAST_UPDATED_ISO = "2026-02-11";
 
 export const USD_TO: Record<string, number> = {
   USD: 1,
 
-  // Major currencies (approx)
-  EUR: 0.92,
-  GBP: 0.79,
-  CAD: 1.35,
-  AUD: 1.52,
-  NZD: 1.65,
-  JPY: 150,
-  KRW: 1330,
-  CNY: 7.2,
-  RUB: 92,
+  // Approx based on quoted FX board shared by user (2026-02-11).
+  EUR: 0.85,
+  GBP: 0.74,
+  CAD: 1.36,
+  AUD: 1.43,
+  NZD: 1.68,
+  JPY: 154,
+  KRW: 1458,
+  CNY: 6.93,
+  RUB: 83,
 
   // Mongolia
-  MNT: 3450,
+  MNT: 3559,
 };
 
 export const isFxCurrencySupported = (currencyCode: string): boolean => {
@@ -43,4 +43,3 @@ export const convertCurrency = (
   const usd = amount / from;
   return usd * to;
 };
-

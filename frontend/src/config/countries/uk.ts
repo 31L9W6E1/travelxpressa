@@ -45,7 +45,7 @@ export const ukConfig: CountryConfig = {
   interviewRequired: false,
   processingTimeline: '3-6 weeks standard, priority service available',
   paymentPricing: {
-    baseFee: 115,
+    baseFee: 127,
     currency: 'GBP',
     serviceFee: 35
   },

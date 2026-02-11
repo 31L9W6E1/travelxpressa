@@ -11,7 +11,6 @@ import {
   CheckCircle,
   Users,
   Zap,
-  Bell,
 } from "lucide-react";
 import {
   getFeaturedContent,
@@ -31,16 +30,6 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useTranslation } from "react-i18next";
-
-// Default ticker items (shown while loading or if no news available)
-const defaultTickerItems = [
-  "🌍 Visa Update: Entry rules and processing timelines may change by destination",
-  "📋 Application Guidance: Complete your checklist before submission to avoid delays",
-  "🏛️ Consular Notice: Appointment availability varies by country and season",
-  "🎉 Platform Update: Track your application status from your dashboard",
-  "⚡ Express Service: Priority support is available for urgent travel cases",
-  "📅 Reminder: Ensure passport validity meets destination requirements",
-];
 
 // Fallback data for when API fails or is empty
 const fallbackBlogPosts: PostSummary[] = [
@@ -81,7 +70,6 @@ const Home = () => {
   const { t, i18n } = useTranslation();
   const [blogPosts, setBlogPosts] = useState<PostSummary[]>([]);
   const [newsItems, setNewsItems] = useState<PostSummary[]>([]);
-  const [tickerItems, setTickerItems] = useState<string[]>(defaultTickerItems);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -95,20 +83,6 @@ const Home = () => {
           content.newsPosts.length > 0 ? content.newsPosts : fallbackNewsItems,
         );
 
-        // Build ticker from latest news posts
-        if (content.newsPosts.length > 0) {
-          const newsTickerItems = content.newsPosts.slice(0, 10).map((post) => {
-            // Add emoji based on tags or default
-            const emoji = getNewsEmoji(post.tags);
-            return `${emoji} ${post.title}`;
-          });
-          // Only use news items if we have at least 3, otherwise mix with defaults
-          if (newsTickerItems.length >= 3) {
-            setTickerItems(newsTickerItems);
-          } else {
-            setTickerItems([...newsTickerItems, ...defaultTickerItems.slice(0, 6 - newsTickerItems.length)]);
-          }
-        }
       } catch (err) {
         console.error("Failed to fetch featured content:", err);
         setBlogPosts(fallbackBlogPosts);
@@ -120,22 +94,6 @@ const Home = () => {
 
     fetchContent();
   }, [i18n.language]);
-
-  // Get emoji based on news tags
-  const getNewsEmoji = (tags: string | null): string => {
-    if (!tags) return "📰";
-    const tagLower = tags.toLowerCase();
-    if (tagLower.includes("travel") || tagLower.includes("advisory")) return "🌍";
-    if (tagLower.includes("embassy") || tagLower.includes("consulate")) return "🏛️";
-    if (tagLower.includes("visa")) return "🇺🇸";
-    if (tagLower.includes("interview")) return "💼";
-    if (tagLower.includes("urgent") || tagLower.includes("alert")) return "🚨";
-    if (tagLower.includes("update") || tagLower.includes("new")) return "🎉";
-    if (tagLower.includes("reminder") || tagLower.includes("deadline")) return "📅";
-    if (tagLower.includes("processing") || tagLower.includes("status")) return "📋";
-    if (tagLower.includes("express") || tagLower.includes("fast")) return "⚡";
-    return "📰";
-  };
 
   const features = [
     {
@@ -162,38 +120,8 @@ const Home = () => {
 
   return (
       <div className="min-h-screen bg-background text-foreground font-sans">
-      {/* News Ticker - Glass morphism style */}
-      <div className="fixed top-16 left-0 right-0 z-40 ticker-bar text-gray-300 overflow-hidden">
-        <div className="flex items-center h-10">
-          <div className="flex-shrink-0 px-4 bg-primary/20 backdrop-blur-sm h-full flex items-center gap-2 z-10 text-gray-300">
-            <Bell className="w-3.5 h-3.5 text-gray-300" />
-            <span className="text-xs font-semibold uppercase tracking-wide text-gray-300">
-              {t("home.news")}
-            </span>
-          </div>
-          <div className="ticker-wrapper flex-1">
-            <div className="animate-ticker">
-              {/* First set of items */}
-              {tickerItems.map((item, index) => (
-                <span key={`a-${index}`} className="inline-flex items-center px-8 text-sm whitespace-nowrap text-gray-300">
-                  <span className="w-1.5 h-1.5 rounded-full bg-primary mr-3"></span>
-                  {item}
-                </span>
-              ))}
-              {/* Duplicate set for seamless loop */}
-              {tickerItems.map((item, index) => (
-                <span key={`b-${index}`} className="inline-flex items-center px-8 text-sm whitespace-nowrap text-gray-300">
-                  <span className="w-1.5 h-1.5 rounded-full bg-primary mr-3"></span>
-                  {item}
-                </span>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Hero Section - Cloudflare inspired */}
-      <section className="relative pt-32 pb-24 overflow-hidden">
+      <section className="relative pt-24 pb-24 overflow-hidden">
         {/* Background decoration */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent pointer-events-none" />
         <div className="absolute top-20 right-0 w-[600px] h-[600px] bg-primary/10 rounded-full blur-3xl pointer-events-none" />

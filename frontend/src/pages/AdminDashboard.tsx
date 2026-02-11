@@ -112,6 +112,7 @@ import PaymentDashboard from "@/components/admin/PaymentDashboard";
 import PaymentAnalytics from "@/components/admin/PaymentAnalytics";
 import GalleryManager from "@/components/admin/GalleryManager";
 import ApplicationTracker from "@/components/admin/ApplicationTracker";
+import TranslationRequestsPanel from "@/components/admin/TranslationRequestsPanel";
 
 interface UserData {
   id: string;
@@ -201,6 +202,7 @@ type AdminTab =
   | "overview"
   | "users"
   | "applications"
+  | "requests"
   | "tracking"
   | "payments"
   | "analytics"
@@ -212,6 +214,7 @@ const getAdminTabFromSection = (section?: string): AdminTab => {
     case "overview":
     case "users":
     case "applications":
+    case "requests":
     case "tracking":
     case "payments":
     case "analytics":
@@ -805,6 +808,10 @@ const AdminDashboard = () => {
             <TabsTrigger value="applications" className="gap-2">
               <FileText className="w-4 h-4" />
               {t('dashboard.tabs.applications', 'Applications')}
+            </TabsTrigger>
+            <TabsTrigger value="requests" className="gap-2">
+              <MessageSquare className="w-4 h-4" />
+              {t("dashboard.tabs.requests", "Requests")}
             </TabsTrigger>
             <TabsTrigger value="tracking" className="gap-2">
               <Activity className="w-4 h-4" />
@@ -1558,6 +1565,10 @@ const AdminDashboard = () => {
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          <TabsContent value="requests">
+            <TranslationRequestsPanel />
           </TabsContent>
 
           {/* Tracking Tab */}

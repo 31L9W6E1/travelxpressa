@@ -1,10 +1,23 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts/ThemeContext";
-import { Menu, X, Plane, User, LogOut, Settings, FileText, CreditCard, ChevronDown, Sun, Moon, MessageSquare, Bell } from "lucide-react";
+import {
+  Menu,
+  X,
+  Plane,
+  LogOut,
+  Settings,
+  FileText,
+  CreditCard,
+  Sun,
+  Moon,
+  MessageSquare,
+  Bell,
+  User,
+} from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { UserAvatar } from "./UserAvatar";
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from "react-i18next";
 import LanguageSwitcher from "./LanguageSwitcher";
 import api from "@/api/client";
 
@@ -15,35 +28,31 @@ type NotificationItem = {
   to: string;
 };
 
+const navItemClass =
+  "flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors";
+
 const Navbar = () => {
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const { t } = useTranslation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
-  const dropdownRef = useRef<HTMLDivElement>(null);
   const notificationDesktopRef = useRef<HTMLDivElement>(null);
   const notificationMobileRef = useRef<HTMLDivElement>(null);
 
-  // Close popovers when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (isDropdownOpen && dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsDropdownOpen(false);
-      }
-      if (isNotificationOpen) {
-        const target = event.target as Node;
-        const clickedDesktop = notificationDesktopRef.current?.contains(target);
-        const clickedMobile = notificationMobileRef.current?.contains(target);
-        if (!clickedDesktop && !clickedMobile) setIsNotificationOpen(false);
-      }
+      if (!isNotificationOpen) return;
+      const target = event.target as Node;
+      const clickedDesktop = notificationDesktopRef.current?.contains(target);
+      const clickedMobile = notificationMobileRef.current?.contains(target);
+      if (!clickedDesktop && !clickedMobile) setIsNotificationOpen(false);
     };
 
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isDropdownOpen, isNotificationOpen]);
+  }, [isNotificationOpen]);
 
   useEffect(() => {
     const loadNotifications = async () => {
@@ -67,7 +76,7 @@ const Navbar = () => {
             next.push({
               id: `inq-${item.id}`,
               title: item.name || item.email || "Pending Inquiry",
-              subtitle: `Translation/Support request pending`,
+              subtitle: "Translation/Support request pending",
               to: "/admin/requests",
             });
           }
@@ -116,410 +125,326 @@ const Navbar = () => {
     void loadNotifications();
   }, [user]);
 
+  const closeMobileMenu = () => setIsMenuOpen(false);
+
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-background/85 backdrop-blur-md theme-transition">
-      <div className="w-full px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          {/* Logo */}
-          <div className="flex items-center gap-4 lg:gap-6 min-w-0">
-            <Link to="/" className="flex items-center space-x-2 flex-shrink-0">
-              <Plane className="w-7 h-7 text-foreground" />
-              <span className="text-xl font-bold text-foreground tracking-tight">
-                TravelXpressa
-              </span>
-            </Link>
-
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center gap-1 pl-4 border-l border-dashed border-border/70">
-              <Link
-                to="/about"
-                className="px-3 py-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
-              >
-                {t('nav.about')}
-              </Link>
-              <Link
-                to="/learn-more"
-                className="px-3 py-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
-              >
-                {t('nav.learnMore')}
-              </Link>
-              <Link
-                to="/translation-service"
-                className="px-3 py-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
-              >
-                {t('nav.translationService', { defaultValue: 'Translation Service' })}
-              </Link>
-              <Link
-                to="/gallery"
-                className="px-3 py-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
-              >
-                {t('nav.gallery', { defaultValue: 'Gallery' })}
-              </Link>
-              {user && (
-                <Link
-                  to="/contactsupport"
-                  className="px-3 py-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors flex items-center gap-2"
-                >
-                  <MessageSquare className="w-4 h-4" />
-                  {t('nav.support', { defaultValue: 'Support' })}
-                </Link>
-              )}
-              {user && user.role !== "ADMIN" && (
-                <Link
-                  to="/select-country"
-                  className="px-3 py-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors flex items-center gap-2"
-                >
-                  <FileText className="w-4 h-4" />
-                  {t('nav.apply')}
-                </Link>
-              )}
-              {user?.role === "ADMIN" && (
-                <Link
-                  to="/admin"
-                  className="px-3 py-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors flex items-center gap-2"
-                >
-                  <Settings className="w-4 h-4" />
-                  {t('nav.admin')}
-                </Link>
-              )}
-            </div>
-          </div>
-
-          {/* Desktop Auth & Theme Toggle */}
-          <div className="hidden md:flex items-center space-x-4">
-            {/* Language Selector - uses Radix UI DropdownMenu */}
-            <LanguageSwitcher />
-
-            {/* Theme Toggle */}
-            <button
-              onClick={toggleTheme}
-              className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
-              aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-              title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-            >
-              {theme === 'dark' ? (
-                <Sun className="w-5 h-5" />
-              ) : (
-                <Moon className="w-5 h-5" />
-              )}
-            </button>
-
-            {user && (
-              <div className="relative" ref={notificationDesktopRef}>
-                <button
-                  onClick={() => setIsNotificationOpen((prev) => !prev)}
-                  className="relative p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
-                  aria-label="Notifications"
-                >
-                  <Bell className="w-5 h-5" />
-                  {notifications.length > 0 && (
-                    <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 rounded-full bg-primary text-primary-foreground text-[10px] leading-4 text-center">
-                      {notifications.length > 9 ? "9+" : notifications.length}
-                    </span>
-                  )}
-                </button>
-
-                {isNotificationOpen && (
-                  <div className="absolute right-0 mt-2 w-80 bg-card border border-border rounded-lg shadow-xl overflow-hidden">
-                    <div className="px-4 py-3 border-b border-border">
-                      <p className="text-sm font-medium text-card-foreground">
-                        {t("nav.notifications", { defaultValue: "Notifications" })}
-                      </p>
-                    </div>
-                    <div className="max-h-80 overflow-y-auto">
-                      {notifications.length === 0 ? (
-                        <p className="px-4 py-6 text-sm text-muted-foreground text-center">
-                          {t("nav.noNotifications", { defaultValue: "No new notifications" })}
-                        </p>
-                      ) : (
-                        notifications.map((item) => (
-                          <Link
-                            key={item.id}
-                            to={item.to}
-                            onClick={() => setIsNotificationOpen(false)}
-                            className="block px-4 py-3 hover:bg-secondary transition-colors border-b last:border-b-0 border-border"
-                          >
-                            <p className="text-sm text-card-foreground font-medium">{item.title}</p>
-                            <p className="text-xs text-muted-foreground mt-0.5">{item.subtitle}</p>
-                          </Link>
-                        ))
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {user ? (
-              <div className="relative" ref={dropdownRef}>
-                <button
-                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className="flex items-center space-x-2 px-3 py-2 text-foreground hover:bg-secondary rounded-lg transition-colors"
-                >
-                  <UserAvatar name={user.name} email={user.email} size="sm" />
-                  <span className="text-sm font-medium max-w-32 truncate">
-                    {user.name || user.email?.split('@')[0]}
-                  </span>
-                  {user.role === "ADMIN" && (
-                    <span className="px-2 py-0.5 text-xs bg-secondary text-secondary-foreground rounded">
-                      {t('nav.admin')}
-                    </span>
-                  )}
-                  <ChevronDown className={`w-4 h-4 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
-                </button>
-
-                {/* Dropdown Menu */}
-                {isDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-56 bg-card border border-border rounded-lg shadow-xl overflow-hidden">
-                    <div className="px-4 py-3 border-b border-border">
-                      <p className="text-sm text-card-foreground font-medium">{user.name}</p>
-                      <p className="text-xs text-muted-foreground">{user.email}</p>
-                    </div>
-                    <div className="py-1">
-                      <Link
-                        to="/profile"
-                        onClick={() => setIsDropdownOpen(false)}
-                        className="flex items-center gap-3 px-4 py-2.5 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
-                      >
-                        <User className="w-4 h-4" />
-                        {t('nav.profile')}
-                      </Link>
-                      <Link
-                        to="/profile"
-                        onClick={() => setIsDropdownOpen(false)}
-                        className="flex items-center gap-3 px-4 py-2.5 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
-                      >
-                        <FileText className="w-4 h-4" />
-                        {t('nav.applications')}
-                      </Link>
-                      <Link
-                        to="/profile"
-                        onClick={() => setIsDropdownOpen(false)}
-                        className="flex items-center gap-3 px-4 py-2.5 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
-                      >
-                        <CreditCard className="w-4 h-4" />
-                        {t('nav.payments')}
-                      </Link>
-                      <Link
-                        to="/contactsupport"
-                        onClick={() => setIsDropdownOpen(false)}
-                        className="flex items-center gap-3 px-4 py-2.5 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
-                      >
-                        <MessageSquare className="w-4 h-4" />
-                        {t('nav.support', { defaultValue: 'Support' })}
-                      </Link>
-                    </div>
-                    <div className="border-t border-border py-1">
-                      <button
-                        onClick={() => {
-                          logout();
-                          setIsDropdownOpen(false);
-                        }}
-                        className="flex items-center gap-3 w-full px-4 py-2.5 text-destructive hover:bg-secondary transition-colors"
-                      >
-                        <LogOut className="w-4 h-4" />
-                        {t('nav.logout')}
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="flex items-center space-x-3">
-                <Link
-                  to="/login"
-                  className="px-4 py-2 text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  {t('nav.signIn')}
-                </Link>
-                <Link
-                  to="/login"
-                  className="px-5 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:opacity-90 transition-opacity"
-                >
-                  {t('nav.getStarted')}
-                </Link>
-              </div>
-            )}
-          </div>
-
-          {/* Mobile: Language + Theme Toggle + Menu button */}
-          <div className="md:hidden flex items-center space-x-1">
-            {user && (
-              <div className="relative" ref={notificationMobileRef}>
-                <button
-                  onClick={() => setIsNotificationOpen((prev) => !prev)}
-                  className="p-2 text-foreground hover:bg-secondary rounded-lg transition-colors relative"
-                  aria-label="Notifications"
-                >
-                  <Bell className="w-5 h-5" />
-                  {notifications.length > 0 && (
-                    <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 rounded-full bg-primary text-primary-foreground text-[10px] leading-4 text-center">
-                      {notifications.length > 9 ? "9+" : notifications.length}
-                    </span>
-                  )}
-                </button>
-                {isNotificationOpen && (
-                  <div className="absolute right-0 mt-2 w-72 bg-card border border-border rounded-lg shadow-xl overflow-hidden">
-                    <div className="max-h-80 overflow-y-auto">
-                      {notifications.length === 0 ? (
-                        <p className="px-4 py-6 text-sm text-muted-foreground text-center">
-                          {t("nav.noNotifications", { defaultValue: "No new notifications" })}
-                        </p>
-                      ) : (
-                        notifications.map((item) => (
-                          <Link
-                            key={item.id}
-                            to={item.to}
-                            onClick={() => {
-                              setIsNotificationOpen(false);
-                              setIsMenuOpen(false);
-                            }}
-                            className="block px-4 py-3 hover:bg-secondary transition-colors border-b last:border-b-0 border-border"
-                          >
-                            <p className="text-sm text-card-foreground font-medium">{item.title}</p>
-                            <p className="text-xs text-muted-foreground mt-0.5">{item.subtitle}</p>
-                          </Link>
-                        ))
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-            {/* Mobile Language Switcher */}
-            <LanguageSwitcher />
-
-            <button
-              onClick={toggleTheme}
-              className="p-2 text-foreground hover:bg-secondary rounded-lg transition-colors"
-              aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-            >
-              {theme === 'dark' ? (
-                <Sun className="w-5 h-5" />
-              ) : (
-                <Moon className="w-5 h-5" />
-              )}
-            </button>
-            <button
-              className="p-2 text-foreground hover:bg-secondary rounded-lg"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-            >
-              {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
-          </div>
+    <>
+      <aside className="hidden md:flex fixed inset-y-0 left-0 z-40 w-[240px] bg-background border-r border-border flex-col">
+        <div className="h-16 px-4 flex items-center border-b border-dashed border-border/70">
+          <Link to="/" className="flex items-center gap-2 min-w-0">
+            <Plane className="w-6 h-6 text-foreground shrink-0" />
+            <span className="text-lg font-bold text-foreground tracking-tight truncate">TravelXpressa</span>
+          </Link>
         </div>
 
-        {/* Mobile Navigation */}
-        {isMenuOpen && (
-          <div className="md:hidden py-4 bg-background border-t border-dashed border-border/70">
-            <div className="flex flex-col space-y-1">
-              <Link
-                to="/about"
-                className="px-4 py-3 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                {t('nav.about')}
+        <div className="flex-1 overflow-y-auto p-3 space-y-1">
+          <Link to="/about" className={navItemClass}>{t("nav.about")}</Link>
+          <Link to="/learn-more" className={navItemClass}>{t("nav.learnMore")}</Link>
+          <Link to="/translation-service" className={navItemClass}>{t("nav.translationService", { defaultValue: "Translation Service" })}</Link>
+          <Link to="/gallery" className={navItemClass}>{t("nav.gallery", { defaultValue: "Gallery" })}</Link>
+
+          {user && (
+            <Link to="/contactsupport" className={navItemClass}>
+              <MessageSquare className="w-4 h-4" />
+              {t("nav.support", { defaultValue: "Support" })}
+            </Link>
+          )}
+
+          {user && user.role !== "ADMIN" && (
+            <Link to="/select-country" className={navItemClass}>
+              <FileText className="w-4 h-4" />
+              {t("nav.apply")}
+            </Link>
+          )}
+
+          {user?.role === "ADMIN" && (
+            <Link to="/admin" className={navItemClass}>
+              <Settings className="w-4 h-4" />
+              {t("nav.admin")}
+            </Link>
+          )}
+
+          {user && (
+            <>
+              <div className="my-3 border-t border-dashed border-border/70" />
+              <Link to="/profile" className={navItemClass}>
+                <User className="w-4 h-4" />
+                {t("nav.profile")}
               </Link>
-              <Link
-                to="/learn-more"
-                className="px-4 py-3 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                {t('nav.learnMore')}
+              <Link to="/profile" className={navItemClass}>
+                <FileText className="w-4 h-4" />
+                {t("nav.applications")}
               </Link>
-              <Link
-                to="/translation-service"
-                className="px-4 py-3 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                {t('nav.translationService', { defaultValue: 'Translation Service' })}
+              <Link to="/profile" className={navItemClass}>
+                <CreditCard className="w-4 h-4" />
+                {t("nav.payments")}
               </Link>
-              <Link
-                to="/gallery"
-                className="px-4 py-3 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
-                onClick={() => setIsMenuOpen(false)}
+            </>
+          )}
+        </div>
+
+        <div className="p-3 border-t border-dashed border-border/70 space-y-3">
+          <div className="flex items-center justify-between">
+            <LanguageSwitcher />
+
+            <div className="flex items-center gap-1">
+              <button
+                onClick={toggleTheme}
+                className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+                aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
               >
-                {t('nav.gallery', { defaultValue: 'Gallery' })}
-              </Link>
+                {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+              </button>
+
               {user && (
-                <Link
-                  to="/contactsupport"
-                  className="px-4 py-3 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  {t('nav.support', { defaultValue: 'Support' })}
-                </Link>
-              )}
-              {user && (
-                <>
-                  <Link
-                    to="/profile"
-                    className="px-4 py-3 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
-                    onClick={() => setIsMenuOpen(false)}
+                <div className="relative" ref={notificationDesktopRef}>
+                  <button
+                    onClick={() => setIsNotificationOpen((prev) => !prev)}
+                    className="relative p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+                    aria-label="Notifications"
                   >
-                    {t('nav.profile')}
-                  </Link>
-                  {user.role !== "ADMIN" && (
-                    <Link
-                      to="/select-country"
-                      className="px-4 py-3 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      {t('nav.apply')}
-                    </Link>
-                  )}
-                </>
-              )}
-              {user?.role === "ADMIN" && (
-                <Link
-                  to="/admin"
-                  className="px-4 py-3 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  {t('nav.admin')}
-                </Link>
-              )}
-              <div className="border-t border-border pt-4 mt-2">
-                {user ? (
-                  <div className="space-y-2">
-                    <div className="px-4 py-2 text-muted-foreground text-sm">
-                      {t('nav.signedInAs')} {user.name}
+                    <Bell className="w-4 h-4" />
+                    {notifications.length > 0 && (
+                      <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 rounded-full bg-primary text-primary-foreground text-[10px] leading-4 text-center">
+                        {notifications.length > 9 ? "9+" : notifications.length}
+                      </span>
+                    )}
+                  </button>
+
+                  {isNotificationOpen && (
+                    <div className="absolute bottom-11 right-0 w-72 bg-card border border-border rounded-lg shadow-xl overflow-hidden">
+                      <div className="px-4 py-3 border-b border-border">
+                        <p className="text-sm font-medium text-card-foreground">
+                          {t("nav.notifications", { defaultValue: "Notifications" })}
+                        </p>
+                      </div>
+                      <div className="max-h-80 overflow-y-auto">
+                        {notifications.length === 0 ? (
+                          <p className="px-4 py-6 text-sm text-muted-foreground text-center">
+                            {t("nav.noNotifications", { defaultValue: "No new notifications" })}
+                          </p>
+                        ) : (
+                          notifications.map((item) => (
+                            <Link
+                              key={item.id}
+                              to={item.to}
+                              onClick={() => setIsNotificationOpen(false)}
+                              className="block px-4 py-3 hover:bg-secondary transition-colors border-b last:border-b-0 border-border"
+                            >
+                              <p className="text-sm text-card-foreground font-medium">{item.title}</p>
+                              <p className="text-xs text-muted-foreground mt-0.5">{item.subtitle}</p>
+                            </Link>
+                          ))
+                        )}
+                      </div>
                     </div>
-                    <button
-                      onClick={() => {
-                        logout();
-                        setIsMenuOpen(false);
-                      }}
-                      className="w-full px-4 py-3 text-destructive hover:bg-secondary transition-colors text-left"
-                    >
-                      {t('nav.logout')}
-                    </button>
-                  </div>
-                ) : (
-                  <div className="space-y-2 px-4">
-                    <Link
-                      to="/login"
-                      className="block py-3 text-muted-foreground hover:text-foreground transition-colors"
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      {t('nav.signIn')}
-                    </Link>
-                    <Link
-                      to="/login"
-                      className="block py-3 bg-primary text-primary-foreground rounded-lg font-medium text-center"
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      {t('nav.getStarted')}
-                    </Link>
-                  </div>
-                )}
-              </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
-        )}
+
+          {user ? (
+            <>
+              <div className="flex items-center gap-3 px-2 py-1">
+                <UserAvatar name={user.name} email={user.email} size="sm" />
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-foreground truncate">{user.name || user.email?.split("@")[0]}</p>
+                  <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                </div>
+              </div>
+              <button
+                onClick={() => void logout()}
+                className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-destructive hover:bg-secondary transition-colors text-sm"
+              >
+                <LogOut className="w-4 h-4" />
+                {t("nav.logout")}
+              </button>
+            </>
+          ) : (
+            <div className="space-y-2">
+              <Link to="/login" className="block px-3 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors text-sm">
+                {t("nav.signIn")}
+              </Link>
+              <Link to="/login" className="block px-3 py-2 rounded-lg bg-primary text-primary-foreground font-medium text-sm text-center hover:opacity-90 transition-opacity">
+                {t("nav.getStarted")}
+              </Link>
+            </div>
+          )}
+        </div>
+      </aside>
+
+      <div className="md:hidden fixed top-0 left-0 right-0 z-50 h-16 bg-background/90 backdrop-blur-md border-b border-dashed border-border/70 px-4 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <button
+            className="p-2 rounded-lg text-foreground hover:bg-secondary transition-colors"
+            onClick={() => setIsMenuOpen((prev) => !prev)}
+            aria-label="Toggle menu"
+          >
+            {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
+          <Link to="/" className="flex items-center gap-2" onClick={closeMobileMenu}>
+            <Plane className="w-5 h-5 text-foreground" />
+            <span className="text-base font-semibold text-foreground">TravelXpressa</span>
+          </Link>
+        </div>
+
+        <div className="flex items-center gap-1">
+          {user && (
+            <div className="relative" ref={notificationMobileRef}>
+              <button
+                onClick={() => setIsNotificationOpen((prev) => !prev)}
+                className="relative p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+                aria-label="Notifications"
+              >
+                <Bell className="w-5 h-5" />
+                {notifications.length > 0 && (
+                  <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 rounded-full bg-primary text-primary-foreground text-[10px] leading-4 text-center">
+                    {notifications.length > 9 ? "9+" : notifications.length}
+                  </span>
+                )}
+              </button>
+
+              {isNotificationOpen && (
+                <div className="absolute right-0 mt-2 w-72 bg-card border border-border rounded-lg shadow-xl overflow-hidden">
+                  <div className="max-h-80 overflow-y-auto">
+                    {notifications.length === 0 ? (
+                      <p className="px-4 py-6 text-sm text-muted-foreground text-center">
+                        {t("nav.noNotifications", { defaultValue: "No new notifications" })}
+                      </p>
+                    ) : (
+                      notifications.map((item) => (
+                        <Link
+                          key={item.id}
+                          to={item.to}
+                          onClick={() => {
+                            setIsNotificationOpen(false);
+                            closeMobileMenu();
+                          }}
+                          className="block px-4 py-3 hover:bg-secondary transition-colors border-b last:border-b-0 border-border"
+                        >
+                          <p className="text-sm text-card-foreground font-medium">{item.title}</p>
+                          <p className="text-xs text-muted-foreground mt-0.5">{item.subtitle}</p>
+                        </Link>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          <LanguageSwitcher />
+
+          <button
+            onClick={toggleTheme}
+            className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+            aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+          >
+            {theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+          </button>
+        </div>
       </div>
-      <div className="border-b border-dashed border-border/70" />
-    </nav>
+
+      {isMenuOpen && (
+        <div className="md:hidden fixed inset-0 z-40 bg-black/40" onClick={closeMobileMenu} />
+      )}
+
+      <aside
+        className={`md:hidden fixed top-0 left-0 bottom-0 z-50 w-[240px] bg-background border-r border-border transform transition-transform duration-300 ${
+          isMenuOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        <div className="h-16 px-4 flex items-center justify-between border-b border-dashed border-border/70">
+          <Link to="/" className="flex items-center gap-2" onClick={closeMobileMenu}>
+            <Plane className="w-5 h-5 text-foreground" />
+            <span className="text-base font-semibold text-foreground">TravelXpressa</span>
+          </Link>
+          <button className="p-2 rounded-lg text-foreground hover:bg-secondary" onClick={closeMobileMenu} aria-label="Close menu">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-3 space-y-1">
+          <Link to="/about" className={navItemClass} onClick={closeMobileMenu}>{t("nav.about")}</Link>
+          <Link to="/learn-more" className={navItemClass} onClick={closeMobileMenu}>{t("nav.learnMore")}</Link>
+          <Link to="/translation-service" className={navItemClass} onClick={closeMobileMenu}>{t("nav.translationService", { defaultValue: "Translation Service" })}</Link>
+          <Link to="/gallery" className={navItemClass} onClick={closeMobileMenu}>{t("nav.gallery", { defaultValue: "Gallery" })}</Link>
+
+          {user && (
+            <Link to="/contactsupport" className={navItemClass} onClick={closeMobileMenu}>
+              <MessageSquare className="w-4 h-4" />
+              {t("nav.support", { defaultValue: "Support" })}
+            </Link>
+          )}
+
+          {user && user.role !== "ADMIN" && (
+            <Link to="/select-country" className={navItemClass} onClick={closeMobileMenu}>
+              <FileText className="w-4 h-4" />
+              {t("nav.apply")}
+            </Link>
+          )}
+
+          {user?.role === "ADMIN" && (
+            <Link to="/admin" className={navItemClass} onClick={closeMobileMenu}>
+              <Settings className="w-4 h-4" />
+              {t("nav.admin")}
+            </Link>
+          )}
+
+          {user && (
+            <>
+              <div className="my-3 border-t border-dashed border-border/70" />
+              <Link to="/profile" className={navItemClass} onClick={closeMobileMenu}>
+                <User className="w-4 h-4" />
+                {t("nav.profile")}
+              </Link>
+              <Link to="/profile" className={navItemClass} onClick={closeMobileMenu}>
+                <FileText className="w-4 h-4" />
+                {t("nav.applications")}
+              </Link>
+              <Link to="/profile" className={navItemClass} onClick={closeMobileMenu}>
+                <CreditCard className="w-4 h-4" />
+                {t("nav.payments")}
+              </Link>
+            </>
+          )}
+        </div>
+
+        <div className="p-3 border-t border-dashed border-border/70 space-y-2">
+          {user ? (
+            <>
+              <div className="flex items-center gap-3 px-2 py-1">
+                <UserAvatar name={user.name} email={user.email} size="sm" />
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-foreground truncate">{user.name || user.email?.split("@")[0]}</p>
+                  <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  void logout();
+                  closeMobileMenu();
+                }}
+                className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-destructive hover:bg-secondary transition-colors text-sm"
+              >
+                <LogOut className="w-4 h-4" />
+                {t("nav.logout")}
+              </button>
+            </>
+          ) : (
+            <div className="space-y-2">
+              <Link to="/login" className="block px-3 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors text-sm" onClick={closeMobileMenu}>
+                {t("nav.signIn")}
+              </Link>
+              <Link to="/login" className="block px-3 py-2 rounded-lg bg-primary text-primary-foreground font-medium text-sm text-center hover:opacity-90 transition-opacity" onClick={closeMobileMenu}>
+                {t("nav.getStarted")}
+              </Link>
+            </div>
+          )}
+        </div>
+      </aside>
+    </>
   );
 };
 

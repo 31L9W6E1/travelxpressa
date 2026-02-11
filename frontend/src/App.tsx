@@ -89,15 +89,11 @@ function App() {
           Used so we can return multiple elements
           without adding extra divs to the DOM 
         */}
-        <>
-          {/* Navbar is placed here so it appears on ALL pages */}
+        <div className="min-h-screen bg-background">
           <Navbar />
 
-          {/* 
-            Routes is a container for Route components ONLY
-            It decides which page to show based on URL
-          */}
-          <Routes>
+          <main className="pt-16 md:pt-0 md:pl-[240px]">
+            <Routes>
             {/* 
               "/" is the FIRST page that loads
               When user opens the site, Home is shown
@@ -239,8 +235,9 @@ function App() {
                 </AdminRoute>
               }
             />
-          </Routes>
-        </>
+            </Routes>
+          </main>
+        </div>
       </BrowserRouter>
       </AuthProvider>
     </ThemeProvider>

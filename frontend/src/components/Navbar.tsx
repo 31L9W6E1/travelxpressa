@@ -306,31 +306,13 @@ const Navbar = () => {
         className="hidden md:flex fixed inset-y-0 left-0 z-40 bg-background border-r border-border flex-col transition-[width] duration-300"
         style={{ width: isSidebarCollapsed ? "88px" : "240px" }}
       >
-        <div className="h-16 px-3 flex items-center justify-between border-b border-dashed border-border/70">
+        <div className="h-16 px-3 flex items-center border-b border-dashed border-border/70">
           <Link to="/" className={`flex items-center ${isSidebarCollapsed ? "justify-center w-full" : "gap-2 min-w-0"}`}>
             <Plane className="w-6 h-6 text-foreground shrink-0" />
             {!isSidebarCollapsed && (
               <span className="text-lg font-bold text-foreground tracking-tight truncate">TravelXpressa</span>
             )}
           </Link>
-          {!isSidebarCollapsed && (
-            <button
-              onClick={() => setIsSidebarCollapsed(true)}
-              className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
-              aria-label="Collapse sidebar"
-            >
-              <ChevronsLeft className="w-4 h-4" />
-            </button>
-          )}
-          {isSidebarCollapsed && (
-            <button
-              onClick={() => setIsSidebarCollapsed(false)}
-              className="absolute top-4 right-2 p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
-              aria-label="Expand sidebar"
-            >
-              <ChevronsRight className="w-4 h-4" />
-            </button>
-          )}
         </div>
 
         <nav className="flex-1 overflow-y-auto p-3 space-y-1">
@@ -383,9 +365,56 @@ const Navbar = () => {
             </>
           )}
         </nav>
+
+        <div className="p-3 border-t border-dashed border-border/70">
+          {isSidebarCollapsed ? (
+            <Link
+              to={user ? "/contactsupport" : "/learn-more"}
+              className="h-10 w-10 mx-auto rounded-lg border border-dashed border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+              title={t("nav.quickHelp", { defaultValue: "Quick Help" })}
+            >
+              <MessageSquare className="w-4 h-4" />
+            </Link>
+          ) : (
+            <div className="rounded-lg border border-dashed border-border bg-secondary/30 p-3">
+              <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-muted-foreground">
+                {t("nav.quickHelp", { defaultValue: "Quick Help" })}
+              </p>
+              <p className="text-sm text-foreground mt-1">
+                {t("nav.quickHelpText", {
+                  defaultValue: "Need support or visa updates? Check our latest guides.",
+                })}
+              </p>
+              <div className="mt-3 flex items-center gap-2">
+                <Link
+                  to={user ? "/contactsupport" : "/learn-more"}
+                  className="text-sm font-medium text-primary hover:underline"
+                >
+                  {user
+                    ? t("nav.contactSupport", { defaultValue: "Contact support" })
+                    : t("nav.learnMore", { defaultValue: "Learn more" })}
+                </Link>
+                <span className="text-muted-foreground">•</span>
+                <Link to="/news" className="text-sm font-medium text-primary hover:underline">
+                  {t("nav.news", { defaultValue: "News" })}
+                </Link>
+              </div>
+            </div>
+          )}
+        </div>
       </aside>
 
-      <header className="hidden md:flex fixed top-0 left-[var(--sidebar-width,240px)] right-0 z-30 h-16 bg-background/90 backdrop-blur-md border-b border-dashed border-border/70 px-6 items-center justify-end transition-[left] duration-300">
+      <header className="hidden md:flex fixed top-0 left-[var(--sidebar-width,240px)] right-0 z-30 h-16 bg-background/90 backdrop-blur-md border-b border-dashed border-border/70 px-6 items-center justify-between transition-[left] duration-300">
+        <div className="flex items-center">
+          <button
+            onClick={() => setIsSidebarCollapsed((prev) => !prev)}
+            className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+            aria-label={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          >
+            {isSidebarCollapsed ? <ChevronsRight className="w-5 h-5" /> : <ChevronsLeft className="w-5 h-5" />}
+          </button>
+        </div>
+
         <div className="flex items-center gap-2">
           {user && (
             <div className="relative" ref={notificationDesktopRef}>
@@ -615,6 +644,34 @@ const Navbar = () => {
             </>
           )}
         </nav>
+
+        <div className="p-3 border-t border-dashed border-border/70">
+          <div className="rounded-lg border border-dashed border-border bg-secondary/30 p-3">
+            <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-muted-foreground">
+              {t("nav.quickHelp", { defaultValue: "Quick Help" })}
+            </p>
+            <p className="text-sm text-foreground mt-1">
+              {t("nav.quickHelpTextMobile", {
+                defaultValue: "Support, updates, and guides are available here.",
+              })}
+            </p>
+            <div className="mt-2 flex items-center gap-2">
+              <Link
+                to={user ? "/contactsupport" : "/learn-more"}
+                onClick={closeMobileMenu}
+                className="text-sm font-medium text-primary hover:underline"
+              >
+                {user
+                  ? t("nav.contactSupport", { defaultValue: "Contact support" })
+                  : t("nav.learnMore", { defaultValue: "Learn more" })}
+              </Link>
+              <span className="text-muted-foreground">•</span>
+              <Link to="/news" onClick={closeMobileMenu} className="text-sm font-medium text-primary hover:underline">
+                {t("nav.news", { defaultValue: "News" })}
+              </Link>
+            </div>
+          </div>
+        </div>
       </aside>
     </>
   );

@@ -29,6 +29,15 @@ const normalizeLocale = (value?: string): string => {
 };
 const normalizeValue = (value: unknown): string => String(value || '').trim().toLowerCase();
 const isPublishedStatus = (value: unknown): boolean => normalizeValue(value) === 'published';
+const isSchemaCompatibilityError = (error: unknown): boolean => {
+  const code = (error as { code?: string })?.code;
+  const message = normalizeValue((error as { message?: string })?.message);
+  return code === 'P2022' || message.includes('does not exist');
+};
+const pickBestTranslation = (translations: any[] | undefined): any | null => {
+  if (!Array.isArray(translations) || translations.length === 0) return null;
+  return translations.find((item: any) => isPublishedStatus(item.status)) || translations[0];
+};
 
 // ==================== PUBLIC ROUTES ====================
 
@@ -46,36 +55,89 @@ router.get('/', async (req: Request, res: Response) => {
     const skip = (currentPage - 1) * take;
     const categoryFilter = requestedCategory && ['blog', 'news'].includes(requestedCategory) ? requestedCategory : '';
 
-    const posts = await prisma.post.findMany({
-      orderBy: { publishedAt: 'desc' },
-      select: {
-        id: true,
-        title: true,
-        slug: true,
-        excerpt: true,
-        imageUrl: true,
-        category: true,
-        tags: true,
-        authorName: true,
-        publishedAt: true,
-        createdAt: true,
-        status: true,
-        ...(useTranslation
-          ? {
-              translations: {
-                where: { locale },
-                select: {
-                  title: true,
-                  slug: true,
-                  excerpt: true,
-                  tags: true,
-                  status: true,
-                },
-              },
-            }
-          : {}),
-      },
-    });
+    const baseSelect = {
+      id: true,
+      title: true,
+      slug: true,
+      excerpt: true,
+      imageUrl: true,
+      category: true,
+      tags: true,
+      authorName: true,
+      publishedAt: true,
+      createdAt: true,
+    };
+
+    const getPostsWithFallback = async () => {
+      try {
+        return await prisma.post.findMany({
+          orderBy: { publishedAt: 'desc' },
+          select: {
+            ...baseSelect,
+            status: true,
+            ...(useTranslation
+              ? {
+                  translations: {
+                    where: { locale },
+                    select: {
+                      title: true,
+                      slug: true,
+                      excerpt: true,
+                      tags: true,
+                      status: true,
+                    },
+                  },
+                }
+              : {}),
+          },
+        });
+      } catch (error) {
+        if (!isSchemaCompatibilityError(error)) throw error;
+        logger.warn('Using compatibility fallback for /api/posts');
+
+        try {
+          const fallbackRows = await prisma.post.findMany({
+            orderBy: { createdAt: 'desc' },
+            select: {
+              ...baseSelect,
+              ...(useTranslation
+                ? {
+                    translations: {
+                      where: { locale },
+                      select: {
+                        title: true,
+                        slug: true,
+                        excerpt: true,
+                        tags: true,
+                      },
+                    },
+                  }
+                : {}),
+            },
+          });
+
+          return fallbackRows.map((row: any) => ({
+            ...row,
+            status: 'published',
+          }));
+        } catch (innerError) {
+          if (!(useTranslation && isSchemaCompatibilityError(innerError))) throw innerError;
+          logger.warn('Using translation-disabled fallback for /api/posts');
+          const fallbackRows = await prisma.post.findMany({
+            orderBy: { createdAt: 'desc' },
+            select: baseSelect,
+          });
+
+          return fallbackRows.map((row: any) => ({
+            ...row,
+            status: 'published',
+            translations: [],
+          }));
+        }
+      }
+    };
+
+    const posts = await getPostsWithFallback();
 
     const filteredPosts = posts.filter((post: any) => {
       if (!isPublishedStatus(post.status)) return false;
@@ -85,7 +147,7 @@ router.get('/', async (req: Request, res: Response) => {
 
     const localizedPosts = filteredPosts.map((post: any) => {
       if (!useTranslation) return post;
-      const translation = post.translations?.find((item: any) => isPublishedStatus(item.status));
+      const translation = pickBestTranslation(post.translations);
       if (!translation) {
         const { translations, ...base } = post;
         return base;
@@ -130,41 +192,88 @@ router.get('/featured', async (_req: Request, res: Response) => {
   try {
     const locale = normalizeLocale(getQueryString(_req.query.locale as string | string[] | undefined));
     const useTranslation = locale !== 'en';
+    const baseSelect = {
+      id: true,
+      title: true,
+      slug: true,
+      excerpt: true,
+      imageUrl: true,
+      category: true,
+      tags: true,
+      authorName: true,
+      publishedAt: true,
+      createdAt: true,
+    };
 
-    const allPosts = await prisma.post.findMany({
-      orderBy: { publishedAt: 'desc' },
-      select: {
-        id: true,
-        title: true,
-        slug: true,
-        excerpt: true,
-        imageUrl: true,
-        category: true,
-        tags: true,
-        authorName: true,
-        publishedAt: true,
-        createdAt: true,
-        status: true,
-        ...(useTranslation
-          ? {
-              translations: {
-                where: { locale },
-                select: {
-                  title: true,
-                  slug: true,
-                  excerpt: true,
-                  tags: true,
-                  status: true,
-                },
-              },
-            }
-          : {}),
-      },
-    });
+    const getFeaturedWithFallback = async () => {
+      try {
+        return await prisma.post.findMany({
+          orderBy: { publishedAt: 'desc' },
+          select: {
+            ...baseSelect,
+            status: true,
+            ...(useTranslation
+              ? {
+                  translations: {
+                    where: { locale },
+                    select: {
+                      title: true,
+                      slug: true,
+                      excerpt: true,
+                      tags: true,
+                      status: true,
+                    },
+                  },
+                }
+              : {}),
+          },
+        });
+      } catch (error) {
+        if (!isSchemaCompatibilityError(error)) throw error;
+        logger.warn('Using compatibility fallback for /api/posts/featured');
+
+        try {
+          const fallbackRows = await prisma.post.findMany({
+            orderBy: { createdAt: 'desc' },
+            select: {
+              ...baseSelect,
+              ...(useTranslation
+                ? {
+                    translations: {
+                      where: { locale },
+                      select: {
+                        title: true,
+                        slug: true,
+                        excerpt: true,
+                        tags: true,
+                      },
+                    },
+                  }
+                : {}),
+            },
+          });
+          return fallbackRows.map((row: any) => ({ ...row, status: 'published' }));
+        } catch (innerError) {
+          if (!(useTranslation && isSchemaCompatibilityError(innerError))) throw innerError;
+          logger.warn('Using translation-disabled fallback for /api/posts/featured');
+          const fallbackRows = await prisma.post.findMany({
+            orderBy: { createdAt: 'desc' },
+            select: baseSelect,
+          });
+          return fallbackRows.map((row: any) => ({
+            ...row,
+            status: 'published',
+            translations: [],
+          }));
+        }
+      }
+    };
+
+    const allPosts = await getFeaturedWithFallback();
 
     const mapLocalized = (post: any) => {
       if (!useTranslation) return post;
-      const translation = post.translations?.find((item: any) => isPublishedStatus(item.status));
+      const translation = pickBestTranslation(post.translations);
       if (!translation) {
         const { translations, ...base } = post;
         return base;
@@ -214,42 +323,106 @@ router.get('/:slug', async (req: Request, res: Response) => {
     const useTranslation = locale !== 'en';
 
     if (useTranslation) {
-      const localizedBySlug = await prisma.postTranslation.findFirst({
-        where: {
-          locale,
-          slug,
-        },
-        include: {
-          post: true,
-        },
-      });
-
-      if (localizedBySlug && isPublishedStatus(localizedBySlug.status) && isPublishedStatus(localizedBySlug.post.status)) {
-        return res.json({
-          success: true,
-          data: {
-            ...localizedBySlug.post,
-            title: localizedBySlug.title,
-            slug: localizedBySlug.slug,
-            excerpt: localizedBySlug.excerpt ?? localizedBySlug.post.excerpt,
-            content: localizedBySlug.content,
-            tags: localizedBySlug.tags ?? localizedBySlug.post.tags,
-            publishedAt: localizedBySlug.publishedAt ?? localizedBySlug.post.publishedAt,
+      try {
+        const localizedBySlug = await prisma.postTranslation.findFirst({
+          where: {
+            locale,
+            slug,
+          },
+          include: {
+            post: true,
           },
         });
+
+        if (localizedBySlug && isPublishedStatus(localizedBySlug.status) && isPublishedStatus(localizedBySlug.post.status)) {
+          return res.json({
+            success: true,
+            data: {
+              ...localizedBySlug.post,
+              title: localizedBySlug.title,
+              slug: localizedBySlug.slug,
+              excerpt: localizedBySlug.excerpt ?? localizedBySlug.post.excerpt,
+              content: localizedBySlug.content,
+              tags: localizedBySlug.tags ?? localizedBySlug.post.tags,
+              publishedAt: localizedBySlug.publishedAt ?? localizedBySlug.post.publishedAt,
+            },
+          });
+        }
+      } catch (error) {
+        if (!isSchemaCompatibilityError(error)) throw error;
+        logger.warn('Using compatibility fallback for translation slug lookup');
       }
     }
 
-    const post = await prisma.post.findUnique({
-      where: { slug },
-      include: useTranslation
-        ? {
-            translations: {
-              where: { locale },
+    const getPostWithFallback = async () => {
+      try {
+        return await prisma.post.findUnique({
+          where: { slug },
+          include: useTranslation
+            ? {
+                translations: {
+                  where: { locale },
+                },
+              }
+            : undefined,
+        });
+      } catch (error) {
+        if (!isSchemaCompatibilityError(error)) throw error;
+        logger.warn('Using compatibility fallback for /api/posts/:slug');
+
+        const legacyPost = await prisma.post.findUnique({
+          where: { slug },
+          select: {
+            id: true,
+            title: true,
+            slug: true,
+            excerpt: true,
+            content: true,
+            imageUrl: true,
+            category: true,
+            tags: true,
+            publishedAt: true,
+            authorName: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+        });
+
+        if (!legacyPost || !useTranslation) {
+          return legacyPost ? { ...legacyPost, status: 'published' } : null;
+        }
+
+        try {
+          const translations = await prisma.postTranslation.findMany({
+            where: { postId: legacyPost.id, locale },
+            select: {
+              title: true,
+              slug: true,
+              excerpt: true,
+              content: true,
+              tags: true,
+              publishedAt: true,
+              status: true,
             },
-          }
-        : undefined,
-    });
+          });
+
+          return {
+            ...legacyPost,
+            status: 'published',
+            translations,
+          };
+        } catch (innerError) {
+          if (!isSchemaCompatibilityError(innerError)) throw innerError;
+          return {
+            ...legacyPost,
+            status: 'published',
+            translations: [],
+          };
+        }
+      }
+    };
+
+    const post = await getPostWithFallback();
 
     if (!post || !isPublishedStatus(post.status)) {
       return res.status(404).json({
@@ -262,7 +435,7 @@ router.get('/:slug', async (req: Request, res: Response) => {
       success: true,
       data: (() => {
         if (!useTranslation) return post;
-        const translation = (post as any).translations?.find((item: any) => isPublishedStatus(item.status));
+        const translation = pickBestTranslation((post as any).translations);
         if (!translation) {
           const { translations, ...base } = post as any;
           return base;

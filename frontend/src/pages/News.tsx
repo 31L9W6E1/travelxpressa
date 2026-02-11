@@ -13,6 +13,7 @@ const News = () => {
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [retryToken, setRetryToken] = useState(0);
 
   useEffect(() => {
     const fetchNews = async () => {
@@ -31,7 +32,7 @@ const News = () => {
     };
 
     fetchNews();
-  }, [i18n.language, page, t]);
+  }, [i18n.language, page, retryToken, t]);
 
   if (loading) {
     return (
@@ -75,7 +76,10 @@ const News = () => {
             <div className="text-center py-12">
               <p className="text-destructive mb-4">{error}</p>
               <button
-                onClick={() => setPage(1)}
+                onClick={() => {
+                  setPage(1);
+                  setRetryToken((prev) => prev + 1);
+                }}
                 className="text-primary hover:underline"
               >
                 {t('errors.tryAgain', { defaultValue: 'Try again' })}

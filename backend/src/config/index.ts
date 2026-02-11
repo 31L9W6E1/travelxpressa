@@ -5,12 +5,39 @@ if (process.env.NODE_ENV !== 'production') {
   dotenv.config();
 }
 
-function requireEnv(name: string, defaultValue?: string): string {
-  const value = process.env[name] || defaultValue;
-  if (!value && process.env.NODE_ENV === 'production') {
+function requireEnv(
+  name: string,
+  defaultValue?: string,
+  options?: { allowDefaultInProduction?: boolean }
+): string {
+  const rawValue = process.env[name]?.trim();
+  const isProduction = process.env.NODE_ENV === 'production';
+  const allowDefaultInProduction = options?.allowDefaultInProduction ?? true;
+
+  if (rawValue) {
+    if (
+      isProduction &&
+      !allowDefaultInProduction &&
+      defaultValue !== undefined &&
+      rawValue === defaultValue
+    ) {
+      throw new Error(`Insecure default value detected for environment variable: ${name}`);
+    }
+    return rawValue;
+  }
+
+  if (defaultValue !== undefined) {
+    if (isProduction && !allowDefaultInProduction) {
+      throw new Error(`Missing required environment variable: ${name}`);
+    }
+    return defaultValue;
+  }
+
+  if (isProduction) {
     throw new Error(`Missing required environment variable: ${name}`);
   }
-  return value || '';
+
+  return '';
 }
 
 function parseOptionalInt(value: string | undefined): number | undefined {
@@ -31,8 +58,12 @@ export const config = {
 
   // JWT
   jwt: {
-    secret: requireEnv('JWT_SECRET', 'dev-secret-change-in-production'),
-    refreshSecret: requireEnv('JWT_REFRESH_SECRET', 'dev-refresh-secret-change-in-production'),
+    secret: requireEnv('JWT_SECRET', 'dev-secret-change-in-production', {
+      allowDefaultInProduction: false,
+    }),
+    refreshSecret: requireEnv('JWT_REFRESH_SECRET', 'dev-refresh-secret-change-in-production', {
+      allowDefaultInProduction: false,
+    }),
     expiresIn: process.env.JWT_EXPIRES_IN || '15m',
     refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
   },
@@ -51,7 +82,9 @@ export const config = {
   },
 
   // Session
-  sessionSecret: process.env.SESSION_SECRET || 'dev-session-secret',
+  sessionSecret: requireEnv('SESSION_SECRET', 'dev-session-secret', {
+    allowDefaultInProduction: false,
+  }),
 
   // Redis
   redisUrl: process.env.REDIS_URL,

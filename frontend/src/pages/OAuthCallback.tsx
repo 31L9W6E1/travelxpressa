@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { setTokens } from '../api/client';
+import api, { setTokens } from '../api/client';
 import { Loader2, CheckCircle, XCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
@@ -18,13 +18,16 @@ const OAuthCallback = () => {
 
   useEffect(() => {
     const handleOAuthCallback = async () => {
-      const accessToken = searchParams.get('accessToken');
-      const refreshToken = searchParams.get('refreshToken');
-      const userId = searchParams.get('userId');
-      const email = searchParams.get('email');
+      let accessToken = searchParams.get('accessToken');
+      let refreshToken = searchParams.get('refreshToken');
       const name = searchParams.get('name');
       const role = searchParams.get('role');
       const error = searchParams.get('error');
+
+      // Scrub query parameters (especially legacy token-in-URL callbacks) from browser history.
+      if (typeof window !== 'undefined' && window.location.search) {
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
 
       if (error) {
         setStatus('error');
@@ -72,7 +75,20 @@ const OAuthCallback = () => {
         return;
       }
 
-      if (!accessToken || !refreshToken) {
+      // Secure flow: backend sets an httpOnly refresh cookie and frontend exchanges it for an access token.
+      // Legacy flow fallback: accepts access/refresh from URL for backward compatibility.
+      if (!accessToken) {
+        try {
+          const refreshResponse = await api.post('/api/auth/refresh');
+          const refreshData = (refreshResponse.data as any)?.data || {};
+          accessToken = refreshData.accessToken;
+          refreshToken = refreshData.refreshToken ?? null;
+        } catch {
+          accessToken = null;
+        }
+      }
+
+      if (!accessToken) {
         setStatus('error');
         setMessage(
           t('oauthPage.errors.invalidResponse', {

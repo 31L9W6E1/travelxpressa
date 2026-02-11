@@ -19,7 +19,7 @@ import { registerSchema, loginSchema, refreshTokenSchema } from '../validation/s
 import { UserRole, AuthenticatedRequest } from '../types';
 import { logger } from '../utils/logger';
 import { config } from '../config';
-import { generateToken } from '../utils/encryption';
+import { hash } from '../utils/encryption';
 
 const router = Router();
 
@@ -139,6 +139,34 @@ function getBackendBaseUrl(req: Request): string {
   return `${req.protocol}://${req.get('host')}`;
 }
 
+const REFRESH_TOKEN_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
+
+function hashRefreshToken(token: string): string {
+  return hash(token);
+}
+
+function refreshTokenLookupCandidates(token: string): string[] {
+  const hashedToken = hashRefreshToken(token);
+  return hashedToken === token ? [token] : [hashedToken, token];
+}
+
+function setRefreshTokenCookie(res: Response, token: string): void {
+  res.cookie('refreshToken', token, {
+    httpOnly: true,
+    secure: config.isProduction,
+    sameSite: 'strict',
+    maxAge: REFRESH_TOKEN_MAX_AGE_MS,
+  });
+}
+
+function clearRefreshTokenCookie(res: Response): void {
+  res.clearCookie('refreshToken', {
+    httpOnly: true,
+    secure: config.isProduction,
+    sameSite: 'strict',
+  });
+}
+
 /**
  * Register a new user
  */
@@ -176,10 +204,10 @@ router.post(
     const refreshToken = generateRefreshToken(tokenPayload);
 
     // Store refresh token
-    const refreshTokenExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
+    const refreshTokenExpiry = new Date(Date.now() + REFRESH_TOKEN_MAX_AGE_MS);
     await prisma.refreshToken.create({
       data: {
-        token: refreshToken,
+        token: hashRefreshToken(refreshToken),
         userId: user.id,
         expiresAt: refreshTokenExpiry,
       },
@@ -187,15 +215,7 @@ router.post(
 
     logger.info('User registered', { userId: user.id, email: user.email });
 
-    // Set refresh token as httpOnly cookie in production
-    if (config.isProduction) {
-      res.cookie('refreshToken', refreshToken, {
-        httpOnly: true,
-        secure: true,
-        sameSite: 'strict',
-        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      });
-    }
+    setRefreshTokenCookie(res, refreshToken);
 
     res.status(201).json({
       success: true,
@@ -282,10 +302,10 @@ router.post(
     const refreshToken = generateRefreshToken(tokenPayload);
 
     // Store refresh token
-    const refreshTokenExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+    const refreshTokenExpiry = new Date(Date.now() + REFRESH_TOKEN_MAX_AGE_MS);
     await prisma.refreshToken.create({
       data: {
-        token: refreshToken,
+        token: hashRefreshToken(refreshToken),
         userId: user.id,
         expiresAt: refreshTokenExpiry,
       },
@@ -293,15 +313,7 @@ router.post(
 
     logger.info('User logged in', { userId: user.id, email: user.email, ip: clientIp });
 
-    // Set refresh token as httpOnly cookie in production
-    if (config.isProduction) {
-      res.cookie('refreshToken', refreshToken, {
-        httpOnly: true,
-        secure: true,
-        sameSite: 'strict',
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-      });
-    }
+    setRefreshTokenCookie(res, refreshToken);
 
     res.json({
       success: true,
@@ -342,8 +354,12 @@ router.post(
     }
 
     // Find token in database
-    const storedToken = await prisma.refreshToken.findUnique({
-      where: { token: refreshToken },
+    const storedToken = await prisma.refreshToken.findFirst({
+      where: {
+        token: {
+          in: refreshTokenLookupCandidates(refreshToken),
+        },
+      },
       include: { user: true },
     });
 
@@ -389,33 +405,25 @@ router.post(
     const newRefreshToken = generateRefreshToken(tokenPayload);
 
     // Revoke old token and create new one (token rotation)
-    const refreshTokenExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+    const refreshTokenExpiry = new Date(Date.now() + REFRESH_TOKEN_MAX_AGE_MS);
     await prisma.$transaction([
       prisma.refreshToken.update({
         where: { id: storedToken.id },
         data: {
           revokedAt: new Date(),
-          replacedBy: newRefreshToken,
+          replacedBy: hashRefreshToken(newRefreshToken),
         },
       }),
       prisma.refreshToken.create({
         data: {
-          token: newRefreshToken,
+          token: hashRefreshToken(newRefreshToken),
           userId: user.id,
           expiresAt: refreshTokenExpiry,
         },
       }),
     ]);
 
-    // Set new refresh token as httpOnly cookie in production
-    if (config.isProduction) {
-      res.cookie('refreshToken', newRefreshToken, {
-        httpOnly: true,
-        secure: true,
-        sameSite: 'strict',
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-      });
-    }
+    setRefreshTokenCookie(res, newRefreshToken);
 
     res.json({
       success: true,
@@ -440,17 +448,17 @@ router.post(
     // Revoke refresh token if provided
     if (refreshToken) {
       await prisma.refreshToken.updateMany({
-        where: { token: refreshToken, userId },
+        where: {
+          userId,
+          token: {
+            in: refreshTokenLookupCandidates(refreshToken),
+          },
+        },
         data: { revokedAt: new Date() },
       });
     }
 
-    // Clear cookie
-    res.clearCookie('refreshToken', {
-      httpOnly: true,
-      secure: config.isProduction,
-      sameSite: 'strict',
-    });
+    clearRefreshTokenCookie(res);
 
     logger.info('User logged out', { userId });
 
@@ -476,12 +484,7 @@ router.post(
       data: { revokedAt: new Date() },
     });
 
-    // Clear cookie
-    res.clearCookie('refreshToken', {
-      httpOnly: true,
-      secure: config.isProduction,
-      sameSite: 'strict',
-    });
+    clearRefreshTokenCookie(res);
 
     logger.info('User logged out from all devices', { userId });
 
@@ -615,12 +618,7 @@ router.post(
 
     logger.info('User changed password', { userId });
 
-    // Clear cookie
-    res.clearCookie('refreshToken', {
-      httpOnly: true,
-      secure: config.isProduction,
-      sameSite: 'strict',
-    });
+    clearRefreshTokenCookie(res);
 
     res.json({
       success: true,
@@ -723,20 +721,20 @@ router.get(
         logger.info('User created via Google OAuth', { userId: user.id, email: user.email });
       }
 
-      // Generate tokens
+      // Generate refresh token and persist a hashed value for rotation.
       const tokenPayload = { userId: user.id, email: user.email, role: user.role as UserRole };
-      const accessToken = generateAccessToken(tokenPayload);
       const refreshToken = generateRefreshToken(tokenPayload);
 
-      // Store refresh token
-      const refreshTokenExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+      const refreshTokenExpiry = new Date(Date.now() + REFRESH_TOKEN_MAX_AGE_MS);
       await prisma.refreshToken.create({
         data: {
-          token: refreshToken,
+          token: hashRefreshToken(refreshToken),
           userId: user.id,
           expiresAt: refreshTokenExpiry,
         },
       });
+
+      setRefreshTokenCookie(res, refreshToken);
 
       // Update last login
       await prisma.user.update({
@@ -749,13 +747,9 @@ router.get(
 
       logger.info('User logged in via Google', { userId: user.id, email: user.email });
 
-      // Redirect to frontend with tokens
+      // Redirect without tokens in URL. Frontend exchanges refresh cookie for access token.
       const params = new URLSearchParams({
-        accessToken,
-        refreshToken,
-        userId: user.id,
-        email: user.email,
-        name: user.name || '',
+        oauth: 'success',
         role: user.role,
       });
 
@@ -855,20 +849,20 @@ router.get(
         logger.info('User created via Facebook OAuth', { userId: user.id, email: user.email });
       }
 
-      // Generate tokens
+      // Generate refresh token and persist a hashed value for rotation.
       const tokenPayload = { userId: user.id, email: user.email, role: user.role as UserRole };
-      const accessToken = generateAccessToken(tokenPayload);
       const refreshToken = generateRefreshToken(tokenPayload);
 
-      // Store refresh token
-      const refreshTokenExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+      const refreshTokenExpiry = new Date(Date.now() + REFRESH_TOKEN_MAX_AGE_MS);
       await prisma.refreshToken.create({
         data: {
-          token: refreshToken,
+          token: hashRefreshToken(refreshToken),
           userId: user.id,
           expiresAt: refreshTokenExpiry,
         },
       });
+
+      setRefreshTokenCookie(res, refreshToken);
 
       // Update last login
       await prisma.user.update({
@@ -881,13 +875,9 @@ router.get(
 
       logger.info('User logged in via Facebook', { userId: user.id, email: user.email });
 
-      // Redirect to frontend with tokens
+      // Redirect without tokens in URL. Frontend exchanges refresh cookie for access token.
       const params = new URLSearchParams({
-        accessToken,
-        refreshToken,
-        userId: user.id,
-        email: user.email,
-        name: user.name || '',
+        oauth: 'success',
         role: user.role,
       });
 

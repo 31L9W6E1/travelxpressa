@@ -117,12 +117,12 @@ const Navbar = () => {
   }, [user]);
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border theme-transition">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-background/85 backdrop-blur-md theme-transition">
+      <div className="w-full px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <div className="flex items-center space-x-8">
-            <Link to="/" className="flex items-center space-x-2">
+          <div className="flex items-center gap-4 lg:gap-6 min-w-0">
+            <Link to="/" className="flex items-center space-x-2 flex-shrink-0">
               <Plane className="w-7 h-7 text-foreground" />
               <span className="text-xl font-bold text-foreground tracking-tight">
                 TravelXpressa
@@ -130,35 +130,35 @@ const Navbar = () => {
             </Link>
 
             {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-1">
+            <div className="hidden md:flex items-center gap-1 pl-4 border-l border-dashed border-border/70">
               <Link
                 to="/about"
-                className="px-4 py-2 text-muted-foreground hover:text-foreground transition-colors"
+                className="px-3 py-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
               >
                 {t('nav.about')}
               </Link>
               <Link
                 to="/learn-more"
-                className="px-4 py-2 text-muted-foreground hover:text-foreground transition-colors"
+                className="px-3 py-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
               >
                 {t('nav.learnMore')}
               </Link>
               <Link
                 to="/translation-service"
-                className="px-4 py-2 text-muted-foreground hover:text-foreground transition-colors"
+                className="px-3 py-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
               >
                 {t('nav.translationService', { defaultValue: 'Translation Service' })}
               </Link>
               <Link
                 to="/gallery"
-                className="px-4 py-2 text-muted-foreground hover:text-foreground transition-colors"
+                className="px-3 py-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
               >
                 {t('nav.gallery', { defaultValue: 'Gallery' })}
               </Link>
               {user && (
                 <Link
                   to="/contactsupport"
-                  className="px-4 py-2 text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2"
+                  className="px-3 py-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors flex items-center gap-2"
                 >
                   <MessageSquare className="w-4 h-4" />
                   {t('nav.support', { defaultValue: 'Support' })}
@@ -167,7 +167,7 @@ const Navbar = () => {
               {user && user.role !== "ADMIN" && (
                 <Link
                   to="/select-country"
-                  className="px-4 py-2 text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2"
+                  className="px-3 py-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors flex items-center gap-2"
                 >
                   <FileText className="w-4 h-4" />
                   {t('nav.apply')}
@@ -176,7 +176,7 @@ const Navbar = () => {
               {user?.role === "ADMIN" && (
                 <Link
                   to="/admin"
-                  className="px-4 py-2 text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2"
+                  className="px-3 py-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors flex items-center gap-2"
                 >
                   <Settings className="w-4 h-4" />
                   {t('nav.admin')}
@@ -411,7 +411,7 @@ const Navbar = () => {
 
         {/* Mobile Navigation */}
         {isMenuOpen && (
-          <div className="md:hidden py-4 bg-background border-t border-border">
+          <div className="md:hidden py-4 bg-background border-t border-dashed border-border/70">
             <div className="flex flex-col space-y-1">
               <Link
                 to="/about"
@@ -518,6 +518,7 @@ const Navbar = () => {
           </div>
         )}
       </div>
+      <div className="border-b border-dashed border-border/70" />
     </nav>
   );
 };

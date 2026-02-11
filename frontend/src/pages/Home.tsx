@@ -119,7 +119,7 @@ const Home = () => {
     };
 
     fetchContent();
-  }, []);
+  }, [i18n.language]);
 
   // Get emoji based on news tags
   const getNewsEmoji = (tags: string | null): string => {

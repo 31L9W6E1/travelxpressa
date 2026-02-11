@@ -21,6 +21,13 @@ const getQueryString = (value: string | string[] | undefined): string | undefine
   return value;
 };
 
+const SUPPORTED_LOCALES = new Set(['en', 'mn', 'ru', 'zh', 'ja', 'ko']);
+const normalizeLocale = (value?: string): string => {
+  const raw = String(value || 'en').trim().toLowerCase();
+  const locale = raw.split('-')[0];
+  return SUPPORTED_LOCALES.has(locale) ? locale : 'en';
+};
+
 // ==================== PUBLIC ROUTES ====================
 
 // GET /api/posts - Get all published posts (public)
@@ -29,6 +36,8 @@ router.get('/', async (req: Request, res: Response) => {
     const category = getQueryString(req.query.category as string | string[] | undefined);
     const limit = getQueryString(req.query.limit as string | string[] | undefined) || '10';
     const page = getQueryString(req.query.page as string | string[] | undefined) || '1';
+    const locale = normalizeLocale(getQueryString(req.query.locale as string | string[] | undefined));
+    const useTranslation = locale !== 'en';
 
     const take = Math.min(parseInt(limit) || 10, 50);
     const skip = (parseInt(page) - 1) * take;
@@ -58,14 +67,49 @@ router.get('/', async (req: Request, res: Response) => {
           authorName: true,
           publishedAt: true,
           createdAt: true,
+          ...(useTranslation
+            ? {
+                translations: {
+                  where: { locale, status: 'published' },
+                  select: {
+                    title: true,
+                    slug: true,
+                    excerpt: true,
+                    tags: true,
+                  },
+                  take: 1,
+                },
+              }
+            : {}),
         },
       }),
       prisma.post.count({ where }),
     ]);
 
+    const localizedPosts = posts.map((post: any) => {
+      if (!useTranslation) return post;
+      const translation = post.translations?.[0];
+      if (!translation) {
+        const { translations, ...base } = post;
+        return base;
+      }
+      return {
+        id: post.id,
+        title: translation.title || post.title,
+        slug: translation.slug || post.slug,
+        excerpt: translation.excerpt ?? post.excerpt,
+        imageUrl: post.imageUrl,
+        category: post.category,
+        tags: translation.tags ?? post.tags,
+        authorName: post.authorName,
+        publishedAt: post.publishedAt,
+        createdAt: post.createdAt,
+      };
+    });
+
     res.json({
       success: true,
-      data: posts,
+      data: localizedPosts,
       pagination: {
         total,
         page: parseInt(page),
@@ -85,6 +129,9 @@ router.get('/', async (req: Request, res: Response) => {
 // GET /api/posts/featured - Get featured posts for homepage
 router.get('/featured', async (_req: Request, res: Response) => {
   try {
+    const locale = normalizeLocale(getQueryString(_req.query.locale as string | string[] | undefined));
+    const useTranslation = locale !== 'en';
+
     const [blogPosts, newsPosts] = await Promise.all([
       prisma.post.findMany({
         where: {
@@ -104,6 +151,20 @@ router.get('/featured', async (_req: Request, res: Response) => {
           authorName: true,
           publishedAt: true,
           createdAt: true,
+          ...(useTranslation
+            ? {
+                translations: {
+                  where: { locale, status: 'published' },
+                  select: {
+                    title: true,
+                    slug: true,
+                    excerpt: true,
+                    tags: true,
+                  },
+                  take: 1,
+                },
+              }
+            : {}),
         },
       }),
       prisma.post.findMany({
@@ -124,15 +185,50 @@ router.get('/featured', async (_req: Request, res: Response) => {
           authorName: true,
           publishedAt: true,
           createdAt: true,
+          ...(useTranslation
+            ? {
+                translations: {
+                  where: { locale, status: 'published' },
+                  select: {
+                    title: true,
+                    slug: true,
+                    excerpt: true,
+                    tags: true,
+                  },
+                  take: 1,
+                },
+              }
+            : {}),
         },
       }),
     ]);
 
+    const mapLocalized = (post: any) => {
+      if (!useTranslation) return post;
+      const translation = post.translations?.[0];
+      if (!translation) {
+        const { translations, ...base } = post;
+        return base;
+      }
+      return {
+        id: post.id,
+        title: translation.title || post.title,
+        slug: translation.slug || post.slug,
+        excerpt: translation.excerpt ?? post.excerpt,
+        imageUrl: post.imageUrl,
+        category: post.category,
+        tags: translation.tags ?? post.tags,
+        authorName: post.authorName,
+        publishedAt: post.publishedAt,
+        createdAt: post.createdAt,
+      };
+    };
+
     res.json({
       success: true,
       data: {
-        blogPosts,
-        newsPosts,
+        blogPosts: blogPosts.map(mapLocalized),
+        newsPosts: newsPosts.map(mapLocalized),
       },
     });
   } catch (error) {
@@ -148,9 +244,47 @@ router.get('/featured', async (_req: Request, res: Response) => {
 router.get('/:slug', async (req: Request, res: Response) => {
   try {
     const slug = req.params.slug as string;
+    const locale = normalizeLocale(getQueryString(req.query.locale as string | string[] | undefined));
+    const useTranslation = locale !== 'en';
+
+    if (useTranslation) {
+      const localizedBySlug = await prisma.postTranslation.findFirst({
+        where: {
+          locale,
+          slug,
+          status: 'published',
+        },
+        include: {
+          post: true,
+        },
+      });
+
+      if (localizedBySlug && localizedBySlug.post.status === 'published') {
+        return res.json({
+          success: true,
+          data: {
+            ...localizedBySlug.post,
+            title: localizedBySlug.title,
+            slug: localizedBySlug.slug,
+            excerpt: localizedBySlug.excerpt ?? localizedBySlug.post.excerpt,
+            content: localizedBySlug.content,
+            tags: localizedBySlug.tags ?? localizedBySlug.post.tags,
+            publishedAt: localizedBySlug.publishedAt ?? localizedBySlug.post.publishedAt,
+          },
+        });
+      }
+    }
 
     const post = await prisma.post.findUnique({
       where: { slug },
+      include: useTranslation
+        ? {
+            translations: {
+              where: { locale, status: 'published' },
+              take: 1,
+            },
+          }
+        : undefined,
     });
 
     if (!post || post.status !== 'published') {
@@ -162,7 +296,24 @@ router.get('/:slug', async (req: Request, res: Response) => {
 
     res.json({
       success: true,
-      data: post,
+      data: (() => {
+        if (!useTranslation) return post;
+        const translation = (post as any).translations?.[0];
+        if (!translation) {
+          const { translations, ...base } = post as any;
+          return base;
+        }
+        const { translations, ...base } = post as any;
+        return {
+          ...base,
+          title: translation.title || post.title,
+          slug: translation.slug || post.slug,
+          excerpt: translation.excerpt ?? post.excerpt,
+          content: translation.content || post.content,
+          tags: translation.tags ?? post.tags,
+          publishedAt: translation.publishedAt ?? post.publishedAt,
+        };
+      })(),
     });
   } catch (error) {
     logger.error('Error fetching post', error as Error);

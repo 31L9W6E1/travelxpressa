@@ -40,7 +40,7 @@ const NewsArticle = () => {
     };
 
     fetchArticle();
-  }, [slug]);
+  }, [i18n.language, slug, t]);
 
   if (loading) {
     return (

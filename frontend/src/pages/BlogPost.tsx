@@ -42,7 +42,7 @@ const BlogPost = () => {
     };
 
     fetchPost();
-  }, [slug]);
+  }, [i18n.language, slug, t]);
 
   if (loading) {
     return (
@@ -175,7 +175,7 @@ const BlogPost = () => {
             })}
           </p>
           <Button asChild size="lg">
-            <Link to={user ? (user.role === 'ADMIN' ? '/admin' : '/application') : '/login'}>
+            <Link to={user ? (user.role === 'ADMIN' ? '/admin' : '/select-country') : '/login'}>
               {t('nav.getStarted', { defaultValue: 'Get Started' })}
             </Link>
           </Button>

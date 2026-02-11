@@ -23,6 +23,8 @@
     "db:seed": "ts-node prisma/seed.ts",
     "db:import:visa": "node prisma/import-visa-content.js",
     "db:translate:news": "node prisma/translate-news-openai.js --locales=mn,ru,zh",
+    "db:translate:posts": "node prisma/translate-posts-openai.js --locales=mn,ru,zh --categories=news,blog",
+    "db:translate:posts:publish": "node prisma/translate-posts-openai.js --locales=mn,ru,zh --categories=news,blog --publish",
     "db:studio": "prisma studio",
     "db:reset": "prisma migrate reset"
   },

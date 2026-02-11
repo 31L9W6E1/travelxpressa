@@ -18,7 +18,7 @@ const News = () => {
     const fetchNews = async () => {
       setLoading(true);
       try {
-        const response = await getPosts({ category: 'news', limit: 12, page });
+        const response = await getPosts({ category: 'news', limit: 12, page, locale: i18n.language });
         setNews(response.data);
         setTotalPages(response.pagination.totalPages);
         setError(null);
@@ -31,7 +31,7 @@ const News = () => {
     };
 
     fetchNews();
-  }, [page]);
+  }, [i18n.language, page, t]);
 
   if (loading) {
     return (

@@ -63,6 +63,14 @@ export interface PaginatedResponse<T> {
   };
 }
 
+const getCurrentLocale = (): string => {
+  if (typeof window === 'undefined') return 'en';
+  const raw = localStorage.getItem('i18nextLng') || 'en';
+  const locale = raw.toLowerCase().split('-')[0];
+  if (['en', 'mn', 'ru', 'zh', 'ja', 'ko'].includes(locale)) return locale;
+  return 'en';
+};
+
 // ==================== PUBLIC API ====================
 
 // Get published posts (public)
@@ -70,12 +78,14 @@ export const getPosts = async (params?: {
   category?: 'blog' | 'news';
   page?: number;
   limit?: number;
+  locale?: string;
 }): Promise<PaginatedResponse<PostSummary>> => {
   try {
     const searchParams = new URLSearchParams();
     if (params?.category) searchParams.append('category', params.category);
     if (params?.page) searchParams.append('page', params.page.toString());
     if (params?.limit) searchParams.append('limit', params.limit.toString());
+    searchParams.append('locale', params?.locale || getCurrentLocale());
 
     const queryString = searchParams.toString();
     const url = queryString ? `/api/posts?${queryString}` : '/api/posts';
@@ -90,7 +100,9 @@ export const getPosts = async (params?: {
 // Get featured content for homepage (public)
 export const getFeaturedContent = async (): Promise<FeaturedContent> => {
   try {
-    const response = await api.get('/api/posts/featured');
+    const response = await api.get('/api/posts/featured', {
+      params: { locale: getCurrentLocale() },
+    });
     return response.data.data;
   } catch (error) {
     throw handleApiError(error);
@@ -100,7 +112,9 @@ export const getFeaturedContent = async (): Promise<FeaturedContent> => {
 // Get single post by slug (public)
 export const getPostBySlug = async (slug: string): Promise<{ success: boolean; data: Post }> => {
   try {
-    const response = await api.get(`/api/posts/${slug}`);
+    const response = await api.get(`/api/posts/${slug}`, {
+      params: { locale: getCurrentLocale() },
+    });
     return response.data;
   } catch (error) {
     throw handleApiError(error);

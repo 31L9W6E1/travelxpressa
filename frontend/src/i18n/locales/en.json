@@ -144,8 +144,8 @@
       "titleLine1": "Your Visa Journey to",
       "titleLine2": "Top Destinations",
       "titleLine3": "Starts Here",
-      "title": "Your Journey to America Starts Here",
-      "subtitle": "Prepare visa applications for the US, Schengen Area, UK, Canada, Japan, South Korea, Australia, and New Zealand. Step-by-step guidance, document checklists, and support from start to finish.",
+      "title": "Your Global Visa Journey Starts Here",
+      "subtitle": "Prepare visa applications for the US, Schengen Area, UK, Canada, Japan, Australia, and New Zealand. Step-by-step guidance, document checklists, and support from start to finish.",
       "cta": "Start Your Application",
       "learnMore": "Learn More"
     },
@@ -193,7 +193,7 @@
     },
     "visaTypes": {
       "title": "Visa Types We Support",
-      "subtitle": "We assist with various US non-immigrant visa categories",
+      "subtitle": "We assist with major tourist, student, work, and business visa paths",
       "b1b2": {
         "title": "B1/B2 Tourist Visa",
         "description": "For tourism, business visits, and medical treatment"
@@ -213,7 +213,7 @@
     },
     "cta": {
       "title": "Ready to Start Your Visa Journey?",
-      "subtitle": "Join thousands of satisfied travelers who have successfully obtained their US visa through TravelXpressa.",
+      "subtitle": "Join applicants who use TravelXpressa to prepare accurate visa applications with confidence.",
       "button": "Get Started Today"
     }
   },
@@ -252,7 +252,7 @@
     },
     "cta": {
       "title": "Ready to Start Your Application?",
-      "subtitle": "Join thousands of successful applicants who have used our platform to complete their DS-160 forms.",
+      "subtitle": "Join applicants who use our platform to prepare visa applications faster and with fewer errors.",
       "primary": "Get Started Free"
     }
   },
@@ -358,7 +358,7 @@
   },
   "blogPage": {
     "title": "Blog",
-    "subtitle": "Visa guides, travel tips, and expert advice to help you navigate your journey to the United States.",
+    "subtitle": "Visa guides, travel tips, and expert advice to help you prepare applications for major destinations.",
     "errors": {
       "loadFailed": "Failed to load blog posts"
     },
@@ -382,7 +382,7 @@
   },
   "newsPage": {
     "title": "News",
-    "subtitle": "Latest updates from the US Embassy and immigration services.",
+    "subtitle": "Latest updates from embassies, consulates, and immigration services.",
     "errors": {
       "loadFailed": "Failed to load news"
     },

@@ -63,7 +63,7 @@ const Blog = () => {
           <p className="text-xl text-muted-foreground max-w-2xl">
             {t('blogPage.subtitle', {
               defaultValue:
-                'Visa guides, travel tips, and expert advice to help you navigate your journey to the United States.',
+                'Visa guides, travel tips, and expert advice to help you prepare applications for major destinations.',
             })}
           </p>
         </div>

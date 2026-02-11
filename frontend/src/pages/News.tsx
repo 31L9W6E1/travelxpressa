@@ -62,7 +62,7 @@ const News = () => {
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl">
             {t('newsPage.subtitle', {
-              defaultValue: 'Latest updates from the US Embassy and immigration services.',
+              defaultValue: 'Latest updates from embassies, consulates, and immigration services.',
             })}
           </p>
         </div>

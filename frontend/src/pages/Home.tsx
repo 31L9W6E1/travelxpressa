@@ -34,21 +34,21 @@ import { useTranslation } from "react-i18next";
 
 // Default ticker items (shown while loading or if no news available)
 const defaultTickerItems = [
-  "🌍 Travel Advisory: Updated visa requirements for B1/B2 applicants - check our blog for details",
-  "📋 DS-160 Processing: Average processing time reduced to 3 business days",
-  "🇺🇸 US Embassy Ulaanbaatar: Visa interview appointments now available for March 2025",
-  "🎉 New Feature: Track your application status in real-time through our dashboard",
-  "⚡ Express Processing: Priority visa services now available for business travelers",
-  "📅 Reminder: Check your passport validity - must be valid for 6 months beyond travel date",
+  "🌍 Visa Update: Entry rules and processing timelines may change by destination",
+  "📋 Application Guidance: Complete your checklist before submission to avoid delays",
+  "🏛️ Consular Notice: Appointment availability varies by country and season",
+  "🎉 Platform Update: Track your application status from your dashboard",
+  "⚡ Express Service: Priority support is available for urgent travel cases",
+  "📅 Reminder: Ensure passport validity meets destination requirements",
 ];
 
 // Fallback data for when API fails or is empty
 const fallbackBlogPosts: PostSummary[] = [
   {
     id: "fallback-1",
-    title: "US Visa Interview Tips: What You Need to Know",
+    title: "Visa Interview Tips: How to Prepare with Confidence",
     excerpt:
-      "Essential tips for acing your US visa interview. Learn about common questions, required documents, and how to make a strong impression.",
+      "Practical tips to prepare for common interview questions, required documents, and a clear travel purpose.",
     imageUrl:
       "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=800&auto=format&fit=crop&q=60",
     tags: "Guide",
@@ -65,7 +65,7 @@ const fallbackNewsItems: PostSummary[] = [
     id: "fallback-news-1",
     title: "Stay tuned for the latest news and updates",
     excerpt:
-      "Check back soon for news from the US Embassy and immigration services.",
+      "Check back soon for visa policy updates from embassies, consulates, and immigration services.",
     imageUrl:
       "https://images.unsplash.com/photo-1551836022-deb4988cc6c0?w=400&auto=format&fit=crop&q=60",
     publishedAt: new Date().toISOString(),
@@ -234,7 +234,7 @@ const Home = () => {
                 <div className="grid grid-cols-2 gap-6">
                   <div className="text-center p-5 rounded-xl bg-secondary/50">
                     <div className="text-4xl md:text-5xl font-bold cf-text-gradient mb-2">
-                      1000K
+                      1,000+
                     </div>
                     <div className="text-sm text-muted-foreground font-medium">
                       {t("home.stats.applicationsCompleted")}

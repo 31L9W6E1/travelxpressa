@@ -52,7 +52,7 @@ const About = () => {
   ];
 
   const stats = [
-    { value: "50,000+", label: t("home.stats.applicationsCompleted", { defaultValue: "Applications Completed" }) },
+    { value: "1,000+", label: t("home.stats.applicationsCompleted", { defaultValue: "Applications Completed" }) },
     { value: "98%", label: t("home.stats.successRate", { defaultValue: "Success Rate" }) },
     { value: "24/7", label: t("home.stats.supportAvailable", { defaultValue: "Support Available" }) },
     { value: "4.9/5", label: t("home.stats.customerRating", { defaultValue: "Customer Rating" }) }
@@ -221,7 +221,7 @@ const About = () => {
                 <p className="text-muted-foreground">
                   {t("aboutPage.howItWorks.steps.submitTrack.description", {
                     defaultValue:
-                      "Review and export your application and track it through your dashboard. Appointment availability varies by location (US, Schengen, and other destinations) and earlier slots can sometimes open within 1-2 days. Express support (if selected) adds +15% to the service fee.",
+                      "Review and export your application and track it through your dashboard. Appointment availability varies by location and season, and earlier slots can sometimes open within 1-2 days. Express support (if selected) adds +15% to the service fee.",
                   })}
                 </p>
               </CardContent>

@@ -249,6 +249,13 @@ code, pre, .font-mono {
   }
 }
 
+/* Sonner toast transparency */
+.toaster [data-sonner-toast] {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 10px 24px oklch(0.18 0 0 / 0.18);
+}
+
 /*
 ===============================
       Component Utilities

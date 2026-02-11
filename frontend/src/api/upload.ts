@@ -9,6 +9,12 @@ export interface UploadResponse {
   message: string;
 }
 
+const getBackendPublicUrl = (): string => {
+  const configured = (import.meta.env.VITE_BACKEND_PUBLIC_URL as string | undefined)?.trim();
+  if (configured) return configured.replace(/\/+$/, '');
+  return 'https://travelxpressa-backend-production.up.railway.app';
+};
+
 /**
  * Upload an image file to the server
  * @param file - The image file to upload
@@ -60,6 +66,20 @@ export const getFullImageUrl = (url: string): string => {
   // If it's a relative URL (starts with /uploads), prepend the API base URL
   if (url.startsWith('/uploads')) {
     return `${getApiBaseUrl()}${url}`;
+  }
+
+  return url;
+};
+
+export const getFallbackImageUrl = (url: string): string => {
+  if (!url) return '';
+
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url;
+  }
+
+  if (url.startsWith('/uploads')) {
+    return `${getBackendPublicUrl()}${url}`;
   }
 
   return url;

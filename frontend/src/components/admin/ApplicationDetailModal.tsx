@@ -267,6 +267,17 @@ const InfoRow = ({ label, value, icon: Icon }: { label: string; value?: string |
   </div>
 );
 
+const JsonFallback = ({ data }: { data: unknown }) => (
+  <div className="rounded-lg border border-border bg-muted/40 p-3">
+    <p className="text-xs text-muted-foreground mb-2">
+      Showing raw section data (schema differs from current template)
+    </p>
+    <pre className="text-xs overflow-auto whitespace-pre-wrap break-all">
+      {JSON.stringify(data, null, 2)}
+    </pre>
+  </div>
+);
+
 export default function ApplicationDetailModal({
   application,
   open,
@@ -334,6 +345,48 @@ export default function ApplicationDetailModal({
   const workEducation = parseFormData<WorkEducation>(app.workEducation);
   const securityInfo = parseFormData<SecurityInfo>(app.securityInfo);
   const documents = parseFormData<Documents>(app.documents);
+  const hasFamilyStructuredData = Boolean(
+    familyInfo &&
+      (familyInfo.fatherGivenNames ||
+        familyInfo.fatherSurnames ||
+        familyInfo.motherGivenNames ||
+        familyInfo.motherSurnames ||
+        familyInfo.hasSpouse ||
+        (familyInfo.children && familyInfo.children.length > 0) ||
+        (familyInfo.immediateRelativesInUS && familyInfo.immediateRelativesInUS.length > 0)),
+  );
+  const hasWorkStructuredData = Boolean(
+    workEducation &&
+      (workEducation.primaryOccupation ||
+        workEducation.presentEmployerName ||
+        (workEducation.education && workEducation.education.length > 0) ||
+        (workEducation.languages && workEducation.languages.length > 0) ||
+        workEducation.hasServedInMilitary),
+  );
+  const hasSecurityStructuredData = Boolean(
+    securityInfo &&
+      [
+        'hasCommunicableDisease',
+        'hasMentalOrPhysicalDisorder',
+        'isDrugAbuser',
+        'hasBeenArrested',
+        'hasViolatedControlledSubstancesLaw',
+        'seeksEspionage',
+        'seeksToEngageInTerrorism',
+        'hasProvidedTerroristSupport',
+        'isTerroristOrganizationMember',
+        'hasBeenInUS',
+        'hasBeenIssuedUSVisa',
+        'hasBeenRefusedUSVisa',
+      ].some((key) => typeof securityInfo[key] === 'boolean'),
+  );
+  const hasDocumentsStructuredData = Boolean(
+    documents &&
+      (documents.photo ||
+        documents.invitationLetter ||
+        (documents.additionalDocuments && documents.additionalDocuments.length > 0)),
+  );
+  const hasPhotoOnlyDocument = Boolean(!hasDocumentsStructuredData && app.photoUrl);
   const hasEncryptedSections =
     typeof application?.personalInfo === 'string' ||
     typeof application?.contactInfo === 'string' ||
@@ -508,17 +561,17 @@ export default function ApplicationDetailModal({
                   </div>
                   <div className="flex-1">
                     <h3 className="text-lg font-semibold">
-                      {personalInfo?.givenNames} {personalInfo?.surnames}
+                      {personalInfo?.givenNames || app.user?.name || '-'} {personalInfo?.surnames || ''}
                     </h3>
-                    <p className="text-muted-foreground">{application.user?.email}</p>
+                    <p className="text-muted-foreground">{app.user?.email || '-'}</p>
                     <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
                       <span className="flex items-center gap-1">
                         <Globe className="w-4 h-4" />
-                        {application.visaType} Visa
+                        {app.visaType} Visa
                       </span>
                       <span className="flex items-center gap-1">
                         <Calendar className="w-4 h-4" />
-                        Created {formatDate(application.createdAt)}
+                        Created {formatDate(app.createdAt)}
                       </span>
                     </div>
                   </div>
@@ -528,7 +581,7 @@ export default function ApplicationDetailModal({
 
             {/* Tabs for different sections */}
             <Tabs defaultValue="personal" className="w-full">
-              <TabsList className="w-full justify-start overflow-x-auto mb-4 gap-1">
+              <TabsList className="w-full justify-start flex-wrap h-auto mb-4 gap-1">
                 <TabsTrigger value="personal" className="text-xs flex-none">
                   <User className="w-3 h-3 mr-1" />
                   Personal
@@ -755,6 +808,7 @@ export default function ApplicationDetailModal({
                   </CardHeader>
                   <CardContent>
                     {familyInfo ? (
+                      hasFamilyStructuredData ? (
                       <div className="space-y-6">
                         <div>
                           <h4 className="font-medium mb-3">Father</h4>
@@ -826,6 +880,9 @@ export default function ApplicationDetailModal({
                           </>
                         )}
                       </div>
+                      ) : (
+                        <JsonFallback data={familyInfo} />
+                      )
                     ) : (
                       <p className="text-muted-foreground text-center py-8">No family information provided</p>
                     )}
@@ -844,6 +901,7 @@ export default function ApplicationDetailModal({
                   </CardHeader>
                   <CardContent>
                     {workEducation ? (
+                      hasWorkStructuredData ? (
                       <div className="space-y-6">
                         <div>
                           <h4 className="font-medium mb-3">Current Employment</h4>
@@ -902,6 +960,9 @@ export default function ApplicationDetailModal({
                           </>
                         )}
                       </div>
+                      ) : (
+                        <JsonFallback data={workEducation} />
+                      )
                     ) : (
                       <p className="text-muted-foreground text-center py-8">No work/education information provided</p>
                     )}
@@ -920,6 +981,7 @@ export default function ApplicationDetailModal({
                   </CardHeader>
                   <CardContent>
                     {securityInfo ? (
+                      hasSecurityStructuredData ? (
                       <div className="space-y-4">
                         {[
                           { key: 'hasCommunicableDisease', label: 'Has communicable disease' },
@@ -959,6 +1021,9 @@ export default function ApplicationDetailModal({
                           </div>
                         )}
                       </div>
+                      ) : (
+                        <JsonFallback data={securityInfo} />
+                      )
                     ) : (
                       <p className="text-muted-foreground text-center py-8">No security information provided</p>
                     )}
@@ -977,6 +1042,7 @@ export default function ApplicationDetailModal({
                   </CardHeader>
                   <CardContent>
                     {documents ? (
+                      hasDocumentsStructuredData ? (
                       <div className="space-y-4">
                         {documents.photo && (
                           <div className="flex items-center justify-between p-3 border rounded">
@@ -1042,6 +1108,28 @@ export default function ApplicationDetailModal({
                         {!documents.photo && !documents.invitationLetter && !documents.additionalDocuments?.length && (
                           <p className="text-muted-foreground text-center py-8">No documents uploaded</p>
                         )}
+                      </div>
+                      ) : (
+                        <JsonFallback data={documents} />
+                      )
+                    ) : hasPhotoOnlyDocument ? (
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between p-3 border rounded">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-primary/10 rounded flex items-center justify-center">
+                              <User className="w-5 h-5 text-primary" />
+                            </div>
+                            <div>
+                              <p className="font-medium">Photo</p>
+                              <p className="text-xs text-muted-foreground">{app.photoUrl}</p>
+                            </div>
+                          </div>
+                          <Button variant="outline" size="sm" asChild>
+                            <a href={app.photoUrl} target="_blank" rel="noopener noreferrer">
+                              View
+                            </a>
+                          </Button>
+                        </div>
                       </div>
                     ) : (
                       <p className="text-muted-foreground text-center py-8">No documents uploaded</p>

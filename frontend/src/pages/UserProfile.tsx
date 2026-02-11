@@ -430,6 +430,16 @@ const UserProfile = () => {
               <h3 className="text-lg font-semibold text-foreground mb-4">{t('userProfile.quickActions', 'Quick Actions')}</h3>
               <div className="space-y-3">
                 <Link
+                  to="/profile/inbox"
+                  className="flex items-center justify-between p-3 bg-secondary/50 rounded-xl border border-border hover:bg-secondary hover:border-muted-foreground transition-all group"
+                >
+                  <div className="flex items-center gap-3">
+                    <Clock className="w-5 h-5 text-foreground" />
+                    <span className="text-muted-foreground">{t('userProfile.applicationInbox', 'Application Inbox')}</span>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                </Link>
+                <Link
                   to="/application"
                   className="flex items-center justify-between p-3 bg-secondary/50 rounded-xl border border-border hover:bg-secondary hover:border-muted-foreground transition-all group"
                 >
@@ -446,13 +456,16 @@ const UserProfile = () => {
                   </div>
                   <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
                 </button>
-                <button className="w-full flex items-center justify-between p-3 bg-secondary/50 rounded-xl border border-border hover:bg-secondary hover:border-muted-foreground transition-all group">
+                <Link
+                  to="/profile/security"
+                  className="flex items-center justify-between p-3 bg-secondary/50 rounded-xl border border-border hover:bg-secondary hover:border-muted-foreground transition-all group"
+                >
                   <div className="flex items-center gap-3">
                     <Shield className="w-5 h-5 text-foreground" />
                     <span className="text-muted-foreground">{t('userProfile.securitySettings', 'Security Settings')}</span>
                   </div>
                   <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
-                </button>
+                </Link>
               </div>
             </Card>
 
@@ -462,8 +475,8 @@ const UserProfile = () => {
               <p className="text-muted-foreground text-sm mb-4">
                 {t('userProfile.supportDescription', 'Our support team is available 24/7 to assist with your application.')}
               </p>
-              <Button variant="outline" className="w-full">
-                {t('userProfile.contactSupport', 'Contact Support')}
+              <Button asChild variant="outline" className="w-full">
+                <Link to="/form">{t('userProfile.contactSupport', 'Contact Support')}</Link>
               </Button>
             </Card>
           </div>

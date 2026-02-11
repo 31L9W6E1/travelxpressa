@@ -24,6 +24,8 @@ import Application from "./pages/Application";
 import UserDetail from "./pages/UserDetail";
 import ReadyToBegin from "./pages/ReadyToBegin";
 import UserProfile from "./pages/UserProfile";
+import UserInbox from "./pages/UserInbox";
+import UserSecuritySettings from "./pages/UserSecuritySettings";
 import LearnMore from "./pages/LearnMore";
 import CountrySelect from "./pages/CountrySelect";
 import OAuthCallback from "./pages/OAuthCallback";
@@ -137,6 +139,22 @@ function App() {
               element={
                 <ProtectedRoute>
                   <UserProfile />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/profile/inbox"
+              element={
+                <ProtectedRoute>
+                  <UserInbox />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/profile/security"
+              element={
+                <ProtectedRoute>
+                  <UserSecuritySettings />
                 </ProtectedRoute>
               }
             />

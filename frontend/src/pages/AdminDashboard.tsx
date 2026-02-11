@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../contexts/AuthContext";
 import { Link, useNavigate, useParams } from "react-router-dom";
@@ -270,6 +270,20 @@ const AdminDashboard = () => {
     },
   } satisfies ChartConfig;
 
+  const dailyUserChartConfig = {
+    users: {
+      label: t("dashboard.tabs.users", "Users"),
+      color: "var(--chart-1)",
+    },
+  } satisfies ChartConfig;
+
+  const dailyApplicationChartConfig = {
+    applications: {
+      label: t("dashboard.stats.applications", "Applications"),
+      color: "var(--chart-2)",
+    },
+  } satisfies ChartConfig;
+
   const applicationStatusRingsConfig = {
     count: {
       label: t("dashboard.stats.applications", "Applications"),
@@ -412,6 +426,39 @@ const AdminDashboard = () => {
     (sum, d) => sum + d.count,
     0,
   );
+
+  const dailyActivityData = useMemo(() => {
+    const days = 14;
+    const daily = [];
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+
+    for (let i = days - 1; i >= 0; i--) {
+      const dayStart = new Date(now);
+      dayStart.setDate(now.getDate() - i);
+      const dayEnd = new Date(dayStart);
+      dayEnd.setDate(dayStart.getDate() + 1);
+
+      const usersCount = users.filter((u) => {
+        const date = new Date(u.createdAt);
+        return date >= dayStart && date < dayEnd;
+      }).length;
+
+      const applicationsCount = applications.filter((app) => {
+        const date = new Date(app.createdAt);
+        return date >= dayStart && date < dayEnd;
+      }).length;
+
+      daily.push({
+        date: dayStart.toISOString().slice(0, 10),
+        day: dayStart.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+        users: usersCount,
+        applications: applicationsCount,
+      });
+    }
+
+    return daily;
+  }, [applications, users]);
 
   useEffect(() => {
     if (user?.role === "ADMIN") {
@@ -859,6 +906,61 @@ const AdminDashboard = () => {
                     {stats?.applications?.submitted || 0} {t('dashboard.status.submitted', 'submitted')},{" "}
                     {stats?.applications?.underReview || 0} {t('dashboard.status.underReview', 'under review')}
                   </p>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Daily Trend Charts */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>{t("dashboard.charts.dailyUsers", "Daily User Count")}</CardTitle>
+                  <CardDescription>
+                    {t("dashboard.charts.dailyUsersDesc", "New user registrations (last 14 days)")}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ChartContainer config={dailyUserChartConfig} className="h-[260px]">
+                    <LineChart data={dailyActivityData}>
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                      <XAxis dataKey="day" className="text-xs" />
+                      <YAxis className="text-xs" allowDecimals={false} />
+                      <ChartTooltip content={<ChartTooltipContent />} />
+                      <Line
+                        type="monotone"
+                        dataKey="users"
+                        stroke="var(--color-users)"
+                        strokeWidth={2}
+                        dot={{ r: 3, fill: "var(--color-users)" }}
+                      />
+                    </LineChart>
+                  </ChartContainer>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>{t("dashboard.charts.dailyApplications", "Daily Application Submissions")}</CardTitle>
+                  <CardDescription>
+                    {t("dashboard.charts.dailyApplicationsDesc", "Applications created per day (last 14 days)")}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ChartContainer config={dailyApplicationChartConfig} className="h-[260px]">
+                    <LineChart data={dailyActivityData}>
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                      <XAxis dataKey="day" className="text-xs" />
+                      <YAxis className="text-xs" allowDecimals={false} />
+                      <ChartTooltip content={<ChartTooltipContent />} />
+                      <Line
+                        type="monotone"
+                        dataKey="applications"
+                        stroke="var(--color-applications)"
+                        strokeWidth={2}
+                        dot={{ r: 3, fill: "var(--color-applications)" }}
+                      />
+                    </LineChart>
+                  </ChartContainer>
                 </CardContent>
               </Card>
             </div>

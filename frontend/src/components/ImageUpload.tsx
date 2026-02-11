@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useRef } from 'react';
-import { uploadImage, normalizeImageUrl } from '@/api/upload';
+import { getFallbackImageUrl, uploadImage, normalizeImageUrl } from '@/api/upload';
 import { Upload, X, Link as LinkIcon, Loader2 } from 'lucide-react';
 // Image Upload Component v2 - with drag & drop support
 import { Button } from '@/components/ui/button';
@@ -209,7 +209,14 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
               alt="Preview"
               className="w-full max-h-48 object-cover"
               onError={(e) => {
-                (e.target as HTMLImageElement).style.display = 'none';
+                const element = e.currentTarget as HTMLImageElement;
+                const fallback = getFallbackImageUrl(displayUrl);
+                if (element.dataset.fallbackApplied !== '1' && fallback && element.src !== fallback) {
+                  element.dataset.fallbackApplied = '1';
+                  element.src = fallback;
+                  return;
+                }
+                element.style.display = 'none';
                 setUploadError('Failed to load image preview. The URL may be invalid.');
               }}
               onLoad={(e) => {

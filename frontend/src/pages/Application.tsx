@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { applicationsApi, type VisaType, type Application } from '../api/applications';
@@ -21,7 +21,8 @@ import {
   AlertCircle,
   Loader2,
   CreditCard,
-  CheckCircle2
+  CheckCircle2,
+  RotateCcw,
 } from 'lucide-react';
 import PaymentModal from '@/components/PaymentModal';
 import type { Payment } from '@/api/payments';
@@ -146,6 +147,7 @@ export default function Application() {
   const [saveError, setSaveError] = useState<string | null>(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [paymentComplete, setPaymentComplete] = useState(false);
+  const [isRestoringDraft, setIsRestoringDraft] = useState(false);
 
   // Get selected country from localStorage (set in CountrySelect page)
   // Note: Korea is currently not offered, so fall back to USA if it was previously selected.
@@ -187,103 +189,130 @@ export default function Application() {
     return visaTypeMap[countryCode] || 'OTHER';
   };
 
-  // Load existing draft application on mount
-  useEffect(() => {
-    const loadDraft = async () => {
+  const restoreLatestDraft = useCallback(
+    async (options?: { initial?: boolean; notifyIfMissing?: boolean }) => {
+      const initial = options?.initial ?? false;
+      const notifyIfMissing = options?.notifyIfMissing ?? false;
+
       try {
-        setIsLoading(true);
+        if (initial) {
+          setIsLoading(true);
+        } else {
+          setIsRestoringDraft(true);
+        }
+
         const response = await applicationsApi.getAll(1, 10);
-        // Find the most recent draft or in-progress application
-        const drafts = response.data?.filter((app: Application) =>
-          app.status === 'DRAFT' || app.status === 'IN_PROGRESS'
-        ) || [];
+        const drafts =
+          response.data?.filter(
+            (app: Application) => app.status === 'DRAFT' || app.status === 'IN_PROGRESS',
+          ) || [];
 
-        if (drafts.length > 0) {
-          const draftMeta = drafts[0];
-          setApplicationId(draftMeta.id);
-
-          // NOTE: The list endpoint intentionally returns only metadata (no decrypted form sections).
-          // Fetch the full application by ID to restore saved form data.
-          const fullDraft = await applicationsApi.getById(draftMeta.id);
-          setCurrentStep(fullDraft.currentStep || 1);
-
-          const nextFormData: FormData = {
-            personalInfo: fullDraft.personalInfo
-              ? {
-                  surnames: fullDraft.personalInfo.surnames || '',
-                  givenNames: fullDraft.personalInfo.givenNames || '',
-                  fullNameNative: fullDraft.personalInfo.fullNameNative || '',
-                  sex: fullDraft.personalInfo.sex || '',
-                  maritalStatus: fullDraft.personalInfo.maritalStatus || '',
-                  dateOfBirth: fullDraft.personalInfo.dateOfBirth || '',
-                  cityOfBirth: fullDraft.personalInfo.cityOfBirth || '',
-                  stateOfBirth: fullDraft.personalInfo.stateOfBirth || '',
-                  countryOfBirth: fullDraft.personalInfo.countryOfBirth || '',
-                  nationality: fullDraft.personalInfo.nationality || '',
-                  nationalId: '',
-                }
-              : initialFormData.personalInfo,
-            contactInfo: fullDraft.contactInfo
-              ? {
-                  email: fullDraft.contactInfo.email || '',
-                  phone: fullDraft.contactInfo.phone || '',
-                  streetAddress: fullDraft.contactInfo.homeAddress?.street || '',
-                  city: fullDraft.contactInfo.homeAddress?.city || '',
-                  state: fullDraft.contactInfo.homeAddress?.state || '',
-                  postalCode: fullDraft.contactInfo.homeAddress?.postalCode || '',
-                  country: fullDraft.contactInfo.homeAddress?.country || '',
-                }
-              : initialFormData.contactInfo,
-            passportInfo: fullDraft.passportInfo
-              ? {
-                  passportNumber: fullDraft.passportInfo.passportNumber || '',
-                  passportBookNumber: fullDraft.passportInfo.passportBookNumber || '',
-                  countryOfIssuance: fullDraft.passportInfo.countryOfIssuance || '',
-                  cityOfIssuance: fullDraft.passportInfo.cityOfIssuance || '',
-                  issuanceDate: fullDraft.passportInfo.issuanceDate || '',
-                  expirationDate: fullDraft.passportInfo.expirationDate || '',
-                }
-              : initialFormData.passportInfo,
-            travelInfo: fullDraft.travelInfo
-              ? {
-                  purposeOfTrip: fullDraft.travelInfo.purposeOfTrip || '',
-                  intendedArrivalDate: fullDraft.travelInfo.intendedArrivalDate || '',
-                  intendedLengthOfStay: fullDraft.travelInfo.intendedLengthOfStay || '',
-                  usAddress: fullDraft.travelInfo.addressWhileInUS?.street || '',
-                  usCity: fullDraft.travelInfo.addressWhileInUS?.city || '',
-                  usState: fullDraft.travelInfo.addressWhileInUS?.state || '',
-                  payingForTrip: fullDraft.travelInfo.payingForTrip || '',
-                }
-              : initialFormData.travelInfo,
-          };
-
-          setFormData(nextFormData);
-
-          const hasAnyRestoredValue = Object.values(nextFormData).some((section) =>
-            Object.values(section).some((v) => String(v || '').trim() !== ''),
-          );
-          if (hasAnyRestoredValue) {
+        if (drafts.length === 0) {
+          if (notifyIfMissing) {
             toast.info(
-              t('applicationPage.toasts.draftLoaded.title', {
-                defaultValue: 'Draft loaded',
-              }),
+              t('applicationPage.toasts.noDraft.title', { defaultValue: 'No saved draft found' }),
               {
-                description: t('applicationPage.toasts.draftLoaded.description', {
-                  defaultValue: 'Your previous progress has been restored.',
+                description: t('applicationPage.toasts.noDraft.description', {
+                  defaultValue: 'Create a draft first by saving your progress.',
                 }),
               },
             );
           }
+          return;
+        }
+
+        const draftMeta = drafts[0];
+        setApplicationId(draftMeta.id);
+
+        // NOTE: The list endpoint intentionally returns only metadata (no decrypted form sections).
+        // Fetch the full application by ID to restore saved form data.
+        const fullDraft = await applicationsApi.getById(draftMeta.id);
+        setCurrentStep(fullDraft.currentStep || 1);
+
+        const nextFormData: FormData = {
+          personalInfo: fullDraft.personalInfo
+            ? {
+                surnames: fullDraft.personalInfo.surnames || '',
+                givenNames: fullDraft.personalInfo.givenNames || '',
+                fullNameNative: fullDraft.personalInfo.fullNameNative || '',
+                sex: fullDraft.personalInfo.sex || '',
+                maritalStatus: fullDraft.personalInfo.maritalStatus || '',
+                dateOfBirth: fullDraft.personalInfo.dateOfBirth || '',
+                cityOfBirth: fullDraft.personalInfo.cityOfBirth || '',
+                stateOfBirth: fullDraft.personalInfo.stateOfBirth || '',
+                countryOfBirth: fullDraft.personalInfo.countryOfBirth || '',
+                nationality: fullDraft.personalInfo.nationality || '',
+                nationalId: '',
+              }
+            : initialFormData.personalInfo,
+          contactInfo: fullDraft.contactInfo
+            ? {
+                email: fullDraft.contactInfo.email || '',
+                phone: fullDraft.contactInfo.phone || '',
+                streetAddress: fullDraft.contactInfo.homeAddress?.street || '',
+                city: fullDraft.contactInfo.homeAddress?.city || '',
+                state: fullDraft.contactInfo.homeAddress?.state || '',
+                postalCode: fullDraft.contactInfo.homeAddress?.postalCode || '',
+                country: fullDraft.contactInfo.homeAddress?.country || '',
+              }
+            : initialFormData.contactInfo,
+          passportInfo: fullDraft.passportInfo
+            ? {
+                passportNumber: fullDraft.passportInfo.passportNumber || '',
+                passportBookNumber: fullDraft.passportInfo.passportBookNumber || '',
+                countryOfIssuance: fullDraft.passportInfo.countryOfIssuance || '',
+                cityOfIssuance: fullDraft.passportInfo.cityOfIssuance || '',
+                issuanceDate: fullDraft.passportInfo.issuanceDate || '',
+                expirationDate: fullDraft.passportInfo.expirationDate || '',
+              }
+            : initialFormData.passportInfo,
+          travelInfo: fullDraft.travelInfo
+            ? {
+                purposeOfTrip: fullDraft.travelInfo.purposeOfTrip || '',
+                intendedArrivalDate: fullDraft.travelInfo.intendedArrivalDate || '',
+                intendedLengthOfStay: fullDraft.travelInfo.intendedLengthOfStay || '',
+                usAddress: fullDraft.travelInfo.addressWhileInUS?.street || '',
+                usCity: fullDraft.travelInfo.addressWhileInUS?.city || '',
+                usState: fullDraft.travelInfo.addressWhileInUS?.state || '',
+                payingForTrip: fullDraft.travelInfo.payingForTrip || '',
+              }
+            : initialFormData.travelInfo,
+        };
+
+        setFormData(nextFormData);
+
+        const hasAnyRestoredValue = Object.values(nextFormData).some((section) =>
+          Object.values(section).some((v) => String(v || '').trim() !== ''),
+        );
+        if (hasAnyRestoredValue) {
+          toast.info(
+            t('applicationPage.toasts.draftLoaded.title', {
+              defaultValue: 'Draft loaded',
+            }),
+            {
+              description: t('applicationPage.toasts.draftLoaded.description', {
+                defaultValue: 'Your previous progress has been restored.',
+              }),
+            },
+          );
         }
       } catch (error) {
         console.error('Failed to load draft:', error);
       } finally {
-        setIsLoading(false);
+        if (initial) {
+          setIsLoading(false);
+        } else {
+          setIsRestoringDraft(false);
+        }
       }
-    };
+    },
+    [t],
+  );
 
-    loadDraft();
-  }, []);
+  // Load existing draft application on mount
+  useEffect(() => {
+    void restoreLatestDraft({ initial: true });
+  }, [restoreLatestDraft]);
 
   const steps: FormStep[] = [
     { id: 1, name: t('form.steps.personal', { defaultValue: 'Personal Info' }), icon: <User className="w-5 h-5" />, status: currentStep === 1 ? 'current' : currentStep > 1 ? 'completed' : 'pending' },
@@ -1389,6 +1418,19 @@ export default function Application() {
             </button>
 
             <div className="flex items-center gap-4">
+              <button
+                onClick={() => void restoreLatestDraft({ notifyIfMissing: true })}
+                disabled={isRestoringDraft || isSaving}
+                className="flex items-center gap-2 px-6 py-3 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-all disabled:opacity-50"
+              >
+                {isRestoringDraft ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  <RotateCcw className="w-5 h-5" />
+                )}
+                {t('applicationPage.buttons.restoreDraft', { defaultValue: 'Restore Draft' })}
+              </button>
+
               <button
                 onClick={handleSave}
                 disabled={isSaving}

@@ -48,7 +48,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import api from '@/api/client';
-import { uploadImage, deleteImage, getFullImageUrl } from '@/api/upload';
+import { uploadImage, deleteImage, getFallbackImageUrl, getFullImageUrl } from '@/api/upload';
 
 interface GalleryImage {
   filename: string;
@@ -355,8 +355,15 @@ const GalleryManager = () => {
                     alt={image.filename}
                     className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105"
                     onError={(e) => {
+                      const element = e.currentTarget as HTMLImageElement;
+                      const fallback = getFallbackImageUrl(image.url);
+                      if (element.dataset.fallbackApplied !== '1' && fallback && element.src !== fallback) {
+                        element.dataset.fallbackApplied = '1';
+                        element.src = fallback;
+                        return;
+                      }
                       // If an image can't be loaded, show the placeholder background instead of a broken icon.
-                      (e.currentTarget as HTMLImageElement).style.display = 'none';
+                      element.style.display = 'none';
                     }}
                   />
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors" />
@@ -421,7 +428,14 @@ const GalleryManager = () => {
                         alt={image.filename}
                         className="w-full h-full object-cover"
                         onError={(e) => {
-                          (e.currentTarget as HTMLImageElement).style.display = 'none';
+                          const element = e.currentTarget as HTMLImageElement;
+                          const fallback = getFallbackImageUrl(image.url);
+                          if (element.dataset.fallbackApplied !== '1' && fallback && element.src !== fallback) {
+                            element.dataset.fallbackApplied = '1';
+                            element.src = fallback;
+                            return;
+                          }
+                          element.style.display = 'none';
                         }}
                       />
                     </div>
@@ -507,7 +521,14 @@ const GalleryManager = () => {
                 alt={selectedImage.filename}
                 className="w-full h-full object-contain"
                 onError={(e) => {
-                  (e.currentTarget as HTMLImageElement).style.display = 'none';
+                  const element = e.currentTarget as HTMLImageElement;
+                  const fallback = getFallbackImageUrl(selectedImage.url);
+                  if (element.dataset.fallbackApplied !== '1' && fallback && element.src !== fallback) {
+                    element.dataset.fallbackApplied = '1';
+                    element.src = fallback;
+                    return;
+                  }
+                  element.style.display = 'none';
                   toast.error('Failed to load image preview.');
                 }}
               />

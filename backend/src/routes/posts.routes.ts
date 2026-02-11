@@ -27,68 +27,65 @@ const normalizeLocale = (value?: string): string => {
   const locale = raw.split('-')[0];
   return SUPPORTED_LOCALES.has(locale) ? locale : 'en';
 };
+const normalizeValue = (value: unknown): string => String(value || '').trim().toLowerCase();
+const isPublishedStatus = (value: unknown): boolean => normalizeValue(value) === 'published';
 
 // ==================== PUBLIC ROUTES ====================
 
 // GET /api/posts - Get all published posts (public)
 router.get('/', async (req: Request, res: Response) => {
   try {
-    const category = getQueryString(req.query.category as string | string[] | undefined);
+    const requestedCategory = normalizeValue(getQueryString(req.query.category as string | string[] | undefined));
     const limit = getQueryString(req.query.limit as string | string[] | undefined) || '10';
     const page = getQueryString(req.query.page as string | string[] | undefined) || '1';
     const locale = normalizeLocale(getQueryString(req.query.locale as string | string[] | undefined));
     const useTranslation = locale !== 'en';
 
     const take = Math.min(parseInt(limit) || 10, 50);
-    const skip = (parseInt(page) - 1) * take;
+    const currentPage = Math.max(parseInt(page) || 1, 1);
+    const skip = (currentPage - 1) * take;
+    const categoryFilter = requestedCategory && ['blog', 'news'].includes(requestedCategory) ? requestedCategory : '';
 
-    const where: any = {
-      status: 'published',
-    };
-
-    if (category && (category === 'blog' || category === 'news')) {
-      where.category = category;
-    }
-
-    const [posts, total] = await Promise.all([
-      prisma.post.findMany({
-        where,
-        orderBy: { publishedAt: 'desc' },
-        take,
-        skip,
-        select: {
-          id: true,
-          title: true,
-          slug: true,
-          excerpt: true,
-          imageUrl: true,
-          category: true,
-          tags: true,
-          authorName: true,
-          publishedAt: true,
-          createdAt: true,
-          ...(useTranslation
-            ? {
-                translations: {
-                  where: { locale, status: 'published' },
-                  select: {
-                    title: true,
-                    slug: true,
-                    excerpt: true,
-                    tags: true,
-                  },
-                  take: 1,
+    const posts = await prisma.post.findMany({
+      orderBy: { publishedAt: 'desc' },
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        excerpt: true,
+        imageUrl: true,
+        category: true,
+        tags: true,
+        authorName: true,
+        publishedAt: true,
+        createdAt: true,
+        status: true,
+        ...(useTranslation
+          ? {
+              translations: {
+                where: { locale },
+                select: {
+                  title: true,
+                  slug: true,
+                  excerpt: true,
+                  tags: true,
+                  status: true,
                 },
-              }
-            : {}),
-        },
-      }),
-      prisma.post.count({ where }),
-    ]);
+              },
+            }
+          : {}),
+      },
+    });
 
-    const localizedPosts = posts.map((post: any) => {
+    const filteredPosts = posts.filter((post: any) => {
+      if (!isPublishedStatus(post.status)) return false;
+      if (!categoryFilter) return true;
+      return normalizeValue(post.category) === categoryFilter;
+    });
+
+    const localizedPosts = filteredPosts.map((post: any) => {
       if (!useTranslation) return post;
-      const translation = post.translations?.[0];
+      const translation = post.translations?.find((item: any) => isPublishedStatus(item.status));
       if (!translation) {
         const { translations, ...base } = post;
         return base;
@@ -106,13 +103,15 @@ router.get('/', async (req: Request, res: Response) => {
         createdAt: post.createdAt,
       };
     });
+    const paginatedPosts = localizedPosts.slice(skip, skip + take);
+    const total = localizedPosts.length;
 
     res.json({
       success: true,
-      data: localizedPosts,
+      data: paginatedPosts,
       pagination: {
         total,
-        page: parseInt(page),
+        page: currentPage,
         limit: take,
         totalPages: Math.ceil(total / take),
       },
@@ -132,80 +131,40 @@ router.get('/featured', async (_req: Request, res: Response) => {
     const locale = normalizeLocale(getQueryString(_req.query.locale as string | string[] | undefined));
     const useTranslation = locale !== 'en';
 
-    const [blogPosts, newsPosts] = await Promise.all([
-      prisma.post.findMany({
-        where: {
-          status: 'published',
-          category: 'blog',
-        },
-        orderBy: { publishedAt: 'desc' },
-        take: 4,
-        select: {
-          id: true,
-          title: true,
-          slug: true,
-          excerpt: true,
-          imageUrl: true,
-          category: true,
-          tags: true,
-          authorName: true,
-          publishedAt: true,
-          createdAt: true,
-          ...(useTranslation
-            ? {
-                translations: {
-                  where: { locale, status: 'published' },
-                  select: {
-                    title: true,
-                    slug: true,
-                    excerpt: true,
-                    tags: true,
-                  },
-                  take: 1,
+    const allPosts = await prisma.post.findMany({
+      orderBy: { publishedAt: 'desc' },
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        excerpt: true,
+        imageUrl: true,
+        category: true,
+        tags: true,
+        authorName: true,
+        publishedAt: true,
+        createdAt: true,
+        status: true,
+        ...(useTranslation
+          ? {
+              translations: {
+                where: { locale },
+                select: {
+                  title: true,
+                  slug: true,
+                  excerpt: true,
+                  tags: true,
+                  status: true,
                 },
-              }
-            : {}),
-        },
-      }),
-      prisma.post.findMany({
-        where: {
-          status: 'published',
-          category: 'news',
-        },
-        orderBy: { publishedAt: 'desc' },
-        take: 8,
-        select: {
-          id: true,
-          title: true,
-          slug: true,
-          excerpt: true,
-          imageUrl: true,
-          category: true,
-          tags: true,
-          authorName: true,
-          publishedAt: true,
-          createdAt: true,
-          ...(useTranslation
-            ? {
-                translations: {
-                  where: { locale, status: 'published' },
-                  select: {
-                    title: true,
-                    slug: true,
-                    excerpt: true,
-                    tags: true,
-                  },
-                  take: 1,
-                },
-              }
-            : {}),
-        },
-      }),
-    ]);
+              },
+            }
+          : {}),
+      },
+    });
 
     const mapLocalized = (post: any) => {
       if (!useTranslation) return post;
-      const translation = post.translations?.[0];
+      const translation = post.translations?.find((item: any) => isPublishedStatus(item.status));
       if (!translation) {
         const { translations, ...base } = post;
         return base;
@@ -223,6 +182,13 @@ router.get('/featured', async (_req: Request, res: Response) => {
         createdAt: post.createdAt,
       };
     };
+    const publishedPosts = allPosts.filter((post) => isPublishedStatus((post as any).status));
+    const blogPosts = publishedPosts
+      .filter((post) => normalizeValue((post as any).category) === 'blog')
+      .slice(0, 4);
+    const newsPosts = publishedPosts
+      .filter((post) => normalizeValue((post as any).category) === 'news')
+      .slice(0, 8);
 
     res.json({
       success: true,
@@ -252,14 +218,13 @@ router.get('/:slug', async (req: Request, res: Response) => {
         where: {
           locale,
           slug,
-          status: 'published',
         },
         include: {
           post: true,
         },
       });
 
-      if (localizedBySlug && localizedBySlug.post.status === 'published') {
+      if (localizedBySlug && isPublishedStatus(localizedBySlug.status) && isPublishedStatus(localizedBySlug.post.status)) {
         return res.json({
           success: true,
           data: {
@@ -280,14 +245,13 @@ router.get('/:slug', async (req: Request, res: Response) => {
       include: useTranslation
         ? {
             translations: {
-              where: { locale, status: 'published' },
-              take: 1,
+              where: { locale },
             },
           }
         : undefined,
     });
 
-    if (!post || post.status !== 'published') {
+    if (!post || !isPublishedStatus(post.status)) {
       return res.status(404).json({
         success: false,
         message: 'Post not found',
@@ -298,7 +262,7 @@ router.get('/:slug', async (req: Request, res: Response) => {
       success: true,
       data: (() => {
         if (!useTranslation) return post;
-        const translation = (post as any).translations?.[0];
+        const translation = (post as any).translations?.find((item: any) => isPublishedStatus(item.status));
         if (!translation) {
           const { translations, ...base } = post as any;
           return base;

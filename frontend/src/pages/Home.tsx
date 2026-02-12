@@ -112,31 +112,10 @@ const Home = () => {
     },
   ];
 
-  const tickerItems = newsItems.length > 0 ? newsItems : fallbackNewsItems;
-  const tickerLoop = [...tickerItems, ...tickerItems];
-
   return (
     <div className="min-h-screen bg-background text-foreground font-sans">
-      {/* News Crawl Ticker */}
-      <section className="ticker-bar border-b border-border">
-        <div className="ticker-wrapper py-2.5">
-          <div className="animate-ticker gap-10 pr-10">
-            {tickerLoop.map((item, index) => (
-              <Link
-                key={`${item.id}-${index}`}
-                to={`/news/${item.slug}`}
-                className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap"
-              >
-                <span className="inline-block h-1.5 w-1.5 rounded-full bg-primary/80" />
-                <span>{item.title}</span>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Hero */}
-      <section className="pt-16 pb-12 border-b border-border">
+      <section className="py-12 border-b border-border">
         <div className="max-w-7xl mx-auto px-6">
           <div className="max-w-3xl">
             <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6 leading-[1.05]">

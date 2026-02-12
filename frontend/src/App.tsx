@@ -5,6 +5,7 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import { Toaster } from "@/components/ui/sonner";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { useTranslation } from "react-i18next";
+import NewsTicker from "./components/NewsTicker";
 
 // Import all page components
 import Home from "./pages/Home";
@@ -100,6 +101,7 @@ function App() {
           <Navbar />
 
           <main className="pt-16 md:pt-16 md:pl-[var(--sidebar-width,240px)] transition-[padding] duration-300">
+            <NewsTicker />
             <Routes>
             {/* 
               "/" is the FIRST page that loads

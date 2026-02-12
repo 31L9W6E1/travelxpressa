@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, Clock, ArrowLeft, Loader2 } from 'lucide-react';
-import { getPosts, formatPostDate, calculateReadTime, getDefaultImage } from '@/api/posts';
+import { Calendar, ArrowLeft, Loader2 } from 'lucide-react';
+import { getPosts, formatPostDate, getDefaultImage } from '@/api/posts';
 import type { PostSummary } from '@/api/posts';
 import { normalizeImageUrl } from '@/api/upload';
 import { useTranslation } from 'react-i18next';
@@ -99,42 +99,32 @@ const Blog = () => {
             </div>
           ) : (
             <>
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {posts.map((post) => (
                   <article key={post.id} className="group">
                     <Link to={`/blog/${post.slug}`} className="block">
-                      <div className="relative aspect-[16/10] overflow-hidden rounded-xl mb-4">
+                      <div className="relative aspect-square overflow-hidden rounded-lg mb-3">
                         <img
                           src={post.imageUrl ? normalizeImageUrl(post.imageUrl) : getDefaultImage('blog')}
                           alt={post.title}
                           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-                        {post.tags && (
-                          <span className="absolute top-4 left-4 px-3 py-1 text-xs font-medium bg-primary text-primary-foreground rounded-full">
-                            {post.tags.split(',')[0]}
-                          </span>
-                        )}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                        <div className="absolute bottom-0 left-0 right-0 p-4">
+                          <h2 className="text-sm font-medium text-white line-clamp-2 group-hover:text-gray-300 transition-colors">
+                            {post.title}
+                          </h2>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
-                        <span className="flex items-center gap-1">
-                          <Calendar className="w-4 h-4" />
-                          {formatPostDate(post.publishedAt || post.createdAt, i18n.language)}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Clock className="w-4 h-4" />
-                          {t('content.readTime', {
-                            defaultValue: '{{minutes}} min read',
-                            minutes: calculateReadTime(post.excerpt || ''),
-                          })}
-                        </span>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <Calendar className="w-3 h-3" />
+                        {formatPostDate(post.publishedAt || post.createdAt, i18n.language)}
                       </div>
-                      <h2 className="text-xl font-bold mb-2 group-hover:text-muted-foreground transition-colors line-clamp-2">
-                        {post.title}
-                      </h2>
-                      <p className="text-muted-foreground line-clamp-2">{post.excerpt}</p>
+                      {post.excerpt && (
+                        <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{post.excerpt}</p>
+                      )}
                       {post.authorName && (
-                        <p className="text-sm text-muted-foreground mt-3">
+                        <p className="text-xs text-muted-foreground mt-2">
                           {t('content.by', { defaultValue: 'By {{name}}', name: post.authorName })}
                         </p>
                       )}

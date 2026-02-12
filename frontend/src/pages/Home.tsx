@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import {
   ArrowRight,
   Calendar,
-  Clock,
   ChevronRight,
   Plane,
   Loader2,
@@ -114,8 +113,29 @@ const Home = () => {
     },
   ];
 
+  const tickerItems = newsItems.length > 0 ? newsItems : fallbackNewsItems;
+  const tickerLoop = [...tickerItems, ...tickerItems];
+
   return (
-      <div className="min-h-screen bg-background text-foreground font-sans">
+    <div className="min-h-screen bg-background text-foreground font-sans">
+      {/* News Crawl Ticker */}
+      <section className="ticker-bar border-b border-dashed border-border/60">
+        <div className="ticker-wrapper py-2.5">
+          <div className="animate-ticker gap-10 pr-10">
+            {tickerLoop.map((item, index) => (
+              <Link
+                key={`${item.id}-${index}`}
+                to={`/news/${item.slug}`}
+                className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap"
+              >
+                <span className="inline-block h-1.5 w-1.5 rounded-full bg-primary/80" />
+                <span>{item.title}</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Hero Section - Cloudflare inspired */}
       <section className="relative pt-24 pb-24 overflow-hidden border-b border-dashed border-border/60">
         {/* Background decoration */}
@@ -246,31 +266,32 @@ const Home = () => {
               <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
             </div>
           ) : blogPosts.length > 0 ? (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {blogPosts.slice(0, 8).map((item) => (
-                <Card key={item.id} className="overflow-hidden group">
+                <article key={item.id} className="group">
                   <Link to={`/blog/${item.slug}`} className="block">
-                    <div className="relative aspect-square overflow-hidden m-[1.5px] rounded-md">
+                    <div className="relative aspect-square overflow-hidden rounded-lg mb-3">
                       <img
                         src={item.imageUrl ? normalizeImageUrl(item.imageUrl) : getDefaultImage("blog")}
                         alt={item.title}
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                      <div className="absolute bottom-0 left-0 right-0 p-4 space-y-1">
-                        <h3 className="text-sm font-medium text-white line-clamp-2">
+                      <div className="absolute bottom-0 left-0 right-0 p-4">
+                        <h3 className="text-sm font-medium text-white line-clamp-2 group-hover:text-gray-300 transition-colors">
                           {item.title}
                         </h3>
-                        <p className="text-[11px] text-white/85">
-                          {formatPostDate(
-                            item.publishedAt || item.createdAt,
-                            i18n.language,
-                          )}
-                        </p>
                       </div>
                     </div>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <Calendar className="w-3 h-3" />
+                      {formatPostDate(item.publishedAt || item.createdAt, i18n.language)}
+                    </div>
+                    {item.excerpt && (
+                      <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{item.excerpt}</p>
+                    )}
                   </Link>
-                </Card>
+                </article>
               ))}
             </div>
           ) : (
@@ -308,31 +329,32 @@ const Home = () => {
               <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
             </div>
           ) : newsItems.length > 0 ? (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {newsItems.slice(0, 8).map((item) => (
-                <Card key={item.id} className="overflow-hidden group">
+                <article key={item.id} className="group">
                   <Link to={`/news/${item.slug}`} className="block">
-                    <div className="relative aspect-square overflow-hidden m-[1.5px] rounded-md">
+                    <div className="relative aspect-square overflow-hidden rounded-lg mb-3">
                       <img
                         src={item.imageUrl ? normalizeImageUrl(item.imageUrl) : getDefaultImage("news")}
                         alt={item.title}
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                      <div className="absolute bottom-0 left-0 right-0 p-4 space-y-1">
-                        <h3 className="text-sm font-medium text-white line-clamp-2">
+                      <div className="absolute bottom-0 left-0 right-0 p-4">
+                        <h3 className="text-sm font-medium text-white line-clamp-2 group-hover:text-gray-300 transition-colors">
                           {item.title}
                         </h3>
-                        <p className="text-[11px] text-white/85">
-                          {formatPostDate(
-                            item.publishedAt || item.createdAt,
-                            i18n.language,
-                          )}
-                        </p>
                       </div>
                     </div>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <Calendar className="w-3 h-3" />
+                      {formatPostDate(item.publishedAt || item.createdAt, i18n.language)}
+                    </div>
+                    {item.excerpt && (
+                      <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{item.excerpt}</p>
+                    )}
                   </Link>
-                </Card>
+                </article>
               ))}
             </div>
           ) : (

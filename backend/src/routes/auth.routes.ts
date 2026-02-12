@@ -180,6 +180,33 @@ function getBackendBaseUrl(req: Request): string {
   return `${req.protocol}://${req.get('host')}`;
 }
 
+function sendBrowserRedirect(res: Response, redirectUrl: string): void {
+  // Some reverse proxies can behave inconsistently with Set-Cookie on 302 responses.
+  // Returning a 200 HTML redirect page ensures the refresh cookie is reliably set.
+  const safeUrl = String(redirectUrl || '').trim();
+  res.status(200);
+  res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  res.setHeader('Cache-Control', 'no-store');
+  res.send(`<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Redirecting...</title>
+    <meta http-equiv="refresh" content="0; url=${safeUrl}" />
+    <style>html,body{height:100%;margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#fff;color:#111}main{display:flex;align-items:center;justify-content:center;height:100%}p{margin:0 16px;text-align:center}</style>
+  </head>
+  <body>
+    <main>
+      <p>Redirecting… If you are not redirected, <a href="${safeUrl}">click here</a>.</p>
+    </main>
+    <script>
+      try { window.location.replace(${JSON.stringify(safeUrl)}); } catch (e) {}
+    </script>
+  </body>
+</html>`);
+}
+
 function getCookieDomain(): string | undefined {
   const explicitDomain = (process.env.COOKIE_DOMAIN || '').trim();
   if (explicitDomain) {
@@ -927,7 +954,7 @@ router.get(
     const frontendBaseUrl = getFrontendBaseUrlFromState(req.query.state, req);
 
     if (error || !code) {
-      return res.redirect(`${frontendBaseUrl}/oauth/callback?error=google_auth_failed`);
+      return sendBrowserRedirect(res, `${frontendBaseUrl}/oauth/callback?error=google_auth_failed`);
     }
 
     try {
@@ -1018,10 +1045,10 @@ router.get(
         role: user.role,
       });
 
-      res.redirect(`${frontendBaseUrl}/oauth/callback?${params}`);
+      sendBrowserRedirect(res, `${frontendBaseUrl}/oauth/callback?${params}`);
     } catch (err) {
       logger.error('Google OAuth error', { error: err });
-      res.redirect(`${frontendBaseUrl}/oauth/callback?error=google_auth_failed`);
+      sendBrowserRedirect(res, `${frontendBaseUrl}/oauth/callback?error=google_auth_failed`);
     }
   })
 );
@@ -1059,7 +1086,7 @@ router.get(
     const frontendBaseUrl = getFrontendBaseUrlFromState(req.query.state, req);
 
     if (error || !code) {
-      return res.redirect(`${frontendBaseUrl}/oauth/callback?error=facebook_auth_failed`);
+      return sendBrowserRedirect(res, `${frontendBaseUrl}/oauth/callback?error=facebook_auth_failed`);
     }
 
     try {
@@ -1088,7 +1115,7 @@ router.get(
 
       if (!userInfo.email) {
         // Facebook doesn't always provide email
-        return res.redirect(`${frontendBaseUrl}/oauth/callback?error=facebook_no_email`);
+        return sendBrowserRedirect(res, `${frontendBaseUrl}/oauth/callback?error=facebook_no_email`);
       }
 
       // Find or create user
@@ -1146,10 +1173,10 @@ router.get(
         role: user.role,
       });
 
-      res.redirect(`${frontendBaseUrl}/oauth/callback?${params}`);
+      sendBrowserRedirect(res, `${frontendBaseUrl}/oauth/callback?${params}`);
     } catch (err) {
       logger.error('Facebook OAuth error', { error: err });
-      res.redirect(`${frontendBaseUrl}/oauth/callback?error=facebook_auth_failed`);
+      sendBrowserRedirect(res, `${frontendBaseUrl}/oauth/callback?error=facebook_auth_failed`);
     }
   })
 );

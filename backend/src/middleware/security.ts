@@ -211,7 +211,7 @@ export function auditLog(action: string) {
  */
 export function detectSuspiciousActivity(req: Request, res: Response, next: NextFunction): void {
   const suspiciousPatterns = [
-    /(\%27)|(\')|(\-\-)|(\%23)|(#)/i, // SQL injection
+    /(\%27)|(\')|(\%23)|(#)/i, // SQL injection (avoid false positives on OAuth/base64url query params)
     /((\%3C)|<)((\%2F)|\/)*[a-z0-9\%]+((\%3E)|>)/i, // XSS
     /(\%00)/i, // Null byte injection
     /(\.\.\/)/i, // Path traversal

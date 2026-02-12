@@ -23,7 +23,6 @@ import {
   Card,
   CardContent,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { useTranslation } from "react-i18next";
 
 // Fallback data for when API fails or is empty
@@ -119,7 +118,7 @@ const Home = () => {
   return (
     <div className="min-h-screen bg-background text-foreground font-sans">
       {/* News Crawl Ticker */}
-      <section className="ticker-bar border-b border-dashed border-border/60">
+      <section className="ticker-bar border-b border-border">
         <div className="ticker-wrapper py-2.5">
           <div className="animate-ticker gap-10 pr-10">
             {tickerLoop.map((item, index) => (
@@ -136,97 +135,52 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Hero Section - Cloudflare inspired */}
-      <section className="relative pt-24 pb-24 overflow-hidden border-b border-dashed border-border/60">
-        {/* Background decoration */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent pointer-events-none" />
-        <div className="absolute top-20 right-0 w-[600px] h-[600px] bg-primary/10 rounded-full blur-3xl pointer-events-none" />
-
-        <div className="max-w-7xl mx-auto px-6 relative">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
-            <div className="animate-fade-in-up">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
-                <CheckCircle className="w-4 h-4" />
-                {t("home.hero.trusted")}
-              </div>
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6 leading-[1.1]">
-                {t("home.hero.titleLine1")}
-                <span className="block cf-text-gradient">
-                  {t("home.hero.titleLine2")}
-                </span>
-                {t("home.hero.titleLine3")}
-              </h1>
-              <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-xl leading-relaxed">
-                {t("home.hero.subtitle")}
-              </p>
-              <div className="flex flex-wrap gap-4">
-                <Button asChild size="lg" className="px-8 cf-shadow font-semibold">
-                  <Link to="/login" className="gap-2">
-                    {t("home.hero.cta")}
-                    <ArrowRight className="w-5 h-5" />
-                  </Link>
-                </Button>
-                <Button asChild variant="outline" size="lg" className="px-8 font-semibold border-2">
-                  <Link to="/learn-more">{t("home.hero.learnMore")}</Link>
-                </Button>
-              </div>
+      {/* Hero */}
+      <section className="pt-16 pb-12 border-b border-border">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="max-w-3xl">
+            <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6 leading-[1.05]">
+              {t("home.hero.titleLine1")}
+              <span className="block text-muted-foreground">
+                {t("home.hero.titleLine2")}
+              </span>
+              {t("home.hero.titleLine3")}
+            </h1>
+            <p className="text-lg md:text-xl text-muted-foreground mb-8 leading-relaxed">
+              {t("home.hero.subtitle")}
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <Button asChild size="lg" className="px-8 font-semibold">
+                <Link to="/login" className="gap-2">
+                  {t("home.hero.cta")}
+                  <ArrowRight className="w-5 h-5" />
+                </Link>
+              </Button>
+              <Button
+                asChild
+                variant="outline"
+                size="lg"
+                className="px-8 font-semibold"
+              >
+                <Link to="/learn-more">{t("home.hero.learnMore")}</Link>
+              </Button>
             </div>
-
-            {/* Stats Card - Cloudflare style */}
-            <Card className="bg-card border-border shadow-xl animate-fade-in-up animation-delay-200">
-              <CardContent className="p-8 md:p-10">
-                <div className="grid grid-cols-2 gap-6">
-                  <div className="text-center p-5 rounded-xl bg-secondary/50">
-                    <div className="text-4xl md:text-5xl font-bold cf-text-gradient mb-2">
-                      1,000+
-                    </div>
-                    <div className="text-sm text-muted-foreground font-medium">
-                      {t("home.stats.applicationsCompleted")}
-                    </div>
-                  </div>
-                  <div className="text-center p-5 rounded-xl bg-secondary/50">
-                    <div className="text-4xl md:text-5xl font-bold cf-text-gradient mb-2">
-                      98%
-                    </div>
-                    <div className="text-sm text-muted-foreground font-medium">
-                      {t("home.stats.successRate")}
-                    </div>
-                  </div>
-                  <div className="text-center p-5 rounded-xl bg-secondary/50">
-                    <div className="text-4xl md:text-5xl font-bold cf-text-gradient mb-2">
-                      24/7
-                    </div>
-                    <div className="text-sm text-muted-foreground font-medium">
-                      {t("home.stats.supportAvailable")}
-                    </div>
-                  </div>
-                  <div className="text-center p-5 rounded-xl bg-secondary/50">
-                    <div className="text-4xl md:text-5xl font-bold cf-text-gradient mb-2">
-                      4.9
-                    </div>
-                    <div className="text-sm text-muted-foreground font-medium">
-                      {t("home.stats.customerRating")}
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
           </div>
         </div>
       </section>
 
       {/* Features Cards */}
-      <section className="py-14 border-b border-dashed border-border/60">
+      <section className="py-14 border-b border-border">
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {features.map((feature, index) => (
               <Card
                 key={index}
-                className="bg-secondary/30 hover:bg-secondary/50 transition-all duration-200 hover-lift group"
+                className="bg-card border-border hover:bg-secondary/40 transition-colors duration-200 group"
               >
                 <CardContent className="p-6">
-                  <div className="w-12 h-12 bg-primary text-primary-foreground rounded-xl flex items-center justify-center mb-4 group-hover:scale-105 transition-transform duration-200">
-                    <feature.icon className="w-6 h-6" />
+                  <div className="w-10 h-10 bg-secondary rounded-lg flex items-center justify-center mb-4">
+                    <feature.icon className="w-5 h-5 text-foreground" />
                   </div>
                   <h3 className="font-semibold text-foreground mb-2 text-lg">
                     {feature.title}
@@ -242,7 +196,7 @@ const Home = () => {
       </section>
 
       {/* Featured Posts Section */}
-      <section className="py-20 border-b border-dashed border-border/60">
+      <section className="py-20 border-b border-border">
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex items-center justify-between mb-8">
             <div>
@@ -305,7 +259,7 @@ const Home = () => {
       </section>
 
       {/* News Grid Section */}
-      <section className="py-20 border-b border-dashed border-border/60">
+      <section className="py-20 border-b border-border">
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex items-center justify-between mb-8">
             <div>
@@ -368,7 +322,7 @@ const Home = () => {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-dashed border-border/60 py-12">
+      <footer className="border-t border-border py-12">
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex flex-col md:flex-row justify-between items-center gap-6">
             <div className="flex items-center gap-2">

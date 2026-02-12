@@ -1,7 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Loader2, Upload, X } from "lucide-react";
 import api from "@/api/client";
@@ -238,26 +236,25 @@ const Gallery = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground pt-20">
+    <div className="min-h-screen bg-background text-foreground">
       {/* Header Section */}
-      <section className="py-12 border-b border-border/50">
+      <section className="pt-16 pb-12 border-b border-border">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center animate-fade-in-up">
-            <Badge variant="secondary" className="mb-4">
-              {t("gallery.badge", "Explore")}
-            </Badge>
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">
-              {t("gallery.title", "Travel Gallery")}
-            </h1>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              {t(
-                "gallery.subtitle",
-                "Discover the beauty of destinations awaiting your journey to the United States"
-              )}
-            </p>
+          <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+            <div className="max-w-3xl">
+              <h1 className="text-4xl md:text-5xl font-bold mb-4">
+                {t("gallery.title", "Travel Gallery")}
+              </h1>
+              <p className="text-xl text-muted-foreground">
+                {t(
+                  "gallery.subtitle",
+                  "Discover the beauty of destinations awaiting your journey."
+                )}
+              </p>
+            </div>
 
             {user?.role === "ADMIN" && (
-              <div className="mt-6 flex items-center justify-center gap-3">
+              <div className="flex items-center gap-3">
                 <input
                   ref={uploadInputRef}
                   type="file"
@@ -290,7 +287,7 @@ const Gallery = () => {
 
           {/* Category Filter */}
           {categories.length > 1 && (
-            <div className="flex flex-wrap justify-center gap-2 mt-8">
+            <div className="flex flex-wrap justify-start gap-2 mt-8">
               {categories.map((category) => (
                 <button
                   key={category}
@@ -399,9 +396,7 @@ const Gallery = () => {
           />
           <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white text-center">
             <p className="text-lg font-medium">{selectedImageAlt}</p>
-            <Badge variant="secondary" className="mt-2">
-              {selectedImageCategory}
-            </Badge>
+            <p className="text-sm text-white/80 mt-1">{selectedImageCategory}</p>
           </div>
         </div>
       )}

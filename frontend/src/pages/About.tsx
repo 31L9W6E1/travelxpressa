@@ -8,7 +8,7 @@ import {
   FileText,
   Headphones,
   Award,
-  Plane
+  Plane,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -61,21 +61,14 @@ const About = () => {
   return (
     <main className="min-h-screen bg-background text-foreground">
       {/* Hero Section */}
-      <section className="relative pt-28 pb-32">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-secondary border border-border rounded-full text-muted-foreground text-sm mb-6">
-            <Plane className="w-4 h-4" />
-            {t("home.hero.trusted", { defaultValue: "Trusted by thousands worldwide" })}
-          </div>
-
-          <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-6">
+      <section className="pt-16 pb-12 border-b border-border">
+        <div className="max-w-7xl mx-auto px-6">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">
             {t("aboutPage.hero.titlePrefix", { defaultValue: "About" })}{" "}
-            <span className="text-muted-foreground">
-              {t("footer.company", { defaultValue: "TravelXpressa" })}
-            </span>
+            {t("footer.company", { defaultValue: "TravelXpressa" })}
           </h1>
 
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-10">
+          <p className="text-xl text-muted-foreground max-w-3xl mb-8">
             {t("aboutPage.hero.subtitle", {
               defaultValue:
                 "We simplify visa application preparation with guided steps, clear checklists, and support for multiple destinations.",
@@ -88,7 +81,7 @@ const About = () => {
             })}
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <div className="flex flex-wrap gap-3">
             <Button asChild size="lg">
               <Link to="/select-country">
                 {t("aboutPage.hero.primaryCta", { defaultValue: "Start Application" })}

@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import { FileText, Languages, Paperclip, Send, Sparkles, Upload, X } from "lucide-react";
+import { FileText, Paperclip, Send, Sparkles, Upload, X } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { createInquiry } from "@/api/inquiries";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,7 +10,6 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
 
 const fileTypePricing: Record<string, number> = {
   certificate: 25000,
@@ -142,27 +141,26 @@ const TranslationService = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pt-20 text-foreground">
-      <div className="max-w-6xl mx-auto px-6 py-10 space-y-8">
-        <div className="space-y-3">
-          <Badge variant="secondary" className="inline-flex items-center gap-2">
-            <Languages className="w-4 h-4" />
-            {t("translationService.badge", { defaultValue: "Professional Translation" })}
-          </Badge>
-          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
+    <div className="min-h-screen bg-background text-foreground">
+      <section className="pt-16 pb-12 border-b border-border">
+        <div className="max-w-7xl mx-auto px-6">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">
             {t("translationService.title", {
               defaultValue: "Document Translation Service",
             })}
           </h1>
-          <p className="text-muted-foreground max-w-3xl">
+          <p className="text-xl text-muted-foreground max-w-3xl">
             {t("translationService.subtitle", {
               defaultValue:
                 "Submit your translation request for visa, legal, and academic documents. Pricing is transparent per page, and requests are linked to your account for admin review and tracking.",
             })}
           </p>
         </div>
+      </section>
 
-        <div className="grid lg:grid-cols-3 gap-6">
+      <section className="py-12">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid lg:grid-cols-3 gap-6">
           <Card className="lg:col-span-2">
             <CardHeader>
               <CardTitle>
@@ -513,7 +511,8 @@ const TranslationService = () => {
             </Card>
           </div>
         </div>
-      </div>
+        </div>
+      </section>
     </div>
   );
 };

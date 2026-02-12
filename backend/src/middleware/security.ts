@@ -217,7 +217,11 @@ export function detectSuspiciousActivity(req: Request, res: Response, next: Next
     /(\.\.\/)/i, // Path traversal
   ];
 
-  const checkString = JSON.stringify(req.body) + JSON.stringify(req.query) + req.url;
+  // IMPORTANT:
+  // Do not scan the request body for "suspicious" characters (like apostrophes).
+  // Legitimate user-generated content (chat, CMS posts, names like O'Connor) will otherwise be blocked.
+  // We only apply lightweight checks on the URL/query string here.
+  const checkString = req.url;
 
   for (const pattern of suspiciousPatterns) {
     if (pattern.test(checkString)) {

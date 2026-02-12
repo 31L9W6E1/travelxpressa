@@ -49,7 +49,7 @@ const translations: Record<Language, Record<string, string>> = {
     'auth.forgotPassword': 'Forgot Password?',
 
     // Home
-    'home.hero.badge': 'Trusted by 10,000+ Travelers',
+    'home.hero.badge': 'Trusted by 1,000+ Travelers',
     'home.hero.title': 'Your Journey to the',
     'home.hero.titleHighlight': 'United States',
     'home.hero.titleEnd': 'Starts Here',
@@ -125,7 +125,7 @@ const translations: Record<Language, Record<string, string>> = {
     'auth.forgotPassword': 'Нууц үгээ мартсан?',
 
     // Home
-    'home.hero.badge': '10,000+ зорчигчдын итгэл',
+    'home.hero.badge': '1,000+ зорчигчдын итгэл',
     'home.hero.title': 'Таны аялал',
     'home.hero.titleHighlight': 'Америк руу',
     'home.hero.titleEnd': 'эндээс эхэлнэ',

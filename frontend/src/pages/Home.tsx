@@ -250,27 +250,25 @@ const Home = () => {
               {blogPosts.slice(0, 8).map((item) => (
                 <Card key={item.id} className="overflow-hidden group">
                   <Link to={`/blog/${item.slug}`} className="block">
-                    <div className="relative aspect-square overflow-hidden m-px rounded-md">
+                    <div className="relative aspect-square overflow-hidden m-[1.5px] rounded-md">
                       <img
                         src={item.imageUrl ? normalizeImageUrl(item.imageUrl) : getDefaultImage("blog")}
                         alt={item.title}
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                      <div className="absolute bottom-0 left-0 right-0 p-4">
+                      <div className="absolute bottom-0 left-0 right-0 p-4 space-y-1">
                         <h3 className="text-sm font-medium text-white line-clamp-2">
                           {item.title}
                         </h3>
+                        <p className="text-[11px] text-white/85">
+                          {formatPostDate(
+                            item.publishedAt || item.createdAt,
+                            i18n.language,
+                          )}
+                        </p>
                       </div>
                     </div>
-                    <CardContent className="p-3">
-                      <p className="text-xs text-muted-foreground">
-                        {formatPostDate(
-                          item.publishedAt || item.createdAt,
-                          i18n.language,
-                        )}
-                      </p>
-                    </CardContent>
                   </Link>
                 </Card>
               ))}
@@ -314,27 +312,25 @@ const Home = () => {
               {newsItems.slice(0, 8).map((item) => (
                 <Card key={item.id} className="overflow-hidden group">
                   <Link to={`/news/${item.slug}`} className="block">
-                    <div className="relative aspect-square overflow-hidden">
+                    <div className="relative aspect-square overflow-hidden m-[1.5px] rounded-md">
                       <img
                         src={item.imageUrl ? normalizeImageUrl(item.imageUrl) : getDefaultImage("news")}
                         alt={item.title}
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                      <div className="absolute bottom-0 left-0 right-0 p-4">
+                      <div className="absolute bottom-0 left-0 right-0 p-4 space-y-1">
                         <h3 className="text-sm font-medium text-white line-clamp-2">
                           {item.title}
                         </h3>
+                        <p className="text-[11px] text-white/85">
+                          {formatPostDate(
+                            item.publishedAt || item.createdAt,
+                            i18n.language,
+                          )}
+                        </p>
                       </div>
                     </div>
-                    <CardContent className="p-3">
-                      <p className="text-xs text-muted-foreground">
-                        {formatPostDate(
-                          item.publishedAt || item.createdAt,
-                          i18n.language,
-                        )}
-                      </p>
-                    </CardContent>
                   </Link>
                 </Card>
               ))}

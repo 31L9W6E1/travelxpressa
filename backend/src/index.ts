@@ -9,7 +9,7 @@ import { logger } from './utils/logger';
 
 // Middleware
 import { securityHeaders, requestId, preventParamPollution, detectSuspiciousActivity, csrfProtection } from './middleware/security';
-import { apiRateLimit, authRateLimit } from './middleware/rateLimit';
+import { apiRateLimit, authRateLimit, chatRateLimit } from './middleware/rateLimit';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import { sanitizeBody } from './middleware/validate';
 
@@ -115,7 +115,7 @@ if (config.isProduction) {
   app.use('/api', apiRateLimit, userRoutes);
   app.use('/api/applications', apiRateLimit, applicationRoutes);
   app.use('/api/posts', apiRateLimit, postsRoutes);
-  app.use('/api/chat', apiRateLimit, chatRoutes);
+  app.use('/api/chat', chatRateLimit, chatRoutes);
   app.use('/api/upload', apiRateLimit, uploadRoutes);
   app.use('/api/payments', apiRateLimit, paymentRoutes);
   app.use('/api/flights', flightsRoutes);

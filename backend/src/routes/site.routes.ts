@@ -14,6 +14,7 @@ const pageViewRateLimit = rateLimit({
   windowMs: 60 * 1000, // 1 minute
   maxRequests: 120,
   message: 'Too many tracking requests, please try again later',
+  keyPrefix: 'pv:',
 });
 
 router.get(

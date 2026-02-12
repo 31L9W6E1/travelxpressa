@@ -33,6 +33,7 @@ interface RateLimitOptions {
   maxRequests?: number;
   message?: string;
   skipSuccessfulRequests?: boolean;
+  keyPrefix?: string;
   keyGenerator?: (req: Request) => string;
   onLimitReached?: (req: Request, res: Response) => void;
 }
@@ -46,12 +47,13 @@ export function rateLimit(options: RateLimitOptions = {}) {
     maxRequests = config.rateLimit.maxRequests,
     message = 'Too many requests, please try again later',
     skipSuccessfulRequests = false,
+    keyPrefix = '',
     keyGenerator = getClientIdentifier,
     onLimitReached,
   } = options;
 
   return (req: Request, res: Response, next: NextFunction) => {
-    const key = keyGenerator(req);
+    const key = `${keyPrefix}${keyGenerator(req)}`;
     const now = Date.now();
 
     let entry = rateLimitStore.get(key);
@@ -143,6 +145,7 @@ export const authRateLimit = rateLimit({
   maxRequests: config.rateLimit.authMaxRequests,
   message: 'Too many authentication attempts, please try again later',
   skipSuccessfulRequests: true, // Don't count successful requests (2xx/3xx)
+  keyPrefix: 'auth:',
   onLimitReached: (req) => {
     logger.security('Auth rate limit exceeded', {
       ip: req.ip,
@@ -158,4 +161,15 @@ export const authRateLimit = rateLimit({
 export const apiRateLimit = rateLimit({
   windowMs: config.rateLimit.windowMs,
   maxRequests: config.rateLimit.maxRequests,
+  keyPrefix: 'api:',
+});
+
+/**
+ * Chat-specific rate limit (higher throughput, separate namespace from general API).
+ */
+export const chatRateLimit = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  maxRequests: 60,
+  message: 'Too many chat requests, please slow down',
+  keyPrefix: 'chat:',
 });

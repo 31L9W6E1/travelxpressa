@@ -110,7 +110,8 @@ const ContactSupport = () => {
         : null;
       const matchedByUserId =
         isAdmin && preferredUserId
-          ? data.find((t) => t.userId === preferredUserId)
+          ? data.find((t) => t.userId === preferredUserId && t.status === "OPEN") ||
+            data.find((t) => t.userId === preferredUserId)
           : null;
       const existingSelection = selectedThreadId
         ? data.find((t) => t.id === selectedThreadId)
@@ -210,7 +211,11 @@ const ContactSupport = () => {
   }, [searchText, threads]);
 
   const preferredUserThread = useMemo(
-    () => (preferredUserId ? threads.find((t) => t.userId === preferredUserId) : null),
+    () =>
+      preferredUserId
+        ? threads.find((t) => t.userId === preferredUserId && t.status === "OPEN") ||
+          threads.find((t) => t.userId === preferredUserId)
+        : null,
     [preferredUserId, threads],
   );
 
@@ -382,7 +387,7 @@ const ContactSupport = () => {
               {threads.length ? "Open Support Chat" : "Start Support Chat"}
             </Button>
           )}
-          {isAdmin && preferredUserId && !preferredUserThread && (
+          {isAdmin && preferredUserId && (!preferredUserThread || preferredUserThread.status === "CLOSED") && (
             <Button
               onClick={() => void handleCreateThreadForUser(preferredUserId)}
               disabled={creatingThread}

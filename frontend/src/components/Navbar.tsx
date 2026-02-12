@@ -145,7 +145,7 @@ const Navbar = () => {
         }
 
         const [myInquiriesRes, myThreadsRes] = await Promise.all([
-          api.get("/api/user/inquiries/user", { params: { limit: 5 } }),
+          api.get("/api/inquiries/user", { params: { limit: 5 } }),
           api.get("/api/chat/threads"),
         ]);
         const myInquiries = myInquiriesRes.data?.data || [];

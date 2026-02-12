@@ -1,12 +1,9 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
-import { useTheme } from "../contexts/ThemeContext";
 import {
   Bell,
   BookOpen,
   ChevronDown,
-  ChevronsLeft,
-  ChevronsRight,
   CreditCard,
   FileText,
   Image,
@@ -19,7 +16,6 @@ import {
   Newspaper,
   Plane,
   Settings,
-  Sun,
   User,
   X,
 } from "lucide-react";
@@ -41,13 +37,11 @@ const navItemBaseClass =
 
 const Navbar = () => {
   const { user, logout } = useAuth();
-  const { theme, toggleTheme } = useTheme();
   const { t } = useTranslation();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
 
   const notificationDesktopRef = useRef<HTMLDivElement>(null);
@@ -81,12 +75,11 @@ const Navbar = () => {
   }, [isNotificationOpen, isUserMenuOpen]);
 
   useEffect(() => {
-    const width = isSidebarCollapsed ? "88px" : "240px";
-    document.documentElement.style.setProperty("--sidebar-width", width);
+    document.documentElement.style.setProperty("--sidebar-width", "240px");
     return () => {
       document.documentElement.style.setProperty("--sidebar-width", "240px");
     };
-  }, [isSidebarCollapsed]);
+  }, []);
 
   useEffect(() => {
     const loadNotifications = async () => {
@@ -297,14 +290,15 @@ const Navbar = () => {
     </div>
   );
 
-  const desktopLinkClass = `${navItemBaseClass} ${isSidebarCollapsed ? "px-2 justify-center" : "px-3"}`;
+  const isSidebarCollapsed = false;
+  const desktopLinkClass = `${navItemBaseClass} px-3`;
   const mobileLinkClass = `${navItemBaseClass} px-3`;
 
   return (
     <>
       <aside
         className="hidden md:flex fixed inset-y-0 left-0 z-40 bg-background border-r border-border flex-col transition-[width] duration-300"
-        style={{ width: isSidebarCollapsed ? "88px" : "240px" }}
+        style={{ width: "240px" }}
       >
         <div className="h-16 px-3 flex items-center border-b border-dashed border-border/70">
           <Link to="/" className={`flex items-center ${isSidebarCollapsed ? "justify-center w-full" : "gap-2 min-w-0"}`}>
@@ -405,15 +399,7 @@ const Navbar = () => {
       </aside>
 
       <header className="hidden md:flex fixed top-0 left-[var(--sidebar-width,240px)] right-0 z-30 h-16 bg-background/90 backdrop-blur-md border-b border-dashed border-border/70 px-6 items-center justify-between transition-[left] duration-300">
-        <div className="flex items-center">
-          <button
-            onClick={() => setIsSidebarCollapsed((prev) => !prev)}
-            className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
-            aria-label={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-          >
-            {isSidebarCollapsed ? <ChevronsRight className="w-5 h-5" /> : <ChevronsLeft className="w-5 h-5" />}
-          </button>
-        </div>
+        <div />
 
         <div className="flex items-center gap-2">
           {user && (
@@ -447,14 +433,6 @@ const Navbar = () => {
           )}
 
           <LanguageSwitcher />
-
-          <button
-            onClick={toggleTheme}
-            className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
-            aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
-          >
-            {theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-          </button>
 
           <div className="relative" ref={userMenuDesktopRef}>
             {user ? (
@@ -546,14 +524,6 @@ const Navbar = () => {
           )}
 
           <LanguageSwitcher />
-
-          <button
-            onClick={toggleTheme}
-            className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
-            aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
-          >
-            {theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-          </button>
 
           <div className="relative" ref={userMenuMobileRef}>
             <button

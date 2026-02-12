@@ -121,7 +121,7 @@ const Home = () => {
   return (
       <div className="min-h-screen bg-background text-foreground font-sans">
       {/* Hero Section - Cloudflare inspired */}
-      <section className="relative pt-24 pb-24 overflow-hidden">
+      <section className="relative pt-24 pb-24 overflow-hidden border-b border-dashed border-border/60">
         {/* Background decoration */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent pointer-events-none" />
         <div className="absolute top-20 right-0 w-[600px] h-[600px] bg-primary/10 rounded-full blur-3xl pointer-events-none" />
@@ -200,7 +200,7 @@ const Home = () => {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 border-b border-border/50">
+      <section className="py-20 border-b border-dashed border-border/60">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
@@ -234,7 +234,7 @@ const Home = () => {
       </section>
 
       {/* Featured Posts Section */}
-      <section className="py-20 border-b border-border/50">
+      <section className="py-20 border-b border-dashed border-border/60">
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex items-center justify-between mb-8">
             <div>
@@ -358,7 +358,7 @@ const Home = () => {
       </section>
 
       {/* News Grid Section */}
-      <section className="py-20 border-b border-border/50">
+      <section className="py-20 border-b border-dashed border-border/60">
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex items-center justify-between mb-8">
             <div>
@@ -422,7 +422,7 @@ const Home = () => {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-border py-12">
+      <footer className="border-t border-dashed border-border/60 py-12">
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex flex-col md:flex-row justify-between items-center gap-6">
             <div className="flex items-center gap-2">

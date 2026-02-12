@@ -62,22 +62,30 @@ function getAllowedFrontendOrigins(): Set<string> {
 }
 
 function getFrontendBaseUrl(req: Request): string {
-  if (process.env.FRONTEND_URL) {
-    return process.env.FRONTEND_URL.replace(/\/+$/, '');
-  }
+  const allowedOrigins = getAllowedFrontendOrigins();
 
   const origin = req.get('origin');
   if (origin) {
-    return origin.replace(/\/+$/, '');
+    const normalizedOrigin = origin.replace(/\/+$/, '');
+    if (allowedOrigins.has(normalizedOrigin)) {
+      return normalizedOrigin;
+    }
   }
 
   const referer = req.get('referer');
   if (referer) {
     try {
-      return new URL(referer).origin;
+      const refererOrigin = new URL(referer).origin;
+      if (allowedOrigins.has(refererOrigin)) {
+        return refererOrigin;
+      }
     } catch {
       // Ignore malformed referer and continue to fallback.
     }
+  }
+
+  if (process.env.FRONTEND_URL) {
+    return process.env.FRONTEND_URL.replace(/\/+$/, '');
   }
 
   const firstCorsOrigin = config.corsOrigin
@@ -139,6 +147,31 @@ function getBackendBaseUrl(req: Request): string {
   return `${req.protocol}://${req.get('host')}`;
 }
 
+function getCookieDomain(): string | undefined {
+  const explicitDomain = (process.env.COOKIE_DOMAIN || '').trim();
+  if (explicitDomain) {
+    const normalized = explicitDomain.replace(/^\./, '').toLowerCase();
+    if (!normalized || normalized === 'localhost' || normalized === '127.0.0.1') {
+      return undefined;
+    }
+    return `.${normalized}`;
+  }
+
+  const candidateUrls = [process.env.FRONTEND_URL, process.env.BACKEND_URL].filter(Boolean) as string[];
+  for (const value of candidateUrls) {
+    try {
+      const hostname = new URL(value).hostname.toLowerCase();
+      if (hostname.endsWith('travelxpressa.com')) {
+        return '.travelxpressa.com';
+      }
+    } catch {
+      // Ignore malformed URL and continue.
+    }
+  }
+
+  return undefined;
+}
+
 const REFRESH_TOKEN_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 
 function hashRefreshToken(token: string): string {
@@ -151,19 +184,23 @@ function refreshTokenLookupCandidates(token: string): string[] {
 }
 
 function setRefreshTokenCookie(res: Response, token: string): void {
+  const cookieDomain = getCookieDomain();
   res.cookie('refreshToken', token, {
     httpOnly: true,
     secure: config.isProduction,
-    sameSite: 'strict',
+    sameSite: 'lax',
+    ...(cookieDomain ? { domain: cookieDomain } : {}),
     maxAge: REFRESH_TOKEN_MAX_AGE_MS,
   });
 }
 
 function clearRefreshTokenCookie(res: Response): void {
+  const cookieDomain = getCookieDomain();
   res.clearCookie('refreshToken', {
     httpOnly: true,
     secure: config.isProduction,
-    sameSite: 'strict',
+    sameSite: 'lax',
+    ...(cookieDomain ? { domain: cookieDomain } : {}),
   });
 }
 

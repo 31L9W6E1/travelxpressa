@@ -111,6 +111,22 @@ export const authApi = {
       throw handleApiError(error);
     }
   },
+
+  async forgotPassword(email: string): Promise<void> {
+    try {
+      await api.post('/api/auth/forgot-password', { email });
+    } catch (error) {
+      throw handleApiError(error);
+    }
+  },
+
+  async resetPassword(token: string, newPassword: string): Promise<void> {
+    try {
+      await api.post('/api/auth/reset-password', { token, newPassword });
+    } catch (error) {
+      throw handleApiError(error);
+    }
+  },
 };
 
 export default authApi;

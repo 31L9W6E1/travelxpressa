@@ -1,6 +1,7 @@
 import { Router, type Request, type Response } from 'express';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
+import jwt from 'jsonwebtoken';
 import { prisma } from '../lib/prisma';
 import { validate } from '../middleware/validate';
 import {
@@ -15,11 +16,18 @@ import {
   UnauthorizedError,
   ConflictError
 } from '../middleware/errorHandler';
-import { registerSchema, loginSchema, refreshTokenSchema } from '../validation/schemas';
+import {
+  registerSchema,
+  loginSchema,
+  refreshTokenSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
+} from '../validation/schemas';
 import { UserRole, AuthenticatedRequest } from '../types';
 import { logger } from '../utils/logger';
 import { config } from '../config';
 import { hash } from '../utils/encryption';
+import { emailService } from '../services/email.service';
 
 const router = Router();
 
@@ -32,6 +40,31 @@ const FACEBOOK_APP_SECRET = process.env.FACEBOOK_APP_SECRET || '';
 const BCRYPT_ROUNDS = 12;
 const MAX_FAILED_LOGINS = 100; // Increased for development
 const LOCKOUT_DURATION_MS = 1 * 60 * 1000; // 1 minute in development
+const PASSWORD_RESET_EXPIRES_IN = '30m';
+const PASSWORD_RESET_EXPIRES_MINUTES = 30;
+const PASSWORD_RESET_PURPOSE = 'PASSWORD_RESET';
+
+type PasswordResetTokenPayload = {
+  userId: string;
+  purpose: string;
+  iat?: number;
+  exp?: number;
+};
+
+function getPasswordResetSecret(passwordHash: string): string {
+  return `${config.jwt.secret}:${passwordHash}`;
+}
+
+function generatePasswordResetToken(userId: string, passwordHash: string): string {
+  const payload: PasswordResetTokenPayload = {
+    userId,
+    purpose: PASSWORD_RESET_PURPOSE,
+  };
+
+  return jwt.sign(payload, getPasswordResetSecret(passwordHash), {
+    expiresIn: PASSWORD_RESET_EXPIRES_IN,
+  } as jwt.SignOptions);
+}
 
 function toOrigin(url: string): string | null {
   try {
@@ -300,6 +333,151 @@ router.post(
         accessToken,
         refreshToken: config.isProduction ? undefined : refreshToken,
       },
+    });
+  })
+);
+
+/**
+ * Request password reset link
+ */
+router.post(
+  '/forgot-password',
+  validate({ body: forgotPasswordSchema }),
+  asyncHandler(async (req: Request, res: Response) => {
+    const { email } = req.body as { email: string };
+    const normalizedEmail = email.toLowerCase();
+    const genericMessage =
+      'If an account exists for this email, a password reset link has been sent';
+
+    const user = await prisma.user.findUnique({
+      where: { email: normalizedEmail },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        password: true,
+      },
+    });
+
+    if (!user) {
+      logger.info('Password reset requested for non-existent account', {
+        email: normalizedEmail,
+      });
+      return res.json({
+        success: true,
+        message: genericMessage,
+      });
+    }
+
+    const token = generatePasswordResetToken(user.id, user.password);
+    const frontendBaseUrl = getFrontendBaseUrl(req);
+    const resetLink = `${frontendBaseUrl}/reset-password?token=${encodeURIComponent(token)}`;
+
+    const sent = await emailService.sendPasswordReset(user.email, {
+      userName: user.name || 'there',
+      resetLink,
+      expiresInMinutes: PASSWORD_RESET_EXPIRES_MINUTES,
+    });
+
+    if (!sent) {
+      logger.warn('Password reset email could not be sent', {
+        userId: user.id,
+        email: user.email,
+      });
+    }
+
+    logger.info('Password reset link generated', {
+      userId: user.id,
+      email: user.email,
+    });
+
+    return res.json({
+      success: true,
+      message: genericMessage,
+    });
+  })
+);
+
+/**
+ * Reset password using email token
+ */
+router.post(
+  '/reset-password',
+  validate({ body: resetPasswordSchema }),
+  asyncHandler(async (req: Request, res: Response) => {
+    const { token, newPassword } = req.body as {
+      token: string;
+      newPassword: string;
+    };
+
+    const decoded = jwt.decode(token);
+    if (!decoded || typeof decoded !== 'object') {
+      throw new BadRequestError('Invalid or expired reset token');
+    }
+
+    const tokenPayload = decoded as PasswordResetTokenPayload;
+    if (
+      typeof tokenPayload.userId !== 'string' ||
+      tokenPayload.purpose !== PASSWORD_RESET_PURPOSE
+    ) {
+      throw new BadRequestError('Invalid or expired reset token');
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: tokenPayload.userId },
+      select: {
+        id: true,
+        email: true,
+        password: true,
+      },
+    });
+
+    if (!user) {
+      throw new BadRequestError('Invalid or expired reset token');
+    }
+
+    try {
+      jwt.verify(token, getPasswordResetSecret(user.password));
+    } catch (error) {
+      if (error instanceof jwt.TokenExpiredError || error instanceof jwt.JsonWebTokenError) {
+        throw new BadRequestError('Invalid or expired reset token');
+      }
+      throw error;
+    }
+
+    const isSamePassword = await bcrypt.compare(newPassword, user.password);
+    if (isSamePassword) {
+      throw new BadRequestError('New password must be different from current password');
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, BCRYPT_ROUNDS);
+    const now = new Date();
+
+    await prisma.$transaction([
+      prisma.user.update({
+        where: { id: user.id },
+        data: {
+          password: hashedPassword,
+          failedLogins: 0,
+          lockedUntil: null,
+        },
+      }),
+      prisma.refreshToken.updateMany({
+        where: {
+          userId: user.id,
+          revokedAt: null,
+        },
+        data: { revokedAt: now },
+      }),
+    ]);
+
+    clearRefreshTokenCookie(res);
+
+    logger.info('Password reset completed', { userId: user.id });
+
+    res.json({
+      success: true,
+      message: 'Password has been reset successfully',
     });
   })
 );

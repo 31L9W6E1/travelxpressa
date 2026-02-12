@@ -19,6 +19,8 @@ import Gallery from "./pages/Gallery";
 import EnhancedDashboard from "./pages/EnhancedDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import Login from "./pages/Login";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import ManageUsers from "./pages/ManageUsers";
 import Application from "./pages/Application";
 import UserDetail from "./pages/UserDetail";
@@ -110,6 +112,8 @@ function App() {
               No page reload happens
             */}
             <Route path="/login" element={<Login />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/oauth/callback" element={<OAuthCallback />} />
             <Route path="/about" element={<About />} />
             <Route path="/blog" element={<Blog />} />

@@ -363,6 +363,66 @@ This payment link expires in 24 hours.
 © ${new Date().getFullYear()} TravelXpressa
     `,
   }),
+
+  passwordReset: (data: {
+    userName: string;
+    resetLink: string;
+    expiresInMinutes: number;
+  }) => ({
+    subject: 'Reset Your TravelXpressa Password',
+    html: `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Password Reset</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f5;">
+  <div style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+    <div style="background: linear-gradient(135deg, #1e293b 0%, #334155 100%); border-radius: 16px 16px 0 0; padding: 40px 30px; text-align: center;">
+      <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700;">
+        ✈️ TravelXpressa
+      </h1>
+      <p style="color: #94a3b8; margin: 10px 0 0; font-size: 14px;">
+        Password Reset Request
+      </p>
+    </div>
+
+    <div style="background: #ffffff; padding: 40px 30px; border-radius: 0 0 16px 16px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+      <h2 style="color: #1e293b; margin: 0 0 16px; font-size: 24px;">Reset your password</h2>
+      <p style="color: #64748b; font-size: 16px; line-height: 1.6; margin: 0 0 20px;">
+        Hello ${data.userName}, we received a request to reset your password.
+      </p>
+      <p style="color: #64748b; font-size: 16px; line-height: 1.6; margin: 0 0 24px;">
+        Click the button below to set a new password. This link expires in ${data.expiresInMinutes} minutes.
+      </p>
+
+      <div style="text-align: center; margin: 0 0 24px;">
+        <a href="${data.resetLink}" style="display: inline-block; background: linear-gradient(135deg, #1e293b 0%, #334155 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-size: 16px; font-weight: 600;">
+          Reset Password
+        </a>
+      </div>
+
+      <p style="color: #94a3b8; font-size: 13px; line-height: 1.5; margin: 0;">
+        If you did not request this, you can safely ignore this email.
+      </p>
+    </div>
+  </div>
+</body>
+</html>
+    `,
+    text: `
+Hello ${data.userName},
+
+We received a request to reset your TravelXpressa password.
+
+Reset link (expires in ${data.expiresInMinutes} minutes):
+${data.resetLink}
+
+If you did not request this, you can ignore this email.
+    `,
+  }),
 };
 
 class EmailService {
@@ -500,6 +560,18 @@ class EmailService {
       amount: formattedAmount,
     });
 
+    return this.send(email, template.subject, template.html, template.text);
+  }
+
+  async sendPasswordReset(
+    email: string,
+    data: {
+      userName: string;
+      resetLink: string;
+      expiresInMinutes: number;
+    }
+  ): Promise<boolean> {
+    const template = EMAIL_TEMPLATES.passwordReset(data);
     return this.send(email, template.subject, template.html, template.text);
   }
 }

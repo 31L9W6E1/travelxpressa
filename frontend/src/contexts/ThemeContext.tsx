@@ -14,27 +14,37 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 const THEME_STORAGE_KEY = 'travelxpressa-theme';
 
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
-  const [theme, setThemeState] = useState<Theme>('light');
+  const [theme, setThemeState] = useState<Theme>(() => {
+    if (typeof window === 'undefined') {
+      return 'light';
+    }
+    const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+    if (savedTheme === 'light' || savedTheme === 'dark') {
+      return savedTheme;
+    }
+    return 'light';
+  });
 
   useEffect(() => {
     const root = document.documentElement;
-    root.classList.remove('dark');
-    localStorage.setItem(THEME_STORAGE_KEY, 'light');
-    if (theme !== 'light') {
-      setThemeState('light');
+    if (theme === 'dark') {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
     }
+    localStorage.setItem(THEME_STORAGE_KEY, theme);
   }, [theme]);
 
   const toggleTheme = () => {
-    setThemeState('light');
+    setThemeState((previousTheme) => (previousTheme === 'light' ? 'dark' : 'light'));
   };
 
-  const setTheme = (_newTheme: Theme) => {
-    setThemeState('light');
+  const setTheme = (newTheme: Theme) => {
+    setThemeState(newTheme);
   };
 
   return (
-    <ThemeContext.Provider value={{ theme: 'light', toggleTheme, setTheme, isDark: false }}>
+    <ThemeContext.Provider value={{ theme, toggleTheme, setTheme, isDark: theme === 'dark' }}>
       {children}
     </ThemeContext.Provider>
   );

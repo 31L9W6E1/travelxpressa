@@ -17,6 +17,7 @@ import {
   Moon,
   Newspaper,
   Plane,
+  Sun,
   Shield,
   Settings,
   User,
@@ -27,6 +28,7 @@ import { UserAvatar } from "./UserAvatar";
 import { useTranslation } from "react-i18next";
 import LanguageSwitcher from "./LanguageSwitcher";
 import api from "@/api/client";
+import { useTheme } from "@/contexts/ThemeContext";
 
 type NotificationItem = {
   id: string;
@@ -40,6 +42,7 @@ const navItemBaseClass =
 
 const Navbar = () => {
   const { user, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const { t } = useTranslation();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -474,6 +477,16 @@ const Navbar = () => {
 
           <LanguageSwitcher />
 
+          <button
+            type="button"
+            onClick={toggleTheme}
+            className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+            aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+            title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+          >
+            {theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+          </button>
+
           <div className="relative" ref={userMenuDesktopRef}>
             {user ? (
               <button
@@ -564,6 +577,16 @@ const Navbar = () => {
           )}
 
           <LanguageSwitcher />
+
+          <button
+            type="button"
+            onClick={toggleTheme}
+            className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+            aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+            title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+          >
+            {theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+          </button>
 
           <div className="relative" ref={userMenuMobileRef}>
             <button

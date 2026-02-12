@@ -110,28 +110,29 @@ app.get('/ready', async (_req, res) => {
 if (config.isProduction) {
   app.use('/api/auth', authRateLimit, csrfProtection, authRoutes);
   app.use('/api/site', siteRoutes);
-  app.use('/api', apiRateLimit, inquiryRoutes);
-  app.use('/api/admin', apiRateLimit, adminRoutes);
-  app.use('/api', apiRateLimit, userRoutes);
   app.use('/api/applications', apiRateLimit, applicationRoutes);
+  app.use('/api/admin', apiRateLimit, adminRoutes);
   app.use('/api/posts', apiRateLimit, postsRoutes);
   app.use('/api/chat', chatRateLimit, chatRoutes);
   app.use('/api/upload', apiRateLimit, uploadRoutes);
   app.use('/api/payments', apiRateLimit, paymentRoutes);
   app.use('/api/flights', flightsRoutes);
+  // NOTE: Mount the generic /api routers last so they don't rate-limit every /api/* endpoint.
+  app.use('/api', apiRateLimit, inquiryRoutes);
+  app.use('/api', apiRateLimit, userRoutes);
 } else {
   // Development - no rate limiting
   app.use('/api/auth', csrfProtection, authRoutes);
   app.use('/api/site', siteRoutes);
-  app.use('/api', inquiryRoutes);
   app.use('/api/admin', adminRoutes);
-  app.use('/api', userRoutes);
   app.use('/api/applications', applicationRoutes);
   app.use('/api/posts', postsRoutes);
   app.use('/api/chat', chatRoutes);
   app.use('/api/upload', uploadRoutes);
   app.use('/api/payments', paymentRoutes);
   app.use('/api/flights', flightsRoutes);
+  app.use('/api', inquiryRoutes);
+  app.use('/api', userRoutes);
 }
 
 // 404 handler

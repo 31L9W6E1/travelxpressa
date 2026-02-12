@@ -15,7 +15,6 @@ import {
 import {
   getFeaturedContent,
   formatPostDate,
-  calculateReadTime,
   getDefaultImage,
 } from "@/api/posts";
 import type { PostSummary } from "@/api/posts";
@@ -24,9 +23,6 @@ import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useTranslation } from "react-i18next";
@@ -250,94 +246,34 @@ const Home = () => {
               <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
             </div>
           ) : blogPosts.length > 0 ? (
-            <div className="grid md:grid-cols-2 gap-8">
-              {/* Main Featured Post */}
-              <Card className="overflow-hidden group">
-                <Link to={`/blog/${blogPosts[0].slug}`} className="block">
-                  <div className="relative aspect-[4/3] overflow-hidden">
-                    <img
-                      src={blogPosts[0].imageUrl ? normalizeImageUrl(blogPosts[0].imageUrl) : getDefaultImage("blog")}
-                      alt={blogPosts[0].title}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                    {blogPosts[0].tags && (
-                      <Badge className="absolute top-4 left-4">
-                        {blogPosts[0].tags.split(",")[0]}
-                      </Badge>
-                    )}
-                  </div>
-                  <CardContent className="p-6">
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
-                      <span className="flex items-center gap-1">
-                        <Calendar className="w-4 h-4" />
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {blogPosts.slice(0, 8).map((item) => (
+                <Card key={item.id} className="overflow-hidden group">
+                  <Link to={`/blog/${item.slug}`} className="block">
+                    <div className="relative aspect-square overflow-hidden m-px rounded-md">
+                      <img
+                        src={item.imageUrl ? normalizeImageUrl(item.imageUrl) : getDefaultImage("blog")}
+                        alt={item.title}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                      <div className="absolute bottom-0 left-0 right-0 p-4">
+                        <h3 className="text-sm font-medium text-white line-clamp-2">
+                          {item.title}
+                        </h3>
+                      </div>
+                    </div>
+                    <CardContent className="p-3">
+                      <p className="text-xs text-muted-foreground">
                         {formatPostDate(
-                          blogPosts[0].publishedAt || blogPosts[0].createdAt,
+                          item.publishedAt || item.createdAt,
                           i18n.language,
                         )}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Clock className="w-4 h-4" />
-                        {t("content.readTime", {
-                          defaultValue: "{{minutes}} min read",
-                          minutes: calculateReadTime(blogPosts[0].excerpt || ""),
-                        })}
-                      </span>
-                    </div>
-                    <h3 className="text-xl font-bold mb-2 group-hover:text-muted-foreground transition-colors">
-                      {blogPosts[0].title}
-                    </h3>
-                    <p className="text-muted-foreground line-clamp-2">
-                      {blogPosts[0].excerpt}
-                    </p>
-                  </CardContent>
-                </Link>
-              </Card>
-
-              {/* Secondary Featured Posts */}
-              <div className="space-y-4">
-                {blogPosts.slice(1, 4).map((post) => (
-                  <Card key={post.id} className="overflow-hidden group">
-                    <Link to={`/blog/${post.slug}`} className="flex gap-4 p-4">
-                      <div className="relative w-24 h-24 flex-shrink-0 overflow-hidden rounded-lg">
-                        <img
-                          src={post.imageUrl ? normalizeImageUrl(post.imageUrl) : getDefaultImage("blog")}
-                          alt={post.title}
-                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                        />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        {post.tags && (
-                          <Badge variant="secondary" className="mb-2 text-xs">
-                            {post.tags.split(",")[0]}
-                          </Badge>
-                        )}
-                        <h3 className="font-semibold group-hover:text-muted-foreground transition-colors line-clamp-2">
-                          {post.title}
-                        </h3>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          {formatPostDate(
-                            post.publishedAt || post.createdAt,
-                            i18n.language,
-                          )}
-                        </p>
-                      </div>
-                    </Link>
-                  </Card>
-                ))}
-                {blogPosts.length === 1 && (
-                  <Card className="p-8 text-center">
-                    <p className="text-muted-foreground mb-4">
-                      {t("home.featuredArticles.moreComingSoon")}
-                    </p>
-                    <Button asChild variant="outline">
-                      <Link to="/blog">
-                        {t("home.featuredArticles.browseAll")}
-                      </Link>
-                    </Button>
-                  </Card>
-                )}
-              </div>
+                      </p>
+                    </CardContent>
+                  </Link>
+                </Card>
+              ))}
             </div>
           ) : (
             <Card className="p-12 text-center">

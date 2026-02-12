@@ -203,6 +203,7 @@ type TrafficStats = {
   last24h: { views: number; uniqueVisitors: number };
   series24h: Array<{ hour: string; views: number; visitors: number }>;
   topPages7d: Array<{ path: string; views: number }>;
+  countries24h: Array<{ countryCode: string; country: string; views: number; visitors: number }>;
 };
 
 // Chart configurations are defined inside the component so labels can be localized.
@@ -1961,6 +1962,43 @@ const AdminDashboard = () => {
                   </CardContent>
                 </Card>
               </div>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>{t("dashboard.traffic.topCountriesTitle", "Top countries (last 24h)")}</CardTitle>
+                  <CardDescription>
+                    {t("dashboard.traffic.topCountriesDesc", "Based on IP geolocation for pageviews")}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {(traffic?.countries24h || []).length === 0 ? (
+                      <p className="text-sm text-muted-foreground">
+                        {t("dashboard.traffic.noCountryData", "No location data yet.")}
+                      </p>
+                    ) : (
+                      (traffic?.countries24h || []).map((row) => (
+                        <div
+                          key={`${row.countryCode}-${row.country}`}
+                          className="flex items-center justify-between gap-3"
+                        >
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium text-foreground truncate">
+                              {row.country}{" "}
+                              <span className="text-muted-foreground font-normal">({row.countryCode})</span>
+                            </p>
+                            <p className="text-xs text-muted-foreground truncate">
+                              {t("dashboard.traffic.uniqueVisitors", "Unique visitors")}:{" "}
+                              <span className="tabular-nums">{row.visitors}</span>
+                            </p>
+                          </div>
+                          <span className="text-sm text-muted-foreground tabular-nums">{row.views}</span>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
 
               {/* Site Settings */}
               <Card>

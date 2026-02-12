@@ -123,7 +123,9 @@ router.get(
             messages: {
               where: {
                 isRead: false,
-                senderType: { not: 'SYSTEM' },
+                ...(userRole === 'USER'
+                  ? { senderType: { notIn: ['USER'] } }
+                  : { senderType: { in: ['USER', 'TELEGRAM'] } }),
               },
             },
           },
@@ -176,7 +178,7 @@ router.get(
         isRead: false,
         ...(userRole === 'USER'
           ? { senderType: { in: ['ADMIN', 'SYSTEM', 'TELEGRAM'] } }
-          : { senderType: 'USER' }),
+          : { senderType: { in: ['USER', 'TELEGRAM'] } }),
       },
       data: { isRead: true },
     });
@@ -336,7 +338,7 @@ router.get(
           _count: {
             select: {
               messages: {
-                where: { isRead: false, senderType: 'USER' },
+                where: { isRead: false, senderType: { in: ['USER', 'TELEGRAM'] } },
               },
             },
           },

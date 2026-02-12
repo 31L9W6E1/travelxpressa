@@ -6,6 +6,7 @@ import { asyncHandler } from '../middleware/errorHandler';
 import { rateLimit } from '../middleware/rateLimit';
 import { pageViewSchema } from '../validation/schemas';
 import { getSiteSettings } from '../services/siteSettings.service';
+import { resolveGeoForRequest } from '../services/geoIp.service';
 
 const router = Router();
 
@@ -40,11 +41,14 @@ router.post(
     const userId = (req as any).user?.userId as string | undefined;
     const userAgent = req.headers['user-agent'];
 
+    const geo = await resolveGeoForRequest(req);
+
     // Keep metadata small and predictable.
     const metadata = JSON.stringify({
       title: title?.slice(0, 200),
       referrer: referrer?.slice(0, 500),
       locale: locale?.slice(0, 10),
+      geo,
     });
 
     await prisma.auditLog.create({
@@ -64,4 +68,3 @@ router.post(
 );
 
 export default router;
-

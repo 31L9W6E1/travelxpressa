@@ -52,6 +52,7 @@ const Navbar = () => {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
+  const [notificationCount, setNotificationCount] = useState(0);
 
   const notificationDesktopRef = useRef<HTMLDivElement>(null);
   const notificationMobileRef = useRef<HTMLDivElement>(null);
@@ -94,9 +95,12 @@ const Navbar = () => {
   }, []);
 
   useEffect(() => {
+    let cancelled = false;
+
     const loadNotifications = async () => {
       if (!user) {
         setNotifications([]);
+        setNotificationCount(0);
         return;
       }
 
@@ -108,7 +112,13 @@ const Navbar = () => {
           ]);
 
           const pendingInquiries = pendingInquiriesRes.data?.data || [];
-          const openThreads = (openThreadsRes.data?.data || []).filter((thread: any) => thread.status === "OPEN");
+          const openThreads = (openThreadsRes.data?.data || [])
+            .filter((thread: any) => thread.status === "OPEN")
+            .filter((thread: any) => Number(thread?._count?.messages || 0) > 0);
+          const unreadMessageTotal = openThreads.reduce(
+            (sum: number, tItem: any) => sum + Number(tItem?._count?.messages || 0),
+            0
+          );
 
           const next: NotificationItem[] = [];
           for (const item of pendingInquiries.slice(0, 3)) {
@@ -123,11 +133,14 @@ const Navbar = () => {
             next.push({
               id: `thread-${item.id}`,
               title: item.user?.name || item.user?.email || "Open support thread",
-              subtitle: "Needs admin response",
+              subtitle: `${Number(item?._count?.messages || 0)} unread message(s)`,
               to: `/contactsupport?threadId=${item.id}`,
             });
           }
-          setNotifications(next);
+          if (!cancelled) {
+            setNotifications(next);
+            setNotificationCount(Math.min(99, pendingInquiries.length + unreadMessageTotal));
+          }
           return;
         }
 
@@ -137,6 +150,11 @@ const Navbar = () => {
         ]);
         const myInquiries = myInquiriesRes.data?.data || [];
         const myThreads = myThreadsRes.data?.data || [];
+        const unreadThreads = myThreads.filter((thread: any) => Number(thread?._count?.messages || 0) > 0);
+        const unreadMessageTotal = unreadThreads.reduce(
+          (sum: number, tItem: any) => sum + Number(tItem?._count?.messages || 0),
+          0
+        );
         const next: NotificationItem[] = [];
 
         for (const item of myInquiries.slice(0, 3)) {
@@ -147,22 +165,39 @@ const Navbar = () => {
             to: "/profile/inbox",
           });
         }
-        for (const item of myThreads.slice(0, 2)) {
+        for (const item of unreadThreads.slice(0, 2)) {
           next.push({
             id: `my-thread-${item.id}`,
             title: item.subject || "Support conversation",
-            subtitle: item.status === "OPEN" ? "Thread is active" : `Status: ${item.status}`,
+            subtitle: `${Number(item?._count?.messages || 0)} new message(s)`,
             to: `/contactsupport?threadId=${item.id}`,
           });
         }
-        setNotifications(next);
+        if (!cancelled) {
+          setNotifications(next);
+          setNotificationCount(Math.min(99, unreadMessageTotal + myInquiries.length));
+        }
       } catch {
-        setNotifications([]);
+        if (!cancelled) {
+          setNotifications([]);
+          setNotificationCount(0);
+        }
       }
     };
 
     void loadNotifications();
-  }, [user]);
+
+    if (!user) return () => {};
+
+    const intervalId = window.setInterval(() => {
+      void loadNotifications();
+    }, 20_000);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(intervalId);
+    };
+  }, [user, t]);
 
   const closeMobileMenu = () => setIsMenuOpen(false);
 
@@ -484,9 +519,9 @@ const Navbar = () => {
                 aria-label="Notifications"
               >
                 <Bell className="w-5 h-5" />
-                {notifications.length > 0 && (
+                {notificationCount > 0 && (
                   <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 rounded-full bg-primary text-primary-foreground text-[10px] leading-4 text-center">
-                    {notifications.length > 9 ? "9+" : notifications.length}
+                    {notificationCount > 9 ? "9+" : notificationCount}
                   </span>
                 )}
               </button>
@@ -584,9 +619,9 @@ const Navbar = () => {
                 aria-label="Notifications"
               >
                 <Bell className="w-5 h-5" />
-                {notifications.length > 0 && (
+                {notificationCount > 0 && (
                   <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 rounded-full bg-primary text-primary-foreground text-[10px] leading-4 text-center">
-                    {notifications.length > 9 ? "9+" : notifications.length}
+                    {notificationCount > 9 ? "9+" : notificationCount}
                   </span>
                 )}
               </button>

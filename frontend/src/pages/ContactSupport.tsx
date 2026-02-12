@@ -93,8 +93,8 @@ const ContactSupport = () => {
   const preferredUserId = searchParams.get("userId");
   const preferredThreadId = searchParams.get("threadId");
 
-  const loadThreads = async () => {
-    setLoadingThreads(true);
+  const loadThreads = async (options?: { silent?: boolean }) => {
+    if (!options?.silent) setLoadingThreads(true);
     try {
       const data = await fetchThreads();
       setThreads(data);
@@ -122,17 +122,17 @@ const ContactSupport = () => {
       console.error("Failed to load support threads:", error);
       toast.error("Failed to load support threads");
     } finally {
-      setLoadingThreads(false);
+      if (!options?.silent) setLoadingThreads(false);
     }
   };
 
-  const loadThreadDetail = async (threadId: string) => {
+  const loadThreadDetail = async (threadId: string, options?: { silent?: boolean }) => {
     if (!threadId) {
       setSelectedThread(null);
       return;
     }
 
-    setLoadingThreadDetail(true);
+    if (!options?.silent) setLoadingThreadDetail(true);
     try {
       const detail = await fetchThreadById(threadId);
       setSelectedThread(detail);
@@ -140,7 +140,7 @@ const ContactSupport = () => {
       console.error("Failed to load thread:", error);
       toast.error("Failed to load conversation");
     } finally {
-      setLoadingThreadDetail(false);
+      if (!options?.silent) setLoadingThreadDetail(false);
     }
   };
 
@@ -152,6 +152,20 @@ const ContactSupport = () => {
   useEffect(() => {
     if (!selectedThreadId) return;
     void loadThreadDetail(selectedThreadId);
+  }, [selectedThreadId]);
+
+  useEffect(() => {
+    if (!selectedThreadId) return;
+
+    const intervalId = window.setInterval(() => {
+      void loadThreadDetail(selectedThreadId, { silent: true });
+      void loadThreads({ silent: true });
+    }, 8_000);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedThreadId]);
 
   useEffect(() => {
@@ -347,13 +361,13 @@ const ContactSupport = () => {
           </div>
           {selectedThreadId && (
             <Button
-              variant="outline"
-              onClick={() => {
-                if (!selectedThreadId) return;
-                void loadThreadDetail(selectedThreadId);
-                void loadThreads();
-              }}
-            >
+                      variant="outline"
+                      onClick={() => {
+                        if (!selectedThreadId) return;
+                        void loadThreadDetail(selectedThreadId);
+                        void loadThreads();
+                      }}
+                    >
               <RefreshCw className="w-4 h-4 mr-2" />
               Refresh
             </Button>
@@ -430,9 +444,16 @@ const ContactSupport = () => {
                               ? thread.user?.name || thread.user?.email || "User"
                               : thread.subject || "Support Request"}
                           </p>
-                          <Badge variant="outline" className={threadStatusVariant(thread.status)}>
-                            {thread.status}
-                          </Badge>
+                          <div className="flex items-center gap-2">
+                            {Number(thread?._count?.messages || 0) > 0 && (
+                              <span className="min-w-5 h-5 px-1.5 rounded-full bg-primary text-primary-foreground text-[11px] leading-5 text-center">
+                                {Number(thread?._count?.messages || 0) > 9 ? "9+" : Number(thread?._count?.messages || 0)}
+                              </span>
+                            )}
+                            <Badge variant="outline" className={threadStatusVariant(thread.status)}>
+                              {thread.status}
+                            </Badge>
+                          </div>
                         </div>
                         {isAdmin && (
                           <p className="text-xs text-muted-foreground truncate mt-1">

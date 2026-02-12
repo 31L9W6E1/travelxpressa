@@ -390,7 +390,7 @@ router.get(
 router.get(
   '/traffic',
   asyncHandler(async (_req: Request, res: Response) => {
-    const [lastHour, last24h, hourlyBuckets, topPages] = await Promise.all([
+    const [lastHour, last24h, hourlyBuckets, topPages, countries24h] = await Promise.all([
       prisma.$queryRaw<
         Array<{ views: number; visitors: number }>
       >`
@@ -445,6 +445,30 @@ router.get(
         ORDER BY views DESC
         LIMIT 8
       `,
+      prisma.$queryRaw<
+        Array<{ countrycode: string | null; country: string | null; views: number; visitors: number }>
+      >`
+        SELECT
+          COALESCE(
+            (NULLIF(metadata, '')::jsonb -> 'geo' ->> 'countryCode'),
+            (NULLIF(metadata, '')::jsonb -> 'geo' ->> 'country_code'),
+            'Unknown'
+          ) AS countryCode,
+          COALESCE(
+            (NULLIF(metadata, '')::jsonb -> 'geo' ->> 'country'),
+            'Unknown'
+          ) AS country,
+          COUNT(*)::int AS views,
+          COUNT(DISTINCT COALESCE("userId", "ipAddress"))::int AS visitors
+        FROM "AuditLog"
+        WHERE action = 'PAGE_VIEW'
+          AND entity = 'PAGE'
+          AND "createdAt" >= NOW() - INTERVAL '24 hours'
+          AND ("entityId" IS NULL OR "entityId" NOT LIKE '/admin%')
+        GROUP BY countryCode, country
+        ORDER BY views DESC
+        LIMIT 8
+      `,
     ]);
 
     const lastHourRow = lastHour?.[0] || { views: 0, visitors: 0 };
@@ -491,6 +515,12 @@ router.get(
         topPages7d: (topPages || []).map((row) => ({
           path: row.path || '/',
           views: Number(row.views) || 0,
+        })),
+        countries24h: (countries24h || []).map((row: any) => ({
+          countryCode: row.countrycode || row.countryCode || 'Unknown',
+          country: row.country || 'Unknown',
+          views: Number(row.views) || 0,
+          visitors: Number(row.visitors) || 0,
         })),
       },
     });

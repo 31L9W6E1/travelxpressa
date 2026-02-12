@@ -67,7 +67,7 @@ export const createInquiry = async (
 export const fetchMyInquiries = async (
   params?: Partial<{ page: number; limit: number; sortOrder: "asc" | "desc" }>,
 ): Promise<InquiryListResponse> => {
-  const res = await api.get("/api/user/inquiries/user", { params });
+  const res = await api.get("/api/inquiries/user", { params });
   return {
     data: (res.data?.data || []) as InquiryItem[],
     pagination: res.data?.pagination as PaginationMeta,

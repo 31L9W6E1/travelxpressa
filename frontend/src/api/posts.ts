@@ -33,6 +33,22 @@ export interface PostSummary {
   createdAt: string;
 }
 
+export interface PostTranslation {
+  id: string;
+  postId: string;
+  locale: string;
+  sourceLocale: string;
+  title: string;
+  slug: string;
+  excerpt: string | null;
+  content: string;
+  tags: string | null;
+  status: 'draft' | 'published';
+  publishedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface CreatePostInput {
   title: string;
   excerpt?: string;
@@ -45,6 +61,14 @@ export interface CreatePostInput {
 
 export interface UpdatePostInput extends Partial<CreatePostInput> {
   id: string;
+}
+
+export interface UpsertTranslationInput {
+  title: string;
+  excerpt?: string | null;
+  content: string;
+  tags?: string | null;
+  status?: 'draft' | 'published';
 }
 
 export interface FeaturedContent {
@@ -157,6 +181,20 @@ export const createPost = async (data: CreatePostInput): Promise<{ success: bool
 export const updatePost = async (id: string, data: Partial<CreatePostInput>): Promise<{ success: boolean; data: Post; message: string }> => {
   try {
     const response = await api.put(`/api/posts/admin/${id}`, data);
+    return response.data;
+  } catch (error) {
+    throw handleApiError(error);
+  }
+};
+
+// Upsert translation (admin only)
+export const upsertPostTranslation = async (
+  id: string,
+  locale: string,
+  data: UpsertTranslationInput
+): Promise<{ success: boolean; data: PostTranslation; message: string }> => {
+  try {
+    const response = await api.put(`/api/posts/admin/${id}/translations/${locale}`, data);
     return response.data;
   } catch (error) {
     throw handleApiError(error);

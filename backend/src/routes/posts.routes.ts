@@ -674,6 +674,134 @@ router.put('/admin/:id', authenticateToken, requireRole(UserRole.ADMIN), async (
   }
 });
 
+// PUT /api/posts/admin/:id/translations/:locale - Upsert a translation (admin only)
+router.put(
+  '/admin/:id/translations/:locale',
+  authenticateToken,
+  requireRole(UserRole.ADMIN),
+  async (req: Request, res: Response) => {
+    try {
+      const id = req.params.id as string;
+      const locale = normalizeLocale(req.params.locale as string | undefined);
+
+      if (locale === 'en') {
+        return res.status(400).json({
+          success: false,
+          message: 'Use the base post update endpoint for English content',
+        });
+      }
+
+      const { title, excerpt, content, tags, status } = req.body || {};
+
+      if (!title || !content) {
+        return res.status(400).json({
+          success: false,
+          message: 'Title and content are required',
+        });
+      }
+
+      const translationStatus = status && ['draft', 'published'].includes(status) ? status : undefined;
+
+      const post = await prisma.post.findUnique({
+        where: { id },
+        select: {
+          id: true,
+          slug: true,
+          status: true,
+          publishedAt: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      });
+
+      if (!post) {
+        return res.status(404).json({
+          success: false,
+          message: 'Post not found',
+        });
+      }
+
+      const existingTranslation = await prisma.postTranslation.findUnique({
+        where: {
+          postId_locale: {
+            postId: post.id,
+            locale,
+          },
+        },
+        select: {
+          status: true,
+          publishedAt: true,
+        },
+      });
+
+      const nextStatus =
+        translationStatus ?? existingTranslation?.status ?? (post.status === 'published' ? 'published' : 'draft');
+
+      let publishedAt: Date | null = existingTranslation?.publishedAt ?? null;
+      if (nextStatus === 'published' && !publishedAt) {
+        publishedAt = post.publishedAt ?? post.createdAt ?? new Date();
+      } else if (nextStatus === 'draft') {
+        publishedAt = null;
+      }
+
+      const now = new Date();
+
+      const translation = await prisma.postTranslation.upsert({
+        where: {
+          postId_locale: {
+            postId: post.id,
+            locale,
+          },
+        },
+        create: {
+          postId: post.id,
+          locale,
+          sourceLocale: 'en',
+          title,
+          // Keep the slug stable across locales to avoid breaking routing.
+          slug: post.slug,
+          excerpt: excerpt ?? null,
+          content,
+          tags: tags ?? null,
+          status: nextStatus,
+          publishedAt,
+          translator: 'manual',
+          translationModel: null,
+          translatedAt: now,
+          sourceUpdatedAt: post.updatedAt,
+        },
+        update: {
+          title,
+          slug: post.slug,
+          excerpt: excerpt ?? null,
+          content,
+          tags: tags ?? null,
+          status: nextStatus,
+          publishedAt,
+          translator: 'manual',
+          translationModel: null,
+          translatedAt: now,
+          sourceUpdatedAt: post.updatedAt,
+        },
+      });
+
+      logger.info('Post translation upserted', { postId: post.id, locale, status: nextStatus });
+
+      res.json({
+        success: true,
+        data: translation,
+        message: 'Translation updated successfully',
+      });
+    } catch (error) {
+      logger.error('Error upserting post translation', error as Error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to update translation',
+      });
+    }
+  }
+);
+
 // DELETE /api/posts/admin/:id - Delete post (admin only)
 router.delete('/admin/:id', authenticateToken, requireRole(UserRole.ADMIN), async (req: Request, res: Response) => {
   try {

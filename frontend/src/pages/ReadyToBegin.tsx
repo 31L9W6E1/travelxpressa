@@ -26,11 +26,82 @@ import {
 import { useTranslation } from "react-i18next";
 import { formatCurrencyCodeAmount, getCurrencyForLanguage } from "@/lib/money";
 
+const MONGOLIAN_SECTION_TRANSLATIONS: Record<string, string> = {
+  "Personal Information": "Хувийн мэдээлэл",
+  "Passport Details": "Паспортын мэдээлэл",
+  "Travel Plans": "Аяллын төлөвлөгөө",
+  "Previous US Travel": "АНУ-д өмнө зорчсон түүх",
+  "US Point of Contact": "АНУ дахь холбоо барих хүн/байгууллага",
+  "Family Information": "Гэр бүлийн мэдээлэл",
+  "Work/Education": "Ажил/Боловсрол",
+  "Security Questions": "Аюулгүй байдлын асуултууд",
+  "Review & Submit": "Шалгах ба илгээх",
+  "Travel Itinerary": "Аяллын маршрут",
+  "Accommodation Details": "Байрлах газрын мэдээлэл",
+  "Travel Insurance": "Аяллын даатгал",
+  "Financial Proof": "Санхүүгийн нотолгоо",
+  "Purpose of Visit": "Айлчлалын зорилго",
+  "Previous Schengen Visas": "Өмнөх Шенгений визүүд",
+  "Personal Details": "Хувийн дэлгэрэнгүй мэдээлэл",
+  "Passport Information": "Паспортын мэдээлэл",
+  "Employment Information": "Ажлын мэдээлэл",
+  "Financial Information": "Санхүүгийн мэдээлэл",
+  "Guarantor/Inviter Details": "Батлан даагч/Уригчийн мэдээлэл",
+  "Previous Japan Visits": "Японд өмнө зорчсон түүх",
+  "Personal Particulars": "Хувийн ерөнхий мэдээлэл",
+  "Contact Information": "Холбоо барих мэдээлэл",
+  "Travel Details": "Аяллын дэлгэрэнгүй",
+  "Employment History": "Ажлын түүх",
+  "Education Background": "Боловсролын мэдээлэл",
+  "Financial Capacity": "Санхүүгийн чадамж",
+  "Health Requirements": "Эрүүл мэндийн шаардлага",
+  "Character Requirements": "Ёс зүйн шаардлага",
+  "Travel History": "Аяллын түүх",
+  "Ties to Home Country": "Эх оронтой холбоо",
+  "Background Information": "Ерөнхий мэдээлэл",
+  Biometrics: "Биометрик",
+  "Accommodation in Ireland": "Ирланд дахь байрлах мэдээлэл",
+  "Employment/Education History": "Ажил/Боловсролын түүх",
+  "Previous Immigration History": "Цагаачлалын өмнөх түүх",
+  "Sponsor/Reference Details": "Ивээн тэтгэгч/Лавлагаа мэдээлэл",
+  "Basic Information": "Үндсэн мэдээлэл",
+  "Travel Purpose": "Аяллын зорилго",
+  Accommodation: "Байрлах мэдээлэл",
+  "Invitation Letter": "Урилгын захидал",
+  "Work/Study Details": "Ажил/Сургалтын дэлгэрэнгүй",
+  "Identity Details": "Иргэний үнэмлэхийн мэдээлэл",
+  "Contact Details": "Холбоо барих дэлгэрэнгүй",
+  "Character & Health": "Ёс зүй ба эрүүл мэнд",
+  "Funds & Sponsorship": "Санхүү ба ивээн тэтгэгч",
+  "Employment Details": "Ажлын дэлгэрэнгүй",
+  "Education History": "Боловсролын түүх",
+  "Immigration History": "Цагаачлалын түүх",
+  "Passport & Travel Document": "Паспорт ба аяллын баримт",
+  "Family Details": "Гэр бүлийн дэлгэрэнгүй",
+  "Accommodation & Travel Plans": "Байрлал ба аяллын төлөвлөгөө",
+  "Employment & Income": "Ажил ба орлого",
+  "Medical & Character": "Эрүүл мэнд ба ёс зүй",
+  "Additional Information": "Нэмэлт мэдээлэл",
+  "Declaration & Submit": "Мэдэгдэл ба илгээх",
+};
+
+const MONGOLIAN_DOCUMENT_TRANSLATIONS: Record<string, string> = {
+  "Valid Passport": "Хүчинтэй гадаад паспорт",
+  "Digital Photo (2x2 inches)": "Цахим зураг (2x2 инч)",
+  "DS-160 Confirmation Page": "DS-160 баталгаажуулалтын хуудас",
+  "SEVIS Fee Receipt (for students)": "SEVIS төлбөрийн баримт (оюутанд)",
+  "Invitation Letter (if applicable)": "Урилгын захидал (холбогдох бол)",
+  "Financial Documents": "Санхүүгийн баримт бичгүүд",
+  "Employment Letter": "Ажлын газрын тодорхойлолт",
+  "Previous US Visas (if any)": "Өмнөх АНУ-ын визүүд (байгаа бол)",
+};
+
 const ReadyToBegin = () => {
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const [selectedCountry, setSelectedCountry] = useState<CountryConfig | null>(null);
   const displayCurrency = getCurrencyForLanguage(i18n.language);
+  const locale = i18n.language.toLowerCase().split("-")[0];
 
   // Business decision: Korea visa services are not currently offered.
   // Clear any stale selection so the redirect logic below works immediately.
@@ -109,6 +180,20 @@ const ReadyToBegin = () => {
 
   const getIconForSection = (sectionName: string) => {
     return sectionIcons[sectionName] || FileText;
+  };
+
+  const getLocalizedSectionName = (sectionName: string) => {
+    if (locale === "mn") {
+      return MONGOLIAN_SECTION_TRANSLATIONS[sectionName] || sectionName;
+    }
+    return sectionName;
+  };
+
+  const getLocalizedDocumentName = (documentName: string) => {
+    if (locale === "mn") {
+      return MONGOLIAN_DOCUMENT_TRANSLATIONS[documentName] || documentName;
+    }
+    return documentName;
   };
 
   const toDisplayCurrency = (amount: number, fromCurrency: string): string => {
@@ -273,7 +358,7 @@ const ReadyToBegin = () => {
                           number: index + 1,
                         })}
                       </span>
-                      <h3 className="font-semibold text-foreground">{section}</h3>
+                      <h3 className="font-semibold text-foreground">{getLocalizedSectionName(section)}</h3>
                     </div>
                   </div>
                   {helpText && (
@@ -300,7 +385,7 @@ const ReadyToBegin = () => {
                 className="flex items-start gap-3 p-4 bg-card border border-border rounded-lg hover:bg-secondary transition-colors"
               >
                 <div className="w-5 h-5 border-2 border-border rounded flex-shrink-0 mt-0.5" />
-                <span className="text-muted-foreground text-sm">{doc}</span>
+                <span className="text-muted-foreground text-sm">{getLocalizedDocumentName(doc)}</span>
               </div>
             ))}
           </div>

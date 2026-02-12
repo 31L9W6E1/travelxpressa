@@ -3,6 +3,8 @@ import { useAuth } from "../contexts/AuthContext";
 import {
   Bell,
   BookOpen,
+  PanelLeftClose,
+  PanelLeftOpen,
   ChevronDown,
   CreditCard,
   FileText,
@@ -42,6 +44,7 @@ const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
 
   const notificationDesktopRef = useRef<HTMLDivElement>(null);
@@ -75,7 +78,10 @@ const Navbar = () => {
   }, [isNotificationOpen, isUserMenuOpen]);
 
   useEffect(() => {
-    document.documentElement.style.setProperty("--sidebar-width", "240px");
+    document.documentElement.style.setProperty("--sidebar-width", isSidebarCollapsed ? "72px" : "240px");
+  }, [isSidebarCollapsed]);
+
+  useEffect(() => {
     return () => {
       document.documentElement.style.setProperty("--sidebar-width", "240px");
     };
@@ -290,7 +296,6 @@ const Navbar = () => {
     </div>
   );
 
-  const isSidebarCollapsed = false;
   const desktopLinkClass = `${navItemBaseClass} px-3`;
   const mobileLinkClass = `${navItemBaseClass} px-3`;
 
@@ -298,7 +303,7 @@ const Navbar = () => {
     <>
       <aside
         className="hidden md:flex fixed inset-y-0 left-0 z-40 bg-background border-r border-border flex-col transition-[width] duration-300"
-        style={{ width: "240px" }}
+        style={{ width: isSidebarCollapsed ? "72px" : "240px" }}
       >
         <div className="h-16 px-3 flex items-center border-b border-dashed border-border/70">
           <Link to="/" className={`flex items-center ${isSidebarCollapsed ? "justify-center w-full" : "gap-2 min-w-0"}`}>
@@ -399,7 +404,15 @@ const Navbar = () => {
       </aside>
 
       <header className="hidden md:flex fixed top-0 left-[var(--sidebar-width,240px)] right-0 z-30 h-16 bg-background/90 backdrop-blur-md border-b border-dashed border-border/70 px-6 items-center justify-between transition-[left] duration-300">
-        <div />
+        <button
+          type="button"
+          onClick={() => setIsSidebarCollapsed((prev) => !prev)}
+          className="h-9 w-9 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors flex items-center justify-center"
+          aria-label={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          title={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+        >
+          {isSidebarCollapsed ? <PanelLeftOpen className="w-4 h-4" /> : <PanelLeftClose className="w-4 h-4" />}
+        </button>
 
         <div className="flex items-center gap-2">
           {user && (

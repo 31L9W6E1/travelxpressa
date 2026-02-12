@@ -31,6 +31,11 @@ import LearnMore from "./pages/LearnMore";
 import TranslationService from "./pages/TranslationService";
 import CountrySelect from "./pages/CountrySelect";
 import OAuthCallback from "./pages/OAuthCallback";
+import Feedback from "./pages/Feedback";
+import QAndA from "./pages/QAndA";
+import HelpCenter from "./pages/HelpCenter";
+import Flight from "./pages/Flight";
+import Insurance from "./pages/Insurance";
 
 // Protected route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -115,6 +120,13 @@ function App() {
             <Route path="/test" element={<Test />} />
             <Route path="/learn-more" element={<LearnMore />} />
             <Route path="/translation-service" element={<TranslationService />} />
+            <Route path="/feedback" element={<Feedback />} />
+            <Route path="/q-and-a" element={<QAndA />} />
+            <Route path="/faq" element={<QAndA />} />
+            <Route path="/help-center" element={<HelpCenter />} />
+            <Route path="/helpcenter" element={<HelpCenter />} />
+            <Route path="/flight" element={<Flight />} />
+            <Route path="/insurance" element={<Insurance />} />
             
             {/* Protected routes - require authentication */}
             <Route

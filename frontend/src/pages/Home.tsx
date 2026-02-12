@@ -455,16 +455,34 @@ const Home = () => {
                 {t("home.hero.learnMore")}
               </Link>
               <Link
-                to="/privacy"
+                to="/flight"
                 className="hover:text-foreground transition-colors"
               >
-                {t("footer.links.privacy")}
+                {t("nav.flight", { defaultValue: "Flight" })}
               </Link>
               <Link
-                to="/terms"
+                to="/insurance"
                 className="hover:text-foreground transition-colors"
               >
-                {t("footer.links.terms")}
+                {t("nav.insurance", { defaultValue: "Insurance" })}
+              </Link>
+              <Link
+                to="/help-center"
+                className="hover:text-foreground transition-colors"
+              >
+                {t("nav.helpCenter", { defaultValue: "Help Center" })}
+              </Link>
+              <Link
+                to="/q-and-a"
+                className="hover:text-foreground transition-colors"
+              >
+                {t("nav.qAndA", { defaultValue: "Q&A" })}
+              </Link>
+              <Link
+                to="/feedback"
+                className="hover:text-foreground transition-colors"
+              >
+                {t("nav.feedback", { defaultValue: "Feedback" })}
               </Link>
             </div>
             <p className="text-sm text-muted-foreground">

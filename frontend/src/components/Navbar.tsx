@@ -17,6 +17,7 @@ import {
   Moon,
   Newspaper,
   Plane,
+  Shield,
   Settings,
   User,
   X,
@@ -331,6 +332,34 @@ const Navbar = () => {
             <BookOpen className="w-4 h-4 shrink-0" />
             {!isSidebarCollapsed && <span>{t("nav.learnMore")}</span>}
           </Link>
+          <Link to="/flight" className={desktopLinkClass} title={t("nav.flight", { defaultValue: "Flight" })}>
+            <Plane className="w-4 h-4 shrink-0" />
+            {!isSidebarCollapsed && <span>{t("nav.flight", { defaultValue: "Flight" })}</span>}
+          </Link>
+          <Link
+            to="/insurance"
+            className={desktopLinkClass}
+            title={t("nav.insurance", { defaultValue: "Insurance" })}
+          >
+            <Shield className="w-4 h-4 shrink-0" />
+            {!isSidebarCollapsed && <span>{t("nav.insurance", { defaultValue: "Insurance" })}</span>}
+          </Link>
+          <Link
+            to="/help-center"
+            className={desktopLinkClass}
+            title={t("nav.helpCenter", { defaultValue: "Help Center" })}
+          >
+            <MessageSquare className="w-4 h-4 shrink-0" />
+            {!isSidebarCollapsed && <span>{t("nav.helpCenter", { defaultValue: "Help Center" })}</span>}
+          </Link>
+          <Link to="/q-and-a" className={desktopLinkClass} title={t("nav.qAndA", { defaultValue: "Q&A" })}>
+            <BookOpen className="w-4 h-4 shrink-0" />
+            {!isSidebarCollapsed && <span>{t("nav.qAndA", { defaultValue: "Q&A" })}</span>}
+          </Link>
+          <Link to="/feedback" className={desktopLinkClass} title={t("nav.feedback", { defaultValue: "Feedback" })}>
+            <FileText className="w-4 h-4 shrink-0" />
+            {!isSidebarCollapsed && <span>{t("nav.feedback", { defaultValue: "Feedback" })}</span>}
+          </Link>
           <Link
             to="/translation-service"
             className={desktopLinkClass}
@@ -597,6 +626,26 @@ const Navbar = () => {
           <Link to="/learn-more" className={mobileLinkClass} onClick={closeMobileMenu}>
             <BookOpen className="w-4 h-4 shrink-0" />
             <span>{t("nav.learnMore")}</span>
+          </Link>
+          <Link to="/flight" className={mobileLinkClass} onClick={closeMobileMenu}>
+            <Plane className="w-4 h-4 shrink-0" />
+            <span>{t("nav.flight", { defaultValue: "Flight" })}</span>
+          </Link>
+          <Link to="/insurance" className={mobileLinkClass} onClick={closeMobileMenu}>
+            <Shield className="w-4 h-4 shrink-0" />
+            <span>{t("nav.insurance", { defaultValue: "Insurance" })}</span>
+          </Link>
+          <Link to="/help-center" className={mobileLinkClass} onClick={closeMobileMenu}>
+            <MessageSquare className="w-4 h-4 shrink-0" />
+            <span>{t("nav.helpCenter", { defaultValue: "Help Center" })}</span>
+          </Link>
+          <Link to="/q-and-a" className={mobileLinkClass} onClick={closeMobileMenu}>
+            <BookOpen className="w-4 h-4 shrink-0" />
+            <span>{t("nav.qAndA", { defaultValue: "Q&A" })}</span>
+          </Link>
+          <Link to="/feedback" className={mobileLinkClass} onClick={closeMobileMenu}>
+            <FileText className="w-4 h-4 shrink-0" />
+            <span>{t("nav.feedback", { defaultValue: "Feedback" })}</span>
           </Link>
           <Link to="/translation-service" className={mobileLinkClass} onClick={closeMobileMenu}>
             <Languages className="w-4 h-4 shrink-0" />

@@ -1,0 +1,108 @@
+import { Link } from "react-router-dom";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+
+const HelpCenter = () => {
+  return (
+    <div className="min-h-screen bg-background text-foreground pt-20">
+      <section className="py-10 border-b border-dashed border-border/60">
+        <div className="max-w-6xl mx-auto px-6">
+          <h1 className="text-3xl md:text-4xl font-bold">Help Center</h1>
+          <p className="text-muted-foreground mt-2">
+            Визийн үйлчилгээ, бүрдүүлэлт, төлөв хяналт, төлбөртэй холбоотой тусламжийн төв.
+          </p>
+        </div>
+      </section>
+
+      <section className="py-10">
+        <div className="max-w-6xl mx-auto px-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <Card>
+            <CardHeader>
+              <CardTitle>Өргөдлийн явц хянах</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground mb-4">
+                Таны өргөдлийн статус, шат бүрийн шинэчлэл, шаардагдах дараагийн алхам.
+              </p>
+              <Button asChild variant="outline">
+                <Link to="/profile/inbox">Inbox нээх</Link>
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Санал хүсэлт</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground mb-4">
+                Үйлчилгээний чанар, сайжруулах санал, хүсэлтээ илгээх хэсэг.
+              </p>
+              <Button asChild variant="outline">
+                <Link to="/feedback">Feedback руу орох</Link>
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Түгээмэл асуулт</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground mb-4">
+                Визийн бүрдүүлэлттэй холбоотой хамгийн нийтлэг асуулт, хариултууд.
+              </p>
+              <Button asChild variant="outline">
+                <Link to="/q-and-a">Q&A харах</Link>
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Flight үйлчилгээ</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground mb-4">
+                Нислэгийн захиалга, itinerary бэлтгэх, аяллын төлөвлөлтийн тусламж.
+              </p>
+              <Button asChild variant="outline">
+                <Link to="/flight">Flight мэдээлэл</Link>
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Insurance үйлчилгээ</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground mb-4">
+                Аяллын даатгалын баримт, шаардлага, сонголтын талаар зөвлөгөө.
+              </p>
+              <Button asChild variant="outline">
+                <Link to="/insurance">Insurance мэдээлэл</Link>
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Support чат</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground mb-4">
+                Админ болон дэмжлэгийн багтай шууд харилцах, файл/заавар солилцох чат.
+              </p>
+              <Button asChild>
+                <Link to="/contactsupport">Чат нээх</Link>
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+    </div>
+  );
+};
+
+export default HelpCenter;

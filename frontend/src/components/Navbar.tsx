@@ -302,7 +302,7 @@ const Navbar = () => {
   return (
     <>
       <aside
-        className="hidden md:flex fixed inset-y-0 left-0 z-40 bg-background border-r border-border flex-col transition-[width] duration-300"
+        className="hidden md:flex fixed inset-y-0 left-0 z-40 bg-background border-r border-dashed border-border/70 flex-col transition-[width] duration-300"
         style={{ width: isSidebarCollapsed ? "72px" : "240px" }}
       >
         <div className="h-16 px-3 flex items-center border-b border-dashed border-border/70">
@@ -567,7 +567,7 @@ const Navbar = () => {
       {isMenuOpen && <div className="md:hidden fixed inset-0 z-40 bg-black/40" onClick={closeMobileMenu} />}
 
       <aside
-        className={`md:hidden fixed top-0 left-0 bottom-0 z-50 w-[240px] bg-background border-r border-border transform transition-transform duration-300 ${
+        className={`md:hidden fixed top-0 left-0 bottom-0 z-50 w-[240px] bg-background border-r border-dashed border-border/70 transform transition-transform duration-300 ${
           isMenuOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >

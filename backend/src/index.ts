@@ -24,6 +24,7 @@ import chatRoutes from './routes/chat.routes';
 import uploadRoutes from './routes/upload.routes';
 import paymentRoutes from './routes/payment.routes';
 import flightsRoutes from './routes/flights.routes';
+import siteRoutes from './routes/site.routes';
 
 const app = express();
 
@@ -108,6 +109,7 @@ app.get('/ready', async (_req, res) => {
 // API routes with rate limiting (disabled in development)
 if (config.isProduction) {
   app.use('/api/auth', authRateLimit, csrfProtection, authRoutes);
+  app.use('/api/site', siteRoutes);
   app.use('/api', apiRateLimit, inquiryRoutes);
   app.use('/api/admin', apiRateLimit, adminRoutes);
   app.use('/api', apiRateLimit, userRoutes);
@@ -120,6 +122,7 @@ if (config.isProduction) {
 } else {
   // Development - no rate limiting
   app.use('/api/auth', csrfProtection, authRoutes);
+  app.use('/api/site', siteRoutes);
   app.use('/api', inquiryRoutes);
   app.use('/api/admin', adminRoutes);
   app.use('/api', userRoutes);

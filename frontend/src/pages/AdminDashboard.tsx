@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../contexts/AuthContext";
+import { DEFAULT_SITE_SETTINGS, useSiteSettings, type SiteSettings } from "@/contexts/SiteSettingsContext";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import {
@@ -197,6 +198,13 @@ interface Stats {
   };
 }
 
+type TrafficStats = {
+  lastHour: { views: number; uniqueVisitors: number };
+  last24h: { views: number; uniqueVisitors: number };
+  series24h: Array<{ hour: string; views: number; visitors: number }>;
+  topPages7d: Array<{ path: string; views: number }>;
+};
+
 // Chart configurations are defined inside the component so labels can be localized.
 
 type AdminTab =
@@ -207,6 +215,7 @@ type AdminTab =
   | "tracking"
   | "payments"
   | "analytics"
+  | "site"
   | "gallery"
   | "cms";
 
@@ -219,6 +228,7 @@ const getAdminTabFromSection = (section?: string): AdminTab => {
     case "tracking":
     case "payments":
     case "analytics":
+    case "site":
     case "gallery":
     case "cms":
       return section;
@@ -268,6 +278,7 @@ const AdminDashboard = () => {
   const { section, applicationId } =
     useParams<{ section?: string; applicationId?: string }>();
   const tabFromUrl = applicationId ? "applications" : getAdminTabFromSection(section);
+  const { settings: siteSettings, refresh: refreshSiteSettings } = useSiteSettings();
 
   const applicationChartConfig = {
     submitted: {
@@ -317,6 +328,17 @@ const AdminDashboard = () => {
   const dailyApplicationChartConfig = {
     applications: {
       label: t("dashboard.stats.applications", "Applications"),
+      color: "var(--chart-2)",
+    },
+  } satisfies ChartConfig;
+
+  const trafficChartConfig = {
+    views: {
+      label: t("dashboard.traffic.views", "Pageviews"),
+      color: "var(--chart-1)",
+    },
+    visitors: {
+      label: t("dashboard.traffic.uniqueVisitors", "Unique Visitors"),
       color: "var(--chart-2)",
     },
   } satisfies ChartConfig;
@@ -383,6 +405,14 @@ const AdminDashboard = () => {
     tags: "",
     status: "draft",
   });
+
+  // Site Settings + Traffic
+  const [draftSiteSettings, setDraftSiteSettings] = useState<SiteSettings>(siteSettings || DEFAULT_SITE_SETTINGS);
+  const [siteSettingsDirty, setSiteSettingsDirty] = useState(false);
+  const [savingSiteSettings, setSavingSiteSettings] = useState(false);
+  const [traffic, setTraffic] = useState<TrafficStats | null>(null);
+  const [trafficLoading, setTrafficLoading] = useState(false);
+  const [trafficError, setTrafficError] = useState<string | null>(null);
 
   // Chart data - use real data from stats or fallback to sample data
   const monthlyApplicationData = stats?.charts?.monthlyApplications?.length
@@ -508,6 +538,12 @@ const AdminDashboard = () => {
   }, [user]);
 
   useEffect(() => {
+    if (!siteSettingsDirty) {
+      setDraftSiteSettings(siteSettings || DEFAULT_SITE_SETTINGS);
+    }
+  }, [siteSettings, siteSettingsDirty]);
+
+  useEffect(() => {
     if (applicationId) {
       setActiveTab("applications");
       return;
@@ -565,6 +601,11 @@ const AdminDashboard = () => {
   const handleTabChange = (nextTab: AdminTab) => {
     setActiveTab(nextTab);
     navigate(`/admin/${nextTab}`);
+
+    if (nextTab === "site") {
+      setSiteSettingsDirty(false);
+      setDraftSiteSettings(siteSettings || DEFAULT_SITE_SETTINGS);
+    }
   };
 
   const fetchDashboardData = async () => {
@@ -640,6 +681,27 @@ const AdminDashboard = () => {
     }
   };
 
+  const fetchTraffic = async () => {
+    setTrafficLoading(true);
+    setTrafficError(null);
+    try {
+      const res = await api.get("/api/admin/traffic");
+      setTraffic(res.data?.data || null);
+    } catch (error) {
+      console.error("Error fetching traffic stats:", error);
+      setTraffic(null);
+      setTrafficError(t("dashboard.traffic.loadFailed", "Failed to load traffic"));
+    } finally {
+      setTrafficLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (user?.role !== "ADMIN") return;
+    if (activeTab !== "site") return;
+    void fetchTraffic();
+  }, [activeTab, user?.role, t]);
+
   const handleUserRoleChange = async (
     userId: string,
     nextRole: UserData["role"],
@@ -669,6 +731,27 @@ const AdminDashboard = () => {
       toast.error(message);
     } finally {
       setUpdatingRoleUserId(null);
+    }
+  };
+
+  const handleSaveSiteSettings = async () => {
+    setSavingSiteSettings(true);
+    try {
+      const res = await api.put("/api/admin/site-settings", draftSiteSettings);
+      const saved = res.data?.data || draftSiteSettings;
+      setDraftSiteSettings(saved);
+      setSiteSettingsDirty(false);
+      toast.success(t("dashboard.siteSettings.saved", "Site settings saved"));
+      await refreshSiteSettings();
+    } catch (error: any) {
+      console.error("Failed to save site settings:", error);
+      const message =
+        error?.response?.data?.error ||
+        error?.response?.data?.message ||
+        t("dashboard.siteSettings.saveFailed", "Failed to save site settings");
+      toast.error(message);
+    } finally {
+      setSavingSiteSettings(false);
     }
   };
 
@@ -892,6 +975,10 @@ const AdminDashboard = () => {
             <TabsTrigger value="analytics" className="gap-2">
               <TrendingUp className="w-4 h-4" />
               {t('dashboard.tabs.analytics', 'Analytics')}
+            </TabsTrigger>
+            <TabsTrigger value="site" className="gap-2">
+              <Globe className="w-4 h-4" />
+              {t('dashboard.tabs.site', 'Site')}
             </TabsTrigger>
             <TabsTrigger value="gallery" className="gap-2">
               <FolderOpen className="w-4 h-4" />
@@ -1712,6 +1799,291 @@ const AdminDashboard = () => {
           {/* Analytics Tab */}
           <TabsContent value="analytics">
             <PaymentAnalytics />
+          </TabsContent>
+
+          {/* Site Tab */}
+          <TabsContent value="site">
+            <div className="space-y-6">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <h2 className="text-2xl font-bold">{t("dashboard.site.title", "Site Controls")}</h2>
+                  <p className="text-muted-foreground">
+                    {t("dashboard.site.subtitle", "Traffic overview, page visibility, and maintenance mode.")}
+                  </p>
+                </div>
+                <Button variant="outline" onClick={fetchTraffic} disabled={trafficLoading}>
+                  {t("common.refresh", "Refresh")}
+                </Button>
+              </div>
+
+              {/* Traffic Summary */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium text-muted-foreground">
+                      {t("dashboard.traffic.viewsLastHour", "Views (last hour)")}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{traffic?.lastHour?.views ?? 0}</div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium text-muted-foreground">
+                      {t("dashboard.traffic.visitorsLastHour", "Unique visitors (last hour)")}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{traffic?.lastHour?.uniqueVisitors ?? 0}</div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium text-muted-foreground">
+                      {t("dashboard.traffic.viewsLast24h", "Views (last 24h)")}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{traffic?.last24h?.views ?? 0}</div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium text-muted-foreground">
+                      {t("dashboard.traffic.visitorsLast24h", "Unique visitors (last 24h)")}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{traffic?.last24h?.uniqueVisitors ?? 0}</div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Traffic Charts */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>{t("dashboard.traffic.chartTitle", "Traffic (last 24 hours)")}</CardTitle>
+                    <CardDescription>
+                      {t("dashboard.traffic.chartDesc", "Pageviews and unique visitors per hour")}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {trafficLoading ? (
+                      <div className="h-[260px] flex items-center justify-center">
+                        <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+                      </div>
+                    ) : trafficError ? (
+                      <div className="h-[260px] flex items-center justify-center text-center">
+                        <div>
+                          <p className="text-destructive">{trafficError}</p>
+                          <button
+                            type="button"
+                            onClick={() => void fetchTraffic()}
+                            className="text-primary hover:underline mt-2"
+                          >
+                            {t("errors.tryAgain", { defaultValue: "Try again" })}
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <ChartContainer config={trafficChartConfig} className="h-[260px]">
+                        <AreaChart
+                          accessibilityLayer
+                          data={(traffic?.series24h || []).map((p) => ({
+                            hour: new Date(p.hour).toLocaleTimeString(undefined, {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            }),
+                            views: p.views,
+                            visitors: p.visitors,
+                          }))}
+                        >
+                          <CartesianGrid vertical={false} strokeDasharray="3 3" className="stroke-muted" />
+                          <XAxis dataKey="hour" className="text-xs" tickLine={false} axisLine={false} tickMargin={8} />
+                          <YAxis className="text-xs" allowDecimals={false} />
+                          <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+                          <defs>
+                            <linearGradient id="gradient-traffic-views" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="5%" stopColor="var(--color-views)" stopOpacity={0.5} />
+                              <stop offset="95%" stopColor="var(--color-views)" stopOpacity={0.1} />
+                            </linearGradient>
+                            <linearGradient id="gradient-traffic-visitors" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="5%" stopColor="var(--color-visitors)" stopOpacity={0.4} />
+                              <stop offset="95%" stopColor="var(--color-visitors)" stopOpacity={0.1} />
+                            </linearGradient>
+                          </defs>
+                          <Area
+                            dataKey="views"
+                            type="natural"
+                            fill="url(#gradient-traffic-views)"
+                            fillOpacity={0.4}
+                            stroke="var(--color-views)"
+                            strokeWidth={0.9}
+                            strokeDasharray={"3 3"}
+                          />
+                          <Area
+                            dataKey="visitors"
+                            type="natural"
+                            fill="url(#gradient-traffic-visitors)"
+                            fillOpacity={0.35}
+                            stroke="var(--color-visitors)"
+                            strokeWidth={0.9}
+                            strokeDasharray={"3 3"}
+                          />
+                        </AreaChart>
+                      </ChartContainer>
+                    )}
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>{t("dashboard.traffic.topPagesTitle", "Top pages (last 7 days)")}</CardTitle>
+                    <CardDescription>{t("dashboard.traffic.topPagesDesc", "Most visited routes")}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {(traffic?.topPages7d || []).length === 0 ? (
+                        <p className="text-sm text-muted-foreground">
+                          {t("dashboard.traffic.noData", "No traffic data yet.")}
+                        </p>
+                      ) : (
+                        (traffic?.topPages7d || []).map((row) => (
+                          <div key={row.path} className="flex items-center justify-between gap-3">
+                            <span className="text-sm text-foreground truncate">{row.path}</span>
+                            <span className="text-sm text-muted-foreground tabular-nums">{row.views}</span>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Site Settings */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>{t("dashboard.siteSettings.title", "Site Settings")}</CardTitle>
+                  <CardDescription>
+                    {t("dashboard.siteSettings.desc", "Control page visibility and enable maintenance mode.")}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="min-w-0">
+                      <p className="font-medium">{t("dashboard.siteSettings.maintenance", "Maintenance mode")}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {t(
+                          "dashboard.siteSettings.maintenanceHelp",
+                          "When enabled, visitors will see a maintenance page. Admins can still access the site."
+                        )}
+                      </p>
+                    </div>
+                    <Switch
+                      checked={!!draftSiteSettings.maintenance.enabled}
+                      onCheckedChange={(checked) => {
+                        setDraftSiteSettings((prev) => ({
+                          ...prev,
+                          maintenance: { ...prev.maintenance, enabled: checked },
+                        }));
+                        setSiteSettingsDirty(true);
+                      }}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="maintenance-message">
+                      {t("dashboard.siteSettings.maintenanceMessage", "Maintenance message")}
+                    </Label>
+                    <Textarea
+                      id="maintenance-message"
+                      value={draftSiteSettings.maintenance.message || ""}
+                      onChange={(e) => {
+                        setDraftSiteSettings((prev) => ({
+                          ...prev,
+                          maintenance: { ...prev.maintenance, message: e.target.value },
+                        }));
+                        setSiteSettingsDirty(true);
+                      }}
+                      placeholder={t("dashboard.siteSettings.maintenancePlaceholder", "Optional message to show users")}
+                    />
+                  </div>
+
+                  <Separator />
+
+                  <div>
+                    <p className="font-medium">{t("dashboard.siteSettings.pageVisibility", "Page visibility")}</p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {t(
+                        "dashboard.siteSettings.pageVisibilityHelp",
+                        "Hide pages from navigation and show an unavailable screen to visitors."
+                      )}
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {[
+                      { key: "about", label: t("nav.about", "About"), path: "/about" },
+                      { key: "learnMore", label: t("nav.learnMore", "Learn More"), path: "/learn-more" },
+                      { key: "translationService", label: t("nav.translationService", "Translation Service"), path: "/translation-service" },
+                      { key: "gallery", label: t("nav.gallery", "Gallery"), path: "/gallery" },
+                      { key: "news", label: t("nav.news", "News"), path: "/news" },
+                      { key: "blog", label: t("nav.articles", "Articles"), path: "/blog" },
+                      { key: "flight", label: t("nav.flight", "Flight"), path: "/flight" },
+                      { key: "insurance", label: t("nav.insurance", "Insurance"), path: "/insurance" },
+                      { key: "helpCenter", label: t("nav.helpCenter", "Help Center"), path: "/help-center" },
+                      { key: "qAndA", label: t("nav.qAndA", "Q&A"), path: "/q-and-a" },
+                      { key: "feedback", label: t("nav.feedback", "Feedback"), path: "/feedback" },
+                    ].map((row) => (
+                      <div
+                        key={row.key}
+                        className="flex items-center justify-between gap-3 rounded-lg border border-dashed border-border/70 bg-card px-4 py-3"
+                      >
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium text-foreground truncate">{row.label}</p>
+                          <p className="text-xs text-muted-foreground truncate">{row.path}</p>
+                        </div>
+                        <Switch
+                          checked={(draftSiteSettings.visibility as any)[row.key]}
+                          onCheckedChange={(checked) => {
+                            setDraftSiteSettings((prev) => ({
+                              ...prev,
+                              visibility: { ...prev.visibility, [row.key]: checked } as any,
+                            }));
+                            setSiteSettingsDirty(true);
+                          }}
+                        />
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="flex items-center justify-end gap-3">
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setDraftSiteSettings(siteSettings || DEFAULT_SITE_SETTINGS);
+                        setSiteSettingsDirty(false);
+                      }}
+                      disabled={savingSiteSettings}
+                    >
+                      {t("common.reset", "Reset")}
+                    </Button>
+                    <Button onClick={handleSaveSiteSettings} disabled={savingSiteSettings || !siteSettingsDirty}>
+                      {savingSiteSettings ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          {t("common.saving", "Saving...")}
+                        </>
+                      ) : (
+                        t("common.saveChanges", "Save changes")
+                      )}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
           {/* Gallery Tab */}

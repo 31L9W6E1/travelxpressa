@@ -53,6 +53,43 @@ export const resetPasswordSchema = z.object({
   newPassword: passwordSchema,
 });
 
+// Site / Analytics schemas
+export const pageViewSchema = z.object({
+  path: z
+    .string()
+    .min(1, 'Path is required')
+    .max(200, 'Path is too long')
+    .refine((value) => value.startsWith('/'), {
+      message: 'Path must start with /',
+    })
+    .refine((value) => !value.includes('://'), {
+      message: 'Path must not be a URL',
+    }),
+  title: z.string().max(200).optional(),
+  referrer: z.string().max(500).optional(),
+  locale: z.string().max(10).optional(),
+});
+
+export const siteSettingsSchema = z.object({
+  maintenance: z.object({
+    enabled: z.boolean(),
+    message: z.string().max(500).optional().or(z.literal('')),
+  }),
+  visibility: z.object({
+    about: z.boolean(),
+    learnMore: z.boolean(),
+    translationService: z.boolean(),
+    gallery: z.boolean(),
+    news: z.boolean(),
+    blog: z.boolean(),
+    flight: z.boolean(),
+    insurance: z.boolean(),
+    helpCenter: z.boolean(),
+    qAndA: z.boolean(),
+    feedback: z.boolean(),
+  }),
+});
+
 // User schemas
 export const updateUserSchema = z.object({
   name: z.string().min(1).max(100).optional(),

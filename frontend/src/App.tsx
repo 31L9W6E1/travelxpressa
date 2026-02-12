@@ -1,11 +1,13 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation, Link } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { SiteSettingsProvider, useSiteSettings } from "./contexts/SiteSettingsContext";
 import { Toaster } from "@/components/ui/sonner";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { useTranslation } from "react-i18next";
 import NewsTicker from "./components/NewsTicker";
+import PageViewTracker from "./components/PageViewTracker";
 
 // Import all page components
 import Home from "./pages/Home";
@@ -39,6 +41,20 @@ import QAndA from "./pages/QAndA";
 import HelpCenter from "./pages/HelpCenter";
 import Flight from "./pages/Flight";
 import Insurance from "./pages/Insurance";
+import Maintenance from "./pages/Maintenance";
+
+const isMaintenanceAllowedPath = (pathname: string): boolean => {
+  const allowPrefixes = [
+    "/login",
+    "/forgot-password",
+    "/reset-password",
+    "/oauth/callback",
+    "/admin",
+    "/contactsupport",
+  ];
+
+  return allowPrefixes.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
+};
 
 // Protected route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -84,25 +100,61 @@ const AdminRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
-// Main App component
-function App() {
-  return (
-    // ThemeProvider and AuthProvider wrap the entire app
-    <ThemeProvider>
-      <AuthProvider>
-        <BrowserRouter>
-          <Toaster position="top-right" richColors closeButton />
-        {/* 
-          React Fragment <> </> 
-          Used so we can return multiple elements
-          without adding extra divs to the DOM 
-        */}
-        <div className="min-h-screen bg-background">
-          <Navbar />
+const VisibilityRoute = ({
+  enabled,
+  children,
+}: {
+  enabled: boolean;
+  children: React.ReactNode;
+}) => {
+  const { t } = useTranslation();
+  const { user } = useAuth();
+  if (enabled || user?.role === "ADMIN") return <>{children}</>;
 
-          <main className="pt-16 md:pt-16 md:pl-[var(--sidebar-width,240px)] transition-[padding] duration-300">
-            <NewsTicker />
-            <Routes>
+  return (
+    <div className="min-h-[calc(100vh-4rem)] bg-background text-foreground flex items-center justify-center">
+      <div className="max-w-xl w-full px-6">
+        <div className="rounded-2xl border border-dashed border-border/70 bg-card p-8">
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
+            {t("errors.pageUnavailable.title", { defaultValue: "Page unavailable" })}
+          </h1>
+          <p className="text-muted-foreground mt-3 leading-relaxed">
+            {t("errors.pageUnavailable.message", {
+              defaultValue: "This page is currently hidden by the site administrator.",
+            })}
+          </p>
+          <div className="mt-6">
+            <Link to="/" className="text-primary hover:underline font-medium">
+              {t("common.backToHome", { defaultValue: "Back to home" })}
+            </Link>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+function AppRoutes() {
+  const location = useLocation();
+  const { user } = useAuth();
+  const { settings } = useSiteSettings();
+
+  const shouldShowMaintenance =
+    settings.maintenance.enabled &&
+    !isMaintenanceAllowedPath(location.pathname) &&
+    user?.role !== "ADMIN";
+
+  return (
+    <div className="min-h-screen bg-background">
+      <Navbar />
+      <PageViewTracker />
+
+      <main className="pt-16 md:pt-16 md:pl-[var(--sidebar-width,240px)] transition-[padding] duration-300">
+        {settings.visibility.news && <NewsTicker />}
+        {shouldShowMaintenance ? (
+          <Maintenance />
+        ) : (
+          <Routes>
             {/* 
               "/" is the FIRST page that loads
               When user opens the site, Home is shown
@@ -117,22 +169,22 @@ function App() {
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/oauth/callback" element={<OAuthCallback />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/blog" element={<Blog />} />
-            <Route path="/blog/:slug" element={<BlogPost />} />
-            <Route path="/news" element={<News />} />
-            <Route path="/news/:slug" element={<NewsArticle />} />
-            <Route path="/gallery" element={<Gallery />} />
+            <Route path="/about" element={<VisibilityRoute enabled={settings.visibility.about}><About /></VisibilityRoute>} />
+            <Route path="/blog" element={<VisibilityRoute enabled={settings.visibility.blog}><Blog /></VisibilityRoute>} />
+            <Route path="/blog/:slug" element={<VisibilityRoute enabled={settings.visibility.blog}><BlogPost /></VisibilityRoute>} />
+            <Route path="/news" element={<VisibilityRoute enabled={settings.visibility.news}><News /></VisibilityRoute>} />
+            <Route path="/news/:slug" element={<VisibilityRoute enabled={settings.visibility.news}><NewsArticle /></VisibilityRoute>} />
+            <Route path="/gallery" element={<VisibilityRoute enabled={settings.visibility.gallery}><Gallery /></VisibilityRoute>} />
             <Route path="/test" element={<Test />} />
-            <Route path="/learn-more" element={<LearnMore />} />
-            <Route path="/translation-service" element={<TranslationService />} />
-            <Route path="/feedback" element={<Feedback />} />
-            <Route path="/q-and-a" element={<QAndA />} />
-            <Route path="/faq" element={<QAndA />} />
-            <Route path="/help-center" element={<HelpCenter />} />
-            <Route path="/helpcenter" element={<HelpCenter />} />
-            <Route path="/flight" element={<Flight />} />
-            <Route path="/insurance" element={<Insurance />} />
+            <Route path="/learn-more" element={<VisibilityRoute enabled={settings.visibility.learnMore}><LearnMore /></VisibilityRoute>} />
+            <Route path="/translation-service" element={<VisibilityRoute enabled={settings.visibility.translationService}><TranslationService /></VisibilityRoute>} />
+            <Route path="/feedback" element={<VisibilityRoute enabled={settings.visibility.feedback}><Feedback /></VisibilityRoute>} />
+            <Route path="/q-and-a" element={<VisibilityRoute enabled={settings.visibility.qAndA}><QAndA /></VisibilityRoute>} />
+            <Route path="/faq" element={<VisibilityRoute enabled={settings.visibility.qAndA}><QAndA /></VisibilityRoute>} />
+            <Route path="/help-center" element={<VisibilityRoute enabled={settings.visibility.helpCenter}><HelpCenter /></VisibilityRoute>} />
+            <Route path="/helpcenter" element={<VisibilityRoute enabled={settings.visibility.helpCenter}><HelpCenter /></VisibilityRoute>} />
+            <Route path="/flight" element={<VisibilityRoute enabled={settings.visibility.flight}><Flight /></VisibilityRoute>} />
+            <Route path="/insurance" element={<VisibilityRoute enabled={settings.visibility.insurance}><Insurance /></VisibilityRoute>} />
             
             {/* Protected routes - require authentication */}
             <Route
@@ -253,10 +305,25 @@ function App() {
                 </AdminRoute>
               }
             />
-            </Routes>
-          </main>
-        </div>
-      </BrowserRouter>
+          </Routes>
+        )}
+      </main>
+    </div>
+  );
+}
+
+// Main App component
+function App() {
+  return (
+    // ThemeProvider and AuthProvider wrap the entire app
+    <ThemeProvider>
+      <AuthProvider>
+        <SiteSettingsProvider>
+          <BrowserRouter>
+            <Toaster position="top-right" richColors closeButton />
+            <AppRoutes />
+          </BrowserRouter>
+        </SiteSettingsProvider>
       </AuthProvider>
     </ThemeProvider>
   );

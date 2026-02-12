@@ -29,6 +29,7 @@ import { useTranslation } from "react-i18next";
 import LanguageSwitcher from "./LanguageSwitcher";
 import api from "@/api/client";
 import { useTheme } from "@/contexts/ThemeContext";
+import { useSiteSettings } from "@/contexts/SiteSettingsContext";
 
 type NotificationItem = {
   id: string;
@@ -44,6 +45,7 @@ const Navbar = () => {
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const { t } = useTranslation();
+  const { settings } = useSiteSettings();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
@@ -327,64 +329,86 @@ const Navbar = () => {
             </div>
           )}
 
-          <Link to="/about" className={desktopLinkClass} title={t("nav.about")}>
-            <Info className="w-4 h-4 shrink-0" />
-            {!isSidebarCollapsed && <span>{t("nav.about")}</span>}
-          </Link>
-          <Link to="/learn-more" className={desktopLinkClass} title={t("nav.learnMore")}>
-            <BookOpen className="w-4 h-4 shrink-0" />
-            {!isSidebarCollapsed && <span>{t("nav.learnMore")}</span>}
-          </Link>
-          <Link to="/flight" className={desktopLinkClass} title={t("nav.flight", { defaultValue: "Flight" })}>
-            <Plane className="w-4 h-4 shrink-0" />
-            {!isSidebarCollapsed && <span>{t("nav.flight", { defaultValue: "Flight" })}</span>}
-          </Link>
-          <Link
-            to="/insurance"
-            className={desktopLinkClass}
-            title={t("nav.insurance", { defaultValue: "Insurance" })}
-          >
-            <Shield className="w-4 h-4 shrink-0" />
-            {!isSidebarCollapsed && <span>{t("nav.insurance", { defaultValue: "Insurance" })}</span>}
-          </Link>
-          <Link
-            to="/help-center"
-            className={desktopLinkClass}
-            title={t("nav.helpCenter", { defaultValue: "Help Center" })}
-          >
-            <MessageSquare className="w-4 h-4 shrink-0" />
-            {!isSidebarCollapsed && <span>{t("nav.helpCenter", { defaultValue: "Help Center" })}</span>}
-          </Link>
-          <Link to="/q-and-a" className={desktopLinkClass} title={t("nav.qAndA", { defaultValue: "Q&A" })}>
-            <BookOpen className="w-4 h-4 shrink-0" />
-            {!isSidebarCollapsed && <span>{t("nav.qAndA", { defaultValue: "Q&A" })}</span>}
-          </Link>
-          <Link to="/feedback" className={desktopLinkClass} title={t("nav.feedback", { defaultValue: "Feedback" })}>
-            <FileText className="w-4 h-4 shrink-0" />
-            {!isSidebarCollapsed && <span>{t("nav.feedback", { defaultValue: "Feedback" })}</span>}
-          </Link>
-          <Link
-            to="/translation-service"
-            className={desktopLinkClass}
-            title={t("nav.translationService", { defaultValue: "Translation Service" })}
-          >
-            <Languages className="w-4 h-4 shrink-0" />
-            {!isSidebarCollapsed && (
-              <span>{t("nav.translationService", { defaultValue: "Translation Service" })}</span>
-            )}
-          </Link>
-          <Link to="/gallery" className={desktopLinkClass} title={t("nav.gallery", { defaultValue: "Gallery" })}>
-            <Image className="w-4 h-4 shrink-0" />
-            {!isSidebarCollapsed && <span>{t("nav.gallery", { defaultValue: "Gallery" })}</span>}
-          </Link>
-          <Link to="/news" className={desktopLinkClass} title={t("nav.news", { defaultValue: "News" })}>
-            <Newspaper className="w-4 h-4 shrink-0" />
-            {!isSidebarCollapsed && <span>{t("nav.news", { defaultValue: "News" })}</span>}
-          </Link>
-          <Link to="/blog" className={desktopLinkClass} title={t("nav.articles", { defaultValue: "Articles" })}>
-            <FileText className="w-4 h-4 shrink-0" />
-            {!isSidebarCollapsed && <span>{t("nav.articles", { defaultValue: "Articles" })}</span>}
-          </Link>
+          {settings.visibility.about && (
+            <Link to="/about" className={desktopLinkClass} title={t("nav.about")}>
+              <Info className="w-4 h-4 shrink-0" />
+              {!isSidebarCollapsed && <span>{t("nav.about")}</span>}
+            </Link>
+          )}
+          {settings.visibility.learnMore && (
+            <Link to="/learn-more" className={desktopLinkClass} title={t("nav.learnMore")}>
+              <BookOpen className="w-4 h-4 shrink-0" />
+              {!isSidebarCollapsed && <span>{t("nav.learnMore")}</span>}
+            </Link>
+          )}
+          {settings.visibility.flight && (
+            <Link to="/flight" className={desktopLinkClass} title={t("nav.flight", { defaultValue: "Flight" })}>
+              <Plane className="w-4 h-4 shrink-0" />
+              {!isSidebarCollapsed && <span>{t("nav.flight", { defaultValue: "Flight" })}</span>}
+            </Link>
+          )}
+          {settings.visibility.insurance && (
+            <Link
+              to="/insurance"
+              className={desktopLinkClass}
+              title={t("nav.insurance", { defaultValue: "Insurance" })}
+            >
+              <Shield className="w-4 h-4 shrink-0" />
+              {!isSidebarCollapsed && <span>{t("nav.insurance", { defaultValue: "Insurance" })}</span>}
+            </Link>
+          )}
+          {settings.visibility.helpCenter && (
+            <Link
+              to="/help-center"
+              className={desktopLinkClass}
+              title={t("nav.helpCenter", { defaultValue: "Help Center" })}
+            >
+              <MessageSquare className="w-4 h-4 shrink-0" />
+              {!isSidebarCollapsed && <span>{t("nav.helpCenter", { defaultValue: "Help Center" })}</span>}
+            </Link>
+          )}
+          {settings.visibility.qAndA && (
+            <Link to="/q-and-a" className={desktopLinkClass} title={t("nav.qAndA", { defaultValue: "Q&A" })}>
+              <BookOpen className="w-4 h-4 shrink-0" />
+              {!isSidebarCollapsed && <span>{t("nav.qAndA", { defaultValue: "Q&A" })}</span>}
+            </Link>
+          )}
+          {settings.visibility.feedback && (
+            <Link to="/feedback" className={desktopLinkClass} title={t("nav.feedback", { defaultValue: "Feedback" })}>
+              <FileText className="w-4 h-4 shrink-0" />
+              {!isSidebarCollapsed && <span>{t("nav.feedback", { defaultValue: "Feedback" })}</span>}
+            </Link>
+          )}
+          {settings.visibility.translationService && (
+            <Link
+              to="/translation-service"
+              className={desktopLinkClass}
+              title={t("nav.translationService", { defaultValue: "Translation Service" })}
+            >
+              <Languages className="w-4 h-4 shrink-0" />
+              {!isSidebarCollapsed && (
+                <span>{t("nav.translationService", { defaultValue: "Translation Service" })}</span>
+              )}
+            </Link>
+          )}
+          {settings.visibility.gallery && (
+            <Link to="/gallery" className={desktopLinkClass} title={t("nav.gallery", { defaultValue: "Gallery" })}>
+              <Image className="w-4 h-4 shrink-0" />
+              {!isSidebarCollapsed && <span>{t("nav.gallery", { defaultValue: "Gallery" })}</span>}
+            </Link>
+          )}
+          {settings.visibility.news && (
+            <Link to="/news" className={desktopLinkClass} title={t("nav.news", { defaultValue: "News" })}>
+              <Newspaper className="w-4 h-4 shrink-0" />
+              {!isSidebarCollapsed && <span>{t("nav.news", { defaultValue: "News" })}</span>}
+            </Link>
+          )}
+          {settings.visibility.blog && (
+            <Link to="/blog" className={desktopLinkClass} title={t("nav.articles", { defaultValue: "Articles" })}>
+              <FileText className="w-4 h-4 shrink-0" />
+              {!isSidebarCollapsed && <span>{t("nav.articles", { defaultValue: "Articles" })}</span>}
+            </Link>
+          )}
 
           {user && user.role !== "ADMIN" && (
             <>
@@ -423,10 +447,14 @@ const Navbar = () => {
                 >
                   {t("nav.contactSupport", { defaultValue: "Contact support" })}
                 </Link>
-                <span className="text-muted-foreground">•</span>
-                <Link to="/news" className="text-sm font-medium text-primary hover:underline">
-                  {t("nav.news", { defaultValue: "News" })}
-                </Link>
+                {settings.visibility.news && (
+                  <>
+                    <span className="text-muted-foreground">•</span>
+                    <Link to="/news" className="text-sm font-medium text-primary hover:underline">
+                      {t("nav.news", { defaultValue: "News" })}
+                    </Link>
+                  </>
+                )}
               </div>
             </div>
           )}
@@ -642,50 +670,72 @@ const Navbar = () => {
             </p>
           </div>
 
-          <Link to="/about" className={mobileLinkClass} onClick={closeMobileMenu}>
-            <Info className="w-4 h-4 shrink-0" />
-            <span>{t("nav.about")}</span>
-          </Link>
-          <Link to="/learn-more" className={mobileLinkClass} onClick={closeMobileMenu}>
-            <BookOpen className="w-4 h-4 shrink-0" />
-            <span>{t("nav.learnMore")}</span>
-          </Link>
-          <Link to="/flight" className={mobileLinkClass} onClick={closeMobileMenu}>
-            <Plane className="w-4 h-4 shrink-0" />
-            <span>{t("nav.flight", { defaultValue: "Flight" })}</span>
-          </Link>
-          <Link to="/insurance" className={mobileLinkClass} onClick={closeMobileMenu}>
-            <Shield className="w-4 h-4 shrink-0" />
-            <span>{t("nav.insurance", { defaultValue: "Insurance" })}</span>
-          </Link>
-          <Link to="/help-center" className={mobileLinkClass} onClick={closeMobileMenu}>
-            <MessageSquare className="w-4 h-4 shrink-0" />
-            <span>{t("nav.helpCenter", { defaultValue: "Help Center" })}</span>
-          </Link>
-          <Link to="/q-and-a" className={mobileLinkClass} onClick={closeMobileMenu}>
-            <BookOpen className="w-4 h-4 shrink-0" />
-            <span>{t("nav.qAndA", { defaultValue: "Q&A" })}</span>
-          </Link>
-          <Link to="/feedback" className={mobileLinkClass} onClick={closeMobileMenu}>
-            <FileText className="w-4 h-4 shrink-0" />
-            <span>{t("nav.feedback", { defaultValue: "Feedback" })}</span>
-          </Link>
-          <Link to="/translation-service" className={mobileLinkClass} onClick={closeMobileMenu}>
-            <Languages className="w-4 h-4 shrink-0" />
-            <span>{t("nav.translationService", { defaultValue: "Translation Service" })}</span>
-          </Link>
-          <Link to="/gallery" className={mobileLinkClass} onClick={closeMobileMenu}>
-            <Image className="w-4 h-4 shrink-0" />
-            <span>{t("nav.gallery", { defaultValue: "Gallery" })}</span>
-          </Link>
-          <Link to="/news" className={mobileLinkClass} onClick={closeMobileMenu}>
-            <Newspaper className="w-4 h-4 shrink-0" />
-            <span>{t("nav.news", { defaultValue: "News" })}</span>
-          </Link>
-          <Link to="/blog" className={mobileLinkClass} onClick={closeMobileMenu}>
-            <FileText className="w-4 h-4 shrink-0" />
-            <span>{t("nav.articles", { defaultValue: "Articles" })}</span>
-          </Link>
+          {settings.visibility.about && (
+            <Link to="/about" className={mobileLinkClass} onClick={closeMobileMenu}>
+              <Info className="w-4 h-4 shrink-0" />
+              <span>{t("nav.about")}</span>
+            </Link>
+          )}
+          {settings.visibility.learnMore && (
+            <Link to="/learn-more" className={mobileLinkClass} onClick={closeMobileMenu}>
+              <BookOpen className="w-4 h-4 shrink-0" />
+              <span>{t("nav.learnMore")}</span>
+            </Link>
+          )}
+          {settings.visibility.flight && (
+            <Link to="/flight" className={mobileLinkClass} onClick={closeMobileMenu}>
+              <Plane className="w-4 h-4 shrink-0" />
+              <span>{t("nav.flight", { defaultValue: "Flight" })}</span>
+            </Link>
+          )}
+          {settings.visibility.insurance && (
+            <Link to="/insurance" className={mobileLinkClass} onClick={closeMobileMenu}>
+              <Shield className="w-4 h-4 shrink-0" />
+              <span>{t("nav.insurance", { defaultValue: "Insurance" })}</span>
+            </Link>
+          )}
+          {settings.visibility.helpCenter && (
+            <Link to="/help-center" className={mobileLinkClass} onClick={closeMobileMenu}>
+              <MessageSquare className="w-4 h-4 shrink-0" />
+              <span>{t("nav.helpCenter", { defaultValue: "Help Center" })}</span>
+            </Link>
+          )}
+          {settings.visibility.qAndA && (
+            <Link to="/q-and-a" className={mobileLinkClass} onClick={closeMobileMenu}>
+              <BookOpen className="w-4 h-4 shrink-0" />
+              <span>{t("nav.qAndA", { defaultValue: "Q&A" })}</span>
+            </Link>
+          )}
+          {settings.visibility.feedback && (
+            <Link to="/feedback" className={mobileLinkClass} onClick={closeMobileMenu}>
+              <FileText className="w-4 h-4 shrink-0" />
+              <span>{t("nav.feedback", { defaultValue: "Feedback" })}</span>
+            </Link>
+          )}
+          {settings.visibility.translationService && (
+            <Link to="/translation-service" className={mobileLinkClass} onClick={closeMobileMenu}>
+              <Languages className="w-4 h-4 shrink-0" />
+              <span>{t("nav.translationService", { defaultValue: "Translation Service" })}</span>
+            </Link>
+          )}
+          {settings.visibility.gallery && (
+            <Link to="/gallery" className={mobileLinkClass} onClick={closeMobileMenu}>
+              <Image className="w-4 h-4 shrink-0" />
+              <span>{t("nav.gallery", { defaultValue: "Gallery" })}</span>
+            </Link>
+          )}
+          {settings.visibility.news && (
+            <Link to="/news" className={mobileLinkClass} onClick={closeMobileMenu}>
+              <Newspaper className="w-4 h-4 shrink-0" />
+              <span>{t("nav.news", { defaultValue: "News" })}</span>
+            </Link>
+          )}
+          {settings.visibility.blog && (
+            <Link to="/blog" className={mobileLinkClass} onClick={closeMobileMenu}>
+              <FileText className="w-4 h-4 shrink-0" />
+              <span>{t("nav.articles", { defaultValue: "Articles" })}</span>
+            </Link>
+          )}
 
           {user && user.role !== "ADMIN" && (
             <>
@@ -716,10 +766,14 @@ const Navbar = () => {
               >
                 {t("nav.contactSupport", { defaultValue: "Contact support" })}
               </Link>
-              <span className="text-muted-foreground">•</span>
-              <Link to="/news" onClick={closeMobileMenu} className="text-sm font-medium text-primary hover:underline">
-                {t("nav.news", { defaultValue: "News" })}
-              </Link>
+              {settings.visibility.news && (
+                <>
+                  <span className="text-muted-foreground">•</span>
+                  <Link to="/news" onClick={closeMobileMenu} className="text-sm font-medium text-primary hover:underline">
+                    {t("nav.news", { defaultValue: "News" })}
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>

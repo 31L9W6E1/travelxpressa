@@ -221,10 +221,9 @@ code, pre, .font-mono {
 */
 
 .ticker-bar {
-  background: oklch(0.16 0.005 285.823 / 0.85);
+  background: color-mix(in oklch, var(--background) 85%, transparent);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid oklch(0.3 0 0 / 0.3);
 }
 
 .ticker-wrapper {

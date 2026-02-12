@@ -368,7 +368,7 @@ const Navbar = () => {
         <div className="p-3 border-t border-dashed border-border/70">
           {isSidebarCollapsed ? (
             <Link
-              to={user ? "/contactsupport" : "/learn-more"}
+              to="/contactsupport"
               className="h-10 w-10 mx-auto rounded-lg border border-dashed border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
               title={t("nav.quickHelp", { defaultValue: "Quick Help" })}
             >
@@ -386,12 +386,10 @@ const Navbar = () => {
               </p>
               <div className="mt-3 flex items-center gap-2">
                 <Link
-                  to={user ? "/contactsupport" : "/learn-more"}
+                  to="/contactsupport"
                   className="text-sm font-medium text-primary hover:underline"
                 >
-                  {user
-                    ? t("nav.contactSupport", { defaultValue: "Contact support" })
-                    : t("nav.learnMore", { defaultValue: "Learn more" })}
+                  {t("nav.contactSupport", { defaultValue: "Contact support" })}
                 </Link>
                 <span className="text-muted-foreground">•</span>
                 <Link to="/news" className="text-sm font-medium text-primary hover:underline">
@@ -640,13 +638,11 @@ const Navbar = () => {
             </p>
             <div className="mt-2 flex items-center gap-2">
               <Link
-                to={user ? "/contactsupport" : "/learn-more"}
+                to="/contactsupport"
                 onClick={closeMobileMenu}
                 className="text-sm font-medium text-primary hover:underline"
               >
-                {user
-                  ? t("nav.contactSupport", { defaultValue: "Contact support" })
-                  : t("nav.learnMore", { defaultValue: "Learn more" })}
+                {t("nav.contactSupport", { defaultValue: "Contact support" })}
               </Link>
               <span className="text-muted-foreground">•</span>
               <Link to="/news" onClick={closeMobileMenu} className="text-sm font-medium text-primary hover:underline">

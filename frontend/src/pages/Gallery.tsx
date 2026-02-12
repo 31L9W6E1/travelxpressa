@@ -119,6 +119,24 @@ const Gallery = () => {
   const [isPublishing, setIsPublishing] = useState(false);
   const uploadInputRef = useRef<HTMLInputElement>(null);
 
+  const getCategoryLabel = useCallback(
+    (category: string) =>
+      t(`gallery.categories.${category}`, {
+        defaultValue: category.charAt(0).toUpperCase() + category.slice(1),
+      }),
+    [t]
+  );
+
+  const getImageAltText = useCallback(
+    (image: GalleryItem) => {
+      if (typeof image.id === "number") {
+        return t(`gallery.placeholderAlts.${image.id}`, { defaultValue: image.alt });
+      }
+      return image.alt;
+    },
+    [t]
+  );
+
   const fetchPublicGallery = useCallback(async () => {
     const res = await api.get("/api/upload/public-gallery");
     const images = res.data?.data?.images;
@@ -130,7 +148,7 @@ const Gallery = () => {
       return {
         id: filename || url || crypto.randomUUID(),
         src: getFullImageUrl(url),
-        alt: filename || t("gallery.uploadedImage", "Uploaded image"),
+        alt: filename || t("gallery.uploadedImage", { defaultValue: "Uploaded image" }),
         category: "uploads",
       } satisfies GalleryItem;
     });
@@ -175,6 +193,8 @@ const Gallery = () => {
     selectedCategory === "all"
       ? galleryItems
       : galleryItems.filter((img) => img.category === selectedCategory);
+  const selectedImageAlt = selectedImage ? getImageAltText(selectedImage) : "";
+  const selectedImageCategory = selectedImage ? getCategoryLabel(selectedImage.category) : "";
 
   const handlePublishPhotos = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -195,15 +215,22 @@ const Gallery = () => {
 
       const successCount = results.filter(Boolean).length;
       if (successCount > 0) {
-        toast.success(`Published ${successCount} photo${successCount > 1 ? "s" : ""}`);
+        toast.success(
+          successCount > 1
+            ? t("gallery.publishSuccessMany", {
+                count: successCount,
+                defaultValue: `Published ${successCount} photos`,
+              })
+            : t("gallery.publishSuccessOne", { defaultValue: "Published 1 photo" })
+        );
       } else {
-        toast.error("Failed to publish photos");
+        toast.error(t("gallery.publishError", { defaultValue: "Failed to publish photos" }));
       }
 
       const mapped = await fetchPublicGallery();
       setUploadedImages(mapped);
     } catch (error: any) {
-      toast.error(error?.message || "Failed to publish photos");
+      toast.error(error?.message || t("gallery.publishError", { defaultValue: "Failed to publish photos" }));
     } finally {
       setIsPublishing(false);
       event.target.value = "";
@@ -248,12 +275,12 @@ const Gallery = () => {
                   {isPublishing ? (
                     <>
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Publishing...
+                      {t("gallery.publishing", { defaultValue: "Publishing..." })}
                     </>
                   ) : (
                     <>
                       <Upload className="w-4 h-4 mr-2" />
-                      Publish Photos
+                      {t("gallery.publishPhotos", { defaultValue: "Publish Photos" })}
                     </>
                   )}
                 </Button>
@@ -274,10 +301,7 @@ const Gallery = () => {
                       : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
                   }`}
                 >
-                  {t(
-                    `gallery.categories.${category}`,
-                    category.charAt(0).toUpperCase() + category.slice(1)
-                  )}
+                  {getCategoryLabel(category)}
                 </button>
               ))}
             </div>
@@ -289,49 +313,49 @@ const Gallery = () => {
       <section className="py-12">
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredImages.map((image, index) => (
-              <Card
-                key={image.id}
-                className={`overflow-hidden cursor-pointer group hover-lift animate-fade-in-up`}
-                style={{ animationDelay: `${Math.min(index * 50, 300)}ms` }}
-                onClick={() => setSelectedImage(image)}
-              >
-                <div className="relative aspect-[4/3] overflow-hidden">
-                  <img
-                    src={image.src}
-                    alt={image.alt}
-                    loading="lazy"
-                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                    onError={(e) => {
-                      const element = e.currentTarget as HTMLImageElement;
-                      const fallback = getFallbackImageUrl(image.src);
-                      if (element.dataset.fallbackApplied !== "1" && fallback && element.src !== fallback) {
-                        element.dataset.fallbackApplied = "1";
-                        element.src = fallback;
-                        return;
-                      }
-                      element.style.display = "none";
-                    }}
-                  />
-                  {/* Overlay on hover */}
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-300 flex items-center justify-center">
-                    <span className="text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-sm font-medium">
-                      {t("gallery.viewImage", "View")}
-                    </span>
+            {filteredImages.map((image, index) => {
+              const localizedAlt = getImageAltText(image);
+              const localizedCategory = getCategoryLabel(image.category);
+              return (
+                <Card
+                  key={image.id}
+                  className={`overflow-hidden cursor-pointer group hover-lift animate-fade-in-up`}
+                  style={{ animationDelay: `${Math.min(index * 50, 300)}ms` }}
+                  onClick={() => setSelectedImage(image)}
+                >
+                  <div className="relative aspect-[4/3] overflow-hidden">
+                    <img
+                      src={image.src}
+                      alt={localizedAlt}
+                      loading="lazy"
+                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      onError={(e) => {
+                        const element = e.currentTarget as HTMLImageElement;
+                        const fallback = getFallbackImageUrl(image.src);
+                        if (element.dataset.fallbackApplied !== "1" && fallback && element.src !== fallback) {
+                          element.dataset.fallbackApplied = "1";
+                          element.src = fallback;
+                          return;
+                        }
+                        element.style.display = "none";
+                      }}
+                    />
+                    {/* Overlay on hover */}
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-300 flex items-center justify-center">
+                      <span className="text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-sm font-medium">
+                        {t("gallery.viewImage", "View")}
+                      </span>
+                    </div>
                   </div>
-                </div>
-                <div className="p-4">
-                  <p className="text-sm text-muted-foreground truncate">
-                    {image.alt}
-                  </p>
-                  <Badge variant="secondary" className="mt-2 text-xs">
-                    {image.category === "uploads"
-                      ? t("gallery.categories.uploads", "Uploads")
-                      : image.category}
-                  </Badge>
-                </div>
-              </Card>
-            ))}
+                  <div className="p-4">
+                    <p className="text-sm text-muted-foreground truncate">{localizedAlt}</p>
+                    <Badge variant="secondary" className="mt-2 text-xs">
+                      {localizedCategory}
+                    </Badge>
+                  </div>
+                </Card>
+              );
+            })}
           </div>
 
           {/* Empty state */}
@@ -354,13 +378,13 @@ const Gallery = () => {
           <button
             className="absolute top-4 right-4 text-white hover:text-gray-300 transition-colors"
             onClick={() => setSelectedImage(null)}
-            aria-label="Close"
+            aria-label={t("common.close", { defaultValue: "Close" })}
           >
             <X className="w-8 h-8" />
           </button>
           <img
             src={selectedImage.src}
-            alt={selectedImage.alt}
+            alt={selectedImageAlt}
             className="max-w-full max-h-[85vh] object-contain rounded-lg"
             onError={(e) => {
               const element = e.currentTarget as HTMLImageElement;
@@ -375,9 +399,9 @@ const Gallery = () => {
             onClick={(e) => e.stopPropagation()}
           />
           <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white text-center">
-            <p className="text-lg font-medium">{selectedImage.alt}</p>
+            <p className="text-lg font-medium">{selectedImageAlt}</p>
             <Badge variant="secondary" className="mt-2">
-              {selectedImage.category}
+              {selectedImageCategory}
             </Badge>
           </div>
         </div>

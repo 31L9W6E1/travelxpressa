@@ -59,6 +59,7 @@
     "applications": "Applications",
     "payments": "Payments",
     "support": "Support",
+    "contactSupport": "Contact Support",
     "notifications": "Notifications",
     "noNotifications": "No new notifications",
     "signIn": "Sign In",
@@ -1145,6 +1146,27 @@
     "pricing": {
       "title": "Pricing Estimate",
       "description": "1 page = 25,000₮ to 40,000₮ depending on file type."
+    }
+  },
+  "gallery": {
+    "badge": "Explore",
+    "title": "Travel Gallery",
+    "subtitle": "Discover destinations and travel moments from our clients and team.",
+    "publishPhotos": "Publish Photos",
+    "publishing": "Publishing...",
+    "publishSuccessOne": "Published 1 photo",
+    "publishSuccessMany": "Published {{count}} photos",
+    "publishError": "Failed to publish photos",
+    "uploadedImage": "Uploaded image",
+    "viewImage": "View",
+    "noImages": "No images found in this category",
+    "categories": {
+      "all": "All",
+      "destinations": "Destinations",
+      "nature": "Nature",
+      "landmarks": "Landmarks",
+      "travel": "Travel",
+      "uploads": "Uploads"
     }
   },
   "userProfile": {

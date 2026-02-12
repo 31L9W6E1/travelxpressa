@@ -116,6 +116,9 @@ export const config = {
   // Frontend URL
   frontendUrl: process.env.FRONTEND_URL || 'http://localhost:5173',
 
+  // Kiwi Tequila Flight API
+  kiwiApiKey: process.env.KIWI_API_KEY || '',
+
   // Telegram Notifications
   telegram: {
     botToken: process.env.TELEGRAM_BOT_TOKEN || '',

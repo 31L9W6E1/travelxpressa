@@ -380,6 +380,57 @@ export const updateApplicationSchema = z.object({
   documents: documentsDraftSchema.optional(),
 });
 
+// Flight search schemas
+const iataSchema = z
+  .string()
+  .trim()
+  .toUpperCase()
+  .regex(/^[A-Z]{3}$/, 'IATA code must be exactly 3 letters');
+
+const isoDateSchema = z
+  .string()
+  .trim()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be in YYYY-MM-DD format');
+
+export const flightSearchSchema = z
+  .object({
+    from: iataSchema,
+    to: iataSchema,
+    departDate: isoDateSchema,
+    returnDate: isoDateSchema.optional(),
+    adults: z.coerce.number().int().min(1).max(9).default(1),
+    children: z.coerce.number().int().min(0).max(9).default(0),
+    infants: z.coerce.number().int().min(0).max(9).default(0),
+    cabinClass: z
+      .enum(['ECONOMY', 'PREMIUM_ECONOMY', 'BUSINESS', 'FIRST'])
+      .default('ECONOMY'),
+  })
+  .superRefine((value, ctx) => {
+    if (value.from === value.to) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['to'],
+        message: 'Destination must be different from origin',
+      });
+    }
+
+    if (value.returnDate && value.returnDate < value.departDate) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['returnDate'],
+        message: 'Return date must be on or after departure date',
+      });
+    }
+
+    if (value.infants > value.adults) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['infants'],
+        message: 'Infants cannot exceed number of adults',
+      });
+    }
+  });
+
 // Pagination schema
 export const paginationSchema = z.object({
   page: z.coerce.number().int().positive().default(1),
@@ -404,4 +455,5 @@ export type PassportInfoInput = z.infer<typeof passportInfoSchema>;
 export type TravelInfoInput = z.infer<typeof travelInfoSchema>;
 export type CreateApplicationInput = z.infer<typeof createApplicationSchema>;
 export type UpdateApplicationInput = z.infer<typeof updateApplicationSchema>;
+export type FlightSearchInput = z.infer<typeof flightSearchSchema>;
 export type PaginationInput = z.infer<typeof paginationSchema>;

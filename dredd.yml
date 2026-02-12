@@ -1,0 +1,16 @@
+color: true
+reporter:
+  - cli
+  - apiary
+dry-run: false
+language: nodejs
+server: npm run dev --prefix backend
+server-wait: 10
+inline-errors: true
+details: true
+loglevel: warning
+config: ./dredd.yml
+blueprint: ./apiary.apib
+path:
+  - ./apiary.apib
+endpoint: http://127.0.0.1:3000

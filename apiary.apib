@@ -1,0 +1,37 @@
+FORMAT: 1A
+HOST: http://127.0.0.1:3000
+
+# TravelXpressa Flights API
+
+This blueprint validates the public flight-search endpoint request contract.
+
+## Flights [/api/flights/search]
+
+### Validate search input [POST]
+
++ Request (application/json)
+
+        {
+          "from": "UBN",
+          "to": "UBN",
+          "departDate": "2026-03-20",
+          "adults": 1,
+          "children": 0,
+          "infants": 0,
+          "cabinClass": "ECONOMY"
+        }
+
++ Response 400 (application/json; charset=utf-8)
+
+    + Body
+
+            {
+              "success": false,
+              "error": "Validation failed",
+              "errors": [
+                {
+                  "field": "to",
+                  "message": "Destination must be different from origin"
+                }
+              ]
+            }

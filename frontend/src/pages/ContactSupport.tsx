@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import {
@@ -6,6 +6,7 @@ import {
   CheckCircle2,
   Loader2,
   MessageSquare,
+  RefreshCw,
   Send,
   UserCircle2,
   XCircle,
@@ -85,6 +86,8 @@ const ContactSupport = () => {
   const [searchText, setSearchText] = useState("");
   const [progressDraft, setProgressDraft] = useState<ProgressDraft>(defaultDraft);
   const [sendingProgress, setSendingProgress] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const shouldAutoScrollRef = useRef(false);
 
   const isAdmin = user?.role === "ADMIN" || user?.role === "AGENT";
   const preferredUserId = searchParams.get("userId");
@@ -150,6 +153,15 @@ const ContactSupport = () => {
     if (!selectedThreadId) return;
     void loadThreadDetail(selectedThreadId);
   }, [selectedThreadId]);
+
+  useEffect(() => {
+    if (!shouldAutoScrollRef.current) return;
+    // Allow layout to settle so Radix ScrollArea viewport can measure correctly.
+    requestAnimationFrame(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+    });
+    shouldAutoScrollRef.current = false;
+  }, [selectedThreadId, selectedThread?.messages?.length]);
 
   useEffect(() => {
     const latest = getLatestProgress(selectedThread);
@@ -231,6 +243,7 @@ const ContactSupport = () => {
     try {
       await sendThreadMessage(selectedThread.id, messageText.trim());
       setMessageText("");
+      shouldAutoScrollRef.current = true;
       await loadThreadDetail(selectedThread.id);
       await loadThreads();
     } catch (error) {
@@ -258,6 +271,7 @@ const ContactSupport = () => {
       };
       await sendThreadMessage(selectedThread.id, encodeProgressUpdate(payload), "SYSTEM");
       toast.success("Progress update sent to user inbox");
+      shouldAutoScrollRef.current = true;
       await loadThreadDetail(selectedThread.id);
       await loadThreads();
     } catch (error) {
@@ -331,6 +345,19 @@ const ContactSupport = () => {
                 : "Chat with our team and track live progress for your visa process."}
             </p>
           </div>
+          {selectedThreadId && (
+            <Button
+              variant="outline"
+              onClick={() => {
+                if (!selectedThreadId) return;
+                void loadThreadDetail(selectedThreadId);
+                void loadThreads();
+              }}
+            >
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Refresh
+            </Button>
+          )}
           {!isAdmin && (
             <Button onClick={() => void handleCreateThread()} disabled={creatingThread}>
               {creatingThread ? (
@@ -387,7 +414,10 @@ const ContactSupport = () => {
                     {filteredThreads.map((thread) => (
                       <button
                         key={thread.id}
-                        onClick={() => setSelectedThreadId(thread.id)}
+                        onClick={() => {
+                          shouldAutoScrollRef.current = true;
+                          setSelectedThreadId(thread.id);
+                        }}
                         className={`w-full text-left rounded-lg border p-3 transition-colors ${
                           selectedThreadId === thread.id
                             ? "border-primary bg-primary/5"
@@ -575,7 +605,7 @@ const ContactSupport = () => {
                 </CardContent>
 
                 <CardContent className="flex-1 min-h-0">
-                  <ScrollArea className="h-[calc(78vh-520px)] pr-2">
+                  <ScrollArea className="h-full pr-2">
                     <div className="space-y-3 py-2">
                       {(selectedThread.messages || []).map((message) => {
                         const parsedProgress = decodeProgressUpdate(message.content);
@@ -617,6 +647,7 @@ const ContactSupport = () => {
                           </div>
                         );
                       })}
+                      <div ref={messagesEndRef} />
                     </div>
                   </ScrollArea>
                 </CardContent>

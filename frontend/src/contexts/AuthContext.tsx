@@ -32,16 +32,27 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   // Initialize auth state
   useEffect(() => {
     const initAuth = async () => {
-      const token = getAccessToken();
-      if (token) {
-        try {
+      try {
+        // If we don't have an access token (e.g., first visit on a different subdomain),
+        // attempt a cookie-based refresh. This keeps sessions stable across
+        // travelxpressa.com <-> www.travelxpressa.com when refreshToken uses `.travelxpressa.com`.
+        if (!getAccessToken()) {
+          try {
+            await authApi.refreshToken();
+          } catch {
+            // Ignore refresh failures (guest session)
+          }
+        }
+
+        if (getAccessToken()) {
           const currentUser = await authApi.getCurrentUser();
           setUser(currentUser);
-        } catch {
-          clearTokens();
         }
+      } catch {
+        clearTokens();
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     };
 
     initAuth();

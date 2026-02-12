@@ -80,6 +80,7 @@ const ContactSupport = () => {
   const [selectedThread, setSelectedThread] = useState<ChatThread | null>(null);
   const [loadingThreads, setLoadingThreads] = useState(true);
   const [loadingThreadDetail, setLoadingThreadDetail] = useState(false);
+  const [threadDetailError, setThreadDetailError] = useState<string | null>(null);
   const [creatingThread, setCreatingThread] = useState(false);
   const [messageText, setMessageText] = useState("");
   const [sendingMessage, setSendingMessage] = useState(false);
@@ -102,6 +103,7 @@ const ContactSupport = () => {
       if (!data.length) {
         setSelectedThreadId("");
         setSelectedThread(null);
+        setThreadDetailError(null);
         return;
       }
 
@@ -121,7 +123,9 @@ const ContactSupport = () => {
       if (next) setSelectedThreadId(next.id);
     } catch (error) {
       console.error("Failed to load support threads:", error);
-      toast.error("Failed to load support threads");
+      if (!options?.silent) {
+        toast.error("Failed to load support threads");
+      }
     } finally {
       if (!options?.silent) setLoadingThreads(false);
     }
@@ -130,16 +134,25 @@ const ContactSupport = () => {
   const loadThreadDetail = async (threadId: string, options?: { silent?: boolean }) => {
     if (!threadId) {
       setSelectedThread(null);
+      setThreadDetailError(null);
       return;
     }
 
-    if (!options?.silent) setLoadingThreadDetail(true);
+    if (!options?.silent) {
+      setLoadingThreadDetail(true);
+      setThreadDetailError(null);
+    }
     try {
       const detail = await fetchThreadById(threadId);
       setSelectedThread(detail);
+      setThreadDetailError(null);
     } catch (error) {
       console.error("Failed to load thread:", error);
-      toast.error("Failed to load conversation");
+      if (!options?.silent) {
+        setSelectedThread(null);
+        setThreadDetailError("Failed to load conversation");
+        toast.error("Failed to load conversation");
+      }
     } finally {
       if (!options?.silent) setLoadingThreadDetail(false);
     }
@@ -489,7 +502,34 @@ const ContactSupport = () => {
                   <p>Select a thread to start messaging.</p>
                 </div>
               </CardContent>
-            ) : loadingThreadDetail || !selectedThread ? (
+            ) : loadingThreadDetail ? (
+              <CardContent className="h-full flex items-center justify-center text-muted-foreground">
+                <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                Loading conversation...
+              </CardContent>
+            ) : threadDetailError ? (
+              <CardContent className="h-full flex items-center justify-center">
+                <div className="text-center text-muted-foreground space-y-3">
+                  <XCircle className="w-10 h-10 mx-auto text-destructive" />
+                  <div className="space-y-1">
+                    <p className="font-medium text-foreground">{threadDetailError}</p>
+                    <p className="text-sm text-muted-foreground">
+                      Please try again. If this keeps happening, refresh the page.
+                    </p>
+                  </div>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      if (!selectedThreadId) return;
+                      void loadThreadDetail(selectedThreadId);
+                    }}
+                  >
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                    Retry
+                  </Button>
+                </div>
+              </CardContent>
+            ) : !selectedThread ? (
               <CardContent className="h-full flex items-center justify-center text-muted-foreground">
                 <Loader2 className="w-5 h-5 animate-spin mr-2" />
                 Loading conversation...

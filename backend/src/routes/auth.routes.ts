@@ -183,6 +183,39 @@ function refreshTokenLookupCandidates(token: string): string[] {
   return hashedToken === token ? [token] : [hashedToken, token];
 }
 
+function getRefreshTokenCandidates(req: Request): string[] {
+  const candidates: string[] = [];
+
+  const pushCandidate = (value: unknown) => {
+    if (typeof value !== 'string') return;
+    const token = value.trim();
+    if (!token) return;
+    if (!candidates.includes(token)) {
+      candidates.push(token);
+    }
+  };
+
+  // Parse raw cookie header to capture duplicate refreshToken entries.
+  const cookieHeader = req.headers.cookie;
+  if (typeof cookieHeader === 'string' && cookieHeader.length > 0) {
+    cookieHeader.split(';').forEach((segment) => {
+      const trimmed = segment.trim();
+      if (!trimmed.startsWith('refreshToken=')) return;
+      const rawValue = trimmed.slice('refreshToken='.length);
+      try {
+        pushCandidate(decodeURIComponent(rawValue));
+      } catch {
+        pushCandidate(rawValue);
+      }
+    });
+  }
+
+  pushCandidate(req.cookies?.refreshToken);
+  pushCandidate(req.body?.refreshToken);
+
+  return candidates;
+}
+
 function setRefreshTokenCookie(res: Response, token: string): void {
   const cookieDomain = getCookieDomain();
   res.cookie('refreshToken', token, {
@@ -375,64 +408,81 @@ router.post(
 router.post(
   '/refresh',
   asyncHandler(async (req: Request, res: Response) => {
-    // Get refresh token from cookie or body
-    const refreshToken = req.cookies?.refreshToken || req.body?.refreshToken;
-
-    if (!refreshToken) {
+    const refreshTokenCandidates = getRefreshTokenCandidates(req);
+    if (refreshTokenCandidates.length === 0) {
       throw new UnauthorizedError('Refresh token required');
     }
 
-    // Verify token signature
-    let decoded;
-    try {
-      decoded = verifyRefreshToken(refreshToken);
-    } catch {
-      throw new UnauthorizedError('Invalid refresh token');
-    }
+    let matchedRefreshToken: string | null = null;
+    let storedToken:
+      | (Awaited<ReturnType<typeof prisma.refreshToken.findFirst>> & { user: { id: string; email: string; role: UserRole } })
+      | null = null;
+    let decodedUserIdForSecurity: string | null = null;
+    let sawRevokedToken = false;
+    const now = new Date();
 
-    // Find token in database
-    const storedToken = await prisma.refreshToken.findFirst({
-      where: {
-        token: {
-          in: refreshTokenLookupCandidates(refreshToken),
+    for (const candidate of refreshTokenCandidates) {
+      let decoded: { userId: string };
+      try {
+        decoded = verifyRefreshToken(candidate) as { userId: string };
+      } catch {
+        continue;
+      }
+
+      decodedUserIdForSecurity = decoded.userId;
+
+      const tokenRow = await prisma.refreshToken.findFirst({
+        where: {
+          token: {
+            in: refreshTokenLookupCandidates(candidate),
+          },
         },
-      },
-      include: { user: true },
-    });
-
-    if (!storedToken) {
-      // Token not found - possible token reuse attack
-      logger.security('Refresh token not found - possible reuse', {
-        userId: decoded.userId,
+        include: { user: true },
       });
 
-      // Revoke all tokens for this user
-      await prisma.refreshToken.updateMany({
-        where: { userId: decoded.userId },
-        data: { revokedAt: new Date() },
-      });
+      if (!tokenRow) {
+        continue;
+      }
 
-      throw new UnauthorizedError('Invalid refresh token');
+      if (tokenRow.revokedAt) {
+        sawRevokedToken = true;
+        logger.security('Revoked refresh token candidate ignored', {
+          userId: decoded.userId,
+          tokenId: tokenRow.id,
+          candidateCount: refreshTokenCandidates.length,
+        });
+        continue;
+      }
+
+      if (tokenRow.expiresAt < now) {
+        continue;
+      }
+
+      matchedRefreshToken = candidate;
+      storedToken = tokenRow as any;
+      break;
     }
 
-    if (storedToken.revokedAt) {
-      // Token was revoked - possible token reuse attack
-      logger.security('Revoked refresh token used', {
-        userId: decoded.userId,
-        tokenId: storedToken.id,
-      });
+    if (!matchedRefreshToken || !storedToken) {
+      // Maintain strict token reuse protection for single-token requests.
+      if (refreshTokenCandidates.length === 1 && decodedUserIdForSecurity) {
+        if (sawRevokedToken) {
+          logger.security('Revoked refresh token used', {
+            userId: decodedUserIdForSecurity,
+          });
+        } else {
+          logger.security('Refresh token not found - possible reuse', {
+            userId: decodedUserIdForSecurity,
+          });
+        }
 
-      // Revoke all tokens for this user
-      await prisma.refreshToken.updateMany({
-        where: { userId: decoded.userId },
-        data: { revokedAt: new Date() },
-      });
+        await prisma.refreshToken.updateMany({
+          where: { userId: decodedUserIdForSecurity },
+          data: { revokedAt: new Date() },
+        });
+      }
 
       throw new UnauthorizedError('Invalid refresh token');
-    }
-
-    if (storedToken.expiresAt < new Date()) {
-      throw new UnauthorizedError('Refresh token expired');
     }
 
     // Generate new tokens

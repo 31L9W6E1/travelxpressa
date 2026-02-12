@@ -24,6 +24,7 @@ import {
   Newspaper,
   BookOpen,
   Globe,
+  ExternalLink,
   Image as ImageIcon,
   Loader2,
   CreditCard,
@@ -227,6 +228,38 @@ const getAdminTabFromSection = (section?: string): AdminTab => {
       return "overview";
   }
 };
+
+type OfficialReferenceLink = {
+  label: string;
+  url: string;
+};
+
+const OFFICIAL_REFERENCE_LINKS: OfficialReferenceLink[] = [
+  {
+    label: "United Kingdom (Standard Visitor)",
+    url: "https://www.gov.uk/standard-visitor/apply-standard-visitor-visa",
+  },
+  {
+    label: "Canada (Visitor Visa)",
+    url: "https://www.canada.ca/en/immigration-refugees-citizenship/services/visit-canada/apply-visitor-visa.htm",
+  },
+  {
+    label: "Australia (Visitor 600)",
+    url: "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/visitor-600",
+  },
+  {
+    label: "Japan VFS (Mongolia)",
+    url: "https://visa.vfsglobal.com/mng/en/jpn",
+  },
+  {
+    label: "Ireland VFS (Mongolia)",
+    url: "https://visa.vfsglobal.com/mng/en/irl/",
+  },
+  {
+    label: "Germany VFS (Ulaanbaatar)",
+    url: "https://visa.vfsglobal.com/mng/en/deu/attend-centre/ulaanbaatar",
+  },
+];
 
 const AdminDashboard = () => {
   const { t } = useTranslation();
@@ -1251,6 +1284,37 @@ const AdminDashboard = () => {
                 </CardContent>
               </Card>
             </div>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("dashboard.additional.title", "Additional")}</CardTitle>
+                <CardDescription>
+                  {t(
+                    "dashboard.additional.officialReferences",
+                    "Official reference links for visa requirements, fees, and process updates."
+                  )}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                  {OFFICIAL_REFERENCE_LINKS.map((item) => (
+                    <a
+                      key={item.url}
+                      href={item.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex items-center justify-between gap-3 rounded-lg border border-dashed border-border/70 bg-card px-4 py-3 hover:bg-secondary transition-colors"
+                    >
+                      <div className="flex items-center gap-2 min-w-0">
+                        <Globe className="w-4 h-4 text-muted-foreground shrink-0" />
+                        <span className="text-sm text-foreground truncate">{item.label}</span>
+                      </div>
+                      <ExternalLink className="w-4 h-4 text-muted-foreground shrink-0" />
+                    </a>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* Users Tab */}

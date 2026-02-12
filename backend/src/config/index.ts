@@ -119,6 +119,14 @@ export const config = {
   // Kiwi Tequila Flight API
   kiwiApiKey: process.env.KIWI_API_KEY || '',
 
+  // CMS auto-translation
+  cmsAutoTranslate: {
+    enabled: !['0', 'false', 'no', 'off'].includes((process.env.CMS_AUTO_TRANSLATE_ENABLED || 'true').trim().toLowerCase()),
+    locales: process.env.CMS_AUTO_TRANSLATE_LOCALES || 'mn',
+    openAiApiKey: process.env.OPENAI_API_KEY || '',
+    openAiModel: process.env.OPENAI_TRANSLATION_MODEL || 'gpt-4.1-mini',
+  },
+
   // Telegram Notifications
   telegram: {
     botToken: process.env.TELEGRAM_BOT_TOKEN || '',

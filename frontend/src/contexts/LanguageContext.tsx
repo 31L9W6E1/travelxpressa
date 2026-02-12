@@ -125,7 +125,7 @@ const translations: Record<Language, Record<string, string>> = {
     'auth.forgotPassword': 'Нууц үгээ мартсан?',
 
     // Home
-    'home.hero.badge': '1,000+ зорчигчдын итгэл',
+    'home.hero.badge': 'Нийт виз мэдүүлэгчдийн тоо 1000+',
     'home.hero.title': 'Таны аялал',
     'home.hero.titleHighlight': 'Америк руу',
     'home.hero.titleEnd': 'эндээс эхэлнэ',

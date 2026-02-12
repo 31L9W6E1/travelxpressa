@@ -3,6 +3,7 @@ import { prisma } from '../lib/prisma';
 import { authenticateToken, requireRole } from '../middleware/auth';
 import { UserRole } from '../types';
 import { logger } from '../utils/logger';
+import { triggerAutoTranslateForPost } from '../services/postAutoTranslate.service';
 
 const router = Router();
 
@@ -599,6 +600,10 @@ router.post('/admin', authenticateToken, requireRole(UserRole.ADMIN), async (req
 
     logger.info('Post created', { postId: post.id, category, status: postStatus });
 
+    if (post.status === 'published') {
+      triggerAutoTranslateForPost(post.id);
+    }
+
     res.status(201).json({
       success: true,
       data: post,
@@ -650,6 +655,10 @@ router.put('/admin/:id', authenticateToken, requireRole(UserRole.ADMIN), async (
     });
 
     logger.info('Post updated', { postId: id });
+
+    if (post.status === 'published') {
+      triggerAutoTranslateForPost(post.id);
+    }
 
     res.json({
       success: true,
@@ -720,6 +729,10 @@ router.patch('/admin/:id/publish', authenticateToken, requireRole(UserRole.ADMIN
     });
 
     logger.info('Post publish status toggled', { postId: id, newStatus });
+
+    if (newStatus === 'published') {
+      triggerAutoTranslateForPost(post.id);
+    }
 
     res.json({
       success: true,

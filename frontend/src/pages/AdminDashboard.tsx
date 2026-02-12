@@ -362,6 +362,9 @@ const AdminDashboard = () => {
   const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState<string>("");
   const [visaTypeFilter, setVisaTypeFilter] = useState<string>("");
+  const [updatingRoleUserId, setUpdatingRoleUserId] = useState<string | null>(
+    null,
+  );
 
   // CMS State
   const [posts, setPosts] = useState<Post[]>([]);
@@ -634,6 +637,38 @@ const AdminDashboard = () => {
       toast.error("Failed to load posts");
     } finally {
       setCmsLoading(false);
+    }
+  };
+
+  const handleUserRoleChange = async (
+    userId: string,
+    nextRole: UserData["role"],
+  ) => {
+    const currentUserRow = users.find((u) => u.id === userId);
+    if (!currentUserRow || currentUserRow.role === nextRole) return;
+
+    setUpdatingRoleUserId(userId);
+    try {
+      const response = await api.put(`/api/admin/users/${userId}/role`, {
+        role: nextRole,
+      });
+
+      const updatedRole =
+        response.data?.data?.role || response.data?.user?.role || nextRole;
+
+      setUsers((prev) =>
+        prev.map((u) => (u.id === userId ? { ...u, role: updatedRole } : u)),
+      );
+      toast.success(t("dashboard.users.roleUpdated", "User role updated"));
+    } catch (error: any) {
+      console.error("Failed to update user role:", error);
+      const message =
+        error?.response?.data?.error ||
+        error?.response?.data?.message ||
+        t("dashboard.users.roleUpdateFailed", "Failed to update user role");
+      toast.error(message);
+    } finally {
+      setUpdatingRoleUserId(null);
     }
   };
 
@@ -1416,7 +1451,7 @@ const AdminDashboard = () => {
                               : t('common.never', 'Never')}
                           </td>
                           <td className="px-4 py-3">
-                            <div className="flex items-center gap-1">
+                            <div className="flex items-center gap-2">
                               <Button variant="ghost" size="icon" asChild>
                                 <Link to={`/admin/users/${u.id}`}>
                                   <Eye className="w-4 h-4" />
@@ -1427,9 +1462,38 @@ const AdminDashboard = () => {
                                   <MessageSquare className="w-4 h-4" />
                                 </Link>
                               </Button>
-                              <Button variant="ghost" size="icon">
-                                <UserCog className="w-4 h-4" />
-                              </Button>
+                              <div className="flex items-center gap-1">
+                                <UserCog className="w-4 h-4 text-muted-foreground" />
+                                <Select
+                                  value={u.role}
+                                  onValueChange={(value) =>
+                                    handleUserRoleChange(
+                                      u.id,
+                                      value as UserData["role"],
+                                    )
+                                  }
+                                  disabled={
+                                    updatingRoleUserId === u.id ||
+                                    u.id === user?.id
+                                  }
+                                >
+                                  <SelectTrigger className="h-8 w-[128px]">
+                                    {updatingRoleUserId === u.id ? (
+                                      <span className="inline-flex items-center gap-2 text-xs text-muted-foreground">
+                                        <Loader2 className="w-3 h-3 animate-spin" />
+                                        {t("common.saving", "Saving")}
+                                      </span>
+                                    ) : (
+                                      <SelectValue />
+                                    )}
+                                  </SelectTrigger>
+                                  <SelectContent align="end">
+                                    <SelectItem value="USER">USER</SelectItem>
+                                    <SelectItem value="AGENT">AGENT</SelectItem>
+                                    <SelectItem value="ADMIN">ADMIN</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
                               <Button
                                 variant="ghost"
                                 size="icon"

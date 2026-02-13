@@ -363,10 +363,10 @@ router.get('/featured', async (_req: Request, res: Response) => {
     const publishedPosts = allPosts.filter((post) => isPubliclyVisibleStatus((post as any).status));
     const blogPosts = publishedPosts
       .filter((post) => normalizeValue((post as any).category) === 'blog')
-      .slice(0, 4);
+      .slice(0, 9);
     const newsPosts = publishedPosts
       .filter((post) => normalizeValue((post as any).category) === 'news')
-      .slice(0, 8);
+      .slice(0, 9);
 
     res.json({
       success: true,

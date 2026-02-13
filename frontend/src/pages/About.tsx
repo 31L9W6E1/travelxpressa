@@ -61,21 +61,21 @@ const About = () => {
   return (
     <main className="min-h-screen bg-background text-foreground">
       {/* Hero Section */}
-      <section className="pt-16 pb-12 border-b border-border">
+      <section className="py-10 border-b border-border">
         <div className="max-w-7xl mx-auto px-6">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">
+          <h1 className="text-3xl md:text-4xl font-bold mb-3">
             {t("aboutPage.hero.titlePrefix", { defaultValue: "About" })}{" "}
             {t("footer.company", { defaultValue: "TravelXpressa" })}
           </h1>
 
-          <p className="text-xl text-muted-foreground max-w-3xl mb-8">
+          <p className="text-base md:text-lg text-muted-foreground max-w-3xl mb-6">
             {t("aboutPage.hero.subtitle", {
               defaultValue:
                 "We simplify visa application preparation with guided steps, clear checklists, and support for multiple destinations.",
             })}
           </p>
 
-          <p className="text-sm text-muted-foreground mb-8">
+          <p className="text-sm text-muted-foreground mb-6">
             {t("aboutPage.hero.customers", {
               defaultValue: "We have helped 1,000+ customers.",
             })}

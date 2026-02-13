@@ -115,17 +115,17 @@ const Home = () => {
   return (
     <div className="min-h-screen bg-background text-foreground font-sans">
       {/* Hero */}
-      <section className="py-12 border-b border-border">
+      <section className="py-10 border-b border-border">
         <div className="max-w-7xl mx-auto px-6">
           <div className="max-w-3xl">
-            <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6 leading-[1.05]">
+            <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-4 leading-[1.1]">
               {t("home.hero.titleLine1")}
               <span className="block text-muted-foreground">
                 {t("home.hero.titleLine2")}
               </span>
               {t("home.hero.titleLine3")}
             </h1>
-            <p className="text-lg md:text-xl text-muted-foreground mb-8 leading-relaxed">
+            <p className="text-base md:text-lg text-muted-foreground mb-6 leading-relaxed">
               {t("home.hero.subtitle")}
             </p>
             <div className="flex flex-wrap gap-3">

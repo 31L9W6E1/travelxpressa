@@ -282,7 +282,7 @@ const BlogPost = () => {
             </div>
           )}
 
-          <h1 className="text-4xl md:text-5xl font-bold mb-6">{post.title}</h1>
+          <h1 className="text-3xl md:text-4xl font-bold mb-4">{post.title}</h1>
 
           <div className="flex flex-wrap items-center gap-6 text-sm text-muted-foreground">
             {post.authorName && (
@@ -309,7 +309,7 @@ const BlogPost = () => {
       {/* Content */}
       <article className="max-w-4xl mx-auto px-6 py-12">
         {post.excerpt && (
-          <p className="text-xl text-muted-foreground mb-8 border-l-4 border-primary pl-6">
+          <p className="text-base md:text-lg text-muted-foreground mb-6 border-l-4 border-primary pl-6">
             {post.excerpt}
           </p>
         )}

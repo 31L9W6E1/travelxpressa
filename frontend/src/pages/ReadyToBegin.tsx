@@ -208,7 +208,7 @@ const ReadyToBegin = () => {
   return (
     <div className="min-h-screen bg-background text-foreground pt-16 theme-transition">
       {/* Header Section */}
-      <section className="py-16 border-b border-border">
+      <section className="py-10 border-b border-border">
         <div className="max-w-6xl mx-auto px-6">
           {/* Welcome badge with country */}
           <div className="flex flex-wrap items-center gap-4 mb-8">
@@ -236,10 +236,10 @@ const ReadyToBegin = () => {
             )}
           </div>
 
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">
+          <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-3">
             {t("readyPage.title", { defaultValue: "Information You'll Need" })}
           </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl">
+          <p className="text-base md:text-lg text-muted-foreground max-w-2xl">
             {selectedCountry
               ? t("readyPage.subtitleWithCountry", {
                   defaultValue:

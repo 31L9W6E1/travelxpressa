@@ -147,10 +147,10 @@ const EnhancedForm = () => {
         <div className="w-full max-w-4xl">
           {/* Header */}
           <div className="text-center mb-12">
-            <h1 className="text-4xl md:text-5xl font-bold text-gradient-primary mb-4">
+            <h1 className="text-3xl md:text-4xl font-bold text-gradient-primary mb-3">
               {t("inquiryPage.title", { defaultValue: "Travel Application" })}
             </h1>
-            <p className="text-lg text-secondary mb-8 max-w-2xl mx-auto">
+            <p className="text-base md:text-lg text-secondary mb-6 max-w-2xl mx-auto">
               {t("inquiryPage.subtitle", {
                 defaultValue:
                   "Complete the form below to begin your journey with confidence and ease",

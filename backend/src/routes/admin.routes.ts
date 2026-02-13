@@ -10,6 +10,7 @@ import {
   updateInquiryStatusSchema,
   updateRoleSchema,
   siteSettingsSchema,
+  adminInquiriesQuerySchema,
 } from '../validation/schemas';
 import { AuthenticatedRequest, UserRole } from '../types';
 import { decrypt } from '../utils/encryption';
@@ -60,7 +61,7 @@ router.use(isAdmin);
  */
 router.get(
   '/inquiries',
-  validate({ query: paginationSchema }),
+  validate({ query: adminInquiriesQuerySchema }),
   asyncHandler(async (req: Request, res: Response) => {
     const { page = 1, limit = 20, sortOrder = 'desc' } = req.query as any;
     const status = req.query.status as string | undefined;

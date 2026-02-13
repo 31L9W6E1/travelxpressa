@@ -498,6 +498,12 @@ export const paginationSchema = z.object({
   sortOrder: z.enum(['asc', 'desc']).default('desc'),
 });
 
+// Admin inquiries list schema (pagination + optional filters)
+export const adminInquiriesQuerySchema = paginationSchema.extend({
+  status: z.string().max(50).optional(),
+  serviceType: z.string().max(50).optional(),
+});
+
 // ID parameter schema
 export const idParamSchema = z.object({
   id: z.string().min(1, 'ID is required'),

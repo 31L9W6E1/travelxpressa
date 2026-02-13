@@ -8,6 +8,7 @@ import { normalizeImageUrl } from '@/api/upload';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import { toast } from 'sonner';
+import MarkdownRenderer from "@/components/MarkdownRenderer";
 import {
   Dialog,
   DialogContent,
@@ -288,15 +289,7 @@ const NewsArticle = () => {
 
       {/* Content */}
       <article className="max-w-4xl mx-auto px-6 py-8">
-        <div className="prose prose-lg dark:prose-invert max-w-none">
-          {article.content.split('\n').map((paragraph, i) => (
-            paragraph.trim() && (
-              <p key={i} className="mb-4 text-foreground leading-relaxed">
-                {paragraph}
-              </p>
-            )
-          ))}
-        </div>
+        <MarkdownRenderer content={article.content || ""} />
       </article>
 
       {/* Related News CTA */}

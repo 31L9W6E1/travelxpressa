@@ -8,6 +8,7 @@ import { normalizeImageUrl } from '@/api/upload';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import { toast } from 'sonner';
+import MarkdownRenderer from "@/components/MarkdownRenderer";
 import {
   Dialog,
   DialogContent,
@@ -314,18 +315,9 @@ const BlogPost = () => {
           <p className="text-base md:text-lg text-muted-foreground mb-6 border-l-4 border-primary pl-6">
             {post.excerpt}
           </p>
-        )}
+      )}
 
-        <div className="prose prose-lg dark:prose-invert max-w-none">
-          {/* Render content - for now as plain text with line breaks */}
-          {post.content.split('\n').map((paragraph, i) => (
-            paragraph.trim() && (
-              <p key={i} className="mb-4 text-foreground leading-relaxed">
-                {paragraph}
-              </p>
-            )
-          ))}
-        </div>
+      <MarkdownRenderer content={post.content || ""} />
       </article>
 
       {/* Footer CTA */}

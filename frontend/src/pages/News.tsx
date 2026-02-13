@@ -94,19 +94,19 @@ const News = () => {
           ) : (
             <>
               {/* Grid layout: 4 columns on desktop, 2 on tablet, 1 on mobile */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-3 md:grid-cols-4 gap-2 md:gap-6">
                 {news.map((item) => (
                   <article key={item.id} className="group">
                     <Link to={`/news/${item.slug}`} className="block">
-                      <div className="relative aspect-square overflow-hidden rounded-lg mb-3">
+                      <div className="relative aspect-square overflow-hidden rounded-lg mb-2 md:mb-3">
                         <img
                           src={item.imageUrl ? normalizeImageUrl(item.imageUrl) : getDefaultImage('news')}
                           alt={item.title}
                           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                        <div className="absolute bottom-0 left-0 right-0 p-4">
-                          <h2 className="text-sm font-medium text-white line-clamp-2 group-hover:text-gray-300 transition-colors">
+                        <div className="absolute bottom-0 left-0 right-0 p-2 md:p-4">
+                          <h2 className="text-xs md:text-sm font-medium text-white line-clamp-2 group-hover:text-gray-300 transition-colors">
                             {item.title}
                           </h2>
                         </div>
@@ -116,7 +116,7 @@ const News = () => {
                         {formatPostDate(item.publishedAt || item.createdAt, i18n.language)}
                       </div>
                       {item.excerpt && (
-                        <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{item.excerpt}</p>
+                        <p className="hidden md:block text-sm text-muted-foreground mt-2 line-clamp-2">{item.excerpt}</p>
                       )}
                     </Link>
                   </article>

@@ -12,7 +12,7 @@ import {
   Zap,
 } from "lucide-react";
 import {
-  getFeaturedContent,
+  getPosts,
   formatPostDate,
   getDefaultImage,
 } from "@/api/posts";
@@ -68,17 +68,18 @@ const Home = () => {
 
   useEffect(() => {
     const fetchContent = async () => {
+      setLoading(true);
       try {
-        const content = await getFeaturedContent();
-        setBlogPosts(
-          content.blogPosts.length > 0 ? content.blogPosts : fallbackBlogPosts,
-        );
-        setNewsItems(
-          content.newsPosts.length > 0 ? content.newsPosts : fallbackNewsItems,
-        );
+        const [blogRes, newsRes] = await Promise.all([
+          getPosts({ category: "blog", page: 1, limit: 9, locale: i18n.language }),
+          getPosts({ category: "news", page: 1, limit: 9, locale: i18n.language }),
+        ]);
+
+        setBlogPosts(blogRes.data.length > 0 ? blogRes.data : fallbackBlogPosts);
+        setNewsItems(newsRes.data.length > 0 ? newsRes.data : fallbackNewsItems);
 
       } catch (err) {
-        console.error("Failed to fetch featured content:", err);
+        console.error("Failed to fetch home content:", err);
         setBlogPosts(fallbackBlogPosts);
         setNewsItems(fallbackNewsItems);
       } finally {

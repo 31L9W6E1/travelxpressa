@@ -217,7 +217,14 @@ function getCookieDomain(): string | undefined {
     return `.${normalized}`;
   }
 
-  const candidateUrls = [process.env.FRONTEND_URL, process.env.BACKEND_URL].filter(Boolean) as string[];
+  const candidateUrls = [
+    process.env.FRONTEND_URL,
+    process.env.BACKEND_URL,
+    ...config.corsOrigin
+      .split(',')
+      .map((value) => value.trim())
+      .filter(Boolean),
+  ].filter(Boolean) as string[];
   for (const value of candidateUrls) {
     try {
       const hostname = new URL(value).hostname.toLowerCase();

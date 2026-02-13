@@ -15,6 +15,7 @@ import {
 } from "@/config/pricing";
 import { convertCurrency, FX_LAST_UPDATED_ISO, isFxCurrencySupported } from "@/config/fx";
 import { formatCurrencyCodeAmount, getCurrencyForLanguage } from "@/lib/money";
+import PageHeader from "@/components/PageHeader";
 
 const LearnMore = () => {
   const { t, i18n } = useTranslation();
@@ -94,53 +95,44 @@ const LearnMore = () => {
     : "";
 
   return (
-    <div className="min-h-screen bg-background text-foreground pt-16">
-      {/* Hero Section */}
-      <section className="py-20 border-b border-border">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="max-w-3xl">
-            <h1 className="text-5xl md:text-6xl font-bold tracking-tight mb-6">
-              {t("learnMorePage.hero.titleLine1", {
-                defaultValue: "Visa Fees &",
+    <div className="min-h-screen bg-background text-foreground">
+      <PageHeader
+        title={
+          <>
+            {t("learnMorePage.hero.titleLine1", { defaultValue: "Visa Fees &" })}
+            <span className="block text-muted-foreground">
+              {t("learnMorePage.hero.titleLine2", { defaultValue: "Requirements" })}
+            </span>
+          </>
+        }
+        subtitle={t("learnMorePage.hero.subtitle", {
+          defaultValue:
+            "Compare government fees, interview requirements, and processing timelines for major destinations. We focus on practical pre-check guidance before payment, then provide case-level document support after onboarding.",
+        })}
+      >
+        <div className="flex flex-wrap gap-3">
+          <Button asChild size="lg">
+            <Link to="/select-country" className="inline-flex items-center gap-2">
+              {t("learnMorePage.hero.cta", { defaultValue: "Choose Destination" })}
+              <ArrowRight className="w-5 h-5" />
+            </Link>
+          </Button>
+          <Button asChild variant="outline" size="lg">
+            <Link to="/application">
+              {t("learnMorePage.hero.secondaryCta", {
+                defaultValue: "Continue Application",
               })}
-              <span className="block text-muted-foreground">
-                {t("learnMorePage.hero.titleLine2", {
-                  defaultValue: "Requirements",
-                })}
-              </span>
-            </h1>
-            <p className="text-xl text-muted-foreground mb-8">
-              {t("learnMorePage.hero.subtitle", {
-                defaultValue:
-                  "Compare government fees, interview requirements, and processing timelines for major destinations. We focus on practical pre-check guidance before payment, then provide case-level document support after onboarding.",
+            </Link>
+          </Button>
+          <Button asChild variant="outline" size="lg">
+            <Link to="/translation-service">
+              {t("learnMorePage.hero.translationCta", {
+                defaultValue: "Translation Service",
               })}
-            </p>
-
-            <div className="flex flex-wrap gap-3">
-              <Button asChild size="lg">
-                <Link to="/select-country" className="inline-flex items-center gap-2">
-                  {t("learnMorePage.hero.cta", { defaultValue: "Choose Destination" })}
-                  <ArrowRight className="w-5 h-5" />
-                </Link>
-              </Button>
-              <Button asChild variant="outline" size="lg">
-                <Link to="/application">
-                  {t("learnMorePage.hero.secondaryCta", {
-                    defaultValue: "Continue Application",
-                  })}
-                </Link>
-              </Button>
-              <Button asChild variant="outline" size="lg">
-                <Link to="/translation-service">
-                  {t("learnMorePage.hero.translationCta", {
-                    defaultValue: "Translation Service",
-                  })}
-                </Link>
-              </Button>
-            </div>
-          </div>
+            </Link>
+          </Button>
         </div>
-      </section>
+      </PageHeader>
 
       {/* Fees & Requirements */}
       <section className="py-20 border-b border-border">

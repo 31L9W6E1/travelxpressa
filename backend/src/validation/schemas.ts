@@ -28,7 +28,11 @@ const nameSchema = z
   .min(1, 'Name is required')
   .max(100, 'Name must be less than 100 characters')
   // Allow Unicode letters (e.g., Mongolian Cyrillic) while still restricting to "name-like" characters.
-  .regex(/^[\p{L}\s\-']+$/u, 'Name can only contain letters, spaces, hyphens, and apostrophes');
+  // Also allow periods for common abbreviations (e.g., "B. Bat").
+  .regex(
+    /^[\p{L}\s\-.'\u2019]+$/u,
+    'Name can only contain letters, spaces, periods, hyphens, and apostrophes'
+  );
 
 // Draft-friendly validators - very permissive for partial saves
 // These accept any string value including empty strings
@@ -116,7 +120,7 @@ export const createInquirySchema = z.object({
   phone: phoneSchema,
   message: z.string()
     .min(10, 'Message must be at least 10 characters')
-    .max(2000, 'Message must be less than 2000 characters'),
+    .max(10000, 'Message must be less than 10000 characters'),
   serviceType: z.nativeEnum(ServiceType),
 });
 

@@ -1,4 +1,4 @@
-import api from "./client";
+import api, { handleApiError } from "./client";
 
 export type InquiryStatus =
   | "PENDING"
@@ -60,8 +60,12 @@ type InquiryListResponse = {
 export const createInquiry = async (
   payload: CreateInquiryInput,
 ): Promise<{ id: string; status: InquiryStatus; createdAt: string }> => {
-  const res = await api.post("/api/inquiry", payload);
-  return res.data?.data;
+  try {
+    const res = await api.post("/api/inquiry", payload);
+    return res.data?.data;
+  } catch (error) {
+    throw handleApiError(error);
+  }
 };
 
 export const fetchMyInquiries = async (

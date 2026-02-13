@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { FileText, Paperclip, Send, Sparkles, Upload, X } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { createInquiry } from "@/api/inquiries";
+import { getFullImageUrl, uploadApplicationFile } from "@/api/upload";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,6 +23,42 @@ const fileTypePricing: Record<string, number> = {
 
 const toMnt = (value: number) =>
   new Intl.NumberFormat("mn-MN").format(Math.round(value)) + "₮";
+
+const MAX_TRANSLATION_UPLOAD_BYTES = 10 * 1024 * 1024; // 10MB (server limit)
+
+const translationUploadMimeTypes = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/gif",
+  "image/webp",
+  "application/pdf",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+]);
+
+const translationUploadExtensions = new Set([
+  ".jpg",
+  ".jpeg",
+  ".png",
+  ".gif",
+  ".webp",
+  ".pdf",
+  ".doc",
+  ".docx",
+]);
+
+const getFileExtension = (filename: string): string => {
+  const idx = filename.lastIndexOf(".");
+  return idx >= 0 ? filename.slice(idx).toLowerCase() : "";
+};
+
+const isAllowedTranslationUpload = (file: File): boolean => {
+  if (file.type && translationUploadMimeTypes.has(file.type)) return true;
+
+  // Some browsers omit `file.type` for certain documents. Fall back to extension.
+  const ext = getFileExtension(file.name);
+  return !!ext && translationUploadExtensions.has(ext);
+};
 
 const TranslationService = () => {
   const { t } = useTranslation();
@@ -54,9 +91,21 @@ const TranslationService = () => {
   const addSelectedFiles = (files: FileList | null) => {
     if (!files?.length) return;
 
+    const rejectedTypes: string[] = [];
+    const rejectedSizes: string[] = [];
+
     setSelectedFiles((prev) => {
       const next = [...prev];
       for (const file of Array.from(files)) {
+        if (file.size > MAX_TRANSLATION_UPLOAD_BYTES) {
+          rejectedSizes.push(file.name);
+          continue;
+        }
+        if (!isAllowedTranslationUpload(file)) {
+          rejectedTypes.push(file.name);
+          continue;
+        }
+
         const exists = next.some(
           (existing) =>
             existing.name === file.name &&
@@ -67,6 +116,28 @@ const TranslationService = () => {
       }
       return next;
     });
+
+    if (rejectedSizes.length) {
+      toast.error(
+        t("translationService.validation.fileTooLarge", {
+          defaultValue: "Some files are too large (max 10MB).",
+        }),
+        {
+          description: rejectedSizes.slice(0, 5).join(", "),
+        }
+      );
+    }
+
+    if (rejectedTypes.length) {
+      toast.error(
+        t("translationService.validation.fileTypeUnsupported", {
+          defaultValue: "Some files have an unsupported type.",
+        }),
+        {
+          description: rejectedTypes.slice(0, 5).join(", "),
+        }
+      );
+    }
   };
 
   const removeSelectedFile = (index: number) => {
@@ -95,6 +166,40 @@ const TranslationService = () => {
 
     setSubmitting(true);
     try {
+      const uploadedFiles: Array<{
+        name: string;
+        size: number;
+        url: string;
+      }> = [];
+
+      if (selectedFiles.length > 0) {
+        if (!user) {
+          toast.error(
+            t("translationService.validation.loginToUpload", {
+              defaultValue: "Please sign in to upload files (or use a cloud link).",
+            })
+          );
+          return;
+        }
+
+        for (const file of selectedFiles) {
+          if (file.size > MAX_TRANSLATION_UPLOAD_BYTES) {
+            throw new Error(`File too large (max 10MB): ${file.name}`);
+          }
+          if (!isAllowedTranslationUpload(file)) {
+            throw new Error(`Unsupported file type: ${file.name}`);
+          }
+
+          const uploadResult = await uploadApplicationFile(file);
+          const relativeUrl = uploadResult?.data?.url || "";
+          uploadedFiles.push({
+            name: file.name,
+            size: file.size,
+            url: relativeUrl ? getFullImageUrl(relativeUrl) : "",
+          });
+        }
+      }
+
       const message = [
         "Translation request",
         `Source language: ${form.sourceLanguage}`,
@@ -103,9 +208,11 @@ const TranslationService = () => {
         `Pages: ${Math.max(1, Number(form.pages || 1))}`,
         `Speed: ${form.urgency}`,
         `Estimated fee: ${toMnt(price.total)}`,
-        `Attached files: ${
-          selectedFiles.length
-            ? selectedFiles.map((file) => `${file.name} (${formatFileSize(file.size)})`).join(", ")
+        `Uploaded files:\n${
+          uploadedFiles.length
+            ? uploadedFiles
+                .map((file) => `- ${file.name} (${formatFileSize(file.size)}): ${file.url}`)
+                .join("\n")
             : "-"
         }`,
         `File links: ${form.fileLinks || "-"}`,
@@ -308,6 +415,7 @@ const TranslationService = () => {
                     ref={fileInputRef}
                     type="file"
                     multiple
+                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif,.webp"
                     className="hidden"
                     onChange={(e) => addSelectedFiles(e.target.files)}
                   />

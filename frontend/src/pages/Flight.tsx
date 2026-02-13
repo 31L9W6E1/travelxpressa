@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import PageHeader from "@/components/PageHeader";
 import { searchFlights, type CabinClass, type FlightResult } from '@/api/flights';
 import { ApiError } from '@/api/client';
 
@@ -140,15 +141,11 @@ const Flight = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground pt-20">
-      <section className="py-10 border-b border-dashed border-border/60">
-        <div className="max-w-7xl mx-auto px-6">
-          <h1 className="text-3xl md:text-4xl font-bold">Flight Search</h1>
-          <p className="text-muted-foreground mt-2">
-            Search live flights for itinerary planning and visa preparation.
-          </p>
-        </div>
-      </section>
+    <div className="min-h-screen bg-background text-foreground">
+      <PageHeader
+        title="Flight Search"
+        subtitle="Search live flights for itinerary planning and visa preparation."
+      />
 
       <section className="py-10 border-b border-dashed border-border/60">
         <div className="max-w-7xl mx-auto px-6">

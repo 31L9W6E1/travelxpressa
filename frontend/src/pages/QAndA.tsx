@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import PageHeader from "@/components/PageHeader";
 
 const items = [
   {
@@ -25,18 +26,14 @@ const items = [
 
 const QAndA = () => {
   return (
-    <div className="min-h-screen bg-background text-foreground pt-20">
-      <section className="py-10 border-b border-dashed border-border/60">
-        <div className="max-w-5xl mx-auto px-6">
-          <h1 className="text-3xl md:text-4xl font-bold">Q&A</h1>
-          <p className="text-muted-foreground mt-2">
-            Хамгийн их асуудаг асуултууд болон товч, ойлгомжтой хариултууд.
-          </p>
-        </div>
-      </section>
+    <div className="min-h-screen bg-background text-foreground">
+      <PageHeader
+        title="Q&A"
+        subtitle="Хамгийн их асуудаг асуултууд болон товч, ойлгомжтой хариултууд."
+      />
 
       <section className="py-10">
-        <div className="max-w-5xl mx-auto px-6 grid gap-4">
+        <div className="max-w-7xl mx-auto px-6 grid gap-4">
           {items.map((item) => (
             <Card key={item.q}>
               <CardHeader>

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Loader2, Upload, X } from "lucide-react";
+import PageHeader from "@/components/PageHeader";
 import api from "@/api/client";
 import { getFallbackImageUrl, getFullImageUrl, uploadImage } from "@/api/upload";
 import { useAuth } from "@/contexts/AuthContext";
@@ -237,74 +238,62 @@ const Gallery = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* Header Section */}
-      <section className="pt-16 pb-12 border-b border-border">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
-            <div className="max-w-3xl">
-              <h1 className="text-4xl md:text-5xl font-bold mb-4">
-                {t("gallery.title", "Travel Gallery")}
-              </h1>
-              <p className="text-xl text-muted-foreground">
-                {t(
-                  "gallery.subtitle",
-                  "Discover the beauty of destinations awaiting your journey."
+      <PageHeader
+        title={t("gallery.title", { defaultValue: "Travel Gallery" })}
+        subtitle={t("gallery.subtitle", {
+          defaultValue: "Discover the beauty of destinations awaiting your journey.",
+        })}
+        actions={
+          user?.role === "ADMIN" ? (
+            <>
+              <input
+                ref={uploadInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                onChange={handlePublishPhotos}
+                disabled={isPublishing}
+              />
+              <Button
+                onClick={() => uploadInputRef.current?.click()}
+                disabled={isPublishing}
+                className="min-w-[180px]"
+              >
+                {isPublishing ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    {t("gallery.publishing", { defaultValue: "Publishing..." })}
+                  </>
+                ) : (
+                  <>
+                    <Upload className="w-4 h-4 mr-2" />
+                    {t("gallery.publishPhotos", { defaultValue: "Publish Photos" })}
+                  </>
                 )}
-              </p>
-            </div>
-
-            {user?.role === "ADMIN" && (
-              <div className="flex items-center gap-3">
-                <input
-                  ref={uploadInputRef}
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  className="hidden"
-                  onChange={handlePublishPhotos}
-                  disabled={isPublishing}
-                />
-                <Button
-                  onClick={() => uploadInputRef.current?.click()}
-                  disabled={isPublishing}
-                  className="min-w-[180px]"
-                >
-                  {isPublishing ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      {t("gallery.publishing", { defaultValue: "Publishing..." })}
-                    </>
-                  ) : (
-                    <>
-                      <Upload className="w-4 h-4 mr-2" />
-                      {t("gallery.publishPhotos", { defaultValue: "Publish Photos" })}
-                    </>
-                  )}
-                </Button>
-              </div>
-            )}
+              </Button>
+            </>
+          ) : null
+        }
+      >
+        {categories.length > 1 ? (
+          <div className="flex flex-wrap justify-start gap-2">
+            {categories.map((category) => (
+              <button
+                key={category}
+                onClick={() => setSelectedCategory(category)}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                  selectedCategory === category
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                }`}
+              >
+                {getCategoryLabel(category)}
+              </button>
+            ))}
           </div>
-
-          {/* Category Filter */}
-          {categories.length > 1 && (
-            <div className="flex flex-wrap justify-start gap-2 mt-8">
-              {categories.map((category) => (
-                <button
-                  key={category}
-                  onClick={() => setSelectedCategory(category)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
-                    selectedCategory === category
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
-                  }`}
-                >
-                  {getCategoryLabel(category)}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
+        ) : null}
+      </PageHeader>
 
       {/* Gallery Grid */}
       <section className="py-12">

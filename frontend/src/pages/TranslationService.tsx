@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import PageHeader from "@/components/PageHeader";
 
 const fileTypePricing: Record<string, number> = {
   certificate: 25000,
@@ -142,21 +143,15 @@ const TranslationService = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <section className="pt-16 pb-12 border-b border-border">
-        <div className="max-w-7xl mx-auto px-6">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            {t("translationService.title", {
-              defaultValue: "Document Translation Service",
-            })}
-          </h1>
-          <p className="text-xl text-muted-foreground max-w-3xl">
-            {t("translationService.subtitle", {
-              defaultValue:
-                "Submit your translation request for visa, legal, and academic documents. Pricing is transparent per page, and requests are linked to your account for admin review and tracking.",
-            })}
-          </p>
-        </div>
-      </section>
+      <PageHeader
+        title={t("translationService.title", {
+          defaultValue: "Document Translation Service",
+        })}
+        subtitle={t("translationService.subtitle", {
+          defaultValue:
+            "Submit your translation request for visa, legal, and academic documents. Pricing is transparent per page, and requests are linked to your account for admin review and tracking.",
+        })}
+      />
 
       <section className="py-12">
         <div className="max-w-7xl mx-auto px-6">

@@ -5,6 +5,7 @@ import { getPosts, formatPostDate, getDefaultImage } from '@/api/posts';
 import type { PostSummary } from '@/api/posts';
 import { normalizeImageUrl } from '@/api/upload';
 import { useTranslation } from 'react-i18next';
+import PageHeader from "@/components/PageHeader";
 
 const Blog = () => {
   const { t, i18n } = useTranslation();
@@ -48,27 +49,21 @@ const Blog = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* Header */}
-      <section className="pt-16 pb-12 border-b border-border">
-        <div className="max-w-7xl mx-auto px-6">
-          <Link
-            to="/"
-            className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-8"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            {t('common.backToHome', { defaultValue: 'Back to Home' })}
-          </Link>
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            {t('blogPage.title', { defaultValue: 'Blog' })}
-          </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl">
-            {t('blogPage.subtitle', {
-              defaultValue:
-                'Visa guides, travel tips, and expert advice to help you prepare applications for major destinations.',
-            })}
-          </p>
-        </div>
-      </section>
+      <PageHeader
+        title={t('blogPage.title', { defaultValue: 'Blog' })}
+        subtitle={t('blogPage.subtitle', {
+          defaultValue:
+            'Visa guides, travel tips, and expert advice to help you prepare applications for major destinations.',
+        })}
+      >
+        <Link
+          to="/"
+          className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          {t('common.backToHome', { defaultValue: 'Back to Home' })}
+        </Link>
+      </PageHeader>
 
       {/* Posts Grid */}
       <section className="py-16">

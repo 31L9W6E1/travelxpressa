@@ -1,21 +1,18 @@
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import PageHeader from "@/components/PageHeader";
 
 const HelpCenter = () => {
   return (
-    <div className="min-h-screen bg-background text-foreground pt-20">
-      <section className="py-10 border-b border-dashed border-border/60">
-        <div className="max-w-6xl mx-auto px-6">
-          <h1 className="text-3xl md:text-4xl font-bold">Help Center</h1>
-          <p className="text-muted-foreground mt-2">
-            Визийн үйлчилгээ, бүрдүүлэлт, төлөв хяналт, төлбөртэй холбоотой тусламжийн төв.
-          </p>
-        </div>
-      </section>
+    <div className="min-h-screen bg-background text-foreground">
+      <PageHeader
+        title="Help Center"
+        subtitle="Визийн үйлчилгээ, бүрдүүлэлт, төлөв хяналт, төлбөртэй холбоотой тусламжийн төв."
+      />
 
       <section className="py-10">
-        <div className="max-w-6xl mx-auto px-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="max-w-7xl mx-auto px-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           <Card>
             <CardHeader>
               <CardTitle>Өргөдлийн явц хянах</CardTitle>

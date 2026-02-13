@@ -1,19 +1,16 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import PageHeader from "@/components/PageHeader";
 
 const Insurance = () => {
   return (
-    <div className="min-h-screen bg-background text-foreground pt-20">
-      <section className="py-10 border-b border-dashed border-border/60">
-        <div className="max-w-5xl mx-auto px-6">
-          <h1 className="text-3xl md:text-4xl font-bold">Insurance Service</h1>
-          <p className="text-muted-foreground mt-2">
-            Виз мэдүүлэгт шаардлагатай аяллын даатгалын чиглэл, багц, баримтын зөвлөмж.
-          </p>
-        </div>
-      </section>
+    <div className="min-h-screen bg-background text-foreground">
+      <PageHeader
+        title="Insurance Service"
+        subtitle="Виз мэдүүлэгт шаардлагатай аяллын даатгалын чиглэл, багц, баримтын зөвлөмж."
+      />
 
       <section className="py-10">
-        <div className="max-w-5xl mx-auto px-6 grid gap-4 md:grid-cols-2">
+        <div className="max-w-7xl mx-auto px-6 grid gap-4 md:grid-cols-2">
           <Card>
             <CardHeader>
               <CardTitle>Даатгалын үндсэн шаардлага</CardTitle>

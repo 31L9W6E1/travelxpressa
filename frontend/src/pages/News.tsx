@@ -5,6 +5,7 @@ import { getPosts, formatPostDate, getDefaultImage } from '@/api/posts';
 import type { PostSummary } from '@/api/posts';
 import { normalizeImageUrl } from '@/api/upload';
 import { useTranslation } from 'react-i18next';
+import PageHeader from "@/components/PageHeader";
 
 const News = () => {
   const { t, i18n } = useTranslation();
@@ -48,26 +49,20 @@ const News = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* Header */}
-      <section className="pt-16 pb-12 border-b border-border">
-        <div className="max-w-7xl mx-auto px-6">
-          <Link
-            to="/"
-            className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-8"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            {t('common.backToHome', { defaultValue: 'Back to Home' })}
-          </Link>
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            {t('newsPage.title', { defaultValue: 'News' })}
-          </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl">
-            {t('newsPage.subtitle', {
-              defaultValue: 'Latest updates from embassies, consulates, and immigration services.',
-            })}
-          </p>
-        </div>
-      </section>
+      <PageHeader
+        title={t('newsPage.title', { defaultValue: 'News' })}
+        subtitle={t('newsPage.subtitle', {
+          defaultValue: 'Latest updates from embassies, consulates, and immigration services.',
+        })}
+      >
+        <Link
+          to="/"
+          className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          {t('common.backToHome', { defaultValue: 'Back to Home' })}
+        </Link>
+      </PageHeader>
 
       {/* News Grid */}
       <section className="py-16">

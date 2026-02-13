@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { UserAvatar } from "@/components/UserAvatar";
 
 interface Application {
   id: string;
@@ -191,9 +192,13 @@ const UserProfile = () => {
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 bg-primary text-primary-foreground rounded-2xl flex items-center justify-center text-2xl sm:text-3xl font-bold">
-              {user?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase()}
-            </div>
+            <UserAvatar
+              seed={user?.id}
+              name={user?.name}
+              email={user?.email}
+              size="xl"
+              className="rounded-2xl sm:w-20 sm:h-20"
+            />
             <div>
               <h1 className="text-2xl font-bold text-foreground">{user?.name || t('common.user', 'User')}</h1>
               <p className="text-muted-foreground">{user?.email}</p>

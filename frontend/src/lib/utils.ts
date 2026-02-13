@@ -51,6 +51,14 @@ export function getAvatarColor(identifier: string): { bg: string; fg: string } {
   return avatarColors[index];
 }
 
+// Dicebear avatar (lorelei-neutral) URL generator.
+// Seed should be stable and non-PII when possible (prefer user.id).
+export function getDicebearAvatarUrl(seed: string): string {
+  const normalized = (seed || "user").trim() || "user";
+  const params = new URLSearchParams({ seed: normalized });
+  return `https://api.dicebear.com/9.x/lorelei-neutral/svg?${params.toString()}`;
+}
+
 function mulberry32(seed: number) {
   return function () {
     let t = (seed += 0x6d2b79f5);

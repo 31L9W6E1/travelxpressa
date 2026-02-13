@@ -1386,7 +1386,7 @@ const AdminDashboard = () => {
                         className="flex items-center justify-between"
                       >
                         <div className="flex items-center gap-3">
-                          <UserAvatar name={u.name} email={u.email} size="md" />
+                          <UserAvatar seed={u.id} name={u.name} email={u.email} size="md" />
                           <div>
                             <p className="text-sm font-medium">
                               {u.name || t('common.noName', 'No name')}
@@ -1495,7 +1495,7 @@ const AdminDashboard = () => {
                         >
                           <td className="px-4 py-3">
                             <div className="flex items-center gap-3">
-                              <UserAvatar name={u.name} email={u.email} size="md" />
+                              <UserAvatar seed={u.id} name={u.name} email={u.email} size="md" />
                               <div>
                                 <p className="font-medium">
                                   {u.name || t('common.noName', 'No name')}
@@ -1719,7 +1719,7 @@ const AdminDashboard = () => {
                               >
                                 <td className="px-4 py-3">
                                   <div className="flex items-center gap-3">
-                                    <UserAvatar name={app.user?.name} email={app.user?.email} size="md" />
+                                    <UserAvatar seed={app.user?.id} name={app.user?.name} email={app.user?.email} size="md" />
                                     <div>
                                       <p className="font-medium">
                                         {personalInfo?.givenNames || app.user?.name || t('common.unknown', 'Unknown')}

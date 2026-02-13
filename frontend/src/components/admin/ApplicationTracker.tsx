@@ -460,7 +460,7 @@ const ApplicationTracker = () => {
                   className="flex items-center justify-between p-4 rounded-lg border hover:bg-muted/50 transition-colors"
                 >
                   <div className="flex items-center gap-4">
-                    <UserAvatar name={app.user?.name} email={app.user?.email} size="md" />
+                    <UserAvatar seed={app.user?.id} name={app.user?.name} email={app.user?.email} size="md" />
                     <div>
                       <p className="font-medium">{app.user?.name || 'Unknown'}</p>
                       <p className="text-sm text-muted-foreground">{app.user?.email}</p>

@@ -1,6 +1,7 @@
-import { generateAvatarDataUrl } from '@/lib/utils';
+import { generateAvatarDataUrl, getDicebearAvatarUrl } from '@/lib/utils';
 
 interface UserAvatarProps {
+  seed?: string | null;
   name?: string | null;
   email?: string | null;
   size?: 'sm' | 'md' | 'lg' | 'xl';
@@ -14,9 +15,11 @@ const sizeClasses = {
   xl: 'w-16 h-16 text-2xl',
 };
 
-export function UserAvatar({ name, email, size = 'md', className = '' }: UserAvatarProps) {
+export function UserAvatar({ seed, name, email, size = 'md', className = '' }: UserAvatarProps) {
   const identifier = name || email || 'User';
-  const src = generateAvatarDataUrl(name, email);
+  const dicebearSeed = (seed || '').trim() || email || name || identifier || 'User';
+  const src = getDicebearAvatarUrl(dicebearSeed);
+  const fallbackSrc = generateAvatarDataUrl(name, email);
 
   return (
     <div
@@ -29,6 +32,11 @@ export function UserAvatar({ name, email, size = 'md', className = '' }: UserAva
         className="w-full h-full object-cover"
         loading="lazy"
         draggable={false}
+        referrerPolicy="no-referrer"
+        onError={(e) => {
+          const img = e.currentTarget as HTMLImageElement;
+          if (img.src !== fallbackSrc) img.src = fallbackSrc;
+        }}
       />
     </div>
   );

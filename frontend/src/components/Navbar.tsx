@@ -559,7 +559,7 @@ const Navbar = () => {
                 }}
                 className="flex items-center gap-2 px-3 py-2 rounded-lg text-foreground hover:bg-secondary transition-colors"
               >
-                <UserAvatar name={user.name} email={user.email} size="sm" />
+                <UserAvatar seed={user.id} name={user.name} email={user.email} size="sm" />
                 <span className="text-sm font-medium max-w-28 truncate">{user.name || user.email?.split("@")[0]}</span>
                 <ChevronDown className={`w-4 h-4 transition-transform ${isUserMenuOpen ? "rotate-180" : ""}`} />
               </button>
@@ -659,7 +659,7 @@ const Navbar = () => {
               }}
               className="flex items-center gap-1 p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
             >
-              {user ? <UserAvatar name={user.name} email={user.email} size="sm" /> : <User className="w-5 h-5" />}
+              {user ? <UserAvatar seed={user.id} name={user.name} email={user.email} size="sm" /> : <User className="w-5 h-5" />}
             </button>
 
             {isUserMenuOpen && (

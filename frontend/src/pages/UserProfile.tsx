@@ -186,12 +186,12 @@ const UserProfile = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground pt-16">
-      <div className="max-w-6xl mx-auto px-6 py-8">
+    <div className="min-h-screen bg-background text-foreground">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
         {/* Header */}
-        <div className="flex items-start justify-between mb-8 pt-4">
-          <div className="flex items-center gap-6">
-            <div className="w-20 h-20 bg-primary text-primary-foreground rounded-2xl flex items-center justify-center text-3xl font-bold">
+        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 bg-primary text-primary-foreground rounded-2xl flex items-center justify-center text-2xl sm:text-3xl font-bold">
               {user?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase()}
             </div>
             <div>
@@ -205,7 +205,7 @@ const UserProfile = () => {
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-secondary border border-border rounded-full">
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-secondary border border-border rounded-full self-start md:self-auto">
             <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
             <span className="text-foreground text-sm">{t('userProfile.autoSaveEnabled', 'Auto-save enabled')}</span>
           </div>

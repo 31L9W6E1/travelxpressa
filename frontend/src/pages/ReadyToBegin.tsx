@@ -206,10 +206,10 @@ const ReadyToBegin = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground pt-16 theme-transition">
+    <div className="min-h-screen bg-background text-foreground theme-transition">
       {/* Header Section */}
       <section className="py-10 border-b border-border">
-        <div className="max-w-6xl mx-auto px-6">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
           {/* Welcome badge with country */}
           <div className="flex flex-wrap items-center gap-4 mb-8">
             {user && (
@@ -258,7 +258,7 @@ const ReadyToBegin = () => {
       {/* Country-specific Info Bar */}
       {selectedCountry && (
         <section className="py-6 border-b border-border">
-          <div className="max-w-6xl mx-auto px-6">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="flex items-center gap-3 p-4 bg-secondary rounded-xl">
                 <Clock className="w-5 h-5 text-muted-foreground" />
@@ -310,7 +310,7 @@ const ReadyToBegin = () => {
 
       {/* Important Notice */}
       <section className="py-8 border-b border-border">
-        <div className="max-w-6xl mx-auto px-6">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="bg-secondary border border-border rounded-xl p-6">
             <div className="flex items-start gap-4">
               <AlertTriangle className="w-6 h-6 text-foreground flex-shrink-0 mt-0.5" />
@@ -332,12 +332,12 @@ const ReadyToBegin = () => {
       </section>
 
       {/* Form Sections Grid */}
-      <section className="py-16 border-b border-border">
-        <div className="max-w-6xl mx-auto px-6">
+      <section className="py-12 md:py-16 border-b border-border">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <h2 className="text-2xl font-bold mb-8">
             {t("readyPage.sections.title", { defaultValue: "Application Sections" })}
           </h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
             {selectedCountry?.formSections.map((section, index) => {
               const IconComponent = getIconForSection(section);
               const helpText = selectedCountry.helpText[section.toLowerCase().replace(/\s+/g, '')] || null;
@@ -345,7 +345,7 @@ const ReadyToBegin = () => {
               return (
                 <div
                   key={index}
-                  className="bg-card hover:bg-secondary border border-border hover:border-muted-foreground rounded-xl p-6 transition-all"
+                  className="bg-card hover:bg-secondary border border-border hover:border-muted-foreground rounded-xl p-4 md:p-6 transition-all"
                 >
                   <div className="flex items-center gap-4 mb-4">
                     <div className="p-3 bg-secondary rounded-lg">
@@ -362,7 +362,7 @@ const ReadyToBegin = () => {
                     </div>
                   </div>
                   {helpText && (
-                    <p className="text-sm text-muted-foreground">{helpText}</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground line-clamp-3">{helpText}</p>
                   )}
                 </div>
               );
@@ -372,13 +372,13 @@ const ReadyToBegin = () => {
       </section>
 
       {/* Required Documents Checklist */}
-      <section className="py-16 border-b border-border">
-        <div className="max-w-6xl mx-auto px-6">
+      <section className="py-12 md:py-16 border-b border-border">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <h2 className="text-2xl font-bold mb-8">
             {t("readyPage.documents.title", { defaultValue: "Required Documents" })}
           </h2>
 
-          <div className="grid md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {selectedCountry?.requiredDocuments.map((doc, index) => (
               <div
                 key={index}
@@ -394,7 +394,7 @@ const ReadyToBegin = () => {
 
       {/* CTA Section */}
       <section className="py-20">
-        <div className="max-w-4xl mx-auto px-6 text-center">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
           <div className="bg-secondary border border-border rounded-2xl p-12">
             <h2 className="text-3xl font-bold mb-4">
               {t("readyPage.cta.title", { defaultValue: "Ready to Begin?" })}

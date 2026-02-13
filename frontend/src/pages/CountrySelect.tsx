@@ -19,15 +19,15 @@ const CountrySelect = () => {
   };
 
   return (
-    <main className="min-h-screen bg-background text-foreground pt-24 pb-12 theme-transition">
+    <main className="min-h-screen bg-background text-foreground py-10 md:py-12 theme-transition">
       <div className="max-w-4xl mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-secondary rounded-full mb-6">
             <Globe className="w-8 h-8 text-foreground" />
           </div>
-          <h1 className="text-4xl font-bold mb-4">{t('selectCountry.title')}</h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          <h1 className="text-3xl md:text-4xl font-bold mb-4">{t('selectCountry.title')}</h1>
+          <p className="text-base md:text-xl text-muted-foreground max-w-2xl mx-auto">
             {t('selectCountry.subtitle')}
           </p>
         </div>
@@ -114,7 +114,7 @@ const CountrySelect = () => {
         </div>
 
         {/* Info Section */}
-        <div className="mt-16 bg-secondary rounded-2xl p-8 border border-border">
+        <div className="mt-10 md:mt-16 bg-secondary rounded-2xl p-6 md:p-8 border border-border">
           <div className="flex items-start gap-4">
             <div className="w-12 h-12 bg-background rounded-lg flex items-center justify-center flex-shrink-0">
               <Plane className="w-6 h-6 text-foreground" />

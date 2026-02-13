@@ -62,7 +62,7 @@ const About = () => {
     <main className="min-h-screen bg-background text-foreground">
       {/* Hero Section */}
       <section className="py-10 border-b border-border">
-        <div className="max-w-7xl mx-auto px-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <h1 className="text-3xl md:text-4xl font-bold mb-3">
             {t("aboutPage.hero.titlePrefix", { defaultValue: "About" })}{" "}
             {t("footer.company", { defaultValue: "TravelXpressa" })}
@@ -97,7 +97,7 @@ const About = () => {
       </section>
 
       {/* Stats Section */}
-      <section className="relative py-16 border-y border-border">
+      <section className="relative py-12 md:py-16 border-y border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {stats.map((stat, index) => (
@@ -113,7 +113,7 @@ const About = () => {
       </section>
 
       {/* Features Section */}
-      <section className="py-24">
+      <section className="py-16 md:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
@@ -127,20 +127,20 @@ const About = () => {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
             {features.map((feature, index) => (
               <Card
                 key={index}
                 className="bg-secondary/50 hover:border-primary/50 transition-all group"
               >
-                <CardContent className="p-6">
-                  <div className="w-12 h-12 bg-primary text-primary-foreground rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                    <feature.icon className="w-6 h-6" />
+                <CardContent className="p-4 md:p-6">
+                  <div className="w-10 h-10 md:w-12 md:h-12 bg-primary text-primary-foreground rounded-xl flex items-center justify-center mb-3 md:mb-4 group-hover:scale-110 transition-transform">
+                    <feature.icon className="w-5 h-5 md:w-6 md:h-6" />
                   </div>
-                  <h3 className="text-lg font-semibold text-foreground mb-2">
+                  <h3 className="text-base md:text-lg font-semibold text-foreground mb-2">
                     {feature.title}
                   </h3>
-                  <p className="text-muted-foreground text-sm">
+                  <p className="text-muted-foreground text-xs md:text-sm">
                     {feature.description}
                   </p>
                 </CardContent>
@@ -151,7 +151,7 @@ const About = () => {
       </section>
 
       {/* How It Works Section */}
-      <section className="py-24 border-t border-border">
+      <section className="py-16 md:py-24 border-t border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
@@ -225,7 +225,7 @@ const About = () => {
 
       {/* Footer */}
       <footer className="border-t border-border py-12">
-        <div className="max-w-7xl mx-auto px-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex flex-col md:flex-row justify-between items-center gap-6">
             <div className="flex items-center gap-2">
               <Plane className="w-6 h-6" />

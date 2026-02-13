@@ -38,7 +38,7 @@ const Blog = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-background text-foreground">
-        <div className="max-w-7xl mx-auto px-6 py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12 md:py-20">
           <div className="flex items-center justify-center py-20">
             <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
           </div>
@@ -66,8 +66,8 @@ const Blog = () => {
       </PageHeader>
 
       {/* Posts Grid */}
-      <section className="py-16">
-        <div className="max-w-7xl mx-auto px-6">
+      <section className="py-10 md:py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
           {error ? (
             <div className="text-center py-12">
               <p className="text-destructive mb-4">{error}</p>

@@ -100,11 +100,11 @@ const EnhancedDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background pt-20">
-      <div className="max-w-7xl mx-auto px-6 py-8">
+    <div className="min-h-screen bg-background">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-8">
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center gap-4">
             <div className="w-14 h-14 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold text-xl">
               {getInitials(user?.name || "User")}
             </div>
@@ -113,8 +113,8 @@ const EnhancedDashboard = () => {
               <p className="text-muted-foreground">{t('dashboard.manageApplications')}</p>
             </div>
           </div>
-          <div className="flex items-center space-x-4">
-            <span className="text-sm text-muted-foreground">{user?.email}</span>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+            <span className="text-xs sm:text-sm text-muted-foreground break-all">{user?.email}</span>
             <Button
               onClick={logout}
               variant="destructive"

@@ -116,8 +116,8 @@ const Home = () => {
   return (
     <div className="min-h-screen bg-background text-foreground font-sans">
       {/* Hero */}
-      <section className="py-10 border-b border-border">
-        <div className="max-w-7xl mx-auto px-6">
+      <section className="py-8 md:py-10 border-b border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="max-w-3xl">
             <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-4 leading-[1.1]">
               {t("home.hero.titleLine1")}
@@ -150,8 +150,8 @@ const Home = () => {
       </section>
 
       {/* Features Cards */}
-      <section className="py-14 border-b border-border">
-        <div className="max-w-7xl mx-auto px-6">
+      <section className="py-10 md:py-14 border-b border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
             {features.map((feature, index) => (
               <Card
@@ -176,8 +176,8 @@ const Home = () => {
       </section>
 
       {/* Featured Posts Section */}
-      <section className="py-20 border-b border-border">
-        <div className="max-w-7xl mx-auto px-6">
+      <section className="py-12 md:py-20 border-b border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between mb-8">
             <div>
               <h2 className="text-3xl font-bold mb-2">
@@ -239,8 +239,8 @@ const Home = () => {
       </section>
 
       {/* News Grid Section */}
-      <section className="py-20 border-b border-border">
-        <div className="max-w-7xl mx-auto px-6">
+      <section className="py-12 md:py-20 border-b border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between mb-8">
             <div>
               <h2 className="text-3xl font-bold mb-2">
@@ -303,7 +303,7 @@ const Home = () => {
 
       {/* Footer */}
       <footer className="border-t border-border py-12">
-        <div className="max-w-7xl mx-auto px-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex flex-col md:flex-row justify-between items-center gap-6">
             <div className="flex items-center gap-2">
               <Plane className="w-6 h-6" />

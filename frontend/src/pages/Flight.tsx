@@ -148,7 +148,7 @@ const Flight = () => {
       />
 
       <section className="py-10 border-b border-dashed border-border/60">
-        <div className="max-w-7xl mx-auto px-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -286,7 +286,7 @@ const Flight = () => {
       </section>
 
       <section className="py-10">
-        <div className="max-w-7xl mx-auto px-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
           {error && (
             <Card className="border-destructive/40 mb-6">
               <CardContent className="pt-6 text-destructive flex items-start gap-2">

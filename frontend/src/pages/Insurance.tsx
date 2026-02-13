@@ -10,7 +10,7 @@ const Insurance = () => {
       />
 
       <section className="py-10">
-        <div className="max-w-7xl mx-auto px-6 grid gap-4 md:grid-cols-2">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 grid gap-4 md:grid-cols-2">
           <Card>
             <CardHeader>
               <CardTitle>Даатгалын үндсэн шаардлага</CardTitle>

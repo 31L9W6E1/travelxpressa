@@ -12,13 +12,13 @@ const HelpCenter = () => {
       />
 
       <section className="py-10">
-        <div className="max-w-7xl mx-auto px-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           <Card>
             <CardHeader>
               <CardTitle>Өргөдлийн явц хянах</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground mb-4">
+              <p className="text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4">
                 Таны өргөдлийн статус, шат бүрийн шинэчлэл, шаардагдах дараагийн алхам.
               </p>
               <Button asChild variant="outline">
@@ -32,7 +32,7 @@ const HelpCenter = () => {
               <CardTitle>Санал хүсэлт</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground mb-4">
+              <p className="text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4">
                 Үйлчилгээний чанар, сайжруулах санал, хүсэлтээ илгээх хэсэг.
               </p>
               <Button asChild variant="outline">
@@ -46,7 +46,7 @@ const HelpCenter = () => {
               <CardTitle>Түгээмэл асуулт</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground mb-4">
+              <p className="text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4">
                 Визийн бүрдүүлэлттэй холбоотой хамгийн нийтлэг асуулт, хариултууд.
               </p>
               <Button asChild variant="outline">
@@ -60,7 +60,7 @@ const HelpCenter = () => {
               <CardTitle>Flight үйлчилгээ</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground mb-4">
+              <p className="text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4">
                 Нислэгийн захиалга, itinerary бэлтгэх, аяллын төлөвлөлтийн тусламж.
               </p>
               <Button asChild variant="outline">
@@ -74,7 +74,7 @@ const HelpCenter = () => {
               <CardTitle>Insurance үйлчилгээ</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground mb-4">
+              <p className="text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4">
                 Аяллын даатгалын баримт, шаардлага, сонголтын талаар зөвлөгөө.
               </p>
               <Button asChild variant="outline">
@@ -88,7 +88,7 @@ const HelpCenter = () => {
               <CardTitle>Support чат</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground mb-4">
+              <p className="text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4">
                 Админ болон дэмжлэгийн багтай шууд харилцах, файл/заавар солилцох чат.
               </p>
               <Button asChild>

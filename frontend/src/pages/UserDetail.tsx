@@ -106,7 +106,7 @@ const UserDetail = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center pt-20">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <div className="w-12 h-12 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
           <p className="text-muted-foreground">
@@ -119,7 +119,7 @@ const UserDetail = () => {
 
   if (error || !userData) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center pt-20">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center bg-card border border-border rounded-2xl p-12">
           <AlertCircle className="w-16 h-16 text-destructive mx-auto mb-4" />
           <h2 className="text-2xl font-semibold text-foreground mb-2">
@@ -140,7 +140,7 @@ const UserDetail = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground pt-20">
+    <div className="min-h-screen bg-background text-foreground">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
         {/* Back button */}
         <Link
@@ -153,9 +153,9 @@ const UserDetail = () => {
 
         {/* User Header */}
         <div className="bg-card border border-border rounded-2xl p-8 mb-8">
-          <div className="flex items-start justify-between">
-            <div className="flex items-center gap-6">
-              <div className="w-20 h-20 bg-primary text-primary-foreground rounded-2xl flex items-center justify-center text-3xl font-semibold">
+          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-primary text-primary-foreground rounded-2xl flex items-center justify-center text-2xl sm:text-3xl font-semibold">
                 {userData.name?.[0]?.toUpperCase() || userData.email[0].toUpperCase()}
               </div>
               <div>
@@ -163,7 +163,7 @@ const UserDetail = () => {
                   {userData.name || "No name"}
                 </h1>
                 <p className="text-muted-foreground">{userData.email}</p>
-                <div className="flex items-center gap-3 mt-3">
+                <div className="flex flex-wrap items-center gap-3 mt-3">
                   <span
                     className={`px-3 py-1 text-xs font-medium rounded-full border ${
                       userData.role === "ADMIN"
@@ -193,19 +193,19 @@ const UserDetail = () => {
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2">
               <Link
                 to={`/contactsupport?userId=${userData.id}`}
-                className="px-4 py-2 bg-secondary border border-border text-foreground rounded-lg hover:bg-secondary/80 transition-colors flex items-center gap-2"
+                className="w-full sm:w-auto justify-center px-4 py-2 bg-secondary border border-border text-foreground rounded-lg hover:bg-secondary/80 transition-colors flex items-center gap-2"
               >
                 <MessageSquare className="w-4 h-4" />
                 {t('userDetail.messageUser', 'Message User')}
               </Link>
-              <button className="px-4 py-2 bg-secondary border border-border text-foreground rounded-lg hover:bg-secondary/80 transition-colors flex items-center gap-2">
+              <button className="w-full sm:w-auto justify-center px-4 py-2 bg-secondary border border-border text-foreground rounded-lg hover:bg-secondary/80 transition-colors flex items-center gap-2">
                 <Unlock className="w-4 h-4" />
                 {t('userDetail.resetPassword', 'Reset Password')}
               </button>
-              <button className="px-4 py-2 bg-destructive/10 border border-destructive/20 text-destructive rounded-lg hover:bg-destructive/20 transition-colors flex items-center gap-2">
+              <button className="w-full sm:w-auto justify-center px-4 py-2 bg-destructive/10 border border-destructive/20 text-destructive rounded-lg hover:bg-destructive/20 transition-colors flex items-center gap-2">
                 <Trash2 className="w-4 h-4" />
                 {t('common.delete', 'Delete')}
               </button>

@@ -206,7 +206,7 @@ const UserInbox = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background pt-20 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-10 h-10 animate-spin mx-auto mb-3 text-primary" />
           <p className="text-muted-foreground">{t("userInbox.loading", "Loading inbox...")}</p>
@@ -216,8 +216,8 @@ const UserInbox = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background pt-20">
-      <div className="max-w-6xl mx-auto px-6 py-8 space-y-6">
+    <div className="min-h-screen bg-background">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-6">
         <Link to="/profile" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
           <ArrowLeft className="w-4 h-4" />
           {t("userInbox.backToProfile", "Back to Profile")}
@@ -279,7 +279,7 @@ const UserInbox = () => {
                   placeholder={t("userInbox.searchPlaceholder", "Search by status, visa type, or message")}
                 />
               </div>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 <Button variant={filter === "all" ? "default" : "outline"} onClick={() => setFilter("all")}>
                   <Filter className="w-4 h-4 mr-2" />
                   {t("common.all", "All")}
@@ -323,10 +323,10 @@ const UserInbox = () => {
                       <p className="text-sm text-muted-foreground truncate">{item.subtitle}</p>
                     </div>
 
-                    <div className="flex items-center gap-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                       {item.source === "application" &&
                         item.progress && (
-                          <div className="w-72 grid grid-cols-2 gap-2 text-xs">
+                          <div className="w-full sm:w-72 grid grid-cols-2 gap-2 text-xs">
                             <div>
                               <p className="text-muted-foreground">Appointment</p>
                               <div className="h-1.5 rounded bg-muted overflow-hidden">
@@ -372,7 +372,7 @@ const UserInbox = () => {
                       {item.source === "application" &&
                         !item.progress &&
                         typeof item.currentStep === "number" && (
-                          <div className="w-40">
+                          <div className="w-full sm:w-40">
                             <div className="h-2 rounded bg-muted overflow-hidden">
                               <div
                                 className="h-full bg-primary transition-all"
@@ -384,7 +384,7 @@ const UserInbox = () => {
                             </p>
                           </div>
                         )}
-                      <p className="text-xs text-muted-foreground whitespace-nowrap">
+                      <p className="text-xs text-muted-foreground whitespace-nowrap self-start sm:self-auto">
                         {new Date(item.updatedAt).toLocaleString()}
                       </p>
                     </div>

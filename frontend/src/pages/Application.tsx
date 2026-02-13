@@ -2516,7 +2516,7 @@ export default function Application() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-5xl mx-auto px-4 pt-24 pb-8">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-10 md:pt-12 pb-8">
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-foreground mb-2">

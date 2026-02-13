@@ -326,7 +326,7 @@ const Login = () => {
   };
 
   return (
-    <main className="min-h-screen bg-background flex items-center justify-center px-4 pt-24 pb-12 theme-transition">
+    <main className="min-h-screen bg-background flex items-center justify-center px-4 py-10 md:py-12 theme-transition">
       <div className="max-w-md w-full space-y-8">
         {/* Logo */}
         <div className="text-center">

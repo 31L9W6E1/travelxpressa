@@ -33,7 +33,7 @@ const QAndA = () => {
       />
 
       <section className="py-10">
-        <div className="max-w-7xl mx-auto px-6 grid gap-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 grid gap-4">
           {items.map((item) => (
             <Card key={item.q}>
               <CardHeader>

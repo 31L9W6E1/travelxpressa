@@ -903,7 +903,7 @@ const AdminDashboard = () => {
 
   if (user?.role !== "ADMIN") {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center pt-20">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center bg-card border border-border rounded-2xl p-12">
           <Shield className="w-16 h-16 text-destructive mx-auto mb-4" />
           <h2 className="text-2xl font-semibold text-foreground mb-2">
@@ -924,10 +924,10 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background pt-20">
-      <div className="max-w-7xl mx-auto px-6 py-8">
+    <div className="min-h-screen bg-background">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
           <div>
             <h1 className="text-3xl font-bold text-foreground">
               {t('dashboard.title', 'Admin Dashboard')}
@@ -936,7 +936,7 @@ const AdminDashboard = () => {
               {t('dashboard.welcomeBack', 'Welcome back')}, {user?.name}
             </p>
           </div>
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-green-500/10 border border-green-500/20 rounded-full">
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-green-500/10 border border-green-500/20 rounded-full self-start sm:self-auto">
             <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
             <span className="text-green-500 text-sm">{t('dashboard.systemOnline', 'System Online')}</span>
           </div>

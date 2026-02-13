@@ -49,8 +49,8 @@ const UserSecuritySettings = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pt-20">
-      <div className="max-w-3xl mx-auto px-6 py-8 space-y-6">
+    <div className="min-h-screen bg-background">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 space-y-6">
         <Link to="/profile" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
           <ArrowLeft className="w-4 h-4" />
           {t("userSecurity.backToProfile", "Back to Profile")}

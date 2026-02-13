@@ -153,8 +153,8 @@ const TranslationService = () => {
         })}
       />
 
-      <section className="py-12">
-        <div className="max-w-7xl mx-auto px-6">
+      <section className="py-10 md:py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="grid lg:grid-cols-3 gap-6">
           <Card className="lg:col-span-2">
             <CardHeader>

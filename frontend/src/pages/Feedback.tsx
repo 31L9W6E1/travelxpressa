@@ -22,9 +22,9 @@ const Feedback = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground pt-20">
+    <div className="min-h-screen bg-background text-foreground">
       <section className="py-10 border-b border-dashed border-border/60">
-        <div className="max-w-4xl mx-auto px-6">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6">
           <h1 className="text-3xl md:text-4xl font-bold">Санал хүсэлт</h1>
           <p className="text-muted-foreground mt-2">
             Үйлчилгээний чанар, сайт ашиглалтын туршлага, сайжруулах саналуудаа бидэнд илгээнэ үү.
@@ -33,7 +33,7 @@ const Feedback = () => {
       </section>
 
       <section className="py-10">
-        <div className="max-w-4xl mx-auto px-6 grid gap-6 md:grid-cols-3">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 grid gap-6 md:grid-cols-3">
           <Card className="md:col-span-2">
             <CardHeader>
               <CardTitle>Санал хүсэлт илгээх</CardTitle>

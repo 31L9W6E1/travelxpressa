@@ -52,29 +52,30 @@ const ManageUsers = () => {
   }
 
   return (
-    <div className="p-8">
-      <h1 className="text-2xl font-bold mb-4">{t('manageUsers.title', 'Manage Users')}</h1>
-      <div className="overflow-x-auto">
-        <table className="min-w-full bg-white">
+    <div className="min-h-screen bg-background text-foreground">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+        <h1 className="text-2xl font-bold mb-4">{t('manageUsers.title', 'Manage Users')}</h1>
+        <div className="overflow-x-auto rounded-xl border border-border bg-card">
+          <table className="min-w-full text-sm">
           <thead>
-            <tr>
-              <th className="py-2 px-4 border-b">{t('manageUsers.name', 'Name')}</th>
-              <th className="py-2 px-4 border-b">{t('manageUsers.email', 'Email')}</th>
-              <th className="py-2 px-4 border-b">{t('manageUsers.role', 'Role')}</th>
-              <th className="py-2 px-4 border-b">{t('manageUsers.actions', 'Actions')}</th>
+            <tr className="border-b border-border">
+              <th className="py-3 px-4 text-left font-medium text-muted-foreground">{t('manageUsers.name', 'Name')}</th>
+              <th className="py-3 px-4 text-left font-medium text-muted-foreground">{t('manageUsers.email', 'Email')}</th>
+              <th className="py-3 px-4 text-left font-medium text-muted-foreground">{t('manageUsers.role', 'Role')}</th>
+              <th className="py-3 px-4 text-left font-medium text-muted-foreground">{t('manageUsers.actions', 'Actions')}</th>
             </tr>
           </thead>
           <tbody>
             {users.map((user) => (
-              <tr key={user.id}>
-                <td className="py-2 px-4 border-b">{user.name}</td>
-                <td className="py-2 px-4 border-b">{user.email}</td>
-                <td className="py-2 px-4 border-b">{user.role}</td>
-                <td className="py-2 px-4 border-b">
+              <tr key={user.id} className="border-b border-border last:border-b-0">
+                <td className="py-3 px-4">{user.name}</td>
+                <td className="py-3 px-4">{user.email}</td>
+                <td className="py-3 px-4">{user.role}</td>
+                <td className="py-3 px-4">
                   <select
                     value={user.role}
                     onChange={(e) => handleRoleChange(user.id, e.target.value)}
-                    className="border border-gray-300 rounded-md p-1"
+                    className="border border-input bg-background rounded-md px-2 py-1"
                   >
                     <option value="USER">USER</option>
                     <option value="ADMIN">ADMIN</option>
@@ -84,6 +85,7 @@ const ManageUsers = () => {
             ))}
           </tbody>
         </table>
+      </div>
       </div>
     </div>
   );

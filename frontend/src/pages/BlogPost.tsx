@@ -76,7 +76,7 @@ const BlogPost = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-background text-foreground">
-        <div className="max-w-4xl mx-auto px-6 py-20">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-12 md:py-20">
           <div className="flex items-center justify-center py-20">
             <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
           </div>
@@ -88,7 +88,7 @@ const BlogPost = () => {
   if (error || !post) {
     return (
       <div className="min-h-screen bg-background text-foreground">
-        <div className="max-w-4xl mx-auto px-6 py-20">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-12 md:py-20">
           <div className="text-center py-20">
             <h1 className="text-4xl font-bold mb-4">
               {t('blogPostPage.notFound.title', { defaultValue: 'Post Not Found' })}
@@ -126,7 +126,7 @@ const BlogPost = () => {
           </div>
         )}
 
-        <div className="relative max-w-4xl mx-auto px-6 pt-24 pb-12">
+        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 pt-12 md:pt-24 pb-8 md:pb-12">
           <div className="flex items-start justify-between gap-4 mb-8">
             <Link
               to="/blog"
@@ -310,7 +310,7 @@ const BlogPost = () => {
       </div>
 
       {/* Content */}
-      <article className="max-w-4xl mx-auto px-6 py-12">
+      <article className="max-w-4xl mx-auto px-4 sm:px-6 py-10 md:py-12">
         {post.excerpt && (
           <p className="text-base md:text-lg text-muted-foreground mb-6 border-l-4 border-primary pl-6">
             {post.excerpt}
@@ -321,7 +321,7 @@ const BlogPost = () => {
       </article>
 
       {/* Footer CTA */}
-      <div className="max-w-4xl mx-auto px-6 py-12 border-t border-border">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-12 border-t border-border">
         <div className="bg-secondary rounded-xl p-8 text-center">
           <h3 className="text-2xl font-bold mb-4">
             {t('home.cta.title', { defaultValue: 'Ready to Start Your Visa Journey?' })}

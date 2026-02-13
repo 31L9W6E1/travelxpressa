@@ -76,7 +76,7 @@ const NewsArticle = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-background text-foreground">
-        <div className="max-w-4xl mx-auto px-6 py-20">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-12 md:py-20">
           <div className="flex items-center justify-center py-20">
             <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
           </div>
@@ -88,7 +88,7 @@ const NewsArticle = () => {
   if (error || !article) {
     return (
       <div className="min-h-screen bg-background text-foreground">
-        <div className="max-w-4xl mx-auto px-6 py-20">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-12 md:py-20">
           <div className="text-center py-20">
             <h1 className="text-4xl font-bold mb-4">
               {t('newsArticlePage.notFound.title', { defaultValue: 'Article Not Found' })}
@@ -115,7 +115,7 @@ const NewsArticle = () => {
     <div className="min-h-screen bg-background text-foreground">
       {/* Header */}
       <section className="py-10 border-b border-border">
-        <div className="max-w-4xl mx-auto px-6">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6">
           <div className="flex items-start justify-between gap-4 mb-8">
             <Link
               to="/news"
@@ -276,7 +276,7 @@ const NewsArticle = () => {
 
       {/* Featured Image */}
       {article.imageUrl && (
-        <div className="max-w-4xl mx-auto px-6 py-8">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
           <div className="aspect-video rounded-xl overflow-hidden">
             <img
               src={article.imageUrl ? normalizeImageUrl(article.imageUrl) : getDefaultImage('news')}
@@ -288,12 +288,12 @@ const NewsArticle = () => {
       )}
 
       {/* Content */}
-      <article className="max-w-4xl mx-auto px-6 py-8">
+      <article className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
         <MarkdownRenderer content={article.content || ""} />
       </article>
 
       {/* Related News CTA */}
-      <div className="max-w-4xl mx-auto px-6 py-12 border-t border-border">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-12 border-t border-border">
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-lg font-semibold mb-1">

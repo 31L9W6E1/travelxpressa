@@ -355,8 +355,8 @@ const ContactSupport = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background via-background to-secondary/20 pt-20">
-      <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">
+    <div className="min-h-screen bg-gradient-to-b from-background via-background to-secondary/20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-6">
         <Link
           to={isAdmin ? "/admin/overview" : "/profile"}
           className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"

@@ -23,18 +23,18 @@ export default function PageHeader({
   subtitleClassName,
 }: PageHeaderProps) {
   return (
-    <section className={cn("py-10 border-b border-border", className)}>
-      <div className={cn("max-w-7xl mx-auto px-6", containerClassName)}>
-        <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+    <section className={cn("py-8 md:py-10 border-b border-border", className)}>
+      <div className={cn("max-w-7xl mx-auto px-4 sm:px-6", containerClassName)}>
+        <div className="flex flex-col gap-4 md:gap-6 md:flex-row md:items-end md:justify-between">
           <div className="max-w-3xl">
-            <h3 className={cn("text-3xl md:text-4xl font-bold mb-3", titleClassName)}>{title}</h3>
+            <h3 className={cn("text-2xl md:text-3xl font-bold mb-2", titleClassName)}>{title}</h3>
             {subtitle ? (
-              <p className={cn("text-base md:text-lg text-muted-foreground", subtitleClassName)}>{subtitle}</p>
+              <p className={cn("text-sm md:text-base text-muted-foreground", subtitleClassName)}>{subtitle}</p>
             ) : null}
           </div>
           {actions ? <div className="flex items-center gap-3">{actions}</div> : null}
         </div>
-        {children ? <div className="mt-6">{children}</div> : null}
+        {children ? <div className="mt-4 md:mt-6">{children}</div> : null}
       </div>
     </section>
   );

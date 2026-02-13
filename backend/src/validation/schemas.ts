@@ -11,15 +11,24 @@ const passwordSchema = z.string()
   .regex(/[0-9]/, 'Password must contain at least one number')
   .regex(/[^A-Za-z0-9]/, 'Password must contain at least one special character');
 
-const phoneSchema = z.string()
+const phoneSchema = z
+  .string()
+  .trim()
+  .max(30, 'Phone number must be less than 30 characters')
   .regex(/^[\d\s\-\+\(\)]+$/, 'Invalid phone number format')
-  .min(10, 'Phone number must be at least 10 digits')
-  .max(20, 'Phone number must be less than 20 characters');
+  .refine((value) => {
+    // Accept international formats (spaces, +, -, parentheses) but enforce a sane digit count.
+    const digits = value.replace(/\D/g, '');
+    return digits.length >= 8 && digits.length <= 15;
+  }, 'Phone number must be 8-15 digits');
 
-const nameSchema = z.string()
+const nameSchema = z
+  .string()
+  .trim()
   .min(1, 'Name is required')
   .max(100, 'Name must be less than 100 characters')
-  .regex(/^[a-zA-Z\s\-']+$/, 'Name can only contain letters, spaces, hyphens, and apostrophes');
+  // Allow Unicode letters (e.g., Mongolian Cyrillic) while still restricting to "name-like" characters.
+  .regex(/^[\p{L}\s\-']+$/u, 'Name can only contain letters, spaces, hyphens, and apostrophes');
 
 // Draft-friendly validators - very permissive for partial saves
 // These accept any string value including empty strings

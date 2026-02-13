@@ -298,7 +298,7 @@ const Gallery = () => {
       {/* Gallery Grid */}
       <section className="py-12">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-3 md:grid-cols-4 gap-2 md:gap-6">
             {filteredImages.map((image, index) => {
               const localizedAlt = getImageAltText(image);
               return (
@@ -309,7 +309,7 @@ const Gallery = () => {
                     style={{ animationDelay: `${Math.min(index * 50, 300)}ms` }}
                     onClick={() => setSelectedImage(image)}
                   >
-                    <div className="relative aspect-square overflow-hidden rounded-lg mb-3">
+                    <div className="relative aspect-square overflow-hidden rounded-lg mb-2 md:mb-3">
                     <img
                       src={image.src}
                       alt={localizedAlt}
@@ -327,8 +327,8 @@ const Gallery = () => {
                       }}
                     />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                      <div className="absolute bottom-0 left-0 right-0 p-4">
-                        <p className="text-sm font-medium text-white line-clamp-2 group-hover:text-gray-300 transition-colors">
+                      <div className="absolute bottom-0 left-0 right-0 p-2 md:p-4">
+                        <p className="text-xs md:text-sm font-medium text-white line-clamp-2 group-hover:text-gray-300 transition-colors">
                           {localizedAlt}
                         </p>
                       </div>

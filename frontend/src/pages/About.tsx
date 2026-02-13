@@ -165,14 +165,14 @@ const About = () => {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 md:gap-8">
             <Card className="bg-secondary/50">
-              <CardContent className="p-8">
-                <div className="w-12 h-12 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold text-xl mb-6">
+              <CardContent className="p-6 md:p-8">
+                <div className="w-10 h-10 md:w-12 md:h-12 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold text-lg md:text-xl mb-5 md:mb-6">
                   1
                 </div>
-                <FileText className="w-10 h-10 text-foreground mb-4" />
-                <h3 className="text-xl font-semibold text-foreground mb-3">
+                <FileText className="w-8 h-8 md:w-10 md:h-10 text-foreground mb-4" />
+                <h3 className="text-lg md:text-xl font-semibold text-foreground mb-3">
                   {t("aboutPage.howItWorks.steps.createAccount.title", { defaultValue: "Create Account" })}
                 </h3>
                 <p className="text-muted-foreground">
@@ -185,12 +185,12 @@ const About = () => {
             </Card>
 
             <Card className="bg-secondary/50">
-              <CardContent className="p-8">
-                <div className="w-12 h-12 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold text-xl mb-6">
+              <CardContent className="p-6 md:p-8">
+                <div className="w-10 h-10 md:w-12 md:h-12 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold text-lg md:text-xl mb-5 md:mb-6">
                   2
                 </div>
-                <Headphones className="w-10 h-10 text-foreground mb-4" />
-                <h3 className="text-xl font-semibold text-foreground mb-3">
+                <Headphones className="w-8 h-8 md:w-10 md:h-10 text-foreground mb-4" />
+                <h3 className="text-lg md:text-xl font-semibold text-foreground mb-3">
                   {t("aboutPage.howItWorks.steps.fillApplication.title", { defaultValue: "Fill Your Application" })}
                 </h3>
                 <p className="text-muted-foreground">
@@ -203,18 +203,36 @@ const About = () => {
             </Card>
 
             <Card className="bg-secondary/50">
-              <CardContent className="p-8">
-                <div className="w-12 h-12 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold text-xl mb-6">
+              <CardContent className="p-6 md:p-8">
+                <div className="w-10 h-10 md:w-12 md:h-12 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold text-lg md:text-xl mb-5 md:mb-6">
                   3
                 </div>
-                <Award className="w-10 h-10 text-foreground mb-4" />
-                <h3 className="text-xl font-semibold text-foreground mb-3">
+                <Award className="w-8 h-8 md:w-10 md:h-10 text-foreground mb-4" />
+                <h3 className="text-lg md:text-xl font-semibold text-foreground mb-3">
                   {t("aboutPage.howItWorks.steps.submitTrack.title", { defaultValue: "Submit & Track" })}
                 </h3>
                 <p className="text-muted-foreground">
                   {t("aboutPage.howItWorks.steps.submitTrack.description", {
                     defaultValue:
                       "Review and export your application and track it through your dashboard. Appointment availability varies by location and season, and earlier slots can sometimes open within 1-2 days. Express support (if selected) adds +15% to the service fee.",
+                  })}
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-secondary/50">
+              <CardContent className="p-6 md:p-8">
+                <div className="w-10 h-10 md:w-12 md:h-12 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold text-lg md:text-xl mb-5 md:mb-6">
+                  4
+                </div>
+                <CheckCircle className="w-8 h-8 md:w-10 md:h-10 text-foreground mb-4" />
+                <h3 className="text-lg md:text-xl font-semibold text-foreground mb-3">
+                  {t("aboutPage.howItWorks.steps.prepareDocs.title", { defaultValue: "Prepare Documents" })}
+                </h3>
+                <p className="text-muted-foreground">
+                  {t("aboutPage.howItWorks.steps.prepareDocs.description", {
+                    defaultValue:
+                      "Finalize your checklist, translations, and appointment-ready document package. You'll receive updates and next steps in your inbox.",
                   })}
                 </p>
               </CardContent>

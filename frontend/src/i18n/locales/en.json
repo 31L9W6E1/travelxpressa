@@ -256,6 +256,10 @@
         "submitTrack": {
           "title": "Submit & Track",
           "description": "Review and export your application and track it through your dashboard. Appointment availability varies by location (US, Schengen, and other destinations) and earlier slots can sometimes open within 1-2 days. Express support (if selected) adds +15% to the service fee."
+        },
+        "prepareDocs": {
+          "title": "Prepare Documents",
+          "description": "Finalize your checklist, translations, and appointment-ready document package. You'll receive updates and next steps in your inbox."
         }
       }
     },
@@ -1247,6 +1251,58 @@
       "amount": "Amount",
       "noteTitle": "Note",
       "noteBody": "After payment, it may take up to 24 hours for your payment to be confirmed. You will receive an email notification once your payment is processed."
+    }
+  },
+  "helpCenterPage": {
+    "subtitle": "Help for visa services, application tracking, payments, and support.",
+    "cards": {
+      "inbox": {
+        "title": "Track Applications",
+        "description": "Check your application status, step-by-step updates, and what to do next.",
+        "action": "Open Inbox"
+      },
+      "feedback": {
+        "description": "Share feedback about the service and your experience on the website.",
+        "action": "Send Feedback"
+      },
+      "qa": {
+        "description": "Common questions and short answers about preparing your visa documents.",
+        "action": "View Q&A"
+      },
+      "flight": {
+        "description": "Flight search and itinerary planning support for visa preparation.",
+        "action": "View Flights"
+      },
+      "insurance": {
+        "description": "Guidance on travel insurance requirements and document readiness.",
+        "action": "View Insurance"
+      },
+      "support": {
+        "title": "Support Chat",
+        "description": "Chat with our team, share files, and receive progress updates.",
+        "action": "Open Chat"
+      }
+    }
+  },
+  "insurancePage": {
+    "subtitle": "Guidance on travel insurance requirements for visa applications.",
+    "basics": {
+      "title": "Insurance Basics",
+      "items": {
+        "coverage": "Covers your full travel period",
+        "amount": "Meets the destination's required coverage amount",
+        "emergency": "Includes emergency medical coverage and terms",
+        "match": "Matches your passport and personal details"
+      }
+    },
+    "support": {
+      "title": "Our Support",
+      "items": {
+        "packages": "Recommend the right plan for your visa type",
+        "review": "Check insurance documents for readiness",
+        "align": "Ensure consistency with your overall application package",
+        "ready": "Guidance to make it appointment-ready for embassy/VAC submission"
+      }
     }
   }
 }

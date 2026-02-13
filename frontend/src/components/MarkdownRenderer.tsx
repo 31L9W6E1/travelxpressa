@@ -90,7 +90,21 @@ const parseInline = (text: string): ReactNode[] => {
 };
 
 const parseBlocks = (content: string): Block[] => {
-  const lines = content.replace(/\r\n/g, "\n").split("\n");
+  const normalized = (content || "")
+    .replace(/\r\n/g, "\n")
+    // Common authoring mistake: break the image/link URL onto the next line.
+    // Convert:
+    // ![alt]
+    // (url)
+    // -> ![alt](url)
+    .replace(/!\[([^\]]*)]\s*\n\s*\(([^)\s]+[^)]*)\)/g, "![$1]($2)")
+    // Convert:
+    // [label]
+    // (url)
+    // -> [label](url)
+    .replace(/\[([^\]]+)]\s*\n\s*\(([^)\s]+[^)]*)\)/g, "[$1]($2)");
+
+  const lines = normalized.split("\n");
   const blocks: Block[] = [];
 
   let paragraph: string[] = [];
@@ -133,7 +147,7 @@ const parseBlocks = (content: string): Block[] => {
     }
 
     // Heading
-    const headingMatch = trimmed.match(/^(#{1,6})\s+(.*)$/);
+    const headingMatch = trimmed.match(/^(#{1,6})\s*(.*)$/);
     if (headingMatch) {
       flushParagraph();
       const level = headingMatch[1].length as 1 | 2 | 3 | 4 | 5 | 6;
@@ -323,4 +337,3 @@ export default function MarkdownRenderer({
     </div>
   );
 }
-

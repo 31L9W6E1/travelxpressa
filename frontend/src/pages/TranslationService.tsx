@@ -60,6 +60,19 @@ const isAllowedTranslationUpload = (file: File): boolean => {
   return !!ext && translationUploadExtensions.has(ext);
 };
 
+const isValidPhone = (phone: string): { ok: boolean; message?: string } => {
+  const value = phone.trim();
+  if (!value) return { ok: false, message: "Phone is required" };
+  if (!/^[\d\s\-\+\(\)]+$/.test(value)) {
+    return { ok: false, message: "Invalid phone number format" };
+  }
+  const digits = value.replace(/\D/g, "");
+  if (digits.length < 8 || digits.length > 15) {
+    return { ok: false, message: "Phone number must be 8-15 digits" };
+  }
+  return { ok: true };
+};
+
 const TranslationService = () => {
   const { t } = useTranslation();
   const { user } = useAuth();
@@ -164,6 +177,16 @@ const TranslationService = () => {
       return;
     }
 
+    const phoneCheck = isValidPhone(form.phone);
+    if (!phoneCheck.ok) {
+      toast.error(
+        t("translationService.validation.phoneInvalid", {
+          defaultValue: phoneCheck.message || "Invalid phone number",
+        }),
+      );
+      return;
+    }
+
     setSubmitting(true);
     try {
       const uploadedFiles: Array<{
@@ -242,7 +265,19 @@ const TranslationService = () => {
       }));
       setSelectedFiles([]);
     } catch (error: any) {
-      toast.error(error?.message || "Failed to submit translation request");
+      const fieldErrors = Array.isArray(error?.errors) ? error.errors : null;
+      if (fieldErrors?.length) {
+        toast.error(
+          t("translationService.validation.genericFailed", {
+            defaultValue: "Validation failed",
+          }),
+          {
+            description: fieldErrors.map((err: any) => err?.message).filter(Boolean).join(", "),
+          },
+        );
+      } else {
+        toast.error(error?.message || "Failed to submit translation request");
+      }
     } finally {
       setSubmitting(false);
     }

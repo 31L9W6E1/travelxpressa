@@ -131,7 +131,7 @@ const NewsArticle = () => {
                     {t('common.edit', { defaultValue: 'Edit' })}
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-2xl">
+                <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-hidden flex flex-col">
                   <DialogHeader>
                     <DialogTitle>
                       {t('newsArticlePage.adminEditor.title', { defaultValue: 'Edit Article' })}{' '}
@@ -139,56 +139,65 @@ const NewsArticle = () => {
                     </DialogTitle>
                   </DialogHeader>
 
-                  <div className="grid gap-4">
-                    <div className="grid gap-2">
-                      <Label htmlFor="news-edit-title">
-                        {t('content.fields.title', { defaultValue: 'Title' })}
-                      </Label>
-                      <Input
-                        id="news-edit-title"
-                        value={draftTitle}
-                        onChange={(e) => setDraftTitle(e.target.value)}
-                        placeholder={t('content.placeholders.title', { defaultValue: 'Enter a title' })}
-                      />
+                  <div className="flex-1 min-h-0 overflow-y-auto pr-1">
+                    <div className="grid gap-4">
+                      <div className="grid gap-2">
+                        <Label htmlFor="news-edit-title">
+                          {t('content.fields.title', { defaultValue: 'Title' })}
+                        </Label>
+                        <Input
+                          id="news-edit-title"
+                          value={draftTitle}
+                          onChange={(e) => setDraftTitle(e.target.value)}
+                          placeholder={t('content.placeholders.title', { defaultValue: 'Enter a title' })}
+                        />
+                      </div>
+
+                      <div className="grid gap-2">
+                        <Label htmlFor="news-edit-excerpt">
+                          {t('content.fields.excerpt', { defaultValue: 'Excerpt' })}
+                        </Label>
+                        <Textarea
+                          id="news-edit-excerpt"
+                          value={draftExcerpt}
+                          onChange={(e) => setDraftExcerpt(e.target.value)}
+                          placeholder={t('content.placeholders.excerpt', { defaultValue: 'Short summary (optional)' })}
+                          rows={3}
+                        />
+                      </div>
+
+                      <div className="grid gap-2">
+                        <Label htmlFor="news-edit-tags">
+                          {t('content.fields.tags', { defaultValue: 'Tags' })}
+                        </Label>
+                        <Input
+                          id="news-edit-tags"
+                          value={draftTags}
+                          onChange={(e) => setDraftTags(e.target.value)}
+                          placeholder={t('content.placeholders.tags', { defaultValue: 'Comma-separated (optional)' })}
+                        />
+                      </div>
+
+                      <div className="grid gap-2">
+                        <Label htmlFor="news-edit-content">
+                          {t('content.fields.content', { defaultValue: 'Content' })}
+                        </Label>
+                        <Textarea
+                          id="news-edit-content"
+                          value={draftContent}
+                          onChange={(e) => setDraftContent(e.target.value)}
+                          placeholder={t('content.placeholders.content', { defaultValue: 'Write the article...' })}
+                          rows={12}
+                        />
+                      </div>
                     </div>
 
-                    <div className="grid gap-2">
-                      <Label htmlFor="news-edit-excerpt">
-                        {t('content.fields.excerpt', { defaultValue: 'Excerpt' })}
-                      </Label>
-                      <Textarea
-                        id="news-edit-excerpt"
-                        value={draftExcerpt}
-                        onChange={(e) => setDraftExcerpt(e.target.value)}
-                        placeholder={t('content.placeholders.excerpt', { defaultValue: 'Short summary (optional)' })}
-                        rows={3}
-                      />
-                    </div>
-
-                    <div className="grid gap-2">
-                      <Label htmlFor="news-edit-tags">
-                        {t('content.fields.tags', { defaultValue: 'Tags' })}
-                      </Label>
-                      <Input
-                        id="news-edit-tags"
-                        value={draftTags}
-                        onChange={(e) => setDraftTags(e.target.value)}
-                        placeholder={t('content.placeholders.tags', { defaultValue: 'Comma-separated (optional)' })}
-                      />
-                    </div>
-
-                    <div className="grid gap-2">
-                      <Label htmlFor="news-edit-content">
-                        {t('content.fields.content', { defaultValue: 'Content' })}
-                      </Label>
-                      <Textarea
-                        id="news-edit-content"
-                        value={draftContent}
-                        onChange={(e) => setDraftContent(e.target.value)}
-                        placeholder={t('content.placeholders.content', { defaultValue: 'Write the article...' })}
-                        rows={12}
-                      />
-                    </div>
+                    <p className="text-xs text-muted-foreground mt-4">
+                      {t('newsArticlePage.adminEditor.note', {
+                        defaultValue:
+                          'Edits apply to the currently selected language. Switch language to edit another translation.',
+                      })}
+                    </p>
                   </div>
 
                   <DialogFooter className="gap-2 sm:gap-2">
@@ -246,13 +255,6 @@ const NewsArticle = () => {
                       {t('common.save', { defaultValue: 'Save' })}
                     </Button>
                   </DialogFooter>
-
-                  <p className="text-xs text-muted-foreground">
-                    {t('newsArticlePage.adminEditor.note', {
-                      defaultValue:
-                        'Edits apply to the currently selected language. Switch language to edit another translation.',
-                    })}
-                  </p>
                 </DialogContent>
               </Dialog>
             )}

@@ -25,6 +25,8 @@ import {
 import { useTranslation } from "react-i18next";
 import SiteFooter from "@/components/SiteFooter";
 
+const HOME_GRID_LIMIT = 16;
+
 // Fallback data for when API fails or is empty
 const fallbackBlogPosts: PostSummary[] = [
   {
@@ -71,8 +73,8 @@ const Home = () => {
       setLoading(true);
       try {
         const [blogRes, newsRes] = await Promise.all([
-          getPosts({ category: "blog", page: 1, limit: 9, locale: i18n.language }),
-          getPosts({ category: "news", page: 1, limit: 9, locale: i18n.language }),
+          getPosts({ category: "blog", page: 1, limit: HOME_GRID_LIMIT, locale: i18n.language }),
+          getPosts({ category: "news", page: 1, limit: HOME_GRID_LIMIT, locale: i18n.language }),
         ]);
 
         setBlogPosts(blogRes.data.length > 0 ? blogRes.data : fallbackBlogPosts);
@@ -200,8 +202,8 @@ const Home = () => {
               <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
             </div>
           ) : blogPosts.length > 0 ? (
-            <div className="grid grid-cols-3 md:grid-cols-4 gap-2 md:gap-6">
-              {blogPosts.slice(0, 9).map((item) => (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-5">
+              {blogPosts.slice(0, HOME_GRID_LIMIT).map((item) => (
                 <article key={item.id} className="group">
                   <Link to={`/blog/${item.slug}`} className="block">
                     <div className="relative aspect-square overflow-hidden rounded-lg mb-2 md:mb-3">
@@ -263,8 +265,8 @@ const Home = () => {
               <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
             </div>
           ) : newsItems.length > 0 ? (
-            <div className="grid grid-cols-3 md:grid-cols-4 gap-2 md:gap-6">
-              {newsItems.slice(0, 9).map((item) => (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-5">
+              {newsItems.slice(0, HOME_GRID_LIMIT).map((item) => (
                 <article key={item.id} className="group">
                   <Link to={`/news/${item.slug}`} className="block">
                     <div className="relative aspect-square overflow-hidden rounded-lg mb-2 md:mb-3">

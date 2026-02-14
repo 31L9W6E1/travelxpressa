@@ -60,9 +60,13 @@ app.use(cookieParser(config.sessionSecret));
 app.use(compression());
 
 // Serve uploaded images statically
+const uploadsRootDir = path.isAbsolute(config.upload.uploadDir)
+  ? config.upload.uploadDir
+  : path.join(process.cwd(), config.upload.uploadDir);
+
 app.use(
   '/uploads',
-  express.static(path.join(process.cwd(), 'uploads'), {
+  express.static(uploadsRootDir, {
     maxAge: '7d',
     immutable: true,
     etag: true,

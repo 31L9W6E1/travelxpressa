@@ -6,10 +6,13 @@ import crypto from 'crypto';
 import { authenticateToken, requireRole } from '../middleware/auth';
 import { UserRole } from '../types';
 import { logger } from '../utils/logger';
+import { config } from '../config';
 
 const router = Router();
 
-const uploadsRootDir = path.join(process.cwd(), 'uploads');
+const uploadsRootDir = path.isAbsolute(config.upload.uploadDir)
+  ? config.upload.uploadDir
+  : path.join(process.cwd(), config.upload.uploadDir);
 const imageUploadsDir = path.join(uploadsRootDir, 'images');
 const fileUploadsDir = path.join(uploadsRootDir, 'files');
 

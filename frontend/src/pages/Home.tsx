@@ -4,7 +4,6 @@ import {
   ArrowRight,
   Calendar,
   ChevronRight,
-  Plane,
   Loader2,
   CheckCircle,
   Shield,
@@ -24,6 +23,7 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { useTranslation } from "react-i18next";
+import SiteFooter from "@/components/SiteFooter";
 
 // Fallback data for when API fails or is empty
 const fallbackBlogPosts: PostSummary[] = [
@@ -301,76 +301,19 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-border py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-            <div className="flex items-center gap-2">
-              <Plane className="w-6 h-6" />
-              <span className="text-xl font-bold">{t("footer.company")}</span>
-            </div>
-            <div className="flex flex-wrap justify-center gap-6 text-sm text-muted-foreground">
-              <Link
-                to="/about"
-                className="hover:text-foreground transition-colors"
-              >
-                {t("footer.links.about")}
-              </Link>
-              <Link
-                to="/blog"
-                className="hover:text-foreground transition-colors"
-              >
-                {t("nav.blog")}
-              </Link>
-              <Link
-                to="/news"
-                className="hover:text-foreground transition-colors"
-              >
-                {t("home.news")}
-              </Link>
-              <Link
-                to="/learn-more"
-                className="hover:text-foreground transition-colors"
-              >
-                {t("home.hero.learnMore")}
-              </Link>
-              <Link
-                to="/flight"
-                className="hover:text-foreground transition-colors"
-              >
-                {t("nav.flight", { defaultValue: "Flight" })}
-              </Link>
-              <Link
-                to="/insurance"
-                className="hover:text-foreground transition-colors"
-              >
-                {t("nav.insurance", { defaultValue: "Insurance" })}
-              </Link>
-              <Link
-                to="/help-center"
-                className="hover:text-foreground transition-colors"
-              >
-                {t("nav.helpCenter", { defaultValue: "Help Center" })}
-              </Link>
-              <Link
-                to="/q-and-a"
-                className="hover:text-foreground transition-colors"
-              >
-                {t("nav.qAndA", { defaultValue: "Q&A" })}
-              </Link>
-              <Link
-                to="/feedback"
-                className="hover:text-foreground transition-colors"
-              >
-                {t("nav.feedback", { defaultValue: "Feedback" })}
-              </Link>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              &copy; 2024 {t("footer.company")}. {t("footer.copyright")}
-            </p>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter
+        links={[
+          { to: "/about", label: t("footer.links.about") },
+          { to: "/blog", label: t("nav.blog") },
+          { to: "/news", label: t("home.news") },
+          { to: "/learn-more", label: t("home.hero.learnMore") },
+          { to: "/flight", label: t("nav.flight", { defaultValue: "Flight" }) },
+          { to: "/insurance", label: t("nav.insurance", { defaultValue: "Insurance" }) },
+          { to: "/help-center", label: t("nav.helpCenter", { defaultValue: "Help Center" }) },
+          { to: "/q-and-a", label: t("nav.qAndA", { defaultValue: "Q&A" }) },
+          { to: "/feedback", label: t("nav.feedback", { defaultValue: "Feedback" }) },
+        ]}
+      />
     </div>
   );
 };

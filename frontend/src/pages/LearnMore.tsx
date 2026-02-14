@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, CheckCircle, Globe, Plane } from "lucide-react";
+import { ArrowRight, CheckCircle, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useTranslation } from "react-i18next";
@@ -16,6 +16,7 @@ import {
 import { convertCurrency, FX_LAST_UPDATED_ISO, isFxCurrencySupported } from "@/config/fx";
 import { formatCurrencyCodeAmount, getCurrencyForLanguage } from "@/lib/money";
 import PageHeader from "@/components/PageHeader";
+import SiteFooter from "@/components/SiteFooter";
 
 const LearnMore = () => {
   const { t, i18n } = useTranslation();
@@ -522,50 +523,14 @@ const LearnMore = () => {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-border py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-            <div className="flex items-center gap-2">
-              <Plane className="w-6 h-6" />
-              <span className="text-xl font-bold">
-                {t("footer.company", { defaultValue: "TravelXpressa" })}
-              </span>
-            </div>
-            <div className="flex flex-wrap justify-center gap-6 text-sm text-muted-foreground">
-              <Link
-                to="/about"
-                className="hover:text-foreground transition-colors"
-              >
-                {t("footer.links.about", { defaultValue: "About Us" })}
-              </Link>
-              <Link
-                to="/learn-more"
-                className="hover:text-foreground transition-colors"
-              >
-                {t("nav.learnMore", { defaultValue: "Learn More" })}
-              </Link>
-              <Link
-                to="/privacy"
-                className="hover:text-foreground transition-colors"
-              >
-                {t("footer.links.privacy", { defaultValue: "Privacy Policy" })}
-              </Link>
-              <Link
-                to="/terms"
-                className="hover:text-foreground transition-colors"
-              >
-                {t("footer.links.terms", { defaultValue: "Terms of Service" })}
-              </Link>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              &copy; {new Date().getFullYear()}{" "}
-              {t("footer.company", { defaultValue: "TravelXpressa" })}.{" "}
-              {t("footer.copyright", { defaultValue: "All rights reserved" })}.
-            </p>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter
+        links={[
+          { to: "/about", label: t("footer.links.about", { defaultValue: "About Us" }) },
+          { to: "/learn-more", label: t("nav.learnMore", { defaultValue: "Learn More" }) },
+          { to: "/privacy", label: t("footer.links.privacy", { defaultValue: "Privacy Policy" }) },
+          { to: "/terms", label: t("footer.links.terms", { defaultValue: "Terms of Service" }) },
+        ]}
+      />
     </div>
   );
 };

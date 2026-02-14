@@ -1,7 +1,7 @@
 import { useAuth } from "../contexts/AuthContext";
 import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Plane, Mail, Lock, User, ArrowRight, Loader2 } from "lucide-react";
+import { Mail, Lock, User, ArrowRight, Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -330,11 +330,13 @@ const Login = () => {
       <div className="max-w-md w-full space-y-8">
         {/* Logo */}
         <div className="text-center">
-          <Link to="/" className="inline-flex items-center space-x-2 mb-6">
-            <Plane className="w-10 h-10 text-foreground" />
-            <span className="text-2xl font-bold text-foreground">
-              TravelXpressa
-            </span>
+          <Link to="/" className="inline-flex items-center mb-6">
+            <img
+              src="/branding/logo-visamn-com.png"
+              alt="visamn.com"
+              className="h-10 w-auto object-contain"
+              loading="eager"
+            />
           </Link>
           <h2 className="text-3xl font-bold text-foreground">
             {isLogin ? t('auth.welcomeBack') : t('auth.createAccount')}

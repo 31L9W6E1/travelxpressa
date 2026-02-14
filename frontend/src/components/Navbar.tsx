@@ -41,6 +41,9 @@ type NotificationItem = {
 const navItemBaseClass =
   "flex items-center gap-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors";
 
+const BRAND_LOGO_ICON = "/branding/logo-icon.png";
+const BRAND_LOGO_TEXT = "/branding/logo-visamn.png";
+
 const Navbar = () => {
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
@@ -348,10 +351,12 @@ const Navbar = () => {
       >
         <div className="h-16 px-3 flex items-center border-b border-dashed border-border/70">
           <Link to="/" className={`flex items-center ${isSidebarCollapsed ? "justify-center w-full" : "gap-2 min-w-0"}`}>
-            <Plane className="w-6 h-6 text-foreground shrink-0" />
-            {!isSidebarCollapsed && (
-              <span className="text-lg font-bold text-foreground tracking-tight truncate">TravelXpressa</span>
-            )}
+            <img
+              src={isSidebarCollapsed ? BRAND_LOGO_ICON : BRAND_LOGO_TEXT}
+              alt="Visamn"
+              className={isSidebarCollapsed ? "w-8 h-8 object-contain shrink-0" : "h-7 w-auto max-w-[140px] object-contain shrink-0"}
+              loading="eager"
+            />
           </Link>
         </div>
 
@@ -602,8 +607,12 @@ const Navbar = () => {
             {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
           <Link to="/" className="flex items-center gap-2" onClick={closeMobileMenu}>
-            <Plane className="w-5 h-5 text-foreground" />
-            <span className="text-base font-semibold text-foreground">TravelXpressa</span>
+            <img
+              src={BRAND_LOGO_TEXT}
+              alt="Visamn"
+              className="h-6 w-auto max-w-[130px] object-contain"
+              loading="eager"
+            />
           </Link>
         </div>
 
@@ -686,8 +695,12 @@ const Navbar = () => {
       >
         <div className="h-16 px-4 flex items-center justify-between border-b border-dashed border-border/70">
           <Link to="/" className="flex items-center gap-2" onClick={closeMobileMenu}>
-            <Plane className="w-5 h-5 text-foreground" />
-            <span className="text-base font-semibold text-foreground">TravelXpressa</span>
+            <img
+              src={BRAND_LOGO_TEXT}
+              alt="Visamn"
+              className="h-6 w-auto max-w-[130px] object-contain"
+              loading="eager"
+            />
           </Link>
           <button
             className="p-2 rounded-lg text-foreground hover:bg-secondary"

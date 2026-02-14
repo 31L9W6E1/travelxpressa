@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Visamn icon">
+  <defs>
+    <linearGradient id="brand-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#B9EA6A" />
+      <stop offset="100%" stop-color="#97D94C" />
+    </linearGradient>
+  </defs>
+  <circle cx="138" cy="152" r="58" fill="url(#brand-grad)" />
+  <rect x="224" y="118" width="118" height="306" rx="59" fill="url(#brand-grad)" transform="rotate(31 283 271)" />
+</svg>

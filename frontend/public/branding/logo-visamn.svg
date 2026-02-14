@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 420" role="img" aria-label="Visamn logo">
+  <defs>
+    <linearGradient id="brand-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#B9EA6A" />
+      <stop offset="100%" stop-color="#97D94C" />
+    </linearGradient>
+  </defs>
+  <g>
+    <circle cx="138" cy="180" r="52" fill="url(#brand-grad)" />
+    <rect x="223" y="143" width="108" height="270" rx="54" fill="url(#brand-grad)" transform="rotate(31 277 278)" />
+  </g>
+  <text x="420" y="290" fill="url(#brand-grad)" font-size="230" font-family="Rubik, Arial, sans-serif" font-weight="800" letter-spacing="-6">visamn</text>
+</svg>

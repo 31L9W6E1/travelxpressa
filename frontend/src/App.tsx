@@ -42,6 +42,9 @@ import HelpCenter from "./pages/HelpCenter";
 import Flight from "./pages/Flight";
 import Insurance from "./pages/Insurance";
 import Maintenance from "./pages/Maintenance";
+import PrivacyPolicy from "./pages/legal/PrivacyPolicy";
+import TermsOfService from "./pages/legal/TermsOfService";
+import DataDeletion from "./pages/legal/DataDeletion";
 
 const isMaintenanceAllowedPath = (pathname: string): boolean => {
   const allowPrefixes = [
@@ -185,6 +188,9 @@ function AppRoutes() {
             <Route path="/helpcenter" element={<VisibilityRoute enabled={settings.visibility.helpCenter}><HelpCenter /></VisibilityRoute>} />
             <Route path="/flight" element={<VisibilityRoute enabled={settings.visibility.flight}><Flight /></VisibilityRoute>} />
             <Route path="/insurance" element={<VisibilityRoute enabled={settings.visibility.insurance}><Insurance /></VisibilityRoute>} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
+            <Route path="/terms" element={<TermsOfService />} />
+            <Route path="/data-deletion" element={<DataDeletion />} />
             
             {/* Protected routes - require authentication */}
             <Route

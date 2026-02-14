@@ -404,63 +404,6 @@ const LearnMore = () => {
         </div>
       </section>
 
-      {/* Official Sources */}
-      <section className="py-12 md:py-16 border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <h2 className="text-2xl md:text-3xl font-bold mb-3">
-            {t("learnMorePage.sources.title", { defaultValue: "Official Reference Links" })}
-          </h2>
-          <p className="text-muted-foreground mb-6">
-            {t("learnMorePage.sources.subtitle", {
-              defaultValue:
-                "Always verify final requirements and fee updates directly with official immigration portals.",
-            })}
-          </p>
-          <div className="grid md:grid-cols-2 gap-4">
-            {[
-              {
-                label: "United Kingdom (Standard Visitor)",
-                href: "https://www.gov.uk/standard-visitor/apply-standard-visitor-visa",
-              },
-              {
-                label: "Canada (Visitor Visa)",
-                href: "https://www.canada.ca/en/immigration-refugees-citizenship/services/visit-canada/apply-visitor-visa.html",
-              },
-              {
-                label: "Australia (Visitor 600)",
-                href: "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/visitor-600",
-              },
-              {
-                label: "Japan VFS (Mongolia)",
-                href: "https://visa.vfsglobal.com/mng/en/jpn",
-              },
-              {
-                label: "Ireland VFS (Mongolia)",
-                href: "https://visa.vfsglobal.com/mng/en/irl/",
-              },
-              {
-                label: "Germany VFS (Ulaanbaatar)",
-                href: "https://visa.vfsglobal.com/mng/en/deu/attend-centre/ulaanbaatar",
-              },
-            ].map((item) => (
-              <Card key={item.href} className="bg-secondary/40">
-                <CardContent className="p-4">
-                  <a
-                    href={item.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm font-medium text-foreground hover:text-primary transition-colors"
-                  >
-                    {item.label}
-                  </a>
-                  <p className="text-xs text-muted-foreground mt-1 break-all">{item.href}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Tips Section */}
       <section className="py-12 md:py-20 border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">

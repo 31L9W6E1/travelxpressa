@@ -3,8 +3,11 @@ import axios, { type AxiosInstance, type AxiosError, type InternalAxiosRequestCo
 const resolveApiUrl = (): string => {
   if (typeof window !== 'undefined') {
     const { hostname, port, protocol, origin } = window.location;
-    const isTravelxpressaDomain =
-      hostname === 'travelxpressa.com' || hostname === 'www.travelxpressa.com';
+    const isPrimaryDomain =
+      hostname === 'travelxpressa.com' ||
+      hostname === 'www.travelxpressa.com' ||
+      hostname === 'visamn.com' ||
+      hostname === 'www.visamn.com';
     const isLocalHost =
       hostname === 'localhost' ||
       hostname === '127.0.0.1' ||
@@ -22,7 +25,7 @@ const resolveApiUrl = (): string => {
     // This is important even when VITE_API_URL is configured, because hitting the
     // Railway backend directly makes uploaded images cross-origin and they can be
     // blocked by `Cross-Origin-Resource-Policy: same-origin`.
-    if (isTravelxpressaDomain || isVercelPreview) {
+    if (isPrimaryDomain || isVercelPreview) {
       return origin;
     }
 

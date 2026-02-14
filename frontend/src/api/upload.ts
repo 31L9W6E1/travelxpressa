@@ -12,6 +12,21 @@ export interface UploadResponse {
 const getBackendPublicUrl = (): string => {
   const configured = (import.meta.env.VITE_BACKEND_PUBLIC_URL as string | undefined)?.trim();
   if (configured) return configured.replace(/\/+$/, '');
+
+  if (typeof window !== 'undefined') {
+    const { hostname, origin } = window.location;
+    const isPrimaryDomain =
+      hostname === 'travelxpressa.com' ||
+      hostname === 'www.travelxpressa.com' ||
+      hostname === 'visamn.com' ||
+      hostname === 'www.visamn.com' ||
+      hostname.endsWith('.vercel.app');
+
+    if (isPrimaryDomain) {
+      return origin;
+    }
+  }
+
   return 'https://travelxpressa-backend-production.up.railway.app';
 };
 

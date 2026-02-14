@@ -231,6 +231,9 @@ function getCookieDomain(): string | undefined {
       if (hostname.endsWith('travelxpressa.com')) {
         return '.travelxpressa.com';
       }
+      if (hostname.endsWith('visamn.com')) {
+        return '.visamn.com';
+      }
     } catch {
       // Ignore malformed URL and continue.
     }

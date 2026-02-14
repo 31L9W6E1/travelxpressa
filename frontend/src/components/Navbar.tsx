@@ -354,7 +354,7 @@ const Navbar = () => {
             <img
               src={isSidebarCollapsed ? BRAND_LOGO_ICON : BRAND_LOGO_TEXT}
               alt="Visamn"
-              className={isSidebarCollapsed ? "w-8 h-8 object-contain shrink-0" : "h-7 w-auto max-w-[140px] object-contain shrink-0"}
+              className={isSidebarCollapsed ? "w-11 h-11 object-contain shrink-0" : "h-10 w-auto max-w-[180px] object-contain shrink-0"}
               loading="eager"
             />
           </Link>
@@ -610,7 +610,7 @@ const Navbar = () => {
             <img
               src={BRAND_LOGO_TEXT}
               alt="Visamn"
-              className="h-6 w-auto max-w-[130px] object-contain"
+              className="h-8 w-auto max-w-[170px] object-contain"
               loading="eager"
             />
           </Link>
@@ -698,7 +698,7 @@ const Navbar = () => {
             <img
               src={BRAND_LOGO_TEXT}
               alt="Visamn"
-              className="h-6 w-auto max-w-[130px] object-contain"
+              className="h-8 w-auto max-w-[170px] object-contain"
               loading="eager"
             />
           </Link>

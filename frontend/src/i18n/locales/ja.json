@@ -116,7 +116,7 @@
       },
       "registerSuccess": {
         "title": "アカウントを作成しました！",
-        "description": "TravelXpressaへようこそ。"
+        "description": "visamnへようこそ。"
       },
       "registerFailed": {
         "title": "登録に失敗しました",
@@ -140,7 +140,7 @@
       "titleLine2": "アメリカ",
       "titleLine3": "ここから始まります",
       "title": "アメリカへの旅はここから始まります",
-      "subtitle": "TravelXpressaはDS-160ビザ申請プロセスを簡素化します。専門家のガイダンス、リアルタイムサポート、最初から最後までシームレスな体験。",
+      "subtitle": "visamnはDS-160ビザ申請プロセスを簡素化します。専門家のガイダンス、リアルタイムサポート、最初から最後までシームレスな体験。",
       "cta": "申請を開始",
       "learnMore": "詳細を見る"
     },
@@ -151,7 +151,7 @@
       "customerRating": "顧客評価"
     },
     "features": {
-      "title": "なぜTravelXpressaを選ぶのか",
+      "title": "なぜvisamnを選ぶのか",
       "subtitle": "数千人の旅行者がビザ申請を成功裏に完了するお手伝いをしてきました",
       "expert": {
         "title": "専門家のガイダンス",
@@ -208,7 +208,7 @@
     },
     "cta": {
       "title": "ビザの旅を始める準備はできましたか？",
-      "subtitle": "TravelXpressaを通じて米国ビザを取得した数千人の満足した旅行者に加わりましょう。",
+      "subtitle": "visamnを通じて米国ビザを取得した数千人の満足した旅行者に加わりましょう。",
       "button": "今日から始める"
     }
   },
@@ -323,7 +323,7 @@
     },
     "cta": {
       "title": "申請する準備はできましたか？",
-      "subtitle": "TravelXpressaでDS-160申請を始め、米国ビザを取得した多くの方々に続きましょう。",
+      "subtitle": "visamnでDS-160申請を始め、米国ビザを取得した多くの方々に続きましょう。",
       "primary": "申請を開始"
     }
   },
@@ -352,7 +352,7 @@
       "description": "お探しの記事は存在しません。"
     },
     "cta": {
-      "subtitle": "TravelXpressaがDS-160申請プロセスをガイドします。"
+      "subtitle": "visamnがDS-160申請プロセスをガイドします。"
     }
   },
   "newsPage": {
@@ -923,7 +923,7 @@
   },
   "footer": {
     "copyright": "全著作権所有",
-    "company": "TravelXpressa",
+    "company": "visamn",
     "links": {
       "about": "会社概要",
       "contact": "お問い合わせ",

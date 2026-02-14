@@ -27,7 +27,7 @@ const getBackendPublicUrl = (): string => {
     }
   }
 
-  return 'https://travelxpressa-backend-production.up.railway.app';
+  return 'https://api.visamn.com';
 };
 
 /**

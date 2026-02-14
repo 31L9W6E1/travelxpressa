@@ -65,7 +65,7 @@ const About = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <h1 className="text-3xl md:text-4xl font-bold mb-3">
             {t("aboutPage.hero.titlePrefix", { defaultValue: "About" })}{" "}
-            {t("footer.company", { defaultValue: "TravelXpressa" })}
+            {t("footer.company", { defaultValue: "visamn" })}
           </h1>
 
           <p className="text-base md:text-lg text-muted-foreground max-w-3xl mb-6">

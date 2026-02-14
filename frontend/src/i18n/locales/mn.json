@@ -130,7 +130,7 @@
       },
       "registerSuccess": {
         "title": "Бүртгэл үүсгэгдлээ!",
-        "description": "TravelXpressa-д тавтай морилно уу."
+        "description": "visamn-д тавтай морилно уу."
       },
       "registerFailed": {
         "title": "Бүртгэл амжилтгүй",
@@ -165,7 +165,7 @@
       "customerRating": "Хэрэглэгчийн үнэлгээ"
     },
     "features": {
-      "title": "Яагаад TravelXpressa-г сонгох вэ",
+      "title": "Яагаад visamn-г сонгох вэ",
       "subtitle": "Олон улсын визийн өргөдөл бэлтгэхэд зориулсан хурдан, ойлгомжтой платформ",
       "expert": {
         "title": "Мэргэжлийн зөвлөгөө",
@@ -391,7 +391,7 @@
       "description": "Таны хайж буй нийтлэл байхгүй байна."
     },
     "cta": {
-      "subtitle": "DS-160 өргөдлийн явцад TravelXpressa таныг чиглүүлнэ."
+      "subtitle": "DS-160 өргөдлийн явцад visamn таныг чиглүүлнэ."
     }
   },
   "newsPage": {
@@ -1098,7 +1098,7 @@
   },
   "footer": {
     "copyright": "Бүх эрх хуулиар хамгаалагдсан",
-    "company": "TravelXpressa",
+    "company": "visamn",
     "links": {
       "about": "Бидний тухай",
       "contact": "Холбоо барих",

@@ -130,7 +130,7 @@
       },
       "registerSuccess": {
         "title": "Account created!",
-        "description": "Welcome to TravelXpressa."
+        "description": "Welcome to visamn."
       },
       "registerFailed": {
         "title": "Registration failed",
@@ -165,7 +165,7 @@
       "customerRating": "Customer Rating"
     },
     "features": {
-      "title": "Why Choose TravelXpressa",
+      "title": "Why Choose visamn",
       "subtitle": "A practical platform for multi-country visa preparation, built for speed and accuracy",
       "expert": {
         "title": "Expert Guidance",
@@ -222,7 +222,7 @@
     },
     "cta": {
       "title": "Ready to Start Your Visa Journey?",
-      "subtitle": "Join applicants who use TravelXpressa to prepare accurate visa applications with confidence.",
+      "subtitle": "Join applicants who use visamn to prepare accurate visa applications with confidence.",
       "button": "Get Started Today"
     }
   },
@@ -390,7 +390,7 @@
       "description": "The post you are looking for does not exist."
     },
     "cta": {
-      "subtitle": "Let TravelXpressa guide you through the DS-160 application process."
+      "subtitle": "Let visamn guide you through the DS-160 application process."
     }
   },
   "newsPage": {
@@ -1097,7 +1097,7 @@
   },
   "footer": {
     "copyright": "All rights reserved",
-    "company": "TravelXpressa",
+    "company": "visamn",
     "links": {
       "about": "About Us",
       "contact": "Contact",

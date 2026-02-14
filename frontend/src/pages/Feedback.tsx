@@ -91,7 +91,7 @@ const Feedback = () => {
               </div>
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Mail className="w-4 h-4" />
-                <span>support@travelxpressa.com</span>
+                <span>support@visamn.com</span>
               </div>
               <Link to="/contactsupport" className="inline-flex items-center gap-2 text-primary hover:underline">
                 <MessageSquare className="w-4 h-4" />

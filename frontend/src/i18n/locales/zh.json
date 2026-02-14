@@ -116,7 +116,7 @@
       },
       "registerSuccess": {
         "title": "账户已创建！",
-        "description": "欢迎使用 TravelXpressa。"
+        "description": "欢迎使用 visamn。"
       },
       "registerFailed": {
         "title": "注册失败",
@@ -140,7 +140,7 @@
       "titleLine2": "美国",
       "titleLine3": "从这里开始",
       "title": "您的美国之旅从这里开始",
-      "subtitle": "TravelXpressa简化DS-160签证申请流程。专家指导、实时支持，从头到尾的无缝体验。",
+      "subtitle": "visamn简化DS-160签证申请流程。专家指导、实时支持，从头到尾的无缝体验。",
       "cta": "开始申请",
       "learnMore": "了解更多"
     },
@@ -151,7 +151,7 @@
       "customerRating": "客户评分"
     },
     "features": {
-      "title": "为什么选择TravelXpressa",
+      "title": "为什么选择visamn",
       "subtitle": "我们已帮助数千名旅行者成功完成签证申请",
       "expert": {
         "title": "专家指导",
@@ -208,7 +208,7 @@
     },
     "cta": {
       "title": "准备好开始您的签证之旅了吗？",
-      "subtitle": "加入数千名通过TravelXpressa成功获得美国签证的满意旅行者。",
+      "subtitle": "加入数千名通过visamn成功获得美国签证的满意旅行者。",
       "button": "今天就开始"
     }
   },
@@ -323,7 +323,7 @@
     },
     "cta": {
       "title": "准备申请了吗？",
-      "subtitle": "从 TravelXpressa 开始您的 DS-160 申请，加入成功获得美国签证的数千人。",
+      "subtitle": "从 visamn 开始您的 DS-160 申请，加入成功获得美国签证的数千人。",
       "primary": "开始申请"
     }
   },
@@ -352,7 +352,7 @@
       "description": "你要查看的文章不存在。"
     },
     "cta": {
-      "subtitle": "让 TravelXpressa 引导你完成 DS-160 申请流程。"
+      "subtitle": "让 visamn 引导你完成 DS-160 申请流程。"
     }
   },
   "newsPage": {
@@ -923,7 +923,7 @@
   },
   "footer": {
     "copyright": "版权所有",
-    "company": "TravelXpressa",
+    "company": "visamn",
     "links": {
       "about": "关于我们",
       "contact": "联系我们",

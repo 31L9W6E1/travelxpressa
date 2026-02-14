@@ -19,7 +19,7 @@ export default function Maintenance() {
               ? settings.maintenance.message
               : t("maintenance.subtitle", {
                   defaultValue:
-                    "TravelXpressa is currently under maintenance. Please check back soon.",
+                    "visamn is currently under maintenance. Please check back soon.",
                 })}
           </p>
 

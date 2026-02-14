@@ -52,7 +52,7 @@ export default function NewsTicker() {
             slug: "",
             category: "news",
             tags: null,
-            authorName: "TravelXpressa",
+            authorName: "visamn",
             createdAt: new Date().toISOString(),
           },
         ];

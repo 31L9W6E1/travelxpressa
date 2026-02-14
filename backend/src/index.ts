@@ -60,7 +60,14 @@ app.use(cookieParser(config.sessionSecret));
 app.use(compression());
 
 // Serve uploaded images statically
-app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+app.use(
+  '/uploads',
+  express.static(path.join(process.cwd(), 'uploads'), {
+    maxAge: '7d',
+    immutable: true,
+    etag: true,
+  })
+);
 
 // Security checks
 app.use(preventParamPollution);

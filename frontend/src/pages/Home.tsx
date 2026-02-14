@@ -40,7 +40,7 @@ const fallbackBlogPosts: PostSummary[] = [
     publishedAt: new Date().toISOString(),
     slug: "visa-interview-tips",
     category: "blog" as const,
-    authorName: "TravelXpressa",
+    authorName: "visamn",
     createdAt: new Date().toISOString(),
   },
 ];
@@ -57,7 +57,7 @@ const fallbackNewsItems: PostSummary[] = [
     slug: "welcome",
     category: "news" as const,
     tags: null,
-    authorName: null,
+    authorName: "visamn",
     createdAt: new Date().toISOString(),
   },
 ];
@@ -211,6 +211,9 @@ const Home = () => {
                         src={item.imageUrl ? normalizeImageUrl(item.imageUrl) : getDefaultImage("blog")}
                         alt={item.title}
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        loading="lazy"
+                        decoding="async"
+                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                       <div className="absolute bottom-0 left-0 right-0 p-2 md:p-4">
@@ -274,6 +277,9 @@ const Home = () => {
                         src={item.imageUrl ? normalizeImageUrl(item.imageUrl) : getDefaultImage("news")}
                         alt={item.title}
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        loading="lazy"
+                        decoding="async"
+                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                       <div className="absolute bottom-0 left-0 right-0 p-2 md:p-4">

@@ -239,7 +239,7 @@ const Login = () => {
         }),
         {
           description: t("auth.toasts.registerSuccess.description", {
-            defaultValue: "Welcome to TravelXpressa.",
+            defaultValue: "Welcome to visamn.",
           }),
         },
       );

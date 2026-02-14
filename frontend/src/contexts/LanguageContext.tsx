@@ -53,16 +53,16 @@ const translations: Record<Language, Record<string, string>> = {
     'home.hero.title': 'Your Journey to the',
     'home.hero.titleHighlight': 'United States',
     'home.hero.titleEnd': 'Starts Here',
-    'home.hero.description': 'TravelXpressa simplifies the DS-160 visa application process. Expert guidance, real-time support, and a seamless experience from start to finish.',
+    'home.hero.description': 'visamn simplifies the DS-160 visa application process. Expert guidance, real-time support, and a seamless experience from start to finish.',
     'home.hero.cta': 'Start Your Application',
-    'home.features.title': 'Why Choose TravelXpressa',
+    'home.features.title': 'Why Choose visamn',
     'home.features.subtitle': "We've helped thousands of travelers successfully complete their visa applications",
     'home.articles.title': 'Featured Articles',
     'home.articles.subtitle': 'Stay informed with our latest visa guides and updates',
     'home.news.title': 'Latest News',
     'home.news.subtitle': 'Updates from the US Embassy and immigration services',
     'home.cta.title': 'Ready to Start Your Visa Journey?',
-    'home.cta.description': 'Join thousands of satisfied travelers who have successfully obtained their US visa through TravelXpressa.',
+    'home.cta.description': 'Join thousands of satisfied travelers who have successfully obtained their US visa through visamn.',
     'home.cta.button': 'Get Started Today',
 
     // Admin
@@ -129,7 +129,7 @@ const translations: Record<Language, Record<string, string>> = {
     'home.hero.title': 'Таны аялал',
     'home.hero.titleHighlight': 'Америк руу',
     'home.hero.titleEnd': 'эндээс эхэлнэ',
-    'home.hero.description': 'TravelXpressa нь DS-160 визний өргөдлийн процессыг хялбаршуулна. Мэргэжлийн зөвлөгөө, шууд дэмжлэг, төгс туршлага.',
+    'home.hero.description': 'visamn нь DS-160 визний өргөдлийн процессыг хялбаршуулна. Мэргэжлийн зөвлөгөө, шууд дэмжлэг, төгс туршлага.',
     'home.hero.cta': 'Өргөдөл гаргах',
     'home.features.title': 'Яагаад биднийг сонгох вэ',
     'home.features.subtitle': 'Бид мянга мянган зорчигчдод визний өргөдлөө амжилттай бөглөхөд туслсан',
@@ -138,7 +138,7 @@ const translations: Record<Language, Record<string, string>> = {
     'home.news.title': 'Сүүлийн мэдээ',
     'home.news.subtitle': 'АНУ-ын Элчин сайдын яамны мэдээлэл',
     'home.cta.title': 'Визний аялалаа эхлүүлэхэд бэлэн үү?',
-    'home.cta.description': 'TravelXpressa-аар дамжуулан АНУ-ын виз амжилттай авсан мянга мянган зорчигчидтой нэгдээрэй.',
+    'home.cta.description': 'visamn-аар дамжуулан АНУ-ын виз амжилттай авсан мянга мянган зорчигчидтой нэгдээрэй.',
     'home.cta.button': 'Өнөөдөр эхлэх',
 
     // Admin

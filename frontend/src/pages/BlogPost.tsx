@@ -328,7 +328,7 @@ const BlogPost = () => {
           </h3>
           <p className="text-muted-foreground mb-6">
             {t('blogPostPage.cta.subtitle', {
-              defaultValue: 'Let TravelXpressa guide you through your visa application process.',
+              defaultValue: 'Let visamn guide you through your visa application process.',
             })}
           </p>
           <Button asChild size="lg">

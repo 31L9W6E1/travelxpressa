@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate, useLocation, Link } from "react-router-dom";
+import { Suspense, lazy } from "react";
 import Navbar from "./components/Navbar";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
@@ -9,42 +10,41 @@ import { useTranslation } from "react-i18next";
 import NewsTicker from "./components/NewsTicker";
 import PageViewTracker from "./components/PageViewTracker";
 
-// Import all page components
-import Home from "./pages/Home";
-import Test from "./pages/Test";
-import About from "./pages/About";
-import Blog from "./pages/Blog";
-import BlogPost from "./pages/BlogPost";
-import News from "./pages/News";
-import NewsArticle from "./pages/NewsArticle";
-import EnhancedForm from "./pages/EnhancedForm";
-import Gallery from "./pages/Gallery";
-import EnhancedDashboard from "./pages/EnhancedDashboard";
-import AdminDashboard from "./pages/AdminDashboard";
-import Login from "./pages/Login";
-import ForgotPassword from "./pages/ForgotPassword";
-import ResetPassword from "./pages/ResetPassword";
-import ManageUsers from "./pages/ManageUsers";
-import Application from "./pages/Application";
-import UserDetail from "./pages/UserDetail";
-import ReadyToBegin from "./pages/ReadyToBegin";
-import UserProfile from "./pages/UserProfile";
-import UserInbox from "./pages/UserInbox";
-import UserSecuritySettings from "./pages/UserSecuritySettings";
-import ContactSupport from "./pages/ContactSupport";
-import LearnMore from "./pages/LearnMore";
-import TranslationService from "./pages/TranslationService";
-import CountrySelect from "./pages/CountrySelect";
-import OAuthCallback from "./pages/OAuthCallback";
-import Feedback from "./pages/Feedback";
-import QAndA from "./pages/QAndA";
-import HelpCenter from "./pages/HelpCenter";
-import Flight from "./pages/Flight";
-import Insurance from "./pages/Insurance";
-import Maintenance from "./pages/Maintenance";
-import PrivacyPolicy from "./pages/legal/PrivacyPolicy";
-import TermsOfService from "./pages/legal/TermsOfService";
-import DataDeletion from "./pages/legal/DataDeletion";
+const Home = lazy(() => import("./pages/Home"));
+const Test = lazy(() => import("./pages/Test"));
+const About = lazy(() => import("./pages/About"));
+const Blog = lazy(() => import("./pages/Blog"));
+const BlogPost = lazy(() => import("./pages/BlogPost"));
+const News = lazy(() => import("./pages/News"));
+const NewsArticle = lazy(() => import("./pages/NewsArticle"));
+const EnhancedForm = lazy(() => import("./pages/EnhancedForm"));
+const Gallery = lazy(() => import("./pages/Gallery"));
+const EnhancedDashboard = lazy(() => import("./pages/EnhancedDashboard"));
+const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+const Login = lazy(() => import("./pages/Login"));
+const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const ManageUsers = lazy(() => import("./pages/ManageUsers"));
+const Application = lazy(() => import("./pages/Application"));
+const UserDetail = lazy(() => import("./pages/UserDetail"));
+const ReadyToBegin = lazy(() => import("./pages/ReadyToBegin"));
+const UserProfile = lazy(() => import("./pages/UserProfile"));
+const UserInbox = lazy(() => import("./pages/UserInbox"));
+const UserSecuritySettings = lazy(() => import("./pages/UserSecuritySettings"));
+const ContactSupport = lazy(() => import("./pages/ContactSupport"));
+const LearnMore = lazy(() => import("./pages/LearnMore"));
+const TranslationService = lazy(() => import("./pages/TranslationService"));
+const CountrySelect = lazy(() => import("./pages/CountrySelect"));
+const OAuthCallback = lazy(() => import("./pages/OAuthCallback"));
+const Feedback = lazy(() => import("./pages/Feedback"));
+const QAndA = lazy(() => import("./pages/QAndA"));
+const HelpCenter = lazy(() => import("./pages/HelpCenter"));
+const Flight = lazy(() => import("./pages/Flight"));
+const Insurance = lazy(() => import("./pages/Insurance"));
+const Maintenance = lazy(() => import("./pages/Maintenance"));
+const PrivacyPolicy = lazy(() => import("./pages/legal/PrivacyPolicy"));
+const TermsOfService = lazy(() => import("./pages/legal/TermsOfService"));
+const DataDeletion = lazy(() => import("./pages/legal/DataDeletion"));
 
 const isMaintenanceAllowedPath = (pathname: string): boolean => {
   const allowPrefixes = [
@@ -139,6 +139,7 @@ const VisibilityRoute = ({
 
 function AppRoutes() {
   const location = useLocation();
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { settings } = useSiteSettings();
 
@@ -154,10 +155,17 @@ function AppRoutes() {
 
       <main className="pt-16 md:pt-16 md:pl-[var(--sidebar-width,240px)] transition-[padding] duration-300">
         {settings.visibility.news && <NewsTicker />}
-        {shouldShowMaintenance ? (
-          <Maintenance />
-        ) : (
-          <Routes>
+        <Suspense
+          fallback={
+            <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center text-muted-foreground">
+              {t("common.loading", { defaultValue: "Loading..." })}
+            </div>
+          }
+        >
+          {shouldShowMaintenance ? (
+            <Maintenance />
+          ) : (
+            <Routes>
             {/* 
               "/" is the FIRST page that loads
               When user opens the site, Home is shown
@@ -312,8 +320,9 @@ function AppRoutes() {
               }
             />
             <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        )}
+            </Routes>
+          )}
+        </Suspense>
       </main>
     </div>
   );

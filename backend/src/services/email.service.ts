@@ -24,7 +24,7 @@ const EMAIL_TEMPLATES = {
     <!-- Header -->
     <div style="background: linear-gradient(135deg, #1e293b 0%, #334155 100%); border-radius: 16px 16px 0 0; padding: 40px 30px; text-align: center;">
       <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700;">
-        ✈️ TravelXpressa
+        ✈️ visamn
       </h1>
       <p style="color: #94a3b8; margin: 10px 0 0; font-size: 14px;">
         Your Visa Application Journey
@@ -112,8 +112,8 @@ const EMAIL_TEMPLATES = {
         <p style="color: #64748b; font-size: 14px; margin: 0 0 8px;">
           Questions? We're here to help.
         </p>
-        <a href="mailto:support@travelxpressa.com" style="color: #3b82f6; text-decoration: none; font-size: 14px;">
-          support@travelxpressa.com
+        <a href="mailto:support@visamn.com" style="color: #3b82f6; text-decoration: none; font-size: 14px;">
+          support@visamn.com
         </a>
       </div>
     </div>
@@ -121,7 +121,7 @@ const EMAIL_TEMPLATES = {
     <!-- Footer -->
     <div style="text-align: center; padding: 24px;">
       <p style="color: #94a3b8; font-size: 12px; margin: 0 0 8px;">
-        © ${new Date().getFullYear()} TravelXpressa. All rights reserved.
+        © ${new Date().getFullYear()} visamn. All rights reserved.
       </p>
       <p style="color: #94a3b8; font-size: 12px; margin: 0;">
         You're receiving this email because you submitted a visa application.
@@ -149,9 +149,9 @@ What happens next?
 
 View your application: ${config.frontendUrl}/profile
 
-Questions? Contact us at support@travelxpressa.com
+Questions? Contact us at support@visamn.com
 
-© ${new Date().getFullYear()} TravelXpressa
+© ${new Date().getFullYear()} visamn
     `,
   }),
 
@@ -177,7 +177,7 @@ Questions? Contact us at support@travelxpressa.com
     <!-- Header -->
     <div style="background: linear-gradient(135deg, #059669 0%, #10b981 100%); border-radius: 16px 16px 0 0; padding: 40px 30px; text-align: center;">
       <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700;">
-        ✈️ TravelXpressa
+        ✈️ visamn
       </h1>
       <p style="color: #a7f3d0; margin: 10px 0 0; font-size: 14px;">
         Payment Confirmation
@@ -244,7 +244,7 @@ Questions? Contact us at support@travelxpressa.com
     <!-- Footer -->
     <div style="text-align: center; padding: 24px;">
       <p style="color: #94a3b8; font-size: 12px; margin: 0;">
-        © ${new Date().getFullYear()} TravelXpressa. All rights reserved.
+        © ${new Date().getFullYear()} visamn. All rights reserved.
       </p>
     </div>
   </div>
@@ -268,7 +268,7 @@ Track your application: ${config.frontendUrl}/profile
 
 Save this email for your records.
 
-© ${new Date().getFullYear()} TravelXpressa
+© ${new Date().getFullYear()} visamn
     `,
   }),
 
@@ -294,7 +294,7 @@ Save this email for your records.
     <!-- Header -->
     <div style="background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%); border-radius: 16px 16px 0 0; padding: 40px 30px; text-align: center;">
       <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700;">
-        ✈️ TravelXpressa
+        ✈️ visamn
       </h1>
       <p style="color: #fef3c7; margin: 10px 0 0; font-size: 14px;">
         Payment Required
@@ -339,7 +339,7 @@ Save this email for your records.
     <!-- Footer -->
     <div style="text-align: center; padding: 24px;">
       <p style="color: #94a3b8; font-size: 12px; margin: 0;">
-        © ${new Date().getFullYear()} TravelXpressa. All rights reserved.
+        © ${new Date().getFullYear()} visamn. All rights reserved.
       </p>
     </div>
   </div>
@@ -360,7 +360,7 @@ Complete Payment: ${data.paymentLink}
 
 This payment link expires in 24 hours.
 
-© ${new Date().getFullYear()} TravelXpressa
+© ${new Date().getFullYear()} visamn
     `,
   }),
 
@@ -369,7 +369,7 @@ This payment link expires in 24 hours.
     resetLink: string;
     expiresInMinutes: number;
   }) => ({
-    subject: 'Reset Your TravelXpressa Password',
+    subject: 'Reset Your visamn Password',
     html: `
 <!DOCTYPE html>
 <html>
@@ -382,7 +382,7 @@ This payment link expires in 24 hours.
   <div style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
     <div style="background: linear-gradient(135deg, #1e293b 0%, #334155 100%); border-radius: 16px 16px 0 0; padding: 40px 30px; text-align: center;">
       <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700;">
-        ✈️ TravelXpressa
+        ✈️ visamn
       </h1>
       <p style="color: #94a3b8; margin: 10px 0 0; font-size: 14px;">
         Password Reset Request
@@ -415,7 +415,7 @@ This payment link expires in 24 hours.
     text: `
 Hello ${data.userName},
 
-We received a request to reset your TravelXpressa password.
+We received a request to reset your visamn password.
 
 Reset link (expires in ${data.expiresInMinutes} minutes):
 ${data.resetLink}
@@ -467,7 +467,7 @@ class EmailService {
 
     try {
       await this.transporter.sendMail({
-        from: `"TravelXpressa" <${config.smtp.from}>`,
+        from: `"visamn" <${config.smtp.from}>`,
         to,
         subject,
         html,

@@ -198,14 +198,17 @@ router.post(
 
       const amount = SERVICE_PRICES[serviceType];
       const invoiceNo = qpayService.generateInvoiceNo('TXP');
+      const qpayCallbackUrl =
+        config.qpay.callbackUrl?.trim() ||
+        `${(process.env.BACKEND_URL || config.frontendUrl).replace(/\/+$/, '')}/api/payments/webhook/qpay`;
 
       // Create QPay invoice
       const qpayInvoice = await qpayService.createInvoice({
         invoiceNo,
         receiverCode: userId,
-        description: description || `${serviceType} - TravelXpressa`,
+        description: description || `${serviceType} - visamn`,
         amount,
-        callbackUrl: `${config.frontendUrl.replace('https://travelxpressa.com', 'https://travelxpressa-backend-production.up.railway.app')}/api/payments/webhook/qpay`,
+        callbackUrl: qpayCallbackUrl,
       });
 
       // Store payment record in database
@@ -217,7 +220,7 @@ router.post(
           status: PaymentStatus.PENDING,
           provider: PaymentProvider.QPAY,
           serviceType,
-          description: description || `${serviceType} - TravelXpressa`,
+          description: description || `${serviceType} - visamn`,
           applicationId,
           invoiceNumber: invoiceNo,
           qpayInvoiceId: qpayInvoice.invoice_id,

@@ -1,4 +1,5 @@
 import { Router, type Request, type Response } from 'express';
+import type { Prisma } from '@prisma/client';
 import { prisma } from '../lib/prisma';
 import { authenticateToken, isAdmin } from '../middleware/auth';
 import { validate } from '../middleware/validate';
@@ -63,12 +64,22 @@ router.get(
   '/inquiries',
   validate({ query: adminInquiriesQuerySchema }),
   asyncHandler(async (req: Request, res: Response) => {
-    const { page = 1, limit = 20, sortOrder = 'desc' } = req.query as any;
-    const status = req.query.status as string | undefined;
-    const serviceType = req.query.serviceType as string | undefined;
+    // Always read parsed query from validation middleware to avoid Prisma type errors.
+    const validatedQuery = (req as any).validatedQuery ?? {};
+    const page = typeof validatedQuery.page === 'number' ? validatedQuery.page : 1;
+    const limit = typeof validatedQuery.limit === 'number' ? validatedQuery.limit : 20;
+    const sortOrder: Prisma.SortOrder = validatedQuery.sortOrder === 'asc' ? 'asc' : 'desc';
+    const status =
+      typeof validatedQuery.status === 'string' && validatedQuery.status.trim()
+        ? validatedQuery.status.trim()
+        : undefined;
+    const serviceType =
+      typeof validatedQuery.serviceType === 'string' && validatedQuery.serviceType.trim()
+        ? validatedQuery.serviceType.trim()
+        : undefined;
     const skip = (page - 1) * limit;
 
-    const whereClause: Record<string, string> = {};
+    const whereClause: Prisma.InquiryWhereInput = {};
     if (status) whereClause.status = status;
     if (serviceType) whereClause.serviceType = serviceType;
 

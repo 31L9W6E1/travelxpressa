@@ -3,6 +3,7 @@ import { useAuth } from "../contexts/AuthContext";
 import {
   Bell,
   BookOpen,
+  Facebook,
   PanelLeftClose,
   PanelLeftOpen,
   ChevronDown,
@@ -343,6 +344,12 @@ const Navbar = () => {
 
   const desktopLinkClass = `${navItemBaseClass} px-3`;
   const mobileLinkClass = `${navItemBaseClass} px-3`;
+  const quickHelp = settings.quickHelp;
+  const renderLines = (value?: string) =>
+    String(value || "")
+      .split("\n")
+      .map((line) => line.trim())
+      .filter(Boolean);
 
   return (
     <>
@@ -479,13 +486,28 @@ const Navbar = () => {
           ) : (
             <div className="rounded-lg border border-dashed border-border bg-secondary/30 p-3">
               <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-muted-foreground">
-                {t("nav.quickHelp", { defaultValue: "Quick Help" })}
+                {quickHelp.title || t("nav.quickHelp", { defaultValue: "Quick Help" })}
               </p>
               <p className="text-sm text-foreground mt-1">
-                {t("nav.quickHelpText", {
+                {quickHelp.description || t("nav.quickHelpText", {
                   defaultValue: "Need support or visa updates? Check our latest guides.",
                 })}
               </p>
+              <div className="mt-3 space-y-1 text-xs text-muted-foreground">
+                {quickHelp.phone ? <p>Утасны дугаар: {quickHelp.phone}</p> : null}
+                {quickHelp.email ? <p>И-мэйл: {quickHelp.email}</p> : null}
+                {quickHelp.branch1Title ? <p className="pt-1 font-medium text-foreground">{quickHelp.branch1Title}</p> : null}
+                {renderLines(quickHelp.branch1Hours).map((line, idx) => (
+                  <p key={`b1-${idx}`}>{line}</p>
+                ))}
+                {quickHelp.headOfficeTitle ? <p className="pt-1 font-medium text-foreground">{quickHelp.headOfficeTitle}</p> : null}
+                {renderLines(quickHelp.headOfficeHours).map((line, idx) => (
+                  <p key={`ho-${idx}`}>{line}</p>
+                ))}
+                {renderLines(quickHelp.onlineHours).map((line, idx) => (
+                  <p key={`on-${idx}`} className="pt-1">{line}</p>
+                ))}
+              </div>
               <div className="mt-3 flex items-center gap-2">
                 <Link
                   to="/contactsupport"
@@ -501,6 +523,20 @@ const Navbar = () => {
                     </Link>
                   </>
                 )}
+                {quickHelp.facebookUrl ? (
+                  <>
+                    <span className="text-muted-foreground">•</span>
+                    <a
+                      href={quickHelp.facebookUrl}
+                      target="_blank"
+                      rel="noreferrer noopener"
+                      className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
+                    >
+                      <Facebook className="w-3.5 h-3.5" />
+                      Facebook
+                    </a>
+                  </>
+                ) : null}
               </div>
             </div>
           )}
@@ -810,13 +846,28 @@ const Navbar = () => {
         <div className="p-3 border-t border-dashed border-border/70">
           <div className="rounded-lg border border-dashed border-border bg-secondary/30 p-3">
             <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-muted-foreground">
-              {t("nav.quickHelp", { defaultValue: "Quick Help" })}
+              {quickHelp.title || t("nav.quickHelp", { defaultValue: "Quick Help" })}
             </p>
             <p className="text-sm text-foreground mt-1">
-              {t("nav.quickHelpTextMobile", {
+              {quickHelp.description || t("nav.quickHelpTextMobile", {
                 defaultValue: "Support, updates, and guides are available here.",
               })}
             </p>
+            <div className="mt-3 space-y-1 text-xs text-muted-foreground">
+              {quickHelp.phone ? <p>Утасны дугаар: {quickHelp.phone}</p> : null}
+              {quickHelp.email ? <p>И-мэйл: {quickHelp.email}</p> : null}
+              {quickHelp.branch1Title ? <p className="pt-1 font-medium text-foreground">{quickHelp.branch1Title}</p> : null}
+              {renderLines(quickHelp.branch1Hours).map((line, idx) => (
+                <p key={`mb1-${idx}`}>{line}</p>
+              ))}
+              {quickHelp.headOfficeTitle ? <p className="pt-1 font-medium text-foreground">{quickHelp.headOfficeTitle}</p> : null}
+              {renderLines(quickHelp.headOfficeHours).map((line, idx) => (
+                <p key={`mho-${idx}`}>{line}</p>
+              ))}
+              {renderLines(quickHelp.onlineHours).map((line, idx) => (
+                <p key={`mon-${idx}`} className="pt-1">{line}</p>
+              ))}
+            </div>
             <div className="mt-2 flex items-center gap-2">
               <Link
                 to="/contactsupport"
@@ -833,6 +884,20 @@ const Navbar = () => {
                   </Link>
                 </>
               )}
+              {quickHelp.facebookUrl ? (
+                <>
+                  <span className="text-muted-foreground">•</span>
+                  <a
+                    href={quickHelp.facebookUrl}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
+                  >
+                    <Facebook className="w-3.5 h-3.5" />
+                    Facebook
+                  </a>
+                </>
+              ) : null}
             </div>
           </div>
         </div>

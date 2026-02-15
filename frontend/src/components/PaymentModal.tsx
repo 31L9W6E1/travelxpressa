@@ -6,6 +6,7 @@ import {
   cancelPayment,
   Payment,
   PaymentServiceType,
+  ServiceAgreementAcceptance,
   formatMNT,
   getPaymentStatusColor,
   getPaymentStatusText,
@@ -23,6 +24,7 @@ interface PaymentModalProps {
   amount?: number;
   description?: string;
   applicationId?: string;
+  agreement?: ServiceAgreementAcceptance;
 }
 
 type ModalStep = 'loading' | 'payment' | 'checking' | 'success' | 'failed' | 'cancelled';
@@ -36,6 +38,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
   amount,
   description,
   applicationId,
+  agreement,
 }) => {
   // Use onPaymentSuccess as alias for onSuccess
   const handleSuccess = onPaymentSuccess || onSuccess;
@@ -72,6 +75,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
         amount,
         description,
         applicationId,
+        agreement,
       });
 
       if (response.success && response.data) {

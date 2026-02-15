@@ -54,6 +54,20 @@ export interface CreatePaymentParams {
   amount?: number;
   description?: string;
   applicationId?: string;
+  agreement?: ServiceAgreementAcceptance;
+}
+
+export interface ServiceAgreementAcceptance {
+  agreementVersion: string;
+  contractNumber: string;
+  acceptedAt: string;
+  signerName: string;
+  signerEmail: string;
+  signerPhone?: string;
+  signerRegistry?: string;
+  signerAddress?: string;
+  signatureMethod: 'CHECKBOX';
+  termsHash: string;
 }
 
 /**

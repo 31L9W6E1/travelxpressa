@@ -95,6 +95,26 @@ export const siteSettingsSchema = z.object({
     qAndA: z.boolean(),
     feedback: z.boolean(),
   }),
+  agreement: z
+    .object({
+      template: z.string().min(50).max(40000),
+      version: z.string().max(80).optional().or(z.literal('')),
+    })
+    .optional(),
+  quickHelp: z
+    .object({
+      title: z.string().max(120).optional().or(z.literal('')),
+      description: z.string().max(800).optional().or(z.literal('')),
+      facebookUrl: z.string().max(500).optional().or(z.literal('')),
+      phone: z.string().max(120).optional().or(z.literal('')),
+      email: z.string().max(200).optional().or(z.literal('')),
+      branch1Title: z.string().max(120).optional().or(z.literal('')),
+      branch1Hours: z.string().max(1000).optional().or(z.literal('')),
+      headOfficeTitle: z.string().max(120).optional().or(z.literal('')),
+      headOfficeHours: z.string().max(1000).optional().or(z.literal('')),
+      onlineHours: z.string().max(1000).optional().or(z.literal('')),
+    })
+    .optional(),
 });
 
 // User schemas

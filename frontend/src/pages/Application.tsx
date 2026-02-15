@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import PaymentModal from '@/components/PaymentModal';
 import type { Payment } from '@/api/payments';
+import ServiceAgreementModal, { type ServiceAgreementAcceptance } from '@/components/ServiceAgreementModal';
 import { convertCurrency, isFxCurrencySupported } from '@/config/fx';
 import {
   calculateExpressServiceFee,
@@ -229,9 +230,11 @@ export default function Application() {
   const [applicationId, setApplicationId] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showAgreementModal, setShowAgreementModal] = useState(false);
+  const [agreementAcceptance, setAgreementAcceptance] = useState<ServiceAgreementAcceptance | null>(null);
   const [paymentComplete, setPaymentComplete] = useState(false);
   const [isRestoringDraft, setIsRestoringDraft] = useState(false);
-  const PAYMENT_REQUIRED = false;
+  const PAYMENT_REQUIRED = String(import.meta.env.VITE_REQUIRE_PAYMENT || 'false').toLowerCase() === 'true';
 
   // Get selected country from localStorage (set in CountrySelect page)
   // Note: Korea is currently not offered, so fall back to USA if it was previously selected.
@@ -245,6 +248,17 @@ export default function Application() {
       navigate('/select-country', { replace: true });
     }
   }, [navigate, storedCountryCode]);
+
+  useEffect(() => {
+    if (!agreementAcceptance) return;
+    setAgreementAcceptance(null);
+  }, [
+    formData.personalInfo.surnames,
+    formData.personalInfo.givenNames,
+    formData.contactInfo.email,
+    formData.contactInfo.phone,
+    formData.contactInfo.streetAddress,
+  ]);
 
   const serviceFeeAmountMnt = (() => {
     const baseFee = countryConfig?.paymentPricing?.baseFee;
@@ -1062,6 +1076,12 @@ export default function Application() {
     }
   };
 
+  const handleAgreementAccepted = (agreement: ServiceAgreementAcceptance) => {
+    setAgreementAcceptance(agreement);
+    setShowAgreementModal(false);
+    setShowPaymentModal(true);
+  };
+
   const handleSubmit = async () => {
     // Validate all steps before submission
     for (let step = 1; step <= 7; step++) {
@@ -1096,7 +1116,11 @@ export default function Application() {
       saveLocalSnapshot(appId, 7, formData);
 
       if (PAYMENT_REQUIRED) {
-        setShowPaymentModal(true);
+        if (!agreementAcceptance) {
+          setShowAgreementModal(true);
+        } else {
+          setShowPaymentModal(true);
+        }
       } else {
         await applicationsApi.submit(appId);
         localStorage.removeItem(LOCAL_DRAFT_SNAPSHOT_KEY);
@@ -2660,18 +2684,39 @@ export default function Application() {
         </div>
       </div>
 
-      {/* Payment Modal */}
-	      {PAYMENT_REQUIRED && applicationId && (
-	        <PaymentModal
-	          isOpen={showPaymentModal}
-	          onClose={() => setShowPaymentModal(false)}
-	          applicationId={applicationId}
-	          serviceType="VISA_APPLICATION"
-	          amount={serviceFeeAmountMnt}
-	          description={`${t('applicationPage.title', { defaultValue: 'DS-160 Visa Application' })} - ${formData.personalInfo.surnames} ${formData.personalInfo.givenNames}`}
-	          onPaymentSuccess={handlePaymentSuccess}
-	        />
-	      )}
+      {PAYMENT_REQUIRED && applicationId && (
+        <>
+          <ServiceAgreementModal
+            isOpen={showAgreementModal}
+            onClose={() => setShowAgreementModal(false)}
+            onAccept={handleAgreementAccepted}
+            applicationId={applicationId}
+            serviceFeeMnt={serviceFeeAmountMnt}
+            applicant={{
+              name:
+                `${formData.personalInfo.surnames} ${formData.personalInfo.givenNames}`.trim() ||
+                user?.name ||
+                '',
+              email: formData.contactInfo.email || user?.email || '',
+              phone: formData.contactInfo.phone || user?.phone || '',
+              registry: formData.personalInfo.nationalId || '',
+              address:
+                `${formData.contactInfo.streetAddress} ${formData.contactInfo.city} ${formData.contactInfo.state}`.trim(),
+            }}
+          />
+
+          <PaymentModal
+            isOpen={showPaymentModal}
+            onClose={() => setShowPaymentModal(false)}
+            applicationId={applicationId}
+            serviceType="VISA_APPLICATION"
+            amount={serviceFeeAmountMnt}
+            agreement={agreementAcceptance || undefined}
+            description={`${t('applicationPage.title', { defaultValue: 'DS-160 Visa Application' })} - ${formData.personalInfo.surnames} ${formData.personalInfo.givenNames}`}
+            onPaymentSuccess={handlePaymentSuccess}
+          />
+        </>
+      )}
     </div>
   );
 }

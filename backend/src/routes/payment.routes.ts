@@ -133,7 +133,7 @@ router.post(
   async (req: Request, res: Response) => {
     try {
       const { userId } = (req as AuthenticatedRequest).user;
-      const { serviceType, description, applicationId } = req.body;
+      const { serviceType, description, applicationId, agreement } = req.body;
 
       // Validate service type
       if (!SERVICE_PRICES[serviceType]) {
@@ -141,6 +141,40 @@ router.post(
           success: false,
           error: 'Invalid service type',
         });
+      }
+
+      const isVisaApplicationPayment = serviceType === PaymentServiceType.VISA_APPLICATION;
+
+      if (isVisaApplicationPayment) {
+        const requiredFields = [
+          'agreementVersion',
+          'contractNumber',
+          'acceptedAt',
+          'signerName',
+          'signerEmail',
+          'signatureMethod',
+          'termsHash',
+        ];
+        const agreementObj = agreement && typeof agreement === 'object' ? agreement : null;
+        const missing = requiredFields.find((field) => {
+          const value = agreementObj ? (agreementObj as Record<string, unknown>)[field] : undefined;
+          return typeof value !== 'string' || !String(value).trim();
+        });
+
+        if (!agreementObj || missing) {
+          return res.status(400).json({
+            success: false,
+            error: 'Online service agreement must be accepted before payment',
+          });
+        }
+
+        const acceptedAt = new Date(String((agreementObj as Record<string, unknown>).acceptedAt));
+        if (Number.isNaN(acceptedAt.getTime())) {
+          return res.status(400).json({
+            success: false,
+            error: 'Invalid agreement acceptedAt value',
+          });
+        }
       }
 
       // Get user for notifications
@@ -212,6 +246,20 @@ router.post(
       });
 
       // Store payment record in database
+      const userAgentHeader = req.headers['user-agent'];
+      const userAgent = Array.isArray(userAgentHeader) ? userAgentHeader.join('; ') : userAgentHeader;
+      const paymentMetadata =
+        agreement && typeof agreement === 'object'
+          ? JSON.stringify({
+              agreement,
+              audit: {
+                ipAddress: req.ip,
+                userAgent: userAgent || null,
+                recordedAt: new Date().toISOString(),
+              },
+            })
+          : null;
+
       const payment = await prisma.payment.create({
         data: {
           userId,
@@ -228,9 +276,28 @@ router.post(
           qpayQrImage: qpayInvoice.qr_image,
           qpayShortUrl: qpayInvoice.qPay_shortUrl,
           qpayDeepLinks: JSON.stringify(qpayInvoice.urls),
+          metadata: paymentMetadata,
           expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
         },
       });
+
+      if (agreement && typeof agreement === 'object') {
+        await prisma.auditLog.create({
+          data: {
+            userId,
+            action: 'SERVICE_AGREEMENT_ACCEPTED',
+            entity: 'PAYMENT',
+            entityId: payment.id,
+            ipAddress: req.ip,
+            userAgent: userAgent?.slice(0, 500),
+            metadata: JSON.stringify({
+              serviceType,
+              applicationId: applicationId || null,
+              agreement,
+            }),
+          },
+        });
+      }
 
       logger.info('Payment created', { paymentId: payment.id, invoiceNo, amount, applicationId });
 

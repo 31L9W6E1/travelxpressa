@@ -2005,7 +2005,10 @@ const AdminDashboard = () => {
                 <CardHeader>
                   <CardTitle>{t("dashboard.siteSettings.title", "Site Settings")}</CardTitle>
                   <CardDescription>
-                    {t("dashboard.siteSettings.desc", "Control page visibility and enable maintenance mode.")}
+                    {t(
+                      "dashboard.siteSettings.desc",
+                      "Control page visibility, maintenance mode, quick-help content, and online agreement text."
+                    )}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
@@ -2046,6 +2049,214 @@ const AdminDashboard = () => {
                         setSiteSettingsDirty(true);
                       }}
                       placeholder={t("dashboard.siteSettings.maintenancePlaceholder", "Optional message to show users")}
+                    />
+                  </div>
+
+                  <Separator />
+
+                  <div>
+                    <p className="font-medium">{t("dashboard.siteSettings.quickHelpBlock", "Quick Help Content")}</p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {t(
+                        "dashboard.siteSettings.quickHelpHelp",
+                        "This content appears in the left sidebar quick-help box."
+                      )}
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Quick Help title</Label>
+                      <Input
+                        value={draftSiteSettings.quickHelp.title || ""}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setDraftSiteSettings((prev) => ({
+                            ...prev,
+                            quickHelp: { ...prev.quickHelp, title: value },
+                          }));
+                          setSiteSettingsDirty(true);
+                        }}
+                        placeholder="Quick Help"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Facebook URL</Label>
+                      <Input
+                        value={draftSiteSettings.quickHelp.facebookUrl || ""}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setDraftSiteSettings((prev) => ({
+                            ...prev,
+                            quickHelp: { ...prev.quickHelp, facebookUrl: value },
+                          }));
+                          setSiteSettingsDirty(true);
+                        }}
+                        placeholder="https://facebook.com/yourpage"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Phone</Label>
+                      <Input
+                        value={draftSiteSettings.quickHelp.phone || ""}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setDraftSiteSettings((prev) => ({
+                            ...prev,
+                            quickHelp: { ...prev.quickHelp, phone: value },
+                          }));
+                          setSiteSettingsDirty(true);
+                        }}
+                        placeholder="0000000"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Support email</Label>
+                      <Input
+                        value={draftSiteSettings.quickHelp.email || ""}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setDraftSiteSettings((prev) => ({
+                            ...prev,
+                            quickHelp: { ...prev.quickHelp, email: value },
+                          }));
+                          setSiteSettingsDirty(true);
+                        }}
+                        placeholder="support@visamn.com"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Quick Help description</Label>
+                    <Textarea
+                      value={draftSiteSettings.quickHelp.description || ""}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setDraftSiteSettings((prev) => ({
+                          ...prev,
+                          quickHelp: { ...prev.quickHelp, description: value },
+                        }));
+                        setSiteSettingsDirty(true);
+                      }}
+                      placeholder="Support, updates, and guides are available here."
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Branch 1 title</Label>
+                      <Input
+                        value={draftSiteSettings.quickHelp.branch1Title || ""}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setDraftSiteSettings((prev) => ({
+                            ...prev,
+                            quickHelp: { ...prev.quickHelp, branch1Title: value },
+                          }));
+                          setSiteSettingsDirty(true);
+                        }}
+                        placeholder="Салбар 1"
+                      />
+                      <Label>Branch 1 hours</Label>
+                      <Textarea
+                        value={draftSiteSettings.quickHelp.branch1Hours || ""}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setDraftSiteSettings((prev) => ({
+                            ...prev,
+                            quickHelp: { ...prev.quickHelp, branch1Hours: value },
+                          }));
+                          setSiteSettingsDirty(true);
+                        }}
+                        placeholder={"Даваа-Баасан: 09:00-18:00\nБямба, Ням: 10:00-19:00"}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Head office title</Label>
+                      <Input
+                        value={draftSiteSettings.quickHelp.headOfficeTitle || ""}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setDraftSiteSettings((prev) => ({
+                            ...prev,
+                            quickHelp: { ...prev.quickHelp, headOfficeTitle: value },
+                          }));
+                          setSiteSettingsDirty(true);
+                        }}
+                        placeholder="Төв оффис"
+                      />
+                      <Label>Head office hours</Label>
+                      <Textarea
+                        value={draftSiteSettings.quickHelp.headOfficeHours || ""}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setDraftSiteSettings((prev) => ({
+                            ...prev,
+                            quickHelp: { ...prev.quickHelp, headOfficeHours: value },
+                          }));
+                          setSiteSettingsDirty(true);
+                        }}
+                        placeholder={"Даваа-Баасан: 08:00-18:00\nБямба, Ням: Амарна"}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Online hours</Label>
+                    <Textarea
+                      value={draftSiteSettings.quickHelp.onlineHours || ""}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setDraftSiteSettings((prev) => ({
+                          ...prev,
+                          quickHelp: { ...prev.quickHelp, onlineHours: value },
+                        }));
+                        setSiteSettingsDirty(true);
+                      }}
+                      placeholder="Онлайнаар амралтын өдрүүдэд 10:00-19:00 ажиллана"
+                    />
+                  </div>
+
+                  <Separator />
+
+                  <div>
+                    <p className="font-medium">Online Agreement</p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Editable contract template shown before payment.
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Agreement version</Label>
+                    <Input
+                      value={draftSiteSettings.agreement.version || ""}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setDraftSiteSettings((prev) => ({
+                          ...prev,
+                          agreement: { ...prev.agreement, version: value },
+                        }));
+                        setSiteSettingsDirty(true);
+                      }}
+                      placeholder="VISAMN-SERVICE-AGREEMENT-2026.02"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Agreement template text</Label>
+                    <Textarea
+                      value={draftSiteSettings.agreement.template || ""}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setDraftSiteSettings((prev) => ({
+                          ...prev,
+                          agreement: { ...prev.agreement, template: value },
+                        }));
+                        setSiteSettingsDirty(true);
+                      }}
+                      className="min-h-[300px] font-mono text-xs"
+                      placeholder="Use placeholders: {{DATE}}, {{CONTRACT_NUMBER}}, {{CLIENT_NAME}}, {{CLIENT_EMAIL}}, {{CLIENT_PHONE}}, {{CLIENT_REGISTRY}}, {{CLIENT_ADDRESS}}, {{SERVICE_FEE_MNT}}"
                     />
                   </div>
 

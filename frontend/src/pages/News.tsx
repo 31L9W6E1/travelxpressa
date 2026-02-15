@@ -8,6 +8,9 @@ import { useTranslation } from 'react-i18next';
 import PageHeader from "@/components/PageHeader";
 import { CONTENT_TOPICS, matchesTopic } from '@/lib/contentTopics';
 
+const NEWS_HERO_IMAGE_URL =
+  'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=1800&auto=format&fit=crop&q=80';
+
 const News = () => {
   const { t, i18n } = useTranslation();
   const [news, setNews] = useState<PostSummary[]>([]);
@@ -65,6 +68,8 @@ const News = () => {
         subtitle={t('newsPage.subtitle', {
           defaultValue: 'Latest updates from embassies, consulates, and immigration services.',
         })}
+        backgroundImageUrl={NEWS_HERO_IMAGE_URL}
+        className="border-b-0"
       >
         <div className="space-y-4">
           <Link

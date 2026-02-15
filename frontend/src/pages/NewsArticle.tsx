@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Calendar, ArrowLeft, Loader2 } from 'lucide-react';
 import { getPostBySlug, formatPostDate, getDefaultImage, updatePost, upsertPostTranslation } from '@/api/posts';
@@ -36,6 +36,17 @@ const NewsArticle = () => {
   const [draftContent, setDraftContent] = useState('');
 
   const locale = (i18n.language || 'en').toLowerCase().split('-')[0] || 'en';
+
+  const articleContent = useMemo(() => {
+    if (!article?.content) return '';
+    if (!article.imageUrl) return article.content;
+
+    // Avoid showing a duplicate top image when a hero image already exists.
+    return article.content.replace(
+      /^(\s*(?:#{1,6}[^\n]*\n+)?)(?:\s*!\[[^\]]*]\([^)]+\)\s*\n+)+/,
+      '$1',
+    );
+  }, [article?.content, article?.imageUrl]);
 
   useEffect(() => {
     const fetchArticle = async () => {
@@ -113,9 +124,19 @@ const NewsArticle = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* Header */}
-      <section className="py-10 border-b border-border">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6">
+      <div className="relative">
+        {article.imageUrl && (
+          <div className="absolute inset-0 h-[400px]">
+            <img
+              src={article.imageUrl ? normalizeImageUrl(article.imageUrl) : getDefaultImage('news')}
+              alt={article.title}
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/80 to-background" />
+          </div>
+        )}
+
+        <section className="relative max-w-4xl mx-auto px-4 sm:px-6 pt-12 md:pt-24 pb-8 md:pb-12">
           <div className="flex items-start justify-between gap-4 mb-8">
             <Link
               to="/news"
@@ -271,25 +292,12 @@ const NewsArticle = () => {
           {article.excerpt && (
             <p className="text-base md:text-lg text-muted-foreground">{article.excerpt}</p>
           )}
-        </div>
-      </section>
-
-      {/* Featured Image */}
-      {article.imageUrl && (
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
-          <div className="aspect-video rounded-xl overflow-hidden">
-            <img
-              src={article.imageUrl ? normalizeImageUrl(article.imageUrl) : getDefaultImage('news')}
-              alt={article.title}
-              className="w-full h-full object-cover"
-            />
-          </div>
-        </div>
-      )}
+        </section>
+      </div>
 
       {/* Content */}
       <article className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
-        <MarkdownRenderer content={article.content || ""} />
+        <MarkdownRenderer content={articleContent} />
       </article>
 
       {/* Related News CTA */}

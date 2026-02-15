@@ -1,12 +1,24 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
-import { Loader2, Upload, X } from "lucide-react";
+import { Loader2, Upload, X, Pencil, Trash2, Globe } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
-import api from "@/api/client";
-import { getFallbackImageUrl, getFullImageUrl, uploadImage } from "@/api/upload";
+import {
+  deleteImage,
+  getAdminGallery,
+  getFallbackImageUrl,
+  getFullImageUrl,
+  getPublicGallery,
+  setGalleryImagePublish,
+  updateGalleryImageMeta,
+  uploadImage,
+  type GalleryImageItem,
+} from "@/api/upload";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
 
 // Placeholder images - will be replaced with API/CMS data later
 const galleryImages = [
@@ -104,9 +116,15 @@ const galleryImages = [
 
 type GalleryItem = {
   id: string | number;
+  filename?: string;
   src: string;
   alt: string;
+  title: string;
   category: string;
+  tags: string[];
+  description?: string;
+  published?: boolean;
+  uploadedAt?: string;
 };
 
 const Gallery = () => {
@@ -116,6 +134,16 @@ const Gallery = () => {
   const [selectedImage, setSelectedImage] = useState<GalleryItem | null>(null);
   const [uploadedImages, setUploadedImages] = useState<GalleryItem[] | null>(null);
   const [isPublishing, setIsPublishing] = useState(false);
+  const [editingImage, setEditingImage] = useState<GalleryItem | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isSavingMeta, setIsSavingMeta] = useState(false);
+  const [editForm, setEditForm] = useState({
+    title: "",
+    category: "",
+    tags: "",
+    description: "",
+    published: true,
+  });
   const uploadInputRef = useRef<HTMLInputElement>(null);
 
   const getCategoryLabel = useCallback(
@@ -136,29 +164,53 @@ const Gallery = () => {
     [t]
   );
 
-  const fetchPublicGallery = useCallback(async () => {
-    const res = await api.get("/api/upload/public-gallery");
-    const images = res.data?.data?.images;
-    if (!Array.isArray(images)) return [];
+  const mapGalleryItems = useCallback(
+    (images: GalleryImageItem[]) =>
+      images.map((img) => {
+        const filename = String(img?.filename || "");
+        const url = String(img?.url || "");
+        const title = String(img?.title || filename || t("gallery.uploadedImage", { defaultValue: "Uploaded image" }));
+        const category = String(img?.category || "general");
+        const tags = Array.isArray(img?.tags) ? img.tags.map((tag) => String(tag)) : [];
+        return {
+          id: filename || url || crypto.randomUUID(),
+          filename: filename || undefined,
+          src: getFullImageUrl(url),
+          alt: title,
+          title,
+          category,
+          tags,
+          description: String(img?.description || ""),
+          published: img?.published !== false,
+          uploadedAt: img?.uploadedAt,
+        } satisfies GalleryItem;
+      }),
+    [t]
+  );
 
-    return images.map((img: any) => {
-      const filename = String(img?.filename || "");
-      const url = String(img?.url || "");
-      return {
-        id: filename || url || crypto.randomUUID(),
-        src: getFullImageUrl(url),
-        alt: filename || t("gallery.uploadedImage", { defaultValue: "Uploaded image" }),
-        category: "uploads",
-      } satisfies GalleryItem;
-    });
-  }, [t]);
+  const fetchGallery = useCallback(async () => {
+    try {
+      if (user?.role === "ADMIN") {
+        const { images } = await getAdminGallery();
+        return mapGalleryItems(images);
+      }
+      const { images } = await getPublicGallery();
+      return mapGalleryItems(images);
+    } catch (error) {
+      if (user?.role === "ADMIN") {
+        const { images } = await getPublicGallery();
+        return mapGalleryItems(images);
+      }
+      throw error;
+    }
+  }, [mapGalleryItems, user?.role]);
 
   useEffect(() => {
     let cancelled = false;
 
     const load = async () => {
       try {
-        const mapped = await fetchPublicGallery();
+        const mapped = await fetchGallery();
         if (!cancelled) setUploadedImages(mapped);
       } catch {
         // If the backend gallery isn't configured yet, keep placeholders.
@@ -170,7 +222,7 @@ const Gallery = () => {
     return () => {
       cancelled = true;
     };
-  }, [fetchPublicGallery]);
+  }, [fetchGallery]);
 
   const usingUploads = (uploadedImages?.length ?? 0) > 0;
 
@@ -181,12 +233,33 @@ const Gallery = () => {
   }, [usingUploads]);
 
   const categories = useMemo(() => {
-    return usingUploads ? ["all"] : ["all", "destinations", "nature", "landmarks", "travel"];
-  }, [usingUploads]);
+    if (!usingUploads) {
+      return ["all", "destinations", "nature", "landmarks", "travel"];
+    }
+    const dynamic = Array.from(
+      new Set(
+        (uploadedImages || [])
+          .map((img) => (img.category || "").trim().toLowerCase())
+          .filter(Boolean)
+      )
+    );
+    return ["all", ...dynamic];
+  }, [uploadedImages, usingUploads]);
+
+  useEffect(() => {
+    if (!categories.includes(selectedCategory)) {
+      setSelectedCategory("all");
+    }
+  }, [categories, selectedCategory]);
 
   const galleryItems: GalleryItem[] = usingUploads
     ? uploadedImages || []
-    : (galleryImages as unknown as GalleryItem[]);
+    : galleryImages.map((item) => ({
+        ...item,
+        title: item.alt,
+        tags: [],
+        published: true,
+      }));
 
   const filteredImages =
     selectedCategory === "all"
@@ -226,13 +299,111 @@ const Gallery = () => {
         toast.error(t("gallery.publishError", { defaultValue: "Failed to publish photos" }));
       }
 
-      const mapped = await fetchPublicGallery();
+      const mapped = await fetchGallery();
       setUploadedImages(mapped);
     } catch (error: any) {
       toast.error(error?.message || t("gallery.publishError", { defaultValue: "Failed to publish photos" }));
     } finally {
       setIsPublishing(false);
       event.target.value = "";
+    }
+  };
+
+  const openEditDialog = (image: GalleryItem) => {
+    if (user?.role !== "ADMIN" || !image.filename) return;
+    setEditingImage(image);
+    setEditForm({
+      title: image.title || image.alt || "",
+      category: image.category || "general",
+      tags: Array.isArray(image.tags) ? image.tags.join(", ") : "",
+      description: image.description || "",
+      published: image.published !== false,
+    });
+    setIsEditing(true);
+  };
+
+  const handleSaveMeta = async () => {
+    if (!editingImage?.filename) return;
+    setIsSavingMeta(true);
+    try {
+      const updated = await updateGalleryImageMeta(editingImage.filename, {
+        title: editForm.title,
+        category: editForm.category,
+        tags: editForm.tags,
+        description: editForm.description,
+        published: editForm.published,
+      });
+
+      if (updated) {
+        setUploadedImages((prev) =>
+          (prev || []).map((item) =>
+            item.filename === editingImage.filename
+              ? {
+                  ...item,
+                  title: updated.title || item.title,
+                  alt: updated.title || item.alt,
+                  category: updated.category || item.category,
+                  tags: Array.isArray(updated.tags) ? updated.tags : item.tags,
+                  description: updated.description || "",
+                  published: updated.published !== false,
+                }
+              : item
+          )
+        );
+      } else {
+        const mapped = await fetchGallery();
+        setUploadedImages(mapped);
+      }
+
+      toast.success(t("gallery.metaSaved", { defaultValue: "Gallery image updated" }));
+      setIsEditing(false);
+      setEditingImage(null);
+    } catch (error: any) {
+      toast.error(error?.message || t("gallery.metaSaveError", { defaultValue: "Failed to save image details" }));
+    } finally {
+      setIsSavingMeta(false);
+    }
+  };
+
+  const handleTogglePublish = async (image: GalleryItem) => {
+    if (user?.role !== "ADMIN" || !image.filename) return;
+    const nextPublished = image.published === false;
+    try {
+      const updated = await setGalleryImagePublish(image.filename, nextPublished);
+      if (updated) {
+        setUploadedImages((prev) =>
+          (prev || []).map((item) =>
+            item.filename === image.filename
+              ? { ...item, published: updated.published !== false }
+              : item
+          )
+        );
+      } else {
+        const mapped = await fetchGallery();
+        setUploadedImages(mapped);
+      }
+      toast.success(
+        nextPublished
+          ? t("gallery.nowPublished", { defaultValue: "Image published" })
+          : t("gallery.nowDraft", { defaultValue: "Image moved to draft" })
+      );
+    } catch (error: any) {
+      toast.error(error?.message || t("gallery.publishToggleError", { defaultValue: "Failed to update status" }));
+    }
+  };
+
+  const handleDeleteImage = async (image: GalleryItem) => {
+    if (user?.role !== "ADMIN" || !image.filename) return;
+    if (!window.confirm(t("gallery.deleteConfirm", { defaultValue: "Delete this image?" }))) return;
+    try {
+      await deleteImage(image.filename);
+      setUploadedImages((prev) => (prev || []).filter((item) => item.filename !== image.filename));
+      if (selectedImage?.filename === image.filename) {
+        setSelectedImage(null);
+      }
+      toast.success(t("gallery.deleted", { defaultValue: "Image deleted" }));
+    } catch (error: any) {
+      toast.error(error?.message || t("gallery.deleteError", { defaultValue: "Failed to delete image" }));
     }
   };
 
@@ -277,20 +448,38 @@ const Gallery = () => {
         }
       >
         {categories.length > 1 ? (
-          <div className="flex flex-wrap justify-start gap-2">
+          <div className="flex flex-wrap items-center justify-start gap-2">
             {categories.map((category) => (
               <button
                 key={category}
                 onClick={() => setSelectedCategory(category)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all duration-200 ${
                   selectedCategory === category
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                    ? "bg-gradient-to-r from-primary to-primary/80 text-primary-foreground border-primary"
+                    : "bg-background text-muted-foreground border-border hover:bg-secondary/80"
                 }`}
               >
                 {getCategoryLabel(category)}
               </button>
             ))}
+            {usingUploads ? (
+              <>
+                <Badge variant="secondary" className="ml-auto">
+                  {t("gallery.publishedCount", {
+                    defaultValue: "Published: {{count}}",
+                    count: (uploadedImages || []).filter((img) => img.published !== false).length,
+                  })}
+                </Badge>
+                {user?.role === "ADMIN" ? (
+                  <Badge variant="outline">
+                    {t("gallery.draftCount", {
+                      defaultValue: "Draft: {{count}}",
+                      count: (uploadedImages || []).filter((img) => img.published === false).length,
+                    })}
+                  </Badge>
+                ) : null}
+              </>
+            ) : null}
           </div>
         ) : null}
       </PageHeader>
@@ -298,17 +487,20 @@ const Gallery = () => {
       {/* Gallery Grid */}
       <section className="py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="grid grid-cols-2 min-[500px]:grid-cols-3 md:grid-cols-4 gap-2 md:gap-6">
-            {filteredImages.map((image, index) => {
-              const localizedAlt = getImageAltText(image);
-              return (
-                <article key={image.id} className="group">
-                  <button
-                    type="button"
-                    className="block text-left w-full"
-                    style={{ animationDelay: `${Math.min(index * 50, 300)}ms` }}
-                    onClick={() => setSelectedImage(image)}
-                  >
+              <div className="grid grid-cols-2 min-[500px]:grid-cols-3 md:grid-cols-4 gap-2 md:gap-6">
+                {filteredImages.map((image, index) => {
+                  const localizedAlt = getImageAltText(image);
+                  return (
+                    <article key={image.id} className="group">
+                      <div
+                        className="block text-left w-full"
+                        style={{ animationDelay: `${Math.min(index * 50, 300)}ms` }}
+                      >
+                        <button
+                          type="button"
+                          className="block text-left w-full"
+                          onClick={() => setSelectedImage(image)}
+                        >
                     <div className="relative aspect-square overflow-hidden rounded-lg mb-2 md:mb-3">
                     <img
                       src={image.src}
@@ -327,21 +519,70 @@ const Gallery = () => {
                       }}
                     />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                      <div className="absolute top-2 left-2 flex flex-wrap gap-1">
+                        <span className="rounded-full bg-black/60 px-2 py-0.5 text-[10px] text-white">
+                          {image.category}
+                        </span>
+                        {image.published === false ? (
+                          <span className="rounded-full bg-amber-500/80 px-2 py-0.5 text-[10px] text-black">
+                            Draft
+                          </span>
+                        ) : null}
+                      </div>
                       <div className="absolute bottom-0 left-0 right-0 p-2 md:p-4">
                         <p className="text-xs md:text-sm font-medium text-white line-clamp-2 group-hover:text-gray-300 transition-colors">
-                          {localizedAlt}
+                          {image.title || localizedAlt}
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        </button>
+                    <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                       <span className="inline-block h-1.5 w-1.5 rounded-full bg-primary/80" />
-                      {t("gallery.viewImage", { defaultValue: "View" })}
+                      {t("gallery.viewImage", { defaultValue: "View" })} 
+                      {image.uploadedAt ? (
+                        <span>
+                          {new Date(image.uploadedAt).toLocaleDateString()}
+                        </span>
+                      ) : null}
                     </div>
-                  </button>
-                </article>
-              );
-            })}
-          </div>
+                        {user?.role === "ADMIN" && image.filename ? (
+                          <div className="mt-2 flex flex-wrap gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-8 px-2"
+                              onClick={() => openEditDialog(image)}
+                            >
+                              <Pencil className="w-3.5 h-3.5 mr-1" />
+                              {t("common.edit", { defaultValue: "Edit" })}
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-8 px-2"
+                              onClick={() => handleTogglePublish(image)}
+                            >
+                              <Globe className="w-3.5 h-3.5 mr-1" />
+                              {image.published === false
+                                ? t("gallery.publish", { defaultValue: "Publish" })
+                                : t("gallery.unpublish", { defaultValue: "Draft" })}
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-8 px-2 text-destructive hover:text-destructive"
+                              onClick={() => handleDeleteImage(image)}
+                            >
+                              <Trash2 className="w-3.5 h-3.5 mr-1" />
+                              {t("common.delete", { defaultValue: "Delete" })}
+                            </Button>
+                          </div>
+                        ) : null}
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
 
           {/* Empty state */}
           {filteredImages.length === 0 && (
@@ -386,9 +627,138 @@ const Gallery = () => {
           <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white text-center">
             <p className="text-lg font-medium">{selectedImageAlt}</p>
             <p className="text-sm text-white/80 mt-1">{selectedImageCategory}</p>
+            {user?.role === "ADMIN" && selectedImage.filename ? (
+              <div className="mt-3 flex items-center justify-center gap-2">
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    openEditDialog(selectedImage);
+                  }}
+                >
+                  <Pencil className="w-3.5 h-3.5 mr-1" />
+                  {t("common.edit", { defaultValue: "Edit" })}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    void handleTogglePublish(selectedImage);
+                  }}
+                >
+                  <Globe className="w-3.5 h-3.5 mr-1" />
+                  {selectedImage.published === false
+                    ? t("gallery.publish", { defaultValue: "Publish" })
+                    : t("gallery.unpublish", { defaultValue: "Draft" })}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    void handleDeleteImage(selectedImage);
+                  }}
+                >
+                  <Trash2 className="w-3.5 h-3.5 mr-1" />
+                  {t("common.delete", { defaultValue: "Delete" })}
+                </Button>
+              </div>
+            ) : null}
           </div>
         </div>
       )}
+
+      <Dialog
+        open={isEditing}
+        onOpenChange={(open) => {
+          if (!open) setEditingImage(null);
+          setIsEditing(open);
+        }}
+      >
+        <DialogContent className="max-w-xl">
+          <DialogHeader>
+            <DialogTitle>{t("gallery.editImage", { defaultValue: "Edit Gallery Image" })}</DialogTitle>
+            <DialogDescription>
+              {t("gallery.editImageDescription", {
+                defaultValue: "Update category, tags, and publish status for this image.",
+              })}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <p className="text-xs text-muted-foreground">
+                {t("gallery.titleField", { defaultValue: "Title" })}
+              </p>
+              <Input
+                value={editForm.title}
+                onChange={(e) => setEditForm((prev) => ({ ...prev, title: e.target.value }))}
+                placeholder={t("gallery.titlePlaceholder", { defaultValue: "Image title" })}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <p className="text-xs text-muted-foreground">
+                {t("gallery.categoryField", { defaultValue: "Category" })}
+              </p>
+              <Input
+                value={editForm.category}
+                onChange={(e) => setEditForm((prev) => ({ ...prev, category: e.target.value }))}
+                placeholder={t("gallery.categoryPlaceholder", { defaultValue: "e.g. usa, japan, germany" })}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <p className="text-xs text-muted-foreground">
+                {t("gallery.tagsField", { defaultValue: "Tags (comma separated)" })}
+              </p>
+              <Input
+                value={editForm.tags}
+                onChange={(e) => setEditForm((prev) => ({ ...prev, tags: e.target.value }))}
+                placeholder={t("gallery.tagsPlaceholder", { defaultValue: "visa, advice, embassy" })}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <p className="text-xs text-muted-foreground">
+                {t("gallery.descriptionField", { defaultValue: "Description" })}
+              </p>
+              <Input
+                value={editForm.description}
+                onChange={(e) => setEditForm((prev) => ({ ...prev, description: e.target.value }))}
+                placeholder={t("gallery.descriptionPlaceholder", { defaultValue: "Short context text" })}
+              />
+            </div>
+
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={editForm.published}
+                onChange={(e) => setEditForm((prev) => ({ ...prev, published: e.target.checked }))}
+              />
+              {t("gallery.publishedSwitch", { defaultValue: "Visible on public gallery" })}
+            </label>
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsEditing(false);
+                setEditingImage(null);
+              }}
+            >
+              {t("common.cancel", { defaultValue: "Cancel" })}
+            </Button>
+            <Button onClick={handleSaveMeta} disabled={isSavingMeta}>
+              {isSavingMeta ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+              {t("common.save", { defaultValue: "Save" })}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

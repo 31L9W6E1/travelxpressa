@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Calendar, ArrowLeft, Loader2 } from 'lucide-react';
 import { getPosts, formatPostDate, getDefaultImage } from '@/api/posts';
@@ -6,6 +6,7 @@ import type { PostSummary } from '@/api/posts';
 import { normalizeImageUrl } from '@/api/upload';
 import { useTranslation } from 'react-i18next';
 import PageHeader from "@/components/PageHeader";
+import { CONTENT_TOPICS, matchesTopic } from '@/lib/contentTopics';
 
 const Blog = () => {
   const { t, i18n } = useTranslation();
@@ -15,6 +16,7 @@ const Blog = () => {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [retryToken, setRetryToken] = useState(0);
+  const [selectedTopic, setSelectedTopic] = useState('all');
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -34,6 +36,11 @@ const Blog = () => {
 
     fetchPosts();
   }, [i18n.language, page, retryToken, t]);
+
+  const filteredPosts = useMemo(
+    () => posts.filter((post) => matchesTopic(selectedTopic, post)),
+    [posts, selectedTopic]
+  );
 
   if (loading) {
     return (
@@ -56,13 +63,34 @@ const Blog = () => {
             'Visa guides, travel tips, and expert advice to help you prepare applications for major destinations.',
         })}
       >
-        <Link
-          to="/"
-          className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          {t('common.backToHome', { defaultValue: 'Back to Home' })}
-        </Link>
+        <div className="space-y-4">
+          <Link
+            to="/"
+            className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            {t('common.backToHome', { defaultValue: 'Back to Home' })}
+          </Link>
+          <div className="flex flex-wrap items-center gap-2">
+            {CONTENT_TOPICS.map((topic) => {
+              const active = topic.id === selectedTopic;
+              return (
+                <button
+                  key={topic.id}
+                  type="button"
+                  onClick={() => setSelectedTopic(topic.id)}
+                  className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
+                    active
+                      ? 'bg-gradient-to-r from-primary to-primary/80 text-primary-foreground border-primary'
+                      : 'bg-background text-muted-foreground border-border hover:bg-secondary'
+                  }`}
+                >
+                  {topic.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
       </PageHeader>
 
       {/* Posts Grid */}
@@ -81,10 +109,14 @@ const Blog = () => {
                 {t('errors.tryAgain', { defaultValue: 'Try again' })}
               </button>
             </div>
-          ) : posts.length === 0 ? (
+          ) : filteredPosts.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-muted-foreground text-lg">
-                {t('blogPage.empty.title', { defaultValue: 'No blog posts published yet.' })}
+                {selectedTopic === 'all'
+                  ? t('blogPage.empty.title', { defaultValue: 'No blog posts published yet.' })
+                  : t('blogPage.empty.filtered', {
+                      defaultValue: 'No blog posts found for this category on the current page.',
+                    })}
               </p>
               <p className="text-muted-foreground mt-2">
                 {t('blogPage.empty.subtitle', {
@@ -95,7 +127,7 @@ const Blog = () => {
           ) : (
             <>
               <div className="grid grid-cols-2 min-[500px]:grid-cols-3 md:grid-cols-4 gap-2 md:gap-6">
-                {posts.map((post) => (
+                {filteredPosts.map((post) => (
                   <article key={post.id} className="group">
                     <Link to={`/blog/${post.slug}`} className="block">
                       <div className="relative aspect-square overflow-hidden rounded-lg mb-2 md:mb-3">
@@ -129,7 +161,7 @@ const Blog = () => {
               </div>
 
               {/* Pagination */}
-              {totalPages > 1 && (
+              {totalPages > 1 && selectedTopic === 'all' && (
                 <div className="flex flex-wrap items-center justify-center gap-2 mt-12">
                   <button
                     onClick={() => setPage(p => Math.max(1, p - 1))}

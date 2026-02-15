@@ -9,6 +9,27 @@ export interface UploadResponse {
   message: string;
 }
 
+export interface GalleryImageItem {
+  filename: string;
+  url: string;
+  size: number;
+  uploadedAt: string;
+  type: string;
+  title?: string;
+  category?: string;
+  tags?: string[];
+  description?: string;
+  published?: boolean;
+}
+
+export interface GalleryStats {
+  totalImages: number;
+  totalSize: number;
+  recentUploads: number;
+  publishedImages?: number;
+  draftImages?: number;
+}
+
 const getBackendPublicUrl = (): string => {
   const configured = (import.meta.env.VITE_BACKEND_PUBLIC_URL as string | undefined)?.trim();
   if (configured) return configured.replace(/\/+$/, '');
@@ -81,6 +102,64 @@ export const deleteImage = async (filename: string): Promise<{ success: boolean;
   try {
     const response = await api.delete(`/api/upload/image/${encodeURIComponent(filename)}`);
     return response.data;
+  } catch (error) {
+    throw handleApiError(error);
+  }
+};
+
+export const getPublicGallery = async (): Promise<{ images: GalleryImageItem[]; stats: GalleryStats | null }> => {
+  try {
+    const response = await api.get('/api/upload/public-gallery');
+    return {
+      images: response.data?.data?.images || [],
+      stats: response.data?.data?.stats || null,
+    };
+  } catch (error) {
+    throw handleApiError(error);
+  }
+};
+
+export const getAdminGallery = async (): Promise<{ images: GalleryImageItem[]; stats: GalleryStats | null }> => {
+  try {
+    const response = await api.get('/api/upload/gallery');
+    return {
+      images: response.data?.data?.images || [],
+      stats: response.data?.data?.stats || null,
+    };
+  } catch (error) {
+    throw handleApiError(error);
+  }
+};
+
+type GalleryMetadataPayload = {
+  title?: string;
+  category?: string;
+  tags?: string[] | string;
+  description?: string;
+  published?: boolean;
+};
+
+export const updateGalleryImageMeta = async (
+  filename: string,
+  payload: GalleryMetadataPayload
+): Promise<GalleryImageItem | null> => {
+  try {
+    const response = await api.put(`/api/upload/image/${encodeURIComponent(filename)}/meta`, payload);
+    return response.data?.data || null;
+  } catch (error) {
+    throw handleApiError(error);
+  }
+};
+
+export const setGalleryImagePublish = async (
+  filename: string,
+  published: boolean
+): Promise<GalleryImageItem | null> => {
+  try {
+    const response = await api.patch(`/api/upload/image/${encodeURIComponent(filename)}/publish`, {
+      published,
+    });
+    return response.data?.data || null;
   } catch (error) {
     throw handleApiError(error);
   }

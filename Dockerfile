@@ -58,5 +58,5 @@ ENV NODE_ENV=production
 ENV PORT=8080
 
 # Start the application
-# Push schema to database (creates tables if they don't exist)
-CMD ["sh", "-c", "npx prisma db push --accept-data-loss && node dist/index.js"]
+# Keep schema in sync without allowing destructive changes at startup.
+CMD ["sh", "-c", "npx prisma db push && node dist/index.js"]

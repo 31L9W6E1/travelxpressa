@@ -53,7 +53,10 @@ export const config = {
   // Database
   databaseUrl: requireEnv(
     'DATABASE_URL',
-    'postgresql://ds160user:ds160pass@localhost:5432/ds160_db?schema=public'
+    'postgresql://ds160user:ds160pass@localhost:5432/ds160_db?schema=public',
+    {
+      allowDefaultInProduction: false,
+    }
   ),
 
   // JWT
@@ -101,7 +104,9 @@ export const config = {
   // File Upload
   upload: {
     maxFileSize: parseInt(process.env.MAX_FILE_SIZE || '5242880', 10), // 5MB
-    uploadDir: process.env.UPLOAD_DIR || './uploads',
+    uploadDir:
+      process.env.UPLOAD_DIR ||
+      (process.env.NODE_ENV === 'production' ? '/app/uploads' : './uploads'),
   },
 
   // Logging

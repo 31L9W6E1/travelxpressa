@@ -16,6 +16,9 @@ import {
   Plus,
   FolderOpen,
   Eye,
+  Pencil,
+  Globe,
+  FilePenLine,
 } from 'lucide-react';
 import {
   Card,
@@ -47,22 +50,18 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import api from '@/api/client';
-import { uploadImage, deleteImage, getFallbackImageUrl, getFullImageUrl } from '@/api/upload';
-
-interface GalleryImage {
-  filename: string;
-  url: string;
-  size: number;
-  uploadedAt: string;
-  type: string;
-}
-
-interface GalleryStats {
-  totalImages: number;
-  totalSize: number;
-  recentUploads: number;
-}
+import {
+  uploadImage,
+  deleteImage,
+  getFallbackImageUrl,
+  getFullImageUrl,
+  getAdminGallery,
+  getPublicGallery,
+  updateGalleryImageMeta,
+  setGalleryImagePublish,
+  type GalleryImageItem as GalleryImage,
+  type GalleryStats,
+} from '@/api/upload';
 
 const GalleryManager = () => {
   const [images, setImages] = useState<GalleryImage[]>([]);
@@ -76,16 +75,25 @@ const GalleryManager = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [imageToDelete, setImageToDelete] = useState<GalleryImage | null>(null);
   const [copiedUrl, setCopiedUrl] = useState<string | null>(null);
+  const [categoryFilter, setCategoryFilter] = useState('all');
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [savingMeta, setSavingMeta] = useState(false);
+  const [editingImage, setEditingImage] = useState<GalleryImage | null>(null);
+  const [metaForm, setMetaForm] = useState({
+    title: '',
+    category: '',
+    tags: '',
+    description: '',
+    published: true,
+  });
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const fetchGallery = async () => {
     setLoading(true);
     try {
-      const response = await api.get('/api/upload/gallery');
-      if (response.data.success) {
-        setImages(response.data.data.images || []);
-        setStats(response.data.data.stats || null);
-      }
+      const { images: adminImages, stats: adminStats } = await getAdminGallery();
+      setImages(adminImages || []);
+      setStats(adminStats || null);
     } catch (error: any) {
       // Fallback to public gallery feed so admins can still preview live images.
       console.error('Gallery fetch error:', error);
@@ -93,16 +101,10 @@ const GalleryManager = () => {
         toast.error('Please log in as an admin to view the gallery.');
       }
       try {
-        const publicRes = await api.get('/api/upload/public-gallery');
-        if (publicRes.data?.success) {
-          const publicImages = publicRes.data?.data?.images || [];
-          setImages(publicImages);
-          setStats(publicRes.data?.data?.stats || null);
-          toast.info('Showing public gallery preview. Admin upload requires a valid admin session.');
-        } else {
-          setImages([]);
-          setStats(null);
-        }
+        const { images: publicImages, stats: publicStats } = await getPublicGallery();
+        setImages(publicImages || []);
+        setStats(publicStats || null);
+        toast.info('Showing public gallery preview. Admin upload requires a valid admin session.');
       } catch {
         setImages([]);
         setStats(null);
@@ -172,6 +174,65 @@ const GalleryManager = () => {
     }
   };
 
+  const openEditDialog = (image: GalleryImage) => {
+    setEditingImage(image);
+    setMetaForm({
+      title: (image.title || image.filename || '').trim(),
+      category: (image.category || 'general').trim(),
+      tags: Array.isArray(image.tags) ? image.tags.join(', ') : '',
+      description: (image.description || '').trim(),
+      published: image.published !== false,
+    });
+    setEditDialogOpen(true);
+  };
+
+  const handleSaveMeta = async () => {
+    if (!editingImage) return;
+    setSavingMeta(true);
+    try {
+      const updated = await updateGalleryImageMeta(editingImage.filename, {
+        title: metaForm.title,
+        category: metaForm.category,
+        tags: metaForm.tags,
+        description: metaForm.description,
+        published: metaForm.published,
+      });
+
+      if (updated) {
+        setImages((prev) =>
+          prev.map((item) => (item.filename === editingImage.filename ? { ...item, ...updated } : item))
+        );
+      } else {
+        await fetchGallery();
+      }
+
+      toast.success('Image details updated');
+      setEditDialogOpen(false);
+      setEditingImage(null);
+    } catch (error: any) {
+      toast.error(error?.message || 'Failed to update image details');
+    } finally {
+      setSavingMeta(false);
+    }
+  };
+
+  const togglePublish = async (image: GalleryImage) => {
+    const nextPublished = image.published === false;
+    try {
+      const updated = await setGalleryImagePublish(image.filename, nextPublished);
+      if (updated) {
+        setImages((prev) =>
+          prev.map((item) => (item.filename === image.filename ? { ...item, ...updated } : item))
+        );
+      } else {
+        await fetchGallery();
+      }
+      toast.success(nextPublished ? 'Image published' : 'Image moved to draft');
+    } catch (error: any) {
+      toast.error(error?.message || 'Failed to change publish status');
+    }
+  };
+
   const formatFileSize = (bytes: number): string => {
     if (bytes < 1024) return `${bytes} B`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
@@ -186,9 +247,33 @@ const GalleryManager = () => {
     });
   };
 
-  const filteredImages = images.filter((img) =>
-    img.filename.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const availableCategories = [
+    'all',
+    ...Array.from(
+      new Set(
+        images
+          .map((item) => (item.category || '').trim().toLowerCase())
+          .filter(Boolean)
+      )
+    ),
+  ];
+
+  const filteredImages = images.filter((img) => {
+    const searchable = [
+      img.filename,
+      img.title || '',
+      img.category || '',
+      Array.isArray(img.tags) ? img.tags.join(' ') : '',
+      img.description || '',
+    ]
+      .join(' ')
+      .toLowerCase();
+
+    const matchesSearch = searchable.includes(searchTerm.toLowerCase());
+    const normalizedCategory = (img.category || '').trim().toLowerCase();
+    const matchesCategory = categoryFilter === 'all' || normalizedCategory === categoryFilter;
+    return matchesSearch && matchesCategory;
+  });
 
   if (loading) {
     return (
@@ -275,58 +360,87 @@ const GalleryManager = () => {
       {/* Gallery Card */}
       <Card>
         <CardHeader>
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-              <CardTitle>Media Gallery</CardTitle>
-              <CardDescription>Manage your uploaded images and media files</CardDescription>
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                <CardTitle>Media Gallery</CardTitle>
+                <CardDescription>Manage your uploaded images and media files</CardDescription>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                {/* Search */}
+                <div className="relative">
+                  <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    placeholder="Search images..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10 w-48"
+                  />
+                </div>
+
+                {/* View Mode Toggle */}
+                <div className="flex border rounded-lg">
+                  <Button
+                    variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
+                    size="icon"
+                    onClick={() => setViewMode('grid')}
+                  >
+                    <Grid className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant={viewMode === 'list' ? 'secondary' : 'ghost'}
+                    size="icon"
+                    onClick={() => setViewMode('list')}
+                  >
+                    <List className="w-4 h-4" />
+                  </Button>
+                </div>
+
+                {/* Refresh */}
+                <Button variant="outline" size="icon" onClick={fetchGallery} disabled={loading}>
+                  <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                </Button>
+
+                {/* Upload Button */}
+                <Button
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading}
+                >
+                  {uploading ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Plus className="w-4 h-4 mr-2" />
+                  )}
+                  Publish Photo
+                </Button>
+              </div>
             </div>
+
             <div className="flex flex-wrap items-center gap-2">
-              {/* Search */}
-              <div className="relative">
-                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  placeholder="Search images..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 w-48"
-                />
-              </div>
-
-              {/* View Mode Toggle */}
-              <div className="flex border rounded-lg">
-                <Button
-                  variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
-                  size="icon"
-                  onClick={() => setViewMode('grid')}
-                >
-                  <Grid className="w-4 h-4" />
-                </Button>
-                <Button
-                  variant={viewMode === 'list' ? 'secondary' : 'ghost'}
-                  size="icon"
-                  onClick={() => setViewMode('list')}
-                >
-                  <List className="w-4 h-4" />
-                </Button>
-              </div>
-
-              {/* Refresh */}
-              <Button variant="outline" size="icon" onClick={fetchGallery} disabled={loading}>
-                <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-              </Button>
-
-              {/* Upload Button */}
-              <Button
-                onClick={() => fileInputRef.current?.click()}
-                disabled={uploading}
-              >
-                {uploading ? (
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                ) : (
-                  <Plus className="w-4 h-4 mr-2" />
-                )}
-                Publish Photo
-              </Button>
+              {availableCategories.map((category) => {
+                const active = categoryFilter === category;
+                return (
+                  <button
+                    key={category}
+                    type="button"
+                    onClick={() => setCategoryFilter(category)}
+                    className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
+                      active
+                        ? 'border-primary bg-primary text-primary-foreground'
+                        : 'border-border bg-background text-muted-foreground hover:bg-secondary'
+                    }`}
+                  >
+                    {category === 'all' ? 'All' : category}
+                  </button>
+                );
+              })}
+              <Badge variant="secondary" className="ml-auto">
+                <Globe className="w-3 h-3 mr-1" />
+                Published {images.filter((img) => img.published !== false).length}
+              </Badge>
+              <Badge variant="outline">
+                Draft {images.filter((img) => img.published === false).length}
+              </Badge>
             </div>
           </div>
         </CardHeader>
@@ -365,7 +479,7 @@ const GalleryManager = () => {
                 >
                   <img
                     src={getFullImageUrl(image.url)}
-                    alt={image.filename}
+                    alt={image.title || image.filename}
                     className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105"
                     onError={(e) => {
                       const element = e.currentTarget as HTMLImageElement;
@@ -380,8 +494,40 @@ const GalleryManager = () => {
                     }}
                   />
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors" />
+                  <div className="absolute top-2 left-2 flex gap-1">
+                    <Badge variant={image.published === false ? 'outline' : 'secondary'} className="text-[10px] py-0 px-2">
+                      {image.published === false ? 'Draft' : 'Live'}
+                    </Badge>
+                    {image.category ? (
+                      <Badge variant="outline" className="text-[10px] py-0 px-2 bg-background/80">
+                        {image.category}
+                      </Badge>
+                    ) : null}
+                  </div>
                   <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                     <div className="flex gap-1">
+                      <Button
+                        variant="secondary"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openEditDialog(image);
+                        }}
+                      >
+                        <FilePenLine className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          togglePublish(image);
+                        }}
+                      >
+                        <Globe className="w-4 h-4" />
+                      </Button>
                       <Button
                         variant="secondary"
                         size="icon"
@@ -453,8 +599,12 @@ const GalleryManager = () => {
                       />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium truncate">{image.filename}</p>
+                      <p className="font-medium truncate">{image.title || image.filename}</p>
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <span>{image.category || 'general'}</span>
+                        <span>•</span>
+                        <span>{image.published === false ? 'Draft' : 'Published'}</span>
+                        <span>•</span>
                         <span>{formatFileSize(image.size || 0)}</span>
                         <span>•</span>
                         <span>{image.type || 'image'}</span>
@@ -467,6 +617,20 @@ const GalleryManager = () => {
                       </div>
                     </div>
                     <div className="flex items-center gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => openEditDialog(image)}
+                      >
+                        <Pencil className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => togglePublish(image)}
+                      >
+                        <Globe className="w-4 h-4" />
+                      </Button>
                       <Button
                         variant="ghost"
                         size="icon"
@@ -571,6 +735,26 @@ const GalleryManager = () => {
                 )}
               </Button>
               <Button
+                variant="outline"
+                onClick={() => {
+                  if (!selectedImage) return;
+                  openEditDialog(selectedImage);
+                }}
+              >
+                <FilePenLine className="w-4 h-4 mr-2" />
+                Edit
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  if (!selectedImage) return;
+                  void togglePublish(selectedImage);
+                }}
+              >
+                <Globe className="w-4 h-4 mr-2" />
+                {selectedImage?.published === false ? 'Publish' : 'Draft'}
+              </Button>
+              <Button
                 variant="destructive"
                 onClick={() => {
                   if (selectedImage) {
@@ -584,6 +768,78 @@ const GalleryManager = () => {
                 Delete
               </Button>
             </div>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit metadata dialog */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent className="max-w-xl">
+          <DialogHeader>
+            <DialogTitle>Edit Image Details</DialogTitle>
+            <DialogDescription>
+              Update title, category, tags, and publish status for this gallery item.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <p className="text-xs text-muted-foreground">Title</p>
+              <Input
+                value={metaForm.title}
+                onChange={(e) => setMetaForm((prev) => ({ ...prev, title: e.target.value }))}
+                placeholder="Image title"
+              />
+            </div>
+            <div className="space-y-2">
+              <p className="text-xs text-muted-foreground">Category</p>
+              <Input
+                value={metaForm.category}
+                onChange={(e) => setMetaForm((prev) => ({ ...prev, category: e.target.value }))}
+                placeholder="e.g. usa, japan, germany"
+              />
+            </div>
+            <div className="space-y-2">
+              <p className="text-xs text-muted-foreground">Tags (comma separated)</p>
+              <Input
+                value={metaForm.tags}
+                onChange={(e) => setMetaForm((prev) => ({ ...prev, tags: e.target.value }))}
+                placeholder="visa, embassy, travel"
+              />
+            </div>
+            <div className="space-y-2">
+              <p className="text-xs text-muted-foreground">Description</p>
+              <Input
+                value={metaForm.description}
+                onChange={(e) => setMetaForm((prev) => ({ ...prev, description: e.target.value }))}
+                placeholder="Short description for context"
+              />
+            </div>
+
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={metaForm.published}
+                onChange={(e) => setMetaForm((prev) => ({ ...prev, published: e.target.checked }))}
+              />
+              Published on public gallery
+            </label>
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setEditDialogOpen(false);
+                setEditingImage(null);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleSaveMeta} disabled={savingMeta}>
+              {savingMeta ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+              Save changes
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

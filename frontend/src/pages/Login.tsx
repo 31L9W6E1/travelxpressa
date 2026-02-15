@@ -72,7 +72,7 @@ const FacebookIcon = () => (
 const Login = () => {
   const { t, i18n } = useTranslation();
   // Rename to avoid conflict with react-hook-form's register
-  const { login: authLogin, register: authRegister } = useAuth();
+  const { login: authLogin, register: authRegister, isLoading: authInitializing } = useAuth();
   const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
@@ -182,6 +182,7 @@ const Login = () => {
   });
 
   const handleLoginSubmit = async (values: LoginFormValues) => {
+    if (authInitializing) return;
     setIsLoading(true);
     setError("");
 
@@ -376,7 +377,7 @@ const Login = () => {
                 variant="outline"
                 className="w-full"
                 onClick={handleGoogleLogin}
-                disabled={isSocialLoading !== null}
+                disabled={isSocialLoading !== null || authInitializing}
               >
                 {isSocialLoading === "google" ? (
                   <Loader2 className="w-5 h-5 animate-spin mr-2" />
@@ -391,7 +392,7 @@ const Login = () => {
                 variant="outline"
                 className="w-full"
                 onClick={handleFacebookLogin}
-                disabled={isSocialLoading !== null}
+                disabled={isSocialLoading !== null || authInitializing}
               >
                 {isSocialLoading === "facebook" ? (
                   <Loader2 className="w-5 h-5 animate-spin mr-2" />
@@ -469,7 +470,7 @@ const Login = () => {
                     )}
                   />
 
-                  <Button type="submit" className="w-full" disabled={isLoading}>
+                  <Button type="submit" className="w-full" disabled={isLoading || authInitializing}>
                     {isLoading ? (
                       <>
                         <Loader2 className="w-5 h-5 animate-spin mr-2" />
@@ -556,7 +557,7 @@ const Login = () => {
                     )}
                   />
 
-                  <Button type="submit" className="w-full" disabled={isLoading}>
+                  <Button type="submit" className="w-full" disabled={isLoading || authInitializing}>
                     {isLoading ? (
                       <>
                         <Loader2 className="w-5 h-5 animate-spin mr-2" />

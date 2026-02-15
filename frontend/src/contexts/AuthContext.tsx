@@ -32,6 +32,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   // Initialize auth state
   useEffect(() => {
     const initAuth = async () => {
+      const initialToken = getAccessToken();
+
       try {
         // If we don't have an access token (e.g., first visit on a different subdomain),
         // attempt a cookie-based refresh. This keeps sessions stable across
@@ -49,7 +51,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           setUser(currentUser);
         }
       } catch {
-        clearTokens();
+        // Avoid clearing a newer token created by a concurrent login action.
+        if (getAccessToken() === initialToken) {
+          clearTokens();
+        }
       } finally {
         setIsLoading(false);
       }

@@ -26,13 +26,7 @@ const nameSchema = z
   .string()
   .trim()
   .min(1, 'Name is required')
-  .max(100, 'Name must be less than 100 characters')
-  // Allow Unicode letters (e.g., Mongolian Cyrillic) while still restricting to "name-like" characters.
-  // Also allow periods for common abbreviations (e.g., "B. Bat").
-  .regex(
-    /^[\p{L}\s\-.'\u2019]+$/u,
-    'Name can only contain letters, spaces, periods, hyphens, and apostrophes'
-  );
+  .max(100, 'Name must be less than 100 characters');
 
 // Draft-friendly validators - very permissive for partial saves
 // These accept any string value including empty strings

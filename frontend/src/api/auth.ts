@@ -30,17 +30,50 @@ export interface RegisterCredentials {
   name?: string;
 }
 
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const isRetryableAuthError = (error: unknown): boolean => {
+  const status = (error as any)?.response?.status as number | undefined;
+  const code = (error as any)?.code as string | undefined;
+
+  // Retry only transient connectivity/server errors.
+  return (
+    !status ||
+    status === 408 ||
+    status === 425 ||
+    status === 429 ||
+    status >= 500 ||
+    code === 'ECONNABORTED'
+  );
+};
+
 // Auth API functions
 export const authApi = {
   async login(credentials: LoginCredentials): Promise<User> {
-    try {
-      const response = await api.post<ApiResponse<AuthResponse>>('/api/auth/login', credentials);
-      const { accessToken, refreshToken, user } = response.data.data!;
-      setTokens(accessToken, refreshToken ?? null);
-      return user;
-    } catch (error) {
-      throw handleApiError(error);
+    const normalizedCredentials = {
+      email: credentials.email.trim(),
+      password: credentials.password,
+    };
+
+    let lastError: unknown;
+
+    // Retry transient failures so users don't need multiple manual login attempts.
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        const response = await api.post<ApiResponse<AuthResponse>>('/api/auth/login', normalizedCredentials);
+        const { accessToken, refreshToken, user } = response.data.data!;
+        setTokens(accessToken, refreshToken ?? null);
+        return user;
+      } catch (error) {
+        lastError = error;
+        if (!isRetryableAuthError(error) || attempt === 2) {
+          break;
+        }
+        await delay(250 * (attempt + 1));
+      }
     }
+
+    throw handleApiError(lastError);
   },
 
   async register(credentials: RegisterCredentials): Promise<User> {

@@ -346,13 +346,24 @@ const Gallery = () => {
     [demoImages, uploadedImages]
   );
 
-  const visibleGalleryItems = useMemo(
-    () =>
-      user?.role === "ADMIN"
-        ? galleryItems
-        : galleryItems.filter((item) => item.published !== false),
-    [galleryItems, user?.role]
-  );
+  const visibleGalleryItems = useMemo(() => {
+    if (user?.role === "ADMIN") {
+      return galleryItems;
+    }
+
+    // Public view: prioritize published uploaded photos first, then demo images.
+    const publishedUploaded = (uploadedImages || [])
+      .filter((item) => item.published !== false)
+      .sort((a, b) => {
+        const aTime = a.uploadedAt ? new Date(a.uploadedAt).getTime() : 0;
+        const bTime = b.uploadedAt ? new Date(b.uploadedAt).getTime() : 0;
+        return bTime - aTime;
+      });
+
+    const publishedDemo = demoImages.filter((item) => item.published !== false);
+
+    return [...publishedUploaded, ...publishedDemo];
+  }, [demoImages, galleryItems, uploadedImages, user?.role]);
 
   const filteredImages =
     selectedCategory === "all"
@@ -360,10 +371,11 @@ const Gallery = () => {
       : visibleGalleryItems.filter((img) => img.category === selectedCategory);
   const selectedImageAlt = selectedImage ? getImageAltText(selectedImage) : "";
   const selectedImageCategory = selectedImage ? getCategoryLabel(selectedImage.category) : "";
+  const configuredGalleryHero = (settings.galleryHeroImageUrl || "").trim();
   const galleryHeroBackground =
-    !settings.galleryHeroImageUrl || settings.galleryHeroImageUrl === LEGACY_GALLERY_HERO_URL
+    !configuredGalleryHero || configuredGalleryHero === LEGACY_GALLERY_HERO_URL
       ? RECOMMENDED_GALLERY_HERO_URL
-      : settings.galleryHeroImageUrl;
+      : configuredGalleryHero;
   const topicChipClass = (active: boolean) =>
     active
       ? "px-3 py-1 text-xs font-medium bg-primary/10 text-primary rounded-full"
@@ -691,24 +703,14 @@ const Gallery = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <div className="relative overflow-hidden">
-        <div className="pointer-events-none absolute inset-0 h-[420px]">
-          <img
-            src={galleryHeroBackground}
-            alt="Gallery background"
-            className="h-full w-full object-cover"
-          />
-        </div>
-        <div className="pointer-events-none absolute inset-0 h-[420px] bg-gradient-to-b from-background/30 via-background/75 to-background" />
-
-        <PageHeader
-          title={t("gallery.title", { defaultValue: "Travel Gallery" })}
-          subtitle={t("gallery.subtitle", {
-            defaultValue: "Discover the beauty of destinations awaiting your journey.",
-          })}
-          backgroundImageUrl={galleryHeroBackground}
-          className="relative z-10 border-b-0"
-          actions={
+      <PageHeader
+        title={t("gallery.title", { defaultValue: "Travel Gallery" })}
+        subtitle={t("gallery.subtitle", {
+          defaultValue: "Discover the beauty of destinations awaiting your journey.",
+        })}
+        backgroundImageUrl={galleryHeroBackground}
+        className="border-b-0"
+        actions={
           user?.role === "ADMIN" ? (
             <>
               <input
@@ -747,41 +749,40 @@ const Gallery = () => {
               </Button>
             </>
           ) : null
-          }
-        >
-          {categories.length > 1 ? (
-            <div className="flex flex-wrap items-center justify-start gap-2">
-              {categories.map((category) => (
-                <button
-                  key={category}
-                  onClick={() => setSelectedCategory(category)}
-                  className={topicChipClass(selectedCategory === category)}
-                >
-                  {getCategoryLabel(category)}
-                </button>
-              ))}
-              {usingUploads ? (
-                <>
-                  <Badge variant="secondary" className="ml-auto">
-                    {t("gallery.publishedCount", {
-                      defaultValue: "Published: {{count}}",
-                      count: (uploadedImages || []).filter((img) => img.published !== false).length,
+        }
+      >
+        {categories.length > 1 ? (
+          <div className="flex flex-wrap items-center justify-start gap-2">
+            {categories.map((category) => (
+              <button
+                key={category}
+                onClick={() => setSelectedCategory(category)}
+                className={topicChipClass(selectedCategory === category)}
+              >
+                {getCategoryLabel(category)}
+              </button>
+            ))}
+            {usingUploads ? (
+              <>
+                <Badge variant="secondary" className="ml-auto">
+                  {t("gallery.publishedCount", {
+                    defaultValue: "Published: {{count}}",
+                    count: (uploadedImages || []).filter((img) => img.published !== false).length,
+                  })}
+                </Badge>
+                {user?.role === "ADMIN" ? (
+                  <Badge variant="outline">
+                    {t("gallery.draftCount", {
+                      defaultValue: "Draft: {{count}}",
+                      count: (uploadedImages || []).filter((img) => img.published === false).length,
                     })}
                   </Badge>
-                  {user?.role === "ADMIN" ? (
-                    <Badge variant="outline">
-                      {t("gallery.draftCount", {
-                        defaultValue: "Draft: {{count}}",
-                        count: (uploadedImages || []).filter((img) => img.published === false).length,
-                      })}
-                    </Badge>
-                  ) : null}
-                </>
-              ) : null}
-            </div>
-          ) : null}
-        </PageHeader>
-      </div>
+                ) : null}
+              </>
+            ) : null}
+          </div>
+        ) : null}
+      </PageHeader>
 
       {/* Gallery Grid */}
       <section className="relative py-12 overflow-hidden">
@@ -822,7 +823,7 @@ const Gallery = () => {
                         element.style.display = "none";
                       }}
                     />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/15 to-transparent" />
                       <div className="absolute top-2 left-2 flex flex-wrap gap-1">
                         <span className="rounded-full bg-black/60 px-2 py-0.5 text-[10px] text-white">
                           {image.category}

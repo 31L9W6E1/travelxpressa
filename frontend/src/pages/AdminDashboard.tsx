@@ -738,8 +738,18 @@ const AdminDashboard = () => {
   const handleSaveSiteSettings = async () => {
     setSavingSiteSettings(true);
     try {
-      const res = await api.put("/api/admin/site-settings", draftSiteSettings);
-      const saved = res.data?.data || draftSiteSettings;
+      const payload: SiteSettings = {
+        ...draftSiteSettings,
+        qAndAItems: (draftSiteSettings.qAndAItems || [])
+          .map((item) => ({
+            q: (item.q || "").trim(),
+            a: (item.a || "").trim(),
+          }))
+          .filter((item) => item.q.length > 0 && item.a.length > 0),
+      };
+
+      const res = await api.put("/api/admin/site-settings", payload);
+      const saved = res.data?.data || payload;
       setDraftSiteSettings(saved);
       setSiteSettingsDirty(false);
       toast.success(t("dashboard.siteSettings.saved", "Site settings saved"));
@@ -2258,6 +2268,102 @@ const AdminDashboard = () => {
                       className="min-h-[300px] font-mono text-xs"
                       placeholder="Use placeholders: {{DATE}}, {{CONTRACT_NUMBER}}, {{CLIENT_NAME}}, {{CLIENT_EMAIL}}, {{CLIENT_PHONE}}, {{CLIENT_REGISTRY}}, {{CLIENT_ADDRESS}}, {{SERVICE_FEE_MNT}}"
                     />
+                  </div>
+
+                  <Separator />
+
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="font-medium">Q&A Content</p>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Manage questions shown on the public Q&A page.
+                      </p>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        setDraftSiteSettings((prev) => ({
+                          ...prev,
+                          qAndAItems: [
+                            ...(prev.qAndAItems || []),
+                            { q: "", a: "" },
+                          ],
+                        }));
+                        setSiteSettingsDirty(true);
+                      }}
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add Q&A
+                    </Button>
+                  </div>
+
+                  <div className="space-y-3">
+                    {(draftSiteSettings.qAndAItems || []).map((item, index) => (
+                      <div
+                        key={`qa-item-${index}`}
+                        className="rounded-lg border border-dashed border-border/70 bg-card p-4 space-y-3"
+                      >
+                        <div className="flex items-center justify-between gap-3">
+                          <p className="text-sm font-medium text-foreground">
+                            Q&A #{index + 1}
+                          </p>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className="text-destructive hover:text-destructive"
+                            onClick={() => {
+                              setDraftSiteSettings((prev) => ({
+                                ...prev,
+                                qAndAItems: (prev.qAndAItems || []).filter((_, i) => i !== index),
+                              }));
+                              setSiteSettingsDirty(true);
+                            }}
+                          >
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Remove
+                          </Button>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label>Question</Label>
+                          <Textarea
+                            value={item.q || ""}
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              setDraftSiteSettings((prev) => ({
+                                ...prev,
+                                qAndAItems: (prev.qAndAItems || []).map((row, i) =>
+                                  i === index ? { ...row, q: value } : row
+                                ),
+                              }));
+                              setSiteSettingsDirty(true);
+                            }}
+                            placeholder="Write question..."
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label>Answer</Label>
+                          <Textarea
+                            value={item.a || ""}
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              setDraftSiteSettings((prev) => ({
+                                ...prev,
+                                qAndAItems: (prev.qAndAItems || []).map((row, i) =>
+                                  i === index ? { ...row, a: value } : row
+                                ),
+                              }));
+                              setSiteSettingsDirty(true);
+                            }}
+                            placeholder="Write answer..."
+                            className="min-h-[96px]"
+                          />
+                        </div>
+                      </div>
+                    ))}
                   </div>
 
                   <Separator />

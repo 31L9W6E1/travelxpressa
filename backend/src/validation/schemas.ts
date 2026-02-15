@@ -115,6 +115,15 @@ export const siteSettingsSchema = z.object({
       onlineHours: z.string().max(1000).optional().or(z.literal('')),
     })
     .optional(),
+  qAndAItems: z
+    .array(
+      z.object({
+        q: z.string().min(1).max(500),
+        a: z.string().min(1).max(2000),
+      })
+    )
+    .max(60)
+    .optional(),
 });
 
 // User schemas

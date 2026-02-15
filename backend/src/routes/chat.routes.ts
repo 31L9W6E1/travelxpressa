@@ -6,6 +6,7 @@ import { AuthenticatedRequest } from '../types';
 import { logger } from '../utils/logger';
 
 const router = Router();
+const STAFF_ROLES = ['ADMIN', 'AGENT'] as const;
 
 // All routes require authentication
 router.use(authenticateToken);
@@ -101,9 +102,31 @@ router.get(
   asyncHandler(async (req: Request, res: Response) => {
     const userId = (req as AuthenticatedRequest).user.userId;
     const userRole = (req as AuthenticatedRequest).user.role;
+    const isStaff = STAFF_ROLES.includes(userRole as (typeof STAFF_ROLES)[number]);
+
+    const unreadWhere = isStaff
+      ? {
+          isRead: false,
+          OR: [
+            { senderType: { in: ['USER', 'TELEGRAM'] } },
+            {
+              senderType: 'ADMIN',
+              senderId: { not: userId },
+              thread: {
+                user: {
+                  role: { in: [...STAFF_ROLES] },
+                },
+              },
+            },
+          ],
+        }
+      : {
+          isRead: false,
+          senderType: { notIn: ['USER'] },
+        };
 
     // Admin/Agent can see all threads
-    const whereClause = ['ADMIN', 'AGENT'].includes(userRole)
+    const whereClause = isStaff
       ? {}
       : { userId };
 
@@ -121,12 +144,7 @@ router.get(
         _count: {
           select: {
             messages: {
-              where: {
-                isRead: false,
-                ...(userRole === 'USER'
-                  ? { senderType: { notIn: ['USER'] } }
-                  : { senderType: { in: ['USER', 'TELEGRAM'] } }),
-              },
+              where: unreadWhere,
             },
           },
         },
@@ -171,15 +189,33 @@ router.get(
       throw new NotFoundError('Thread not found');
     }
 
+    const isStaff = STAFF_ROLES.includes(userRole as (typeof STAFF_ROLES)[number]);
+    const markReadWhere = isStaff
+      ? {
+          threadId: id,
+          isRead: false,
+          OR: [
+            { senderType: { in: ['USER', 'TELEGRAM'] } },
+            {
+              senderType: 'ADMIN',
+              senderId: { not: userId },
+              thread: {
+                user: {
+                  role: { in: [...STAFF_ROLES] },
+                },
+              },
+            },
+          ],
+        }
+      : {
+          threadId: id,
+          isRead: false,
+          senderType: { in: ['ADMIN', 'SYSTEM', 'TELEGRAM'] },
+        };
+
     // Mark messages as read
     await prisma.chatMessage.updateMany({
-      where: {
-        threadId: id,
-        isRead: false,
-        ...(userRole === 'USER'
-          ? { senderType: { in: ['ADMIN', 'SYSTEM', 'TELEGRAM'] } }
-          : { senderType: { in: ['USER', 'TELEGRAM'] } }),
-      },
+      where: markReadWhere,
       data: { isRead: true },
     });
 
@@ -316,6 +352,7 @@ router.get(
   '/admin/threads',
   isAgentOrAdmin,
   asyncHandler(async (req: Request, res: Response) => {
+    const requesterId = (req as AuthenticatedRequest).user.userId;
     const { status, page = 1, limit = 20 } = req.query;
     const skip = (Number(page) - 1) * Number(limit);
 
@@ -338,7 +375,21 @@ router.get(
           _count: {
             select: {
               messages: {
-                where: { isRead: false, senderType: { in: ['USER', 'TELEGRAM'] } },
+                where: {
+                  isRead: false,
+                  OR: [
+                    { senderType: { in: ['USER', 'TELEGRAM'] } },
+                    {
+                      senderType: 'ADMIN',
+                      senderId: { not: requesterId },
+                      thread: {
+                        user: {
+                          role: { in: [...STAFF_ROLES] },
+                        },
+                      },
+                    },
+                  ],
+                },
               },
             },
           },

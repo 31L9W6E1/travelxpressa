@@ -217,6 +217,8 @@ type AdminTab =
   | "payments"
   | "analytics"
   | "site"
+  | "agreement"
+  | "qna"
   | "gallery"
   | "cms";
 
@@ -230,6 +232,8 @@ const getAdminTabFromSection = (section?: string): AdminTab => {
     case "payments":
     case "analytics":
     case "site":
+    case "agreement":
+    case "qna":
     case "gallery":
     case "cms":
       return section;
@@ -990,6 +994,14 @@ const AdminDashboard = () => {
             <TabsTrigger value="site" className="gap-2 whitespace-nowrap flex-none shrink-0">
               <Globe className="w-4 h-4" />
               {t('dashboard.tabs.site', 'Site')}
+            </TabsTrigger>
+            <TabsTrigger value="agreement" className="gap-2 whitespace-nowrap flex-none shrink-0">
+              <FileText className="w-4 h-4" />
+              {t("dashboard.tabs.agreement", "Agreement")}
+            </TabsTrigger>
+            <TabsTrigger value="qna" className="gap-2 whitespace-nowrap flex-none shrink-0">
+              <BookOpen className="w-4 h-4" />
+              {t("dashboard.tabs.qna", "Q&A")}
             </TabsTrigger>
             <TabsTrigger value="gallery" className="gap-2 whitespace-nowrap flex-none shrink-0">
               <FolderOpen className="w-4 h-4" />
@@ -2017,7 +2029,7 @@ const AdminDashboard = () => {
                   <CardDescription>
                     {t(
                       "dashboard.siteSettings.desc",
-                      "Control page visibility, maintenance mode, quick-help content, and online agreement text."
+                      "Control page visibility, maintenance mode, and quick-help content."
                     )}
                   </CardDescription>
                 </CardHeader>
@@ -2231,12 +2243,89 @@ const AdminDashboard = () => {
                   <Separator />
 
                   <div>
-                    <p className="font-medium">Online Agreement</p>
+                    <p className="font-medium">{t("dashboard.siteSettings.pageVisibility", "Page visibility")}</p>
                     <p className="text-sm text-muted-foreground mt-1">
-                      Editable contract template shown before payment.
+                      {t(
+                        "dashboard.siteSettings.pageVisibilityHelp",
+                        "Hide pages from navigation and show an unavailable screen to visitors."
+                      )}
                     </p>
                   </div>
 
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {[
+                      { key: "about", label: t("nav.about", "About"), path: "/about" },
+                      { key: "learnMore", label: t("nav.learnMore", "Learn More"), path: "/learn-more" },
+                      { key: "translationService", label: t("nav.translationService", "Translation Service"), path: "/translation-service" },
+                      { key: "gallery", label: t("nav.gallery", "Gallery"), path: "/gallery" },
+                      { key: "news", label: t("nav.news", "News"), path: "/news" },
+                      { key: "blog", label: t("nav.articles", "Articles"), path: "/blog" },
+                      { key: "flight", label: t("nav.flight", "Flight"), path: "/flight" },
+                      { key: "insurance", label: t("nav.insurance", "Insurance"), path: "/insurance" },
+                      { key: "helpCenter", label: t("nav.helpCenter", "Help Center"), path: "/help-center" },
+                      { key: "qAndA", label: t("nav.qAndA", "Q&A"), path: "/q-and-a" },
+                      { key: "feedback", label: t("nav.feedback", "Feedback"), path: "/feedback" },
+                    ].map((row) => (
+                      <div
+                        key={row.key}
+                        className="flex items-center justify-between gap-3 rounded-lg border border-dashed border-border/70 bg-card px-4 py-3"
+                      >
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium text-foreground truncate">{row.label}</p>
+                          <p className="text-xs text-muted-foreground truncate">{row.path}</p>
+                        </div>
+                        <Switch
+                          checked={(draftSiteSettings.visibility as any)[row.key]}
+                          onCheckedChange={(checked) => {
+                            setDraftSiteSettings((prev) => ({
+                              ...prev,
+                              visibility: { ...prev.visibility, [row.key]: checked } as any,
+                            }));
+                            setSiteSettingsDirty(true);
+                          }}
+                        />
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="flex items-center justify-end gap-3">
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setDraftSiteSettings(siteSettings || DEFAULT_SITE_SETTINGS);
+                        setSiteSettingsDirty(false);
+                      }}
+                      disabled={savingSiteSettings}
+                    >
+                      {t("common.reset", "Reset")}
+                    </Button>
+                    <Button onClick={handleSaveSiteSettings} disabled={savingSiteSettings || !siteSettingsDirty}>
+                      {savingSiteSettings ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          {t("common.saving", "Saving...")}
+                        </>
+                      ) : (
+                        t("common.saveChanges", "Save changes")
+                      )}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Agreement Tab */}
+          <TabsContent value="agreement">
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Online Agreement</CardTitle>
+                  <CardDescription>
+                    Editable contract template shown before payment.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
                   <div className="space-y-2">
                     <Label>Agreement version</Label>
                     <Input
@@ -2265,20 +2354,53 @@ const AdminDashboard = () => {
                         }));
                         setSiteSettingsDirty(true);
                       }}
-                      className="min-h-[300px] font-mono text-xs"
+                      className="min-h-[360px] font-mono text-xs"
                       placeholder="Use placeholders: {{DATE}}, {{CONTRACT_NUMBER}}, {{CLIENT_NAME}}, {{CLIENT_EMAIL}}, {{CLIENT_PHONE}}, {{CLIENT_REGISTRY}}, {{CLIENT_ADDRESS}}, {{SERVICE_FEE_MNT}}"
                     />
                   </div>
 
-                  <Separator />
+                  <div className="flex items-center justify-end gap-3">
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setDraftSiteSettings(siteSettings || DEFAULT_SITE_SETTINGS);
+                        setSiteSettingsDirty(false);
+                      }}
+                      disabled={savingSiteSettings}
+                    >
+                      {t("common.reset", "Reset")}
+                    </Button>
+                    <Button onClick={handleSaveSiteSettings} disabled={savingSiteSettings || !siteSettingsDirty}>
+                      {savingSiteSettings ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          {t("common.saving", "Saving...")}
+                        </>
+                      ) : (
+                        t("common.saveChanges", "Save changes")
+                      )}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
 
+          {/* Q&A Tab */}
+          <TabsContent value="qna">
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Q&A Content</CardTitle>
+                  <CardDescription>
+                    Manage questions shown on the public Q&A page.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
                   <div className="flex items-center justify-between gap-3">
-                    <div>
-                      <p className="font-medium">Q&A Content</p>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        Manage questions shown on the public Q&A page.
-                      </p>
-                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Add, edit, and remove Q&A cards.
+                    </p>
                     <Button
                       type="button"
                       variant="outline"
@@ -2362,54 +2484,6 @@ const AdminDashboard = () => {
                             className="min-h-[96px]"
                           />
                         </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  <Separator />
-
-                  <div>
-                    <p className="font-medium">{t("dashboard.siteSettings.pageVisibility", "Page visibility")}</p>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {t(
-                        "dashboard.siteSettings.pageVisibilityHelp",
-                        "Hide pages from navigation and show an unavailable screen to visitors."
-                      )}
-                    </p>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {[
-                      { key: "about", label: t("nav.about", "About"), path: "/about" },
-                      { key: "learnMore", label: t("nav.learnMore", "Learn More"), path: "/learn-more" },
-                      { key: "translationService", label: t("nav.translationService", "Translation Service"), path: "/translation-service" },
-                      { key: "gallery", label: t("nav.gallery", "Gallery"), path: "/gallery" },
-                      { key: "news", label: t("nav.news", "News"), path: "/news" },
-                      { key: "blog", label: t("nav.articles", "Articles"), path: "/blog" },
-                      { key: "flight", label: t("nav.flight", "Flight"), path: "/flight" },
-                      { key: "insurance", label: t("nav.insurance", "Insurance"), path: "/insurance" },
-                      { key: "helpCenter", label: t("nav.helpCenter", "Help Center"), path: "/help-center" },
-                      { key: "qAndA", label: t("nav.qAndA", "Q&A"), path: "/q-and-a" },
-                      { key: "feedback", label: t("nav.feedback", "Feedback"), path: "/feedback" },
-                    ].map((row) => (
-                      <div
-                        key={row.key}
-                        className="flex items-center justify-between gap-3 rounded-lg border border-dashed border-border/70 bg-card px-4 py-3"
-                      >
-                        <div className="min-w-0">
-                          <p className="text-sm font-medium text-foreground truncate">{row.label}</p>
-                          <p className="text-xs text-muted-foreground truncate">{row.path}</p>
-                        </div>
-                        <Switch
-                          checked={(draftSiteSettings.visibility as any)[row.key]}
-                          onCheckedChange={(checked) => {
-                            setDraftSiteSettings((prev) => ({
-                              ...prev,
-                              visibility: { ...prev.visibility, [row.key]: checked } as any,
-                            }));
-                            setSiteSettingsDirty(true);
-                          }}
-                        />
                       </div>
                     ))}
                   </div>

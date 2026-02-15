@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Loader2, Upload, X, Pencil, Trash2, Globe, RefreshCcw } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
+import api from "@/api/client";
 import {
   deleteImage,
   getAdminGallery,
@@ -15,13 +16,25 @@ import {
   type GalleryImageItem,
 } from "@/api/upload";
 import { useAuth } from "@/contexts/AuthContext";
+import { useSiteSettings } from "@/contexts/SiteSettingsContext";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 
+type DemoSettingItem = {
+  id?: number;
+  src?: string;
+  alt?: string;
+  title?: string;
+  category?: string;
+  tags?: string[];
+  description?: string;
+  published?: boolean;
+};
+
 // Demo gallery images shown by default
-const defaultGalleryImages = [
+const defaultGalleryImages: DemoSettingItem[] = [
   {
     id: 1,
     src: "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=800&auto=format&fit=crop&q=80",
@@ -114,8 +127,6 @@ const defaultGalleryImages = [
   },
 ];
 
-const DEMO_GALLERY_STORAGE_KEY = "gallery_demo_images_v1";
-
 type GalleryItem = {
   id: string | number;
   filename?: string;
@@ -131,23 +142,35 @@ type GalleryItem = {
   uploadedAt?: string;
 };
 
-const mapDefaultDemoImages = (): GalleryItem[] =>
-  defaultGalleryImages.map((item) => ({
-    ...item,
-    id: `placeholder-${item.id}`,
-    demoId: item.id,
-    isDemo: true,
-    title: item.alt,
-    tags: [],
-    published: true,
-  }));
+const mapDemoSettingsToGalleryItems = (items?: DemoSettingItem[]): GalleryItem[] => {
+  const source = Array.isArray(items) && items.length > 0 ? items : defaultGalleryImages;
+  return source.map((item, index) => {
+    const demoId = Number(item.id || index + 1);
+    const title = String(item.title || item.alt || `Demo image ${demoId}`);
+    return {
+      id: `demo-${demoId}`,
+      demoId,
+      isDemo: true,
+      src: String(item.src || ""),
+      alt: String(item.alt || title),
+      title,
+      category: String(item.category || "general").toLowerCase(),
+      tags: Array.isArray(item.tags) ? item.tags.map((tag) => String(tag)) : [],
+      description: String(item.description || ""),
+      published: item.published !== false,
+    };
+  }).filter((item) => Boolean(item.src));
+};
 
 const Gallery = () => {
   const { t } = useTranslation();
   const { user } = useAuth();
+  const { settings, refresh: refreshSiteSettings } = useSiteSettings();
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedImage, setSelectedImage] = useState<GalleryItem | null>(null);
-  const [demoImages, setDemoImages] = useState<GalleryItem[]>(() => mapDefaultDemoImages());
+  const [demoImages, setDemoImages] = useState<GalleryItem[]>(() =>
+    mapDemoSettingsToGalleryItems(settings.galleryDemoItems as DemoSettingItem[])
+  );
   const [uploadedImages, setUploadedImages] = useState<GalleryItem[] | null>(null);
   const [isPublishing, setIsPublishing] = useState(false);
   const [editingImage, setEditingImage] = useState<GalleryItem | null>(null);
@@ -244,45 +267,53 @@ const Gallery = () => {
   }, [fetchGallery]);
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(DEMO_GALLERY_STORAGE_KEY);
-      if (!raw) return;
-      const parsed = JSON.parse(raw) as unknown;
-      if (!Array.isArray(parsed) || parsed.length === 0) return;
-      const normalized = parsed
-        .map((item, index) => {
-          const row = item as Partial<GalleryItem>;
-          const fallbackDemoId = Number(row.demoId || index + 1);
-          return {
-            id: String(row.id || `placeholder-${fallbackDemoId}`),
-            demoId: fallbackDemoId,
-            isDemo: true,
-            src: String(row.src || ""),
-            alt: String(row.alt || row.title || "Demo image"),
-            title: String(row.title || row.alt || "Demo image"),
-            category: String(row.category || "general"),
-            tags: Array.isArray(row.tags) ? row.tags.map((tag) => String(tag)) : [],
-            description: String(row.description || ""),
-            published: row.published !== false,
-          } satisfies GalleryItem;
-        })
-        .filter((item) => Boolean(item.src));
+    const intervalId = window.setInterval(() => {
+      void refreshSiteSettings();
+      void fetchGallery()
+        .then((mapped) => setUploadedImages(mapped))
+        .catch(() => {
+          // Ignore transient poll errors.
+        });
+    }, 20_000);
 
-      if (normalized.length > 0) {
-        setDemoImages(normalized);
-      }
-    } catch {
-      // Ignore invalid local cache and use defaults.
-    }
-  }, []);
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, [fetchGallery, refreshSiteSettings]);
 
   useEffect(() => {
-    try {
-      localStorage.setItem(DEMO_GALLERY_STORAGE_KEY, JSON.stringify(demoImages));
-    } catch {
-      // Ignore storage errors in restricted environments.
-    }
-  }, [demoImages]);
+    setDemoImages(mapDemoSettingsToGalleryItems(settings.galleryDemoItems as DemoSettingItem[]));
+  }, [settings.galleryDemoItems]);
+
+  const saveDemoItemsToServer = useCallback(
+    async (nextDemoImages: GalleryItem[]) => {
+      if (user?.role !== "ADMIN") return;
+
+      const payloadDemo = nextDemoImages
+        .map((item, index) => ({
+          id: Number(item.demoId || index + 1),
+          src: String(item.src || "").trim(),
+          alt: String(item.alt || item.title || `Demo image ${index + 1}`).trim(),
+          title: String(item.title || item.alt || `Demo image ${index + 1}`).trim(),
+          category: String(item.category || "general").trim().toLowerCase(),
+          tags: Array.isArray(item.tags) ? item.tags.map((tag) => String(tag).trim()).filter(Boolean) : [],
+          description: String(item.description || "").trim(),
+          published: item.published !== false,
+        }))
+        .filter((item) => Boolean(item.src) && Boolean(item.alt))
+        .slice(0, 120);
+
+      const currentRes = await api.get("/api/admin/site-settings");
+      const currentSettings = currentRes.data?.data || settings;
+
+      await api.put("/api/admin/site-settings", {
+        ...currentSettings,
+        galleryDemoItems: payloadDemo,
+      });
+      await refreshSiteSettings();
+    },
+    [refreshSiteSettings, settings, user?.role]
+  );
 
   const usingUploads = (uploadedImages?.length ?? 0) > 0;
 
@@ -389,35 +420,33 @@ const Gallery = () => {
           .map((tag) => tag.trim())
           .filter(Boolean)
           .slice(0, 20);
-        setDemoImages((prev) =>
-          prev.map((item) =>
-            item.id === editingImage.id
-              ? {
-                  ...item,
-                  title: editForm.title || item.title,
-                  alt: editForm.title || item.alt,
-                  category: (editForm.category || item.category || "general").trim().toLowerCase(),
-                  tags: normalizedTags,
-                  description: editForm.description || "",
-                  published: editForm.published,
-                }
-              : item
-          )
+        const previousDemoImages = [...demoImages];
+        const nextDemoImages = previousDemoImages.map((item) =>
+          item.id === editingImage.id
+            ? {
+                ...item,
+                title: editForm.title || item.title,
+                alt: editForm.title || item.alt,
+                category: (editForm.category || item.category || "general").trim().toLowerCase(),
+                tags: normalizedTags,
+                description: editForm.description || "",
+                published: editForm.published,
+              }
+            : item
         );
+        setDemoImages(nextDemoImages);
+
+        try {
+          await saveDemoItemsToServer(nextDemoImages);
+        } catch (error: any) {
+          setDemoImages(previousDemoImages);
+          throw error;
+        }
 
         if (selectedImage?.id === editingImage.id) {
+          const updatedImage = nextDemoImages.find((item) => item.id === editingImage.id);
           setSelectedImage((prev) =>
-            prev
-              ? {
-                  ...prev,
-                  title: editForm.title || prev.title,
-                  alt: editForm.title || prev.alt,
-                  category: (editForm.category || prev.category || "general").trim().toLowerCase(),
-                  tags: normalizedTags,
-                  description: editForm.description || "",
-                  published: editForm.published,
-                }
-              : prev
+            updatedImage && prev ? { ...prev, ...updatedImage } : prev
           );
         }
 
@@ -473,11 +502,19 @@ const Gallery = () => {
     const nextPublished = image.published === false;
     try {
       if (image.isDemo) {
-        setDemoImages((prev) =>
-          prev.map((item) =>
-            item.id === image.id ? { ...item, published: nextPublished } : item
-          )
+        const previousDemoImages = [...demoImages];
+        const nextDemoImages = previousDemoImages.map((item) =>
+          item.id === image.id ? { ...item, published: nextPublished } : item
         );
+        setDemoImages(nextDemoImages);
+
+        try {
+          await saveDemoItemsToServer(nextDemoImages);
+        } catch (error: any) {
+          setDemoImages(previousDemoImages);
+          throw error;
+        }
+
         if (selectedImage?.id === image.id) {
           setSelectedImage((prev) =>
             prev ? { ...prev, published: nextPublished } : prev
@@ -521,7 +558,17 @@ const Gallery = () => {
     if (!window.confirm(t("gallery.deleteConfirm", { defaultValue: "Delete this image?" }))) return;
     try {
       if (image.isDemo) {
-        setDemoImages((prev) => prev.filter((item) => item.id !== image.id));
+        const previousDemoImages = [...demoImages];
+        const nextDemoImages = previousDemoImages.filter((item) => item.id !== image.id);
+        setDemoImages(nextDemoImages);
+
+        try {
+          await saveDemoItemsToServer(nextDemoImages);
+        } catch (error: any) {
+          setDemoImages(previousDemoImages);
+          throw error;
+        }
+
         if (selectedImage?.id === image.id) {
           setSelectedImage(null);
         }
@@ -566,27 +613,30 @@ const Gallery = () => {
       }
 
       if (replacingImage.isDemo) {
-        setDemoImages((prev) =>
-          prev.map((item) =>
-            item.id === replacingImage.id
-              ? {
-                  ...item,
-                  src: nextUrl || item.src,
-                  alt: replacingImage.title || replacingImage.alt,
-                }
-              : item
-          )
+        const previousDemoImages = [...demoImages];
+        const nextDemoImages = previousDemoImages.map((item) =>
+          item.id === replacingImage.id
+            ? {
+                ...item,
+                src: nextUrl || item.src,
+                alt: replacingImage.title || replacingImage.alt,
+                title: replacingImage.title || replacingImage.alt || item.title,
+              }
+            : item
         );
+        setDemoImages(nextDemoImages);
+
+        try {
+          await saveDemoItemsToServer(nextDemoImages);
+        } catch (error: any) {
+          setDemoImages(previousDemoImages);
+          throw error;
+        }
 
         if (selectedImage?.id === replacingImage.id) {
+          const updatedImage = nextDemoImages.find((item) => item.id === replacingImage.id);
           setSelectedImage((prev) =>
-            prev
-              ? {
-                  ...prev,
-                  src: nextUrl || prev.src,
-                  alt: replacingImage.title || prev.alt,
-                }
-              : prev
+            updatedImage && prev ? { ...prev, ...updatedImage } : prev
           );
         }
 

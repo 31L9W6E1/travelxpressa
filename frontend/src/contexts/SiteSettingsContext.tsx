@@ -35,6 +35,16 @@ export type SiteSettings = {
     headOfficeHours?: string;
     onlineHours?: string;
   };
+  galleryDemoItems: Array<{
+    id: number;
+    src: string;
+    alt: string;
+    title?: string;
+    category: string;
+    tags?: string[];
+    description?: string;
+    published?: boolean;
+  }>;
   qAndAItems: Array<{
     q: string;
     a: string;
@@ -104,6 +114,158 @@ IV. ҮЙЛЧИЛГЭЭНИЙ ХӨЛС, ТӨЛБӨР
     headOfficeHours: "Даваа-Баасан: 08:00-18:00\nБямба, Ням: Амарна",
     onlineHours: "Онлайнаар амралтын өдрүүдэд 10:00-19:00 ажиллана",
   },
+  galleryDemoItems: [
+    {
+      id: 1,
+      src: "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=800&auto=format&fit=crop&q=80",
+      alt: "Airplane wing over clouds",
+      title: "Airplane wing over clouds",
+      category: "travel",
+      tags: [],
+      description: "",
+      published: true,
+    },
+    {
+      id: 2,
+      src: "https://images.unsplash.com/photo-1569154941061-e231b4725ef1?w=800&auto=format&fit=crop&q=80",
+      alt: "US Capitol Building",
+      title: "US Capitol Building",
+      category: "destinations",
+      tags: [],
+      description: "",
+      published: true,
+    },
+    {
+      id: 3,
+      src: "https://images.unsplash.com/photo-1485738422979-f5c462d49f74?w=800&auto=format&fit=crop&q=80",
+      alt: "New York City skyline",
+      title: "New York City skyline",
+      category: "destinations",
+      tags: [],
+      description: "",
+      published: true,
+    },
+    {
+      id: 4,
+      src: "https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=800&auto=format&fit=crop&q=80",
+      alt: "Golden Gate Bridge",
+      title: "Golden Gate Bridge",
+      category: "destinations",
+      tags: [],
+      description: "",
+      published: true,
+    },
+    {
+      id: 5,
+      src: "https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=800&auto=format&fit=crop&q=80",
+      alt: "Grand Canyon",
+      title: "Grand Canyon",
+      category: "nature",
+      tags: [],
+      description: "",
+      published: true,
+    },
+    {
+      id: 6,
+      src: "https://images.unsplash.com/photo-1534430480872-3498386e7856?w=800&auto=format&fit=crop&q=80",
+      alt: "Statue of Liberty",
+      title: "Statue of Liberty",
+      category: "landmarks",
+      tags: [],
+      description: "",
+      published: true,
+    },
+    {
+      id: 7,
+      src: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&auto=format&fit=crop&q=80",
+      alt: "Los Angeles downtown",
+      title: "Los Angeles downtown",
+      category: "destinations",
+      tags: [],
+      description: "",
+      published: true,
+    },
+    {
+      id: 8,
+      src: "https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?w=800&auto=format&fit=crop&q=80",
+      alt: "City at night",
+      title: "City at night",
+      category: "destinations",
+      tags: [],
+      description: "",
+      published: true,
+    },
+    {
+      id: 9,
+      src: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&auto=format&fit=crop&q=80",
+      alt: "Mountain landscape",
+      title: "Mountain landscape",
+      category: "nature",
+      tags: [],
+      description: "",
+      published: true,
+    },
+    {
+      id: 10,
+      src: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=800&auto=format&fit=crop&q=80",
+      alt: "City street view",
+      title: "City street view",
+      category: "destinations",
+      tags: [],
+      description: "",
+      published: true,
+    },
+    {
+      id: 11,
+      src: "https://images.unsplash.com/photo-1518391846015-55a9cc003b25?w=800&auto=format&fit=crop&q=80",
+      alt: "Las Vegas strip",
+      title: "Las Vegas strip",
+      category: "destinations",
+      tags: [],
+      description: "",
+      published: true,
+    },
+    {
+      id: 12,
+      src: "https://images.unsplash.com/photo-1507608616759-54f48f0af0ee?w=800&auto=format&fit=crop&q=80",
+      alt: "Travel adventure",
+      title: "Travel adventure",
+      category: "travel",
+      tags: [],
+      description: "",
+      published: true,
+    },
+    {
+      id: 13,
+      src: "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=800&auto=format&fit=crop&q=80",
+      alt: "Lake and mountains",
+      title: "Lake and mountains",
+      category: "nature",
+      tags: [],
+      description: "",
+      published: true,
+    },
+    {
+      id: 14,
+      src: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=800&auto=format&fit=crop&q=80",
+      alt: "Scenic cityscape",
+      title: "Scenic cityscape",
+      category: "destinations",
+      tags: [],
+      description: "",
+      published: true,
+    },
+    {
+      id: 15,
+      src: "https://images.unsplash.com/photo-1500835556837-99ac94a94552?w=800&auto=format&fit=crop&q=80",
+      alt: "Travel passport and map",
+      title: "Travel passport and map",
+      category: "travel",
+      tags: [],
+      description: "",
+      published: true,
+    },
+  ],
   qAndAItems: [
     {
       q: "Визийн зөвлөгөө авахын тулд заавал оффис дээр очих уу?",
@@ -175,6 +337,10 @@ const normalizeSettings = (raw?: Partial<SiteSettings> | null): SiteSettings => 
     ...DEFAULT_SITE_SETTINGS.quickHelp,
     ...(raw?.quickHelp || {}),
   },
+  galleryDemoItems:
+    Array.isArray(raw?.galleryDemoItems) && raw?.galleryDemoItems.length > 0
+      ? raw.galleryDemoItems
+      : DEFAULT_SITE_SETTINGS.galleryDemoItems,
   qAndAItems: Array.isArray(raw?.qAndAItems) && raw?.qAndAItems.length > 0
     ? raw.qAndAItems
     : DEFAULT_SITE_SETTINGS.qAndAItems,

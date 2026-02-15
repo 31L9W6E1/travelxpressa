@@ -124,6 +124,21 @@ export const siteSettingsSchema = z.object({
     )
     .max(60)
     .optional(),
+  galleryDemoItems: z
+    .array(
+      z.object({
+        id: z.number().int().min(1).max(9999).optional(),
+        src: z.string().min(1).max(2000),
+        alt: z.string().min(1).max(200),
+        title: z.string().max(200).optional().or(z.literal('')),
+        category: z.string().min(1).max(80),
+        tags: z.array(z.string().max(40)).max(20).optional(),
+        description: z.string().max(500).optional().or(z.literal('')),
+        published: z.boolean().optional(),
+      })
+    )
+    .max(120)
+    .optional(),
 });
 
 // User schemas

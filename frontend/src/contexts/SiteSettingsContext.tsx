@@ -89,9 +89,9 @@ IV. ҮЙЛЧИЛГЭЭНИЙ ХӨЛС, ТӨЛБӨР
 4.3. Гэрээ байгуулж, үйлчилгээ эхэлснээс хойш үйлчилгээний хөлс буцаагдахгүй.`,
   },
   quickHelp: {
-    title: "Quick Help",
-    description: "Need support or visa updates? Check our latest guides.",
-    facebookUrl: "https://www.facebook.com",
+    title: "Шуурхай тусламж",
+    description: "Дэмжлэг болон үйлчилгээний мэдээлэл авах бол бидэнтэй холбогдоорой.",
+    facebookUrl: "",
     phone: "0000000",
     email: "support@visamn.com",
     branch1Title: "Салбар 1",

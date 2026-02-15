@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
-import { Loader2, Upload, X, Pencil, Trash2, Globe } from "lucide-react";
+import { Loader2, Upload, X, Pencil, Trash2, Globe, RefreshCcw } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import {
   deleteImage,
@@ -137,6 +137,8 @@ const Gallery = () => {
   const [editingImage, setEditingImage] = useState<GalleryItem | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isSavingMeta, setIsSavingMeta] = useState(false);
+  const [replacingImage, setReplacingImage] = useState<GalleryItem | null>(null);
+  const [isReplacingPhoto, setIsReplacingPhoto] = useState(false);
   const [editForm, setEditForm] = useState({
     title: "",
     category: "",
@@ -145,6 +147,7 @@ const Gallery = () => {
     published: true,
   });
   const uploadInputRef = useRef<HTMLInputElement>(null);
+  const replaceInputRef = useRef<HTMLInputElement>(null);
 
   const getCategoryLabel = useCallback(
     (category: string) =>
@@ -226,25 +229,30 @@ const Gallery = () => {
 
   const usingUploads = (uploadedImages?.length ?? 0) > 0;
 
-  useEffect(() => {
-    if (usingUploads) {
-      setSelectedCategory("all");
-    }
-  }, [usingUploads]);
+  const placeholderItems = useMemo(
+    () =>
+      galleryImages.map((item) => ({
+        ...item,
+        id: `placeholder-${item.id}`,
+        title: item.alt,
+        tags: [],
+        published: true,
+      })),
+    []
+  );
 
   const categories = useMemo(() => {
-    if (!usingUploads) {
-      return ["all", "destinations", "nature", "landmarks", "travel"];
-    }
+    if (!usingUploads) return ["all", "destinations", "nature", "landmarks", "travel"];
+    const source = [...placeholderItems, ...(uploadedImages || [])];
     const dynamic = Array.from(
       new Set(
-        (uploadedImages || [])
+        source
           .map((img) => (img.category || "").trim().toLowerCase())
           .filter(Boolean)
       )
     );
     return ["all", ...dynamic];
-  }, [uploadedImages, usingUploads]);
+  }, [placeholderItems, uploadedImages, usingUploads]);
 
   useEffect(() => {
     if (!categories.includes(selectedCategory)) {
@@ -252,14 +260,10 @@ const Gallery = () => {
     }
   }, [categories, selectedCategory]);
 
-  const galleryItems: GalleryItem[] = usingUploads
-    ? uploadedImages || []
-    : galleryImages.map((item) => ({
-        ...item,
-        title: item.alt,
-        tags: [],
-        published: true,
-      }));
+  const galleryItems: GalleryItem[] = useMemo(
+    () => [...(uploadedImages || []), ...placeholderItems],
+    [uploadedImages, placeholderItems]
+  );
 
   const filteredImages =
     selectedCategory === "all"
@@ -407,6 +411,56 @@ const Gallery = () => {
     }
   };
 
+  const triggerReplacePhoto = (image: GalleryItem) => {
+    if (user?.role !== "ADMIN" || !image.filename || isReplacingPhoto) return;
+    setReplacingImage(image);
+    replaceInputRef.current?.click();
+  };
+
+  const handleReplacePhoto = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || user?.role !== "ADMIN" || !replacingImage?.filename) {
+      event.target.value = "";
+      return;
+    }
+
+    setIsReplacingPhoto(true);
+
+    try {
+      const uploadResult = await uploadImage(file);
+      const nextFilename = uploadResult?.data?.filename;
+      if (!nextFilename) {
+        throw new Error(t("gallery.replaceFailed", { defaultValue: "Failed to replace image" }));
+      }
+
+      await updateGalleryImageMeta(nextFilename, {
+        title: replacingImage.title || replacingImage.alt,
+        category: replacingImage.category,
+        tags: replacingImage.tags,
+        description: replacingImage.description,
+        published: replacingImage.published !== false,
+      });
+
+      await deleteImage(replacingImage.filename);
+
+      const mapped = await fetchGallery();
+      setUploadedImages(mapped);
+
+      if (selectedImage?.filename === replacingImage.filename) {
+        const nextSelected = mapped.find((item) => item.filename === nextFilename);
+        setSelectedImage(nextSelected || null);
+      }
+
+      toast.success(t("gallery.replacedSuccess", { defaultValue: "Image replaced" }));
+    } catch (error: any) {
+      toast.error(error?.message || t("gallery.replaceFailed", { defaultValue: "Failed to replace image" }));
+    } finally {
+      setReplacingImage(null);
+      setIsReplacingPhoto(false);
+      event.target.value = "";
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <PageHeader
@@ -425,6 +479,14 @@ const Gallery = () => {
                 className="hidden"
                 onChange={handlePublishPhotos}
                 disabled={isPublishing}
+              />
+              <input
+                ref={replaceInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleReplacePhoto}
+                disabled={isReplacingPhoto}
               />
               <Button
                 onClick={() => uploadInputRef.current?.click()}
@@ -560,6 +622,18 @@ const Gallery = () => {
                               size="sm"
                               variant="outline"
                               className="h-8 px-2"
+                              onClick={() => triggerReplacePhoto(image)}
+                              disabled={isReplacingPhoto}
+                            >
+                              <RefreshCcw className="w-3.5 h-3.5 mr-1" />
+                              {isReplacingPhoto && replacingImage?.id === image.id
+                                ? t("gallery.replacing", { defaultValue: "Replacing..." })
+                                : t("gallery.changePhoto", { defaultValue: "Change photo" })}
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-8 px-2"
                               onClick={() => handleTogglePublish(image)}
                             >
                               <Globe className="w-3.5 h-3.5 mr-1" />
@@ -639,6 +713,20 @@ const Gallery = () => {
                 >
                   <Pencil className="w-3.5 h-3.5 mr-1" />
                   {t("common.edit", { defaultValue: "Edit" })}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  disabled={isReplacingPhoto}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    triggerReplacePhoto(selectedImage);
+                  }}
+                >
+                  <RefreshCcw className="w-3.5 h-3.5 mr-1" />
+                  {isReplacingPhoto && replacingImage?.id === selectedImage.id
+                    ? t("gallery.replacing", { defaultValue: "Replacing..." })
+                    : t("gallery.changePhoto", { defaultValue: "Change photo" })}
                 </Button>
                 <Button
                   size="sm"

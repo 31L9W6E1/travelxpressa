@@ -49,7 +49,7 @@ const BRAND_LOGO_TEXT = "/branding/logo-visamn.png";
 const Navbar = () => {
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { settings } = useSiteSettings();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -58,11 +58,34 @@ const Navbar = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [notificationCount, setNotificationCount] = useState(0);
+  const [seenNotificationIds, setSeenNotificationIds] = useState<string[]>([]);
 
   const notificationDesktopRef = useRef<HTMLDivElement>(null);
   const notificationMobileRef = useRef<HTMLDivElement>(null);
   const userMenuDesktopRef = useRef<HTMLDivElement>(null);
   const userMenuMobileRef = useRef<HTMLDivElement>(null);
+
+  const notificationStorageKey = user ? `seen_notifications_${user.role}_${user.id}` : null;
+
+  const persistSeenNotifications = (next: string[]) => {
+    if (!notificationStorageKey) return;
+    try {
+      localStorage.setItem(notificationStorageKey, JSON.stringify(next.slice(-300)));
+    } catch {
+      // Ignore storage errors in private mode / restricted environments.
+    }
+  };
+
+  const markNotificationsSeen = (ids: string[]) => {
+    if (!ids.length) return;
+    setSeenNotificationIds((prev) => {
+      const merged = Array.from(new Set([...prev, ...ids]));
+      persistSeenNotifications(merged);
+      return merged;
+    });
+    setNotifications((prev) => prev.filter((item) => !ids.includes(item.id)));
+    setNotificationCount((prev) => Math.max(0, prev - ids.length));
+  };
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -100,6 +123,29 @@ const Navbar = () => {
   }, []);
 
   useEffect(() => {
+    if (!notificationStorageKey) {
+      setSeenNotificationIds([]);
+      return;
+    }
+
+    try {
+      const raw = localStorage.getItem(notificationStorageKey);
+      if (!raw) {
+        setSeenNotificationIds([]);
+        return;
+      }
+      const parsed = JSON.parse(raw) as unknown;
+      if (Array.isArray(parsed)) {
+        setSeenNotificationIds(parsed.map((item) => String(item)));
+      } else {
+        setSeenNotificationIds([]);
+      }
+    } catch {
+      setSeenNotificationIds([]);
+    }
+  }, [notificationStorageKey]);
+
+  useEffect(() => {
     let cancelled = false;
 
     const loadNotifications = async () => {
@@ -120,31 +166,30 @@ const Navbar = () => {
           const openThreads = (openThreadsRes.data?.data || [])
             .filter((thread: any) => thread.status === "OPEN")
             .filter((thread: any) => Number(thread?._count?.messages || 0) > 0);
-          const unreadMessageTotal = openThreads.reduce(
-            (sum: number, tItem: any) => sum + Number(tItem?._count?.messages || 0),
-            0
-          );
 
           const next: NotificationItem[] = [];
           for (const item of pendingInquiries.slice(0, 3)) {
+            const version = item?.updatedAt || item?.createdAt || "";
             next.push({
-              id: `inq-${item.id}`,
+              id: `inq-${item.id}-${version}`,
               title: item.name || item.email || "Pending Inquiry",
               subtitle: "Translation/Support request pending",
               to: "/admin/requests",
             });
           }
           for (const item of openThreads.slice(0, 2)) {
+            const messageCount = Number(item?._count?.messages || 0);
             next.push({
-              id: `thread-${item.id}`,
+              id: `thread-${item.id}-${messageCount}`,
               title: item.user?.name || item.user?.email || "Open support thread",
-              subtitle: `${Number(item?._count?.messages || 0)} unread message(s)`,
+              subtitle: `${messageCount} unread message(s)`,
               to: `/contactsupport?threadId=${item.id}`,
             });
           }
           if (!cancelled) {
-            setNotifications(next);
-            setNotificationCount(Math.min(99, pendingInquiries.length + unreadMessageTotal));
+            const unseen = next.filter((item) => !seenNotificationIds.includes(item.id));
+            setNotifications(unseen);
+            setNotificationCount(Math.min(99, unseen.length));
           }
           return;
         }
@@ -156,31 +201,30 @@ const Navbar = () => {
         const myInquiries = myInquiriesRes.data?.data || [];
         const myThreads = myThreadsRes.data?.data || [];
         const unreadThreads = myThreads.filter((thread: any) => Number(thread?._count?.messages || 0) > 0);
-        const unreadMessageTotal = unreadThreads.reduce(
-          (sum: number, tItem: any) => sum + Number(tItem?._count?.messages || 0),
-          0
-        );
         const next: NotificationItem[] = [];
 
         for (const item of myInquiries.slice(0, 3)) {
+          const version = item?.updatedAt || item?.createdAt || "";
           next.push({
-            id: `my-inq-${item.id}`,
+            id: `my-inq-${item.id}-${version}`,
             title: `${item.serviceType || "Request"} • ${item.status || "Pending"}`,
             subtitle: "Check your inbox for updates",
             to: "/profile/inbox",
           });
         }
         for (const item of unreadThreads.slice(0, 2)) {
+          const messageCount = Number(item?._count?.messages || 0);
           next.push({
-            id: `my-thread-${item.id}`,
+            id: `my-thread-${item.id}-${messageCount}`,
             title: item.subject || "Support conversation",
-            subtitle: `${Number(item?._count?.messages || 0)} new message(s)`,
+            subtitle: `${messageCount} new message(s)`,
             to: `/contactsupport?threadId=${item.id}`,
           });
         }
         if (!cancelled) {
-          setNotifications(next);
-          setNotificationCount(Math.min(99, unreadMessageTotal + myInquiries.length));
+          const unseen = next.filter((item) => !seenNotificationIds.includes(item.id));
+          setNotifications(unseen);
+          setNotificationCount(Math.min(99, unseen.length));
         }
       } catch {
         if (!cancelled) {
@@ -202,7 +246,7 @@ const Navbar = () => {
       cancelled = true;
       window.clearInterval(intervalId);
     };
-  }, [user, t]);
+  }, [seenNotificationIds, t, user]);
 
   const closeMobileMenu = () => setIsMenuOpen(false);
 
@@ -223,6 +267,7 @@ const Navbar = () => {
             key={item.id}
             to={item.to}
             onClick={() => {
+              markNotificationsSeen([item.id]);
               setIsNotificationOpen(false);
               if (isMobile) closeMobileMenu();
             }}
@@ -345,6 +390,24 @@ const Navbar = () => {
   const desktopLinkClass = `${navItemBaseClass} px-3`;
   const mobileLinkClass = `${navItemBaseClass} px-3`;
   const quickHelp = settings.quickHelp;
+  const quickHelpFacebookUrl = (quickHelp.facebookUrl || "https://www.facebook.com").trim();
+  const isMongolian = i18n.resolvedLanguage?.toLowerCase().startsWith("mn") ?? false;
+  const quickHelpTitle =
+    isMongolian && quickHelp.title?.trim() === "Quick Help"
+      ? t("nav.quickHelp", { defaultValue: "Шуурхай тусламж" })
+      : quickHelp.title || t("nav.quickHelp", { defaultValue: "Quick Help" });
+  const quickHelpDescription =
+    isMongolian && quickHelp.description?.trim() === "Need support or visa updates? Check our latest guides."
+      ? t("nav.quickHelpText", {
+          defaultValue: "Дэмжлэг болон визийн шинэчлэлт хэрэгтэй бол бидэнтэй холбогдоорой.",
+        })
+      : quickHelp.description ||
+        t("nav.quickHelpText", {
+          defaultValue: "Need support or visa updates? Check our latest guides.",
+        });
+  const contactSupportLabel = t("nav.contactSupport", {
+    defaultValue: isMongolian ? "Дэмжлэгтэй холбогдох" : "Contact support",
+  });
   const renderLines = (value?: string) =>
     String(value || "")
       .split("\n")
@@ -486,12 +549,10 @@ const Navbar = () => {
           ) : (
             <div className="rounded-lg border border-dashed border-border bg-secondary/30 p-3">
               <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-muted-foreground">
-                {quickHelp.title || t("nav.quickHelp", { defaultValue: "Quick Help" })}
+                {quickHelpTitle}
               </p>
               <p className="text-sm text-foreground mt-1">
-                {quickHelp.description || t("nav.quickHelpText", {
-                  defaultValue: "Need support or visa updates? Check our latest guides.",
-                })}
+                {quickHelpDescription}
               </p>
               <div className="mt-3 space-y-1 text-xs text-muted-foreground">
                 {quickHelp.phone ? <p>Утасны дугаар: {quickHelp.phone}</p> : null}
@@ -511,32 +572,20 @@ const Navbar = () => {
               <div className="mt-3 flex items-center gap-2">
                 <Link
                   to="/contactsupport"
-                  className="text-sm font-medium text-primary hover:underline"
+                  className="text-xs font-semibold text-primary hover:underline"
                 >
-                  {t("nav.contactSupport", { defaultValue: "Contact support" })}
+                  {contactSupportLabel}
                 </Link>
-                {settings.visibility.news && (
-                  <>
-                    <span className="text-muted-foreground">•</span>
-                    <Link to="/news" className="text-sm font-medium text-primary hover:underline">
-                      {t("nav.news", { defaultValue: "News" })}
-                    </Link>
-                  </>
-                )}
-                {quickHelp.facebookUrl ? (
-                  <>
-                    <span className="text-muted-foreground">•</span>
-                    <a
-                      href={quickHelp.facebookUrl}
-                      target="_blank"
-                      rel="noreferrer noopener"
-                      className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
-                    >
-                      <Facebook className="w-3.5 h-3.5" />
-                      Facebook
-                    </a>
-                  </>
-                ) : null}
+                <span className="text-muted-foreground">•</span>
+                <a
+                  href={quickHelpFacebookUrl}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
+                >
+                  <Facebook className="w-3.5 h-3.5" />
+                  Facebook
+                </a>
               </div>
             </div>
           )}
@@ -559,8 +608,12 @@ const Navbar = () => {
             <div className="relative" ref={notificationDesktopRef}>
               <button
                 onClick={() => {
-                  setIsNotificationOpen((prev) => !prev);
+                  const nextOpen = !isNotificationOpen;
+                  setIsNotificationOpen(nextOpen);
                   setIsUserMenuOpen(false);
+                  if (nextOpen) {
+                    markNotificationsSeen(notifications.map((item) => item.id));
+                  }
                 }}
                 className="relative p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
                 aria-label="Notifications"
@@ -663,8 +716,12 @@ const Navbar = () => {
             <div className="relative" ref={notificationMobileRef}>
               <button
                 onClick={() => {
-                  setIsNotificationOpen((prev) => !prev);
+                  const nextOpen = !isNotificationOpen;
+                  setIsNotificationOpen(nextOpen);
                   setIsUserMenuOpen(false);
+                  if (nextOpen) {
+                    markNotificationsSeen(notifications.map((item) => item.id));
+                  }
                 }}
                 className="relative p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
                 aria-label="Notifications"
@@ -846,12 +903,10 @@ const Navbar = () => {
         <div className="p-3 border-t border-dashed border-border/70">
           <div className="rounded-lg border border-dashed border-border bg-secondary/30 p-3">
             <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-muted-foreground">
-              {quickHelp.title || t("nav.quickHelp", { defaultValue: "Quick Help" })}
+              {quickHelpTitle}
             </p>
             <p className="text-sm text-foreground mt-1">
-              {quickHelp.description || t("nav.quickHelpTextMobile", {
-                defaultValue: "Support, updates, and guides are available here.",
-              })}
+              {quickHelpDescription}
             </p>
             <div className="mt-3 space-y-1 text-xs text-muted-foreground">
               {quickHelp.phone ? <p>Утасны дугаар: {quickHelp.phone}</p> : null}
@@ -872,32 +927,20 @@ const Navbar = () => {
               <Link
                 to="/contactsupport"
                 onClick={closeMobileMenu}
-                className="text-sm font-medium text-primary hover:underline"
+                className="text-xs font-semibold text-primary hover:underline"
               >
-                {t("nav.contactSupport", { defaultValue: "Contact support" })}
+                {contactSupportLabel}
               </Link>
-              {settings.visibility.news && (
-                <>
-                  <span className="text-muted-foreground">•</span>
-                  <Link to="/news" onClick={closeMobileMenu} className="text-sm font-medium text-primary hover:underline">
-                    {t("nav.news", { defaultValue: "News" })}
-                  </Link>
-                </>
-              )}
-              {quickHelp.facebookUrl ? (
-                <>
-                  <span className="text-muted-foreground">•</span>
-                  <a
-                    href={quickHelp.facebookUrl}
-                    target="_blank"
-                    rel="noreferrer noopener"
-                    className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
-                  >
-                    <Facebook className="w-3.5 h-3.5" />
-                    Facebook
-                  </a>
-                </>
-              ) : null}
+              <span className="text-muted-foreground">•</span>
+              <a
+                href={quickHelpFacebookUrl}
+                target="_blank"
+                rel="noreferrer noopener"
+                className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
+              >
+                <Facebook className="w-3.5 h-3.5" />
+                Facebook
+              </a>
             </div>
           </div>
         </div>

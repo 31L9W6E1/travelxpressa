@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Loader2, Upload, X, Pencil, Trash2, Globe, RefreshCcw } from "lucide-react";
-import PageHeader from "@/components/PageHeader";
 import api from "@/api/client";
 import {
   deleteImage,
@@ -703,86 +702,103 @@ const Gallery = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <PageHeader
-        title={t("gallery.title", { defaultValue: "Travel Gallery" })}
-        subtitle={t("gallery.subtitle", {
-          defaultValue: "Discover the beauty of destinations awaiting your journey.",
-        })}
-        backgroundImageUrl={galleryHeroBackground}
-        className="border-b-0"
-        actions={
-          user?.role === "ADMIN" ? (
-            <>
-              <input
-                ref={uploadInputRef}
-                type="file"
-                accept="image/*"
-                multiple
-                className="hidden"
-                onChange={handlePublishPhotos}
-                disabled={isPublishing}
-              />
-              <input
-                ref={replaceInputRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleReplacePhoto}
-                disabled={isReplacingPhoto}
-              />
-              <Button
-                onClick={() => uploadInputRef.current?.click()}
-                disabled={isPublishing}
-                className="w-full sm:w-auto sm:min-w-[180px]"
-              >
-                {isPublishing ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    {t("gallery.publishing", { defaultValue: "Publishing..." })}
-                  </>
-                ) : (
-                  <>
-                    <Upload className="w-4 h-4 mr-2" />
-                    {t("gallery.publishPhotos", { defaultValue: "Publish Photos" })}
-                  </>
-                )}
-              </Button>
-            </>
-          ) : null
-        }
-      >
-        {categories.length > 1 ? (
-          <div className="flex flex-wrap items-center justify-start gap-2">
-            {categories.map((category) => (
-              <button
-                key={category}
-                onClick={() => setSelectedCategory(category)}
-                className={topicChipClass(selectedCategory === category)}
-              >
-                {getCategoryLabel(category)}
-              </button>
-            ))}
-            {usingUploads ? (
-              <>
-                <Badge variant="secondary" className="ml-auto">
-                  {t("gallery.publishedCount", {
-                    defaultValue: "Published: {{count}}",
-                    count: (uploadedImages || []).filter((img) => img.published !== false).length,
-                  })}
-                </Badge>
-                {user?.role === "ADMIN" ? (
-                  <Badge variant="outline">
-                    {t("gallery.draftCount", {
-                      defaultValue: "Draft: {{count}}",
-                      count: (uploadedImages || []).filter((img) => img.published === false).length,
-                    })}
-                  </Badge>
-                ) : null}
-              </>
+      <section className="relative overflow-hidden border-b-0">
+        <div className="pointer-events-none absolute inset-0">
+          <img
+            src={galleryHeroBackground}
+            alt=""
+            className="h-full w-full object-cover"
+            loading="lazy"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/72 via-black/58 to-black/46" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-transparent to-background/95" />
+        </div>
+
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-6 md:py-8">
+          <div className="flex flex-col gap-3 md:gap-5 md:flex-row md:items-end md:justify-between">
+            <div className="max-w-3xl">
+              <h3 className="text-xl sm:text-2xl font-bold mb-1.5 text-white">
+                {t("gallery.title", { defaultValue: "Travel Gallery" })}
+              </h3>
+              <p className="text-sm text-white/90">
+                {t("gallery.subtitle", {
+                  defaultValue: "Discover the beauty of destinations awaiting your journey.",
+                })}
+              </p>
+            </div>
+            {user?.role === "ADMIN" ? (
+              <div className="flex w-full md:w-auto flex-wrap items-center gap-2">
+                <input
+                  ref={uploadInputRef}
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  className="hidden"
+                  onChange={handlePublishPhotos}
+                  disabled={isPublishing}
+                />
+                <input
+                  ref={replaceInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleReplacePhoto}
+                  disabled={isReplacingPhoto}
+                />
+                <Button
+                  onClick={() => uploadInputRef.current?.click()}
+                  disabled={isPublishing}
+                  className="w-full sm:w-auto sm:min-w-[180px]"
+                >
+                  {isPublishing ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      {t("gallery.publishing", { defaultValue: "Publishing..." })}
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="w-4 h-4 mr-2" />
+                      {t("gallery.publishPhotos", { defaultValue: "Publish Photos" })}
+                    </>
+                  )}
+                </Button>
+              </div>
             ) : null}
           </div>
-        ) : null}
-      </PageHeader>
+
+          {categories.length > 1 ? (
+            <div className="mt-3 md:mt-5 flex flex-wrap items-center justify-start gap-2">
+              {categories.map((category) => (
+                <button
+                  key={category}
+                  onClick={() => setSelectedCategory(category)}
+                  className={topicChipClass(selectedCategory === category)}
+                >
+                  {getCategoryLabel(category)}
+                </button>
+              ))}
+              {usingUploads ? (
+                <>
+                  <Badge variant="secondary" className="ml-auto">
+                    {t("gallery.publishedCount", {
+                      defaultValue: "Published: {{count}}",
+                      count: (uploadedImages || []).filter((img) => img.published !== false).length,
+                    })}
+                  </Badge>
+                  {user?.role === "ADMIN" ? (
+                    <Badge variant="outline">
+                      {t("gallery.draftCount", {
+                        defaultValue: "Draft: {{count}}",
+                        count: (uploadedImages || []).filter((img) => img.published === false).length,
+                      })}
+                    </Badge>
+                  ) : null}
+                </>
+              ) : null}
+            </div>
+          ) : null}
+        </div>
+      </section>
 
       {/* Gallery Grid */}
       <section className="relative py-12 overflow-hidden">

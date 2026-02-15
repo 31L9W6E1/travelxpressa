@@ -6,11 +6,11 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "https://api.visamn.com/api/$1"
+      "destination": "https://travelxpressa-backend-production.up.railway.app/api/$1"
     },
     {
       "source": "/uploads/(.*)",
-      "destination": "https://api.visamn.com/uploads/$1"
+      "destination": "https://travelxpressa-backend-production.up.railway.app/uploads/$1"
     },
     { "source": "/(.*)", "destination": "/" }
   ]

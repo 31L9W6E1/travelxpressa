@@ -202,7 +202,7 @@ const Home = () => {
       <section className="py-8 md:py-10 border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="max-w-3xl">
-            <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-4 leading-[1.1]">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight mb-4 leading-[1.1]">
               {t("home.hero.titleLine1")}
               <span className="block text-muted-foreground">
                 {t("home.hero.titleLine2")}
@@ -283,7 +283,7 @@ const Home = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h2 className="text-3xl font-bold mb-2">
+              <h2 className="text-2xl md:text-3xl font-bold mb-2">
                 {t("home.featuredArticles.title")}
               </h2>
               <p className="text-muted-foreground">
@@ -303,7 +303,7 @@ const Home = () => {
               <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
             </div>
           ) : blogPosts.length > 0 ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-5">
+            <div className="grid grid-cols-2 min-[500px]:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-5">
               {blogPosts.slice(0, HOME_GRID_LIMIT).map((item) => (
                 <article key={item.id} className="group">
                   <Link to={`/blog/${item.slug}`} className="block">
@@ -349,7 +349,7 @@ const Home = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h2 className="text-3xl font-bold mb-2">
+              <h2 className="text-2xl md:text-3xl font-bold mb-2">
                 {t("home.latestNews.title")}
               </h2>
               <p className="text-muted-foreground">
@@ -369,7 +369,7 @@ const Home = () => {
               <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
             </div>
           ) : newsItems.length > 0 ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-5">
+            <div className="grid grid-cols-2 min-[500px]:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-5">
               {newsItems.slice(0, HOME_GRID_LIMIT).map((item) => (
                 <article key={item.id} className="group">
                   <Link to={`/news/${item.slug}`} className="block">

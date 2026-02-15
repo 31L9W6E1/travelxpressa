@@ -259,10 +259,10 @@ const PaymentDashboard = () => {
                 All payment transactions
               </CardDescription>
             </div>
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
               {/* Status Filter */}
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-[140px]">
+                <SelectTrigger className="w-full sm:w-[140px]">
                   <Filter className="w-4 h-4 mr-2" />
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
@@ -278,7 +278,7 @@ const PaymentDashboard = () => {
 
               {/* Provider Filter */}
               <Select value={providerFilter} onValueChange={setProviderFilter}>
-                <SelectTrigger className="w-[140px]">
+                <SelectTrigger className="w-full sm:w-[140px]">
                   <SelectValue placeholder="Provider" />
                 </SelectTrigger>
                 <SelectContent>
@@ -302,7 +302,7 @@ const PaymentDashboard = () => {
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="w-full min-w-[980px]">
               <thead>
                 <tr className="border-b">
                   <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
@@ -391,7 +391,7 @@ const PaymentDashboard = () => {
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between mt-4 pt-4 border-t">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between mt-4 pt-4 border-t gap-3">
               <p className="text-sm text-muted-foreground">
                 Page {page} of {totalPages}
               </p>

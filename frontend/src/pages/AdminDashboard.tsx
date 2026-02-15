@@ -925,11 +925,11 @@ const AdminDashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 md:py-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">
+            <h1 className="text-2xl md:text-3xl font-bold text-foreground">
               {t('dashboard.title', 'Admin Dashboard')}
             </h1>
             <p className="text-muted-foreground mt-1">
@@ -948,44 +948,44 @@ const AdminDashboard = () => {
           onValueChange={(v) => handleTabChange(v as AdminTab)}
           className="space-y-6"
         >
-          <TabsList className="bg-secondary flex-wrap h-auto gap-1 p-1">
-            <TabsTrigger value="overview" className="gap-2">
+          <TabsList className="bg-secondary h-auto gap-1 p-1 w-full justify-start overflow-x-auto flex-nowrap">
+            <TabsTrigger value="overview" className="gap-2 whitespace-nowrap flex-none shrink-0">
               <BarChart3 className="w-4 h-4" />
               {t('dashboard.tabs.overview', 'Overview')}
             </TabsTrigger>
-            <TabsTrigger value="users" className="gap-2">
+            <TabsTrigger value="users" className="gap-2 whitespace-nowrap flex-none shrink-0">
               <Users className="w-4 h-4" />
               {t('dashboard.tabs.users', 'Users')}
             </TabsTrigger>
-            <TabsTrigger value="applications" className="gap-2">
+            <TabsTrigger value="applications" className="gap-2 whitespace-nowrap flex-none shrink-0">
               <FileText className="w-4 h-4" />
               {t('dashboard.tabs.applications', 'Applications')}
             </TabsTrigger>
-            <TabsTrigger value="requests" className="gap-2">
+            <TabsTrigger value="requests" className="gap-2 whitespace-nowrap flex-none shrink-0">
               <MessageSquare className="w-4 h-4" />
               {t("dashboard.tabs.requests", "Requests")}
             </TabsTrigger>
-            <TabsTrigger value="tracking" className="gap-2">
+            <TabsTrigger value="tracking" className="gap-2 whitespace-nowrap flex-none shrink-0">
               <Activity className="w-4 h-4" />
               {t('dashboard.tabs.tracking', 'Tracking')}
             </TabsTrigger>
-            <TabsTrigger value="payments" className="gap-2">
+            <TabsTrigger value="payments" className="gap-2 whitespace-nowrap flex-none shrink-0">
               <CreditCard className="w-4 h-4" />
               {t('dashboard.tabs.payments', 'Payments')}
             </TabsTrigger>
-            <TabsTrigger value="analytics" className="gap-2">
+            <TabsTrigger value="analytics" className="gap-2 whitespace-nowrap flex-none shrink-0">
               <TrendingUp className="w-4 h-4" />
               {t('dashboard.tabs.analytics', 'Analytics')}
             </TabsTrigger>
-            <TabsTrigger value="site" className="gap-2">
+            <TabsTrigger value="site" className="gap-2 whitespace-nowrap flex-none shrink-0">
               <Globe className="w-4 h-4" />
               {t('dashboard.tabs.site', 'Site')}
             </TabsTrigger>
-            <TabsTrigger value="gallery" className="gap-2">
+            <TabsTrigger value="gallery" className="gap-2 whitespace-nowrap flex-none shrink-0">
               <FolderOpen className="w-4 h-4" />
               {t('dashboard.tabs.gallery', 'Gallery')}
             </TabsTrigger>
-            <TabsTrigger value="cms" className="gap-2">
+            <TabsTrigger value="cms" className="gap-2 whitespace-nowrap flex-none shrink-0">
               <Newspaper className="w-4 h-4" />
               {t('dashboard.tabs.cms', 'CMS')}
             </TabsTrigger>
@@ -1444,27 +1444,27 @@ const AdminDashboard = () => {
           <TabsContent value="users">
             <Card>
               <CardHeader>
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
                     <CardTitle>{t('dashboard.users.title', 'User Management')}</CardTitle>
                     <CardDescription>
                       {t('dashboard.users.description', 'Manage all registered users')}
                     </CardDescription>
                   </div>
-                  <div className="relative">
+                  <div className="relative w-full sm:w-auto">
                     <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                     <Input
                       placeholder={t('dashboard.users.searchPlaceholder', 'Search users...')}
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10 w-64"
+                      className="pl-10 w-full sm:w-64"
                     />
                   </div>
                 </div>
               </CardHeader>
               <CardContent>
                 <div className="overflow-x-auto">
-                  <table className="w-full">
+                  <table className="w-full min-w-[920px]">
                     <thead>
                       <tr className="border-b">
                         <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
@@ -1618,18 +1618,18 @@ const AdminDashboard = () => {
                     </div>
                     <div className="flex flex-wrap items-center gap-2">
                       {/* Search */}
-                      <div className="relative">
+                      <div className="relative w-full sm:w-auto">
                         <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                         <Input
                           placeholder={t('common.search', 'Search...')}
                           value={searchTerm}
                           onChange={(e) => setSearchTerm(e.target.value)}
-                          className="pl-10 w-48"
+                          className="pl-10 w-full sm:w-48"
                         />
                       </div>
                       {/* Status Filter */}
                       <Select value={statusFilter || "all"} onValueChange={(v) => setStatusFilter(v === "all" ? "" : v)}>
-                        <SelectTrigger className="w-[140px]">
+                        <SelectTrigger className="w-full sm:w-[140px]">
                           <SelectValue placeholder={t('dashboard.applications.allStatus', 'All Status')} />
                         </SelectTrigger>
                         <SelectContent>
@@ -1644,7 +1644,7 @@ const AdminDashboard = () => {
                       </Select>
                       {/* Visa Type Filter */}
                       <Select value={visaTypeFilter || "all"} onValueChange={(v) => setVisaTypeFilter(v === "all" ? "" : v)}>
-                        <SelectTrigger className="w-[130px]">
+                        <SelectTrigger className="w-full sm:w-[130px]">
                           <SelectValue placeholder={t('dashboard.applications.allTypes', 'All Types')} />
                         </SelectTrigger>
                         <SelectContent>
@@ -1664,7 +1664,7 @@ const AdminDashboard = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="overflow-x-auto">
-                    <table className="w-full">
+                    <table className="w-full min-w-[960px]">
                       <thead>
                         <tr className="border-b">
                           <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
@@ -1805,9 +1805,9 @@ const AdminDashboard = () => {
           {/* Site Tab */}
           <TabsContent value="site">
             <div className="space-y-6">
-              <div className="flex items-center justify-between gap-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
-                  <h2 className="text-2xl font-bold">{t("dashboard.site.title", "Site Controls")}</h2>
+                  <h2 className="text-xl md:text-2xl font-bold">{t("dashboard.site.title", "Site Controls")}</h2>
                   <p className="text-muted-foreground">
                     {t("dashboard.site.subtitle", "Traffic overview, page visibility, and maintenance mode.")}
                   </p>
@@ -2133,22 +2133,23 @@ const AdminDashboard = () => {
           <TabsContent value="cms">
             <div className="space-y-6">
               {/* CMS Header */}
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
-                  <h2 className="text-2xl font-bold">{t('dashboard.cms.title', 'Content Management')}</h2>
+                  <h2 className="text-xl md:text-2xl font-bold">{t('dashboard.cms.title', 'Content Management')}</h2>
                   <p className="text-muted-foreground">
                     {t('dashboard.cms.description', 'Manage blog posts and news articles')}
                   </p>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                   <Button
                     variant="outline"
                     onClick={() => handleOpenNewPost("news")}
+                    className="w-full sm:w-auto"
                   >
                     <Newspaper className="w-4 h-4 mr-2" />
                     {t('dashboard.cms.newNews', 'New News')}
                   </Button>
-                  <Button onClick={() => handleOpenNewPost("blog")}>
+                  <Button onClick={() => handleOpenNewPost("blog")} className="w-full sm:w-auto">
                     <Plus className="w-4 h-4 mr-2" />
                     {t('dashboard.cms.newBlogPost', 'New Blog Post')}
                   </Button>

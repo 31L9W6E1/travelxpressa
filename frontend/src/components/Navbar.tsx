@@ -8,6 +8,7 @@ import {
   ChevronDown,
   CreditCard,
   FileText,
+  House,
   Image,
   Info,
   Languages,
@@ -369,6 +370,11 @@ const Navbar = () => {
             </div>
           )}
 
+          <Link to="/" className={desktopLinkClass} title={t("nav.home", { defaultValue: "Home" })}>
+            <House className="w-4 h-4 shrink-0" />
+            {!isSidebarCollapsed && <span>{t("nav.home", { defaultValue: "Home" })}</span>}
+          </Link>
+
           {settings.visibility.about && (
             <Link to="/about" className={desktopLinkClass} title={t("nav.about")}>
               <Info className="w-4 h-4 shrink-0" />
@@ -531,7 +537,7 @@ const Navbar = () => {
                 )}
               </button>
               {isNotificationOpen && (
-                <div className="absolute right-0 mt-2 w-72 bg-card border border-border rounded-lg shadow-xl overflow-hidden">
+                <div className="absolute right-0 mt-2 w-[min(20rem,calc(100vw-1rem))] bg-card border border-border rounded-lg shadow-xl overflow-hidden">
                   <div className="px-4 py-3 border-b border-border">
                     <p className="text-sm font-medium text-card-foreground">
                       {t("nav.notifications", { defaultValue: "Notifications" })}
@@ -583,7 +589,7 @@ const Navbar = () => {
             )}
 
             {isUserMenuOpen && (
-              <div className="absolute right-0 mt-2 w-56 bg-card border border-border rounded-lg shadow-xl overflow-hidden">
+              <div className="absolute right-0 mt-2 w-[min(14rem,calc(100vw-1rem))] bg-card border border-border rounded-lg shadow-xl overflow-hidden">
                 {user && (
                   <div className="px-4 py-3 border-b border-border">
                     <p className="text-sm text-card-foreground font-medium truncate">{user.name}</p>
@@ -636,7 +642,7 @@ const Navbar = () => {
               </button>
 
               {isNotificationOpen && (
-                <div className="absolute right-0 mt-2 w-72 bg-card border border-border rounded-lg shadow-xl overflow-hidden">
+                <div className="absolute right-0 mt-2 w-[min(20rem,calc(100vw-1rem))] bg-card border border-border rounded-lg shadow-xl overflow-hidden">
                   <div className="px-4 py-3 border-b border-border">
                     <p className="text-sm font-medium text-card-foreground">
                       {t("nav.notifications", { defaultValue: "Notifications" })}
@@ -672,7 +678,7 @@ const Navbar = () => {
             </button>
 
             {isUserMenuOpen && (
-              <div className="absolute right-0 mt-2 w-56 bg-card border border-border rounded-lg shadow-xl overflow-hidden">
+              <div className="absolute right-0 mt-2 w-[min(14rem,calc(100vw-1rem))] bg-card border border-border rounded-lg shadow-xl overflow-hidden">
                 {user && (
                   <div className="px-4 py-3 border-b border-border">
                     <p className="text-sm text-card-foreground font-medium truncate">{user.name}</p>
@@ -717,6 +723,11 @@ const Navbar = () => {
               {t("nav.menu", { defaultValue: "Main Menu" })}
             </p>
           </div>
+
+          <Link to="/" className={mobileLinkClass} onClick={closeMobileMenu}>
+            <House className="w-4 h-4 shrink-0" />
+            <span>{t("nav.home", { defaultValue: "Home" })}</span>
+          </Link>
 
           {settings.visibility.about && (
             <Link to="/about" className={mobileLinkClass} onClick={closeMobileMenu}>

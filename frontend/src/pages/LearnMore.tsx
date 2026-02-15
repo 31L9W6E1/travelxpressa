@@ -144,7 +144,7 @@ const LearnMore = () => {
                 <div className="p-2 bg-secondary rounded-lg">
                   <Globe className="w-6 h-6" />
                 </div>
-                <h2 className="text-2xl font-bold">
+                <h2 className="text-xl md:text-2xl font-bold">
                   {t("learnMorePage.sections.fees.title", {
                     defaultValue: "Fees by Destination",
                   })}
@@ -169,7 +169,7 @@ const LearnMore = () => {
               )}
             </div>
 
-            <Card className="bg-secondary/50">
+            <Card className="bg-secondary/50 w-full md:w-auto">
               <CardContent className="p-6 flex items-center gap-4">
                 <div className="w-12 h-12 bg-primary/15 rounded-xl flex items-center justify-center">
                   <CheckCircle className="w-6 h-6 text-primary" />
@@ -204,30 +204,30 @@ const LearnMore = () => {
 
           <Card className="bg-secondary/50 overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full">
+              <table className="w-full min-w-[780px]">
                 <thead>
                   <tr className="border-b border-border">
-                    <th className="text-left p-4 text-sm font-medium text-muted-foreground">
+                    <th className="text-left p-3 md:p-4 text-xs md:text-sm font-medium text-muted-foreground">
                       {t("learnMorePage.sections.fees.table.destination", {
                         defaultValue: "Destination",
                       })}
                     </th>
-                    <th className="text-left p-4 text-sm font-medium text-muted-foreground">
+                    <th className="text-left p-3 md:p-4 text-xs md:text-sm font-medium text-muted-foreground">
                       {t("learnMorePage.sections.fees.table.governmentFee", {
                         defaultValue: "Typical government fee",
                       })}
                     </th>
-                    <th className="text-left p-4 text-sm font-medium text-muted-foreground">
+                    <th className="text-left p-3 md:p-4 text-xs md:text-sm font-medium text-muted-foreground">
                       {t("learnMorePage.sections.fees.table.serviceFee", {
                         defaultValue: "Service fee",
                       })}
                     </th>
-                    <th className="text-left p-4 text-sm font-medium text-muted-foreground">
+                    <th className="text-left p-3 md:p-4 text-xs md:text-sm font-medium text-muted-foreground">
                       {t("learnMorePage.sections.fees.table.processing", {
                         defaultValue: "Processing time",
                       })}
                     </th>
-                    <th className="text-left p-4 text-sm font-medium text-muted-foreground">
+                    <th className="text-left p-3 md:p-4 text-xs md:text-sm font-medium text-muted-foreground">
                       {t("learnMorePage.sections.fees.table.interview", {
                         defaultValue: "Interview",
                       })}
@@ -258,7 +258,7 @@ const LearnMore = () => {
                           isSelected ? "bg-primary/10" : "hover:bg-primary/5"
                         }`}
                       >
-                        <td className="p-4">
+                        <td className="p-3 md:p-4">
                           <div className="flex items-center gap-2">
                             <span className="text-lg">{dest.flag}</span>
                             <span className={isSelected ? "font-semibold" : ""}>
@@ -266,12 +266,12 @@ const LearnMore = () => {
                             </span>
                           </div>
                         </td>
-                        <td className="p-4 font-mono text-sm">{governmentFee}</td>
-                        <td className="p-4 font-mono text-sm">{serviceFee}</td>
-                        <td className="p-4 text-sm text-muted-foreground">
+                        <td className="p-3 md:p-4 font-mono text-xs md:text-sm">{governmentFee}</td>
+                        <td className="p-3 md:p-4 font-mono text-xs md:text-sm">{serviceFee}</td>
+                        <td className="p-3 md:p-4 text-xs md:text-sm text-muted-foreground">
                           {dest.processingTimeline}
                         </td>
-                        <td className="p-4 text-sm">
+                        <td className="p-3 md:p-4 text-xs md:text-sm">
                           {dest.interviewRequired
                             ? t("learnMorePage.sections.fees.interviewYes", {
                                 defaultValue: "Usually yes",
@@ -297,7 +297,7 @@ const LearnMore = () => {
           </p>
 
           {selectedDestination && (
-            <div className="mt-10 grid md:grid-cols-2 gap-6">
+            <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-6">
               <Card className="bg-secondary/50">
                 <CardContent className="p-6">
                   <h3 className="text-lg font-semibold">
@@ -414,7 +414,7 @@ const LearnMore = () => {
             })}
           </h2>
 
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
             {[
               {
                 title: t("learnMorePage.tips.items.documentation.title", {
@@ -485,7 +485,7 @@ const LearnMore = () => {
                   <div className="w-10 h-10 md:w-11 md:h-11 bg-primary text-primary-foreground rounded-xl flex items-center justify-center font-bold mb-3 md:mb-4">
                     {String(index + 1).padStart(2, "0")}
                   </div>
-                  <h3 className="text-base md:text-lg font-semibold mb-2">{tip.title}</h3>
+                  <h3 className="text-sm md:text-lg font-semibold mb-2">{tip.title}</h3>
                   <p className="text-muted-foreground text-sm leading-relaxed">
                     {tip.description}
                   </p>
@@ -500,11 +500,11 @@ const LearnMore = () => {
       <section className="py-12 md:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <Card className="bg-secondary">
-            <CardContent className="p-12 text-center">
-              <h2 className="text-4xl font-bold mb-4">
+            <CardContent className="p-6 md:p-12 text-center">
+              <h2 className="text-2xl md:text-3xl font-bold mb-4">
                 {t("learnMorePage.cta.title", { defaultValue: "Ready to Apply?" })}
               </h2>
-              <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+              <p className="text-base md:text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
                 {t("learnMorePage.cta.subtitle", {
                   defaultValue:
                     "Choose your destination and start a guided application with clear steps and checklists.",

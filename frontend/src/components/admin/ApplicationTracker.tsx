@@ -235,8 +235,8 @@ const ApplicationTracker = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Application Tracking</h2>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <h2 className="text-xl md:text-2xl font-bold">Application Tracking</h2>
         <Button variant="outline" onClick={fetchData} disabled={loading}>
           <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
           Refresh
@@ -441,7 +441,7 @@ const ApplicationTracker = () => {
       {/* Recent Applications */}
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <CardTitle>Recent Applications</CardTitle>
               <CardDescription>Latest application submissions</CardDescription>
@@ -457,16 +457,16 @@ const ApplicationTracker = () => {
               {recentApps.map((app) => (
                 <div
                   key={app.id}
-                  className="flex items-center justify-between p-4 rounded-lg border hover:bg-muted/50 transition-colors"
+                  className="flex flex-col md:flex-row md:items-center justify-between gap-3 p-4 rounded-lg border hover:bg-muted/50 transition-colors"
                 >
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-3 min-w-0">
                     <UserAvatar seed={app.user?.id} name={app.user?.name} email={app.user?.email} size="md" />
-                    <div>
-                      <p className="font-medium">{app.user?.name || 'Unknown'}</p>
-                      <p className="text-sm text-muted-foreground">{app.user?.email}</p>
+                    <div className="min-w-0">
+                      <p className="font-medium truncate">{app.user?.name || 'Unknown'}</p>
+                      <p className="text-sm text-muted-foreground truncate">{app.user?.email}</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-4">
+                  <div className="flex flex-wrap md:flex-nowrap items-center gap-2 md:gap-4 w-full md:w-auto">
                     <div className="text-right">
                       <Badge variant="outline" className="font-mono">
                         {app.visaType}
@@ -478,7 +478,7 @@ const ApplicationTracker = () => {
                     <Badge className={getStatusBadgeStyle(app.status)}>
                       {app.status.replace(/_/g, ' ')}
                     </Badge>
-                    <div className="text-right text-sm text-muted-foreground">
+                    <div className="text-right text-sm text-muted-foreground ml-auto">
                       <p>{new Date(app.updatedAt).toLocaleDateString()}</p>
                       <p className="text-xs">{new Date(app.updatedAt).toLocaleTimeString()}</p>
                     </div>

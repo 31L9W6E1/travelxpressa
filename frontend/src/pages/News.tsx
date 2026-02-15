@@ -94,7 +94,7 @@ const News = () => {
           ) : (
             <>
               {/* Grid layout: 4 columns on desktop, 2 on tablet, 1 on mobile */}
-              <div className="grid grid-cols-3 md:grid-cols-4 gap-2 md:gap-6">
+              <div className="grid grid-cols-2 min-[500px]:grid-cols-3 md:grid-cols-4 gap-2 md:gap-6">
                 {news.map((item) => (
                   <article key={item.id} className="group">
                     <Link to={`/news/${item.slug}`} className="block">
@@ -125,7 +125,7 @@ const News = () => {
 
               {/* Pagination */}
               {totalPages > 1 && (
-                <div className="flex items-center justify-center gap-2 mt-12">
+                <div className="flex flex-wrap items-center justify-center gap-2 mt-12">
                   <button
                     onClick={() => setPage(p => Math.max(1, p - 1))}
                     disabled={page === 1}
@@ -133,7 +133,7 @@ const News = () => {
                   >
                     {t('common.previous', { defaultValue: 'Previous' })}
                   </button>
-                  <span className="px-4 py-2 text-muted-foreground">
+                  <span className="px-4 py-2 text-sm text-muted-foreground">
                     {t('common.pageOf', {
                       defaultValue: 'Page {{page}} of {{total}}',
                       page,

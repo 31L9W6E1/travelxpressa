@@ -186,9 +186,9 @@ const TranslationRequestsPanel = () => {
               User-linked requests for document translation (25,000-40,000 MNT per page)
             </CardDescription>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 w-full md:w-auto">
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-full sm:w-[180px]">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -306,7 +306,7 @@ const TranslationRequestsPanel = () => {
                   )}
                 </div>
 
-                <div className="grid md:grid-cols-[220px_1fr_auto] gap-3 items-end">
+                <div className="grid grid-cols-1 md:grid-cols-[220px_1fr_auto] gap-3 items-end">
                   <div className="space-y-2">
                     <Label>Status</Label>
                     <Select

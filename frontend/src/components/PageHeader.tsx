@@ -23,18 +23,18 @@ export default function PageHeader({
   subtitleClassName,
 }: PageHeaderProps) {
   return (
-    <section className={cn("py-8 md:py-10 border-b border-border", className)}>
+    <section className={cn("py-6 md:py-8 border-b border-border", className)}>
       <div className={cn("max-w-7xl mx-auto px-4 sm:px-6", containerClassName)}>
-        <div className="flex flex-col gap-4 md:gap-6 md:flex-row md:items-end md:justify-between">
+        <div className="flex flex-col gap-3 md:gap-5 md:flex-row md:items-end md:justify-between">
           <div className="max-w-3xl">
-            <h3 className={cn("text-2xl md:text-3xl font-bold mb-2", titleClassName)}>{title}</h3>
+            <h3 className={cn("text-xl sm:text-2xl font-bold mb-1.5", titleClassName)}>{title}</h3>
             {subtitle ? (
-              <p className={cn("text-sm md:text-base text-muted-foreground", subtitleClassName)}>{subtitle}</p>
+              <p className={cn("text-sm text-muted-foreground", subtitleClassName)}>{subtitle}</p>
             ) : null}
           </div>
-          {actions ? <div className="flex items-center gap-3">{actions}</div> : null}
+          {actions ? <div className="flex w-full md:w-auto flex-wrap items-center gap-2">{actions}</div> : null}
         </div>
-        {children ? <div className="mt-4 md:mt-6">{children}</div> : null}
+        {children ? <div className="mt-3 md:mt-5">{children}</div> : null}
       </div>
     </section>
   );

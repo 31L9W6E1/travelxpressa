@@ -2516,13 +2516,13 @@ export default function Application() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-10 md:pt-12 pb-8">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-6 md:pt-10 pb-8">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
             {t('applicationPage.title', { defaultValue: 'DS-160 Visa Application' })}
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-sm md:text-base text-muted-foreground">
             {t('applicationPage.subtitle', {
               defaultValue: 'Complete your nonimmigrant visa application',
             })}
@@ -2540,57 +2540,66 @@ export default function Application() {
 
         {/* Progress Steps */}
         <div className="mb-8">
-          <div className="flex items-center justify-between">
-            {steps.map((step, index) => (
-              <div key={step.id} className="flex items-center">
-                <div className={`flex items-center justify-center w-12 h-12 rounded-full border-2 transition-all ${
-                  step.status === 'completed'
-                    ? 'bg-primary border-primary text-primary-foreground'
-                    : step.status === 'current'
-                    ? 'bg-primary/20 border-primary text-foreground'
-                    : 'bg-muted border-border text-muted-foreground'
-                }`}>
-                  {step.status === 'completed' ? <Check className="w-6 h-6" /> : step.icon}
+          <div className="overflow-x-auto pb-2">
+            <div className="inline-flex items-center min-w-max px-1">
+              {steps.map((step, index) => (
+                <div key={step.id} className="flex items-center">
+                  <div className="flex flex-col items-center">
+                    <div className={`flex items-center justify-center w-10 h-10 md:w-12 md:h-12 rounded-full border-2 transition-all ${
+                      step.status === 'completed'
+                        ? 'bg-primary border-primary text-primary-foreground'
+                        : step.status === 'current'
+                        ? 'bg-primary/20 border-primary text-foreground'
+                        : 'bg-muted border-border text-muted-foreground'
+                    }`}>
+                      {step.status === 'completed' ? <Check className="w-5 h-5 md:w-6 md:h-6" /> : step.icon}
+                    </div>
+                    <span
+                      className={`mt-2 w-16 text-center text-[10px] md:text-xs font-medium ${
+                        step.status === 'current' ? 'text-foreground' : 'text-muted-foreground'
+                      }`}
+                    >
+                      {step.name}
+                    </span>
+                  </div>
+                  {index < steps.length - 1 && (
+                    <div className={`w-10 sm:w-14 md:w-24 h-1 mx-2 rounded ${
+                      step.status === 'completed' ? 'bg-primary' : 'bg-border'
+                    }`} />
+                  )}
                 </div>
-                {index < steps.length - 1 && (
-                  <div className={`hidden md:block w-24 h-1 mx-2 rounded ${
-                    step.status === 'completed' ? 'bg-primary' : 'bg-border'
-                  }`} />
-                )}
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-          <div className="flex justify-between mt-2">
-            {steps.map((step) => (
-              <span key={step.id} className={`text-xs font-medium ${
-                step.status === 'current' ? 'text-foreground' : 'text-muted-foreground'
-              }`}>
-                {step.name}
-              </span>
-            ))}
-          </div>
+          <p className="mt-2 text-xs text-muted-foreground text-center md:text-left">
+            {t('applicationPage.progress.currentStep', {
+              defaultValue: 'Current step: {{current}} / {{total}}',
+              current: currentStep,
+              total: steps.length,
+            })}
+          </p>
         </div>
 
         {/* Form Content */}
-        <div className="bg-card border border-border rounded-2xl p-8">
+        <div className="bg-card border border-border rounded-2xl p-4 sm:p-6 md:p-8">
           {renderStepContent()}
 
           {/* Navigation Buttons */}
-          <div className="flex justify-between items-center mt-8 pt-6 border-t border-border">
+          <div className="mt-8 pt-6 border-t border-border space-y-4">
             <button
               onClick={handlePrev}
               disabled={currentStep === 1}
-              className="flex items-center gap-2 px-6 py-3 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center justify-center sm:justify-start gap-2 w-full sm:w-auto px-4 sm:px-6 py-3 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <ChevronLeft className="w-5 h-5" />
               {t('common.previous', { defaultValue: 'Previous' })}
             </button>
 
-            <div className="flex items-center gap-4">
+            <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-2 sm:gap-3">
               <button
                 onClick={() => void restoreLatestDraft({ notifyIfMissing: true })}
                 disabled={isRestoringDraft || isSaving}
-                className="flex items-center gap-2 px-6 py-3 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-all disabled:opacity-50"
+                className="flex items-center justify-center gap-2 w-full sm:w-auto px-4 sm:px-6 py-3 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-all disabled:opacity-50"
               >
                 {isRestoringDraft ? (
                   <Loader2 className="w-5 h-5 animate-spin" />
@@ -2603,7 +2612,7 @@ export default function Application() {
               <button
                 onClick={handleSave}
                 disabled={isSaving}
-                className="flex items-center gap-2 px-6 py-3 text-primary hover:bg-primary/10 rounded-lg transition-all disabled:opacity-50"
+                className="flex items-center justify-center gap-2 w-full sm:w-auto px-4 sm:px-6 py-3 text-primary hover:bg-primary/10 rounded-lg transition-all disabled:opacity-50"
               >
                 {isSaving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
                 {t('form.actions.saveDraft', { defaultValue: 'Save Draft' })}
@@ -2612,7 +2621,7 @@ export default function Application() {
               {currentStep < 7 ? (
                 <button
                   onClick={handleNext}
-                  className="flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg font-semibold hover:bg-primary/90 transition-all"
+                  className="flex items-center justify-center gap-2 w-full sm:w-auto px-4 sm:px-6 py-3 bg-primary text-primary-foreground rounded-lg font-semibold hover:bg-primary/90 transition-all"
                 >
                   {t('common.next', { defaultValue: 'Next' })}
                   <ChevronRight className="w-5 h-5" />
@@ -2621,7 +2630,7 @@ export default function Application() {
                 <button
                   onClick={handleSubmit}
                   disabled={isSubmitting || paymentComplete}
-                  className="flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg font-semibold hover:bg-primary/90 transition-all disabled:opacity-50"
+                  className="flex items-center justify-center gap-2 w-full sm:w-auto px-4 sm:px-6 py-3 bg-primary text-primary-foreground rounded-lg font-semibold hover:bg-primary/90 transition-all disabled:opacity-50"
                 >
                   {isSubmitting ? (
                     <>

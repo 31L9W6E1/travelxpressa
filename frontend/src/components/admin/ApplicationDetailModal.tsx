@@ -561,8 +561,8 @@ export default function ApplicationDetailModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[98vw] max-w-[96vw] h-[96vh] p-0 flex flex-col">
-        <DialogHeader className="p-6 pb-4">
+      <DialogContent className="w-[100vw] sm:w-[98vw] max-w-[100vw] sm:max-w-[96vw] h-[100dvh] sm:h-[96vh] p-0 flex flex-col">
+        <DialogHeader className="p-4 sm:p-6 pb-3 sm:pb-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0">
               <DialogTitle className="text-xl">Application Details</DialogTitle>
@@ -602,20 +602,20 @@ export default function ApplicationDetailModal({
               Loading application details…
             </div>
           )}
-          <div className="p-6 pt-4">
+          <div className="p-4 sm:p-6 pt-3 sm:pt-4">
             {/* Applicant Info Header */}
             <Card className="mb-6">
               <CardContent className="pt-6">
-                <div className="flex items-center gap-4">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                   <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
                     <User className="w-8 h-8 text-primary" />
                   </div>
-                  <div className="flex-1">
+                  <div className="flex-1 min-w-0">
                     <h3 className="text-lg font-semibold">
                       {personalInfo?.givenNames || app.user?.name || '-'} {personalInfo?.surnames || ''}
                     </h3>
-                    <p className="text-muted-foreground">{app.user?.email || '-'}</p>
-                    <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
+                    <p className="text-muted-foreground break-all">{app.user?.email || '-'}</p>
+                    <div className="flex flex-wrap items-center gap-3 mt-2 text-sm text-muted-foreground">
                       <span className="flex items-center gap-1">
                         <Globe className="w-4 h-4" />
                         {app.visaType} Visa
@@ -633,36 +633,36 @@ export default function ApplicationDetailModal({
             {/* Tabs for different sections */}
             <Tabs defaultValue="personal" className="w-full">
               <div className="mb-4">
-                <TabsList className="grid w-full grid-cols-4 md:grid-cols-8 h-auto gap-1 p-1">
-                <TabsTrigger value="personal" className="text-xs whitespace-nowrap">
+                <TabsList className="w-full h-auto gap-1 p-1 justify-start overflow-x-auto flex-nowrap">
+                <TabsTrigger value="personal" className="text-xs whitespace-nowrap flex-none shrink-0">
                   <User className="w-3 h-3 mr-1" />
                   Personal
                 </TabsTrigger>
-                <TabsTrigger value="contact" className="text-xs whitespace-nowrap">
+                <TabsTrigger value="contact" className="text-xs whitespace-nowrap flex-none shrink-0">
                   <Phone className="w-3 h-3 mr-1" />
                   Contact
                 </TabsTrigger>
-                <TabsTrigger value="passport" className="text-xs whitespace-nowrap">
+                <TabsTrigger value="passport" className="text-xs whitespace-nowrap flex-none shrink-0">
                   <BookOpen className="w-3 h-3 mr-1" />
                   Passport
                 </TabsTrigger>
-                <TabsTrigger value="travel" className="text-xs whitespace-nowrap">
+                <TabsTrigger value="travel" className="text-xs whitespace-nowrap flex-none shrink-0">
                   <Plane className="w-3 h-3 mr-1" />
                   Travel
                 </TabsTrigger>
-                <TabsTrigger value="family" className="text-xs whitespace-nowrap">
+                <TabsTrigger value="family" className="text-xs whitespace-nowrap flex-none shrink-0">
                   <Users className="w-3 h-3 mr-1" />
                   Family
                 </TabsTrigger>
-                <TabsTrigger value="work" className="text-xs whitespace-nowrap">
+                <TabsTrigger value="work" className="text-xs whitespace-nowrap flex-none shrink-0">
                   <Briefcase className="w-3 h-3 mr-1" />
                   Work
                 </TabsTrigger>
-                <TabsTrigger value="security" className="text-xs whitespace-nowrap">
+                <TabsTrigger value="security" className="text-xs whitespace-nowrap flex-none shrink-0">
                   <Shield className="w-3 h-3 mr-1" />
                   Security
                 </TabsTrigger>
-                <TabsTrigger value="docs" className="text-xs whitespace-nowrap">
+                <TabsTrigger value="docs" className="text-xs whitespace-nowrap flex-none shrink-0">
                   <FileText className="w-3 h-3 mr-1" />
                   Docs
                 </TabsTrigger>

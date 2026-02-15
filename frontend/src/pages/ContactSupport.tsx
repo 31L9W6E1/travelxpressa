@@ -356,7 +356,7 @@ const ContactSupport = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background via-background to-secondary/20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 md:py-8 space-y-6">
         <Link
           to={isAdmin ? "/admin/overview" : "/profile"}
           className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
@@ -367,7 +367,7 @@ const ContactSupport = () => {
 
         <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-semibold flex items-center gap-3">
+            <h1 className="text-2xl md:text-3xl font-semibold flex items-center gap-3">
               <MessageSquare className="w-7 h-7 text-primary" />
               {isAdmin ? "Support Inbox" : "Contact Support"}
             </h1>
@@ -416,7 +416,7 @@ const ContactSupport = () => {
         </div>
 
         <div className="grid grid-cols-1 xl:grid-cols-[340px_1fr] gap-6">
-          <Card className="h-[78vh] flex flex-col bg-card/70 backdrop-blur-sm border-border/70 shadow-sm">
+          <Card className="h-[42vh] md:h-[78vh] flex flex-col bg-card/70 backdrop-blur-sm border-border/70 shadow-sm">
             <CardHeader className="space-y-3">
               <CardTitle>{isAdmin ? "User Threads" : "Your Threads"}</CardTitle>
               <Input
@@ -441,7 +441,7 @@ const ContactSupport = () => {
                   </p>
                 </div>
               ) : (
-                <ScrollArea className="h-[calc(78vh-130px)] pr-2">
+                <ScrollArea className="h-[calc(42vh-130px)] md:h-[calc(78vh-130px)] pr-2">
                   <div className="space-y-2">
                     {filteredThreads.map((thread) => (
                       <button
@@ -494,7 +494,7 @@ const ContactSupport = () => {
             </CardContent>
           </Card>
 
-          <Card className="h-[78vh] flex flex-col bg-card/70 backdrop-blur-sm border-border/70 shadow-sm">
+          <Card className="min-h-[60vh] md:h-[78vh] flex flex-col bg-card/70 backdrop-blur-sm border-border/70 shadow-sm">
             {!selectedThreadId ? (
               <CardContent className="h-full flex items-center justify-center">
                 <div className="text-center text-muted-foreground">
@@ -537,7 +537,7 @@ const ContactSupport = () => {
             ) : (
               <>
                 <CardHeader className="border-b border-border">
-                  <div className="flex items-center justify-between gap-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <div className="min-w-0">
                       <CardTitle className="truncate">
                         {isAdmin
@@ -550,7 +550,7 @@ const ContactSupport = () => {
                           : "General support thread"}
                       </CardDescription>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
                       <Badge variant="outline" className={threadStatusVariant(selectedThread.status)}>
                         {selectedThread.status}
                       </Badge>
@@ -719,7 +719,7 @@ const ContactSupport = () => {
                 </CardContent>
 
                 <CardContent className="border-t border-border">
-                  <div className="flex gap-2">
+                  <div className="flex flex-col sm:flex-row gap-2">
                     <Textarea
                       value={messageText}
                       onChange={(e) => setMessageText(e.target.value)}

@@ -258,7 +258,7 @@ const Gallery = () => {
               <Button
                 onClick={() => uploadInputRef.current?.click()}
                 disabled={isPublishing}
-                className="min-w-[180px]"
+                className="w-full sm:w-auto sm:min-w-[180px]"
               >
                 {isPublishing ? (
                   <>
@@ -298,7 +298,7 @@ const Gallery = () => {
       {/* Gallery Grid */}
       <section className="py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="grid grid-cols-3 md:grid-cols-4 gap-2 md:gap-6">
+          <div className="grid grid-cols-2 min-[500px]:grid-cols-3 md:grid-cols-4 gap-2 md:gap-6">
             {filteredImages.map((image, index) => {
               const localizedAlt = getImageAltText(image);
               return (

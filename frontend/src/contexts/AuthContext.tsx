@@ -33,12 +33,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const initAuth = async () => {
       const initialToken = getAccessToken();
+      const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
+      const isAuthScreen =
+        pathname === '/login' ||
+        pathname === '/forgot-password' ||
+        pathname === '/reset-password' ||
+        pathname === '/oauth/callback';
 
       try {
         // If we don't have an access token (e.g., first visit on a different subdomain),
         // attempt a cookie-based refresh. This keeps sessions stable across
         // travelxpressa.com <-> www.travelxpressa.com when refreshToken uses `.travelxpressa.com`.
-        if (!getAccessToken()) {
+        //
+        // Skip this call on auth pages to avoid noisy expected 401s in browser console
+        // for fresh visitors who are just opening the login form.
+        if (!getAccessToken() && !isAuthScreen) {
           try {
             await authApi.refreshToken();
           } catch {

@@ -706,6 +706,7 @@ const Gallery = () => {
           subtitle={t("gallery.subtitle", {
             defaultValue: "Discover the beauty of destinations awaiting your journey.",
           })}
+          backgroundImageUrl={galleryHeroBackground}
           className="relative z-10 border-b-0"
           actions={
           user?.role === "ADMIN" ? (

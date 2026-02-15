@@ -28,7 +28,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
@@ -59,6 +58,13 @@ const threadStatusVariant = (status: string) => {
     default:
       return "bg-secondary text-secondary-foreground border-border";
   }
+};
+
+type MessageIdentity = {
+  isMine: boolean;
+  isSystem: boolean;
+  senderLabel: string;
+  senderRoleLabel: string;
 };
 
 const getLatestProgress = (
@@ -232,7 +238,82 @@ const ContactSupport = () => {
     [preferredUserId, threads],
   );
 
-  const latestProgress = getLatestProgress(selectedThread);
+  const setProgressField = (
+    field: keyof Omit<ProgressDraft, "note">,
+    value: number,
+  ) => {
+    setProgressDraft((prev) => ({
+      ...prev,
+      [field]: clampPercent(value),
+    }));
+  };
+
+  const resolveMessageIdentity = (message: NonNullable<ChatThread["messages"]>[number]): MessageIdentity => {
+    const senderType = String(message.senderType || "").toUpperCase();
+    const isSystem = senderType === "SYSTEM";
+    const isTelegram = senderType === "TELEGRAM";
+    const isFromCurrentUser = Boolean(user?.id && message.senderId && message.senderId === user.id);
+    const senderIdMissing = !message.senderId;
+
+    const isMine =
+      !isSystem &&
+      (isFromCurrentUser ||
+        (senderIdMissing && !isAdmin && senderType === "USER") ||
+        false);
+
+    if (isMine) {
+      return {
+        isMine: true,
+        isSystem: false,
+        senderLabel: "You",
+        senderRoleLabel: isAdmin ? "Admin" : "Client",
+      };
+    }
+
+    if (isSystem) {
+      return {
+        isMine: false,
+        isSystem: true,
+        senderLabel: "System",
+        senderRoleLabel: "System",
+      };
+    }
+
+    if (isTelegram) {
+      return {
+        isMine: false,
+        isSystem: false,
+        senderLabel: "Telegram",
+        senderRoleLabel: "Integration",
+      };
+    }
+
+    if (senderType === "USER") {
+      return {
+        isMine: false,
+        isSystem: false,
+        senderLabel:
+          selectedThread?.user?.name || selectedThread?.user?.email || "Client",
+        senderRoleLabel: "Client",
+      };
+    }
+
+    if (senderType === "ADMIN") {
+      return {
+        isMine: false,
+        isSystem: false,
+        senderLabel: "Support Team",
+        senderRoleLabel: "Admin",
+      };
+    }
+
+    return {
+      isMine: false,
+      isSystem: false,
+      senderLabel: senderType || "Message",
+      senderRoleLabel: "Unknown",
+    };
+  };
 
   const handleCreateThread = async () => {
     setCreatingThread(true);
@@ -327,8 +408,22 @@ const ContactSupport = () => {
     }
   };
 
-  const renderProgressSnapshot = (progress: ProgressUpdatePayload) => (
-    <div className="rounded-lg border border-border p-3 bg-secondary/40 space-y-2">
+  const renderProgressSnapshot = (progress: ProgressUpdatePayload, messageIdentity: MessageIdentity, createdAt: string) => (
+    <div
+      className={`rounded-lg border p-3 space-y-2 ${
+        messageIdentity.isMine
+          ? "bg-primary/10 border-primary/25"
+          : "bg-secondary/50 border-border"
+      }`}
+    >
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-xs font-medium text-foreground">
+          {messageIdentity.senderLabel} · {messageIdentity.senderRoleLabel}
+        </p>
+        <p className="text-[11px] text-muted-foreground">
+          {new Date(createdAt).toLocaleString()}
+        </p>
+      </div>
       <p className="text-xs text-muted-foreground">
         Progress updated {new Date(progress.updatedAt).toLocaleString()}
       </p>
@@ -564,91 +659,71 @@ const ContactSupport = () => {
                   </div>
                 </CardHeader>
 
-                <CardContent className="space-y-4 py-4 border-b border-border">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <div className="rounded-lg border border-border p-3">
-                      <p className="text-xs text-muted-foreground mb-1">Appointment PDF</p>
-                      <Progress value={latestProgress?.appointmentPdf || 0} />
-                      <p className="text-xs mt-1">{latestProgress?.appointmentPdf || 0}%</p>
-                    </div>
-                    <div className="rounded-lg border border-border p-3">
-                      <p className="text-xs text-muted-foreground mb-1">DS-160</p>
-                      <Progress value={latestProgress?.ds160 || 0} />
-                      <p className="text-xs mt-1">{latestProgress?.ds160 || 0}%</p>
-                    </div>
-                    <div className="rounded-lg border border-border p-3">
-                      <p className="text-xs text-muted-foreground mb-1">Material Check</p>
-                      <Progress value={latestProgress?.materialCheck || 0} />
-                      <p className="text-xs mt-1">{latestProgress?.materialCheck || 0}%</p>
-                    </div>
-                    <div className="rounded-lg border border-border p-3">
-                      <p className="text-xs text-muted-foreground mb-1">Visa Consultation</p>
-                      <Progress value={latestProgress?.visaConsultation || 0} />
-                      <p className="text-xs mt-1">{latestProgress?.visaConsultation || 0}%</p>
-                    </div>
-                  </div>
-                  {latestProgress?.note && (
-                    <p className="text-sm text-muted-foreground">
-                      Latest note: {latestProgress.note}
-                    </p>
-                  )}
-
-                  {isAdmin && selectedThread.status !== "CLOSED" && (
-                    <div className="rounded-lg border border-border/70 p-3 space-y-3 bg-secondary/20 backdrop-blur-sm">
-                      <p className="font-medium text-sm">Send Live Progress Update</p>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                        <Input
-                          type="number"
-                          min={0}
-                          max={100}
-                          value={progressDraft.appointmentPdf}
-                          onChange={(e) =>
-                            setProgressDraft((prev) => ({
-                              ...prev,
-                              appointmentPdf: clampPercent(Number(e.target.value || 0)),
-                            }))
-                          }
-                          placeholder="Appointment %"
-                        />
-                        <Input
-                          type="number"
-                          min={0}
-                          max={100}
-                          value={progressDraft.ds160}
-                          onChange={(e) =>
-                            setProgressDraft((prev) => ({
-                              ...prev,
-                              ds160: clampPercent(Number(e.target.value || 0)),
-                            }))
-                          }
-                          placeholder="DS-160 %"
-                        />
-                        <Input
-                          type="number"
-                          min={0}
-                          max={100}
-                          value={progressDraft.materialCheck}
-                          onChange={(e) =>
-                            setProgressDraft((prev) => ({
-                              ...prev,
-                              materialCheck: clampPercent(Number(e.target.value || 0)),
-                            }))
-                          }
-                          placeholder="Material %"
-                        />
-                        <Input
-                          type="number"
-                          min={0}
-                          max={100}
-                          value={progressDraft.visaConsultation}
-                          onChange={(e) =>
-                            setProgressDraft((prev) => ({
-                              ...prev,
-                              visaConsultation: clampPercent(Number(e.target.value || 0)),
-                            }))
-                          }
-                          placeholder="Consult %"
-                        />
+                {isAdmin && selectedThread.status !== "CLOSED" && (
+                  <CardContent className="py-4 border-b border-border">
+                    <div className="rounded-lg border border-border/70 p-4 space-y-4 bg-secondary/20 backdrop-blur-sm">
+                      <p className="font-medium text-sm">Live Progress Controls</p>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between text-sm">
+                            <span>Appointment PDF</span>
+                            <span className="font-medium">{progressDraft.appointmentPdf}%</span>
+                          </div>
+                          <input
+                            type="range"
+                            min={0}
+                            max={100}
+                            step={1}
+                            value={progressDraft.appointmentPdf}
+                            onChange={(e) => setProgressField("appointmentPdf", Number(e.target.value))}
+                            className="w-full accent-primary cursor-pointer"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between text-sm">
+                            <span>DS-160</span>
+                            <span className="font-medium">{progressDraft.ds160}%</span>
+                          </div>
+                          <input
+                            type="range"
+                            min={0}
+                            max={100}
+                            step={1}
+                            value={progressDraft.ds160}
+                            onChange={(e) => setProgressField("ds160", Number(e.target.value))}
+                            className="w-full accent-primary cursor-pointer"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between text-sm">
+                            <span>Material Check</span>
+                            <span className="font-medium">{progressDraft.materialCheck}%</span>
+                          </div>
+                          <input
+                            type="range"
+                            min={0}
+                            max={100}
+                            step={1}
+                            value={progressDraft.materialCheck}
+                            onChange={(e) => setProgressField("materialCheck", Number(e.target.value))}
+                            className="w-full accent-primary cursor-pointer"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between text-sm">
+                            <span>Visa Consultation</span>
+                            <span className="font-medium">{progressDraft.visaConsultation}%</span>
+                          </div>
+                          <input
+                            type="range"
+                            min={0}
+                            max={100}
+                            step={1}
+                            value={progressDraft.visaConsultation}
+                            onChange={(e) => setProgressField("visaConsultation", Number(e.target.value))}
+                            className="w-full accent-primary cursor-pointer"
+                          />
+                        </div>
                       </div>
                       <Textarea
                         value={progressDraft.note}
@@ -667,46 +742,59 @@ const ContactSupport = () => {
                         Send Progress Update
                       </Button>
                     </div>
-                  )}
-                </CardContent>
+                  </CardContent>
+                )}
 
                 <CardContent className="flex-1 min-h-0">
                   <ScrollArea className="h-full pr-2">
                     <div className="space-y-3 py-2">
                       {(selectedThread.messages || []).map((message) => {
+                        const identity = resolveMessageIdentity(message);
                         const parsedProgress = decodeProgressUpdate(message.content);
                         if (parsedProgress) {
                           return (
                             <div key={message.id} className="max-w-full">
-                              {renderProgressSnapshot(parsedProgress)}
+                              <div
+                                className={`flex ${
+                                  identity.isSystem
+                                    ? "justify-center"
+                                    : identity.isMine
+                                      ? "justify-end"
+                                      : "justify-start"
+                                }`}
+                              >
+                                <div className={`w-full ${identity.isSystem ? "max-w-[92%]" : "max-w-[86%] md:max-w-[74%]"}`}>
+                                  {renderProgressSnapshot(parsedProgress, identity, message.createdAt)}
+                                </div>
+                              </div>
                             </div>
                           );
                         }
 
-                        const isMine =
-                          message.senderId === user?.id ||
-                          (isAdmin ? message.senderType === "ADMIN" : message.senderType === "USER");
-
                         return (
                           <div
                             key={message.id}
-                            className={`flex ${isMine ? "justify-end" : "justify-start"}`}
+                            className={`flex ${
+                              identity.isSystem ? "justify-center" : identity.isMine ? "justify-end" : "justify-start"
+                            }`}
                           >
                             <div
-                              className={`max-w-[80%] rounded-lg px-3 py-2 ${
-                                isMine
-                                  ? "bg-primary text-primary-foreground"
-                                  : "bg-secondary/70 text-secondary-foreground border border-border/60"
+                              className={`max-w-[86%] md:max-w-[74%] rounded-xl px-3 py-2.5 border ${
+                                identity.isSystem
+                                  ? "bg-muted/60 border-border text-foreground"
+                                  : identity.isMine
+                                    ? "bg-primary text-primary-foreground border-primary/30 shadow-sm"
+                                    : "bg-card/90 text-foreground border-border/70"
                               }`}
                             >
-                              {!isMine && isAdmin && (
-                                <div className="text-[11px] opacity-80 mb-1 flex items-center gap-1">
-                                  <UserCircle2 className="w-3 h-3" />
-                                  {message.senderType}
-                                </div>
-                              )}
+                              <div className={`text-[11px] mb-1 flex items-center gap-1 ${identity.isMine ? "text-primary-foreground/85" : "text-muted-foreground"}`}>
+                                <UserCircle2 className="w-3 h-3" />
+                                <span className="font-medium">{identity.senderLabel}</span>
+                                <span>·</span>
+                                <span>{identity.senderRoleLabel}</span>
+                              </div>
                               <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
-                              <p className="text-[11px] mt-1 opacity-80">
+                              <p className={`text-[11px] mt-1 ${identity.isMine ? "text-primary-foreground/80" : "text-muted-foreground"}`}>
                                 {new Date(message.createdAt).toLocaleString()}
                               </p>
                             </div>

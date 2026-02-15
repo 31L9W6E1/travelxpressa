@@ -87,7 +87,7 @@ const Feedback = () => {
             <CardContent className="space-y-3 text-sm">
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Phone className="w-4 h-4" />
-                <span>+976 7799 9090</span>
+                <span>0000000</span>
               </div>
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Mail className="w-4 h-4" />

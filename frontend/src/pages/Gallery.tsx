@@ -20,8 +20,8 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 
-// Placeholder images - will be replaced with API/CMS data later
-const galleryImages = [
+// Demo gallery images shown by default
+const defaultGalleryImages = [
   {
     id: 1,
     src: "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=800&auto=format&fit=crop&q=80",
@@ -114,9 +114,13 @@ const galleryImages = [
   },
 ];
 
+const DEMO_GALLERY_STORAGE_KEY = "gallery_demo_images_v1";
+
 type GalleryItem = {
   id: string | number;
   filename?: string;
+  isDemo?: boolean;
+  demoId?: number;
   src: string;
   alt: string;
   title: string;
@@ -127,11 +131,23 @@ type GalleryItem = {
   uploadedAt?: string;
 };
 
+const mapDefaultDemoImages = (): GalleryItem[] =>
+  defaultGalleryImages.map((item) => ({
+    ...item,
+    id: `placeholder-${item.id}`,
+    demoId: item.id,
+    isDemo: true,
+    title: item.alt,
+    tags: [],
+    published: true,
+  }));
+
 const Gallery = () => {
   const { t } = useTranslation();
   const { user } = useAuth();
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedImage, setSelectedImage] = useState<GalleryItem | null>(null);
+  const [demoImages, setDemoImages] = useState<GalleryItem[]>(() => mapDefaultDemoImages());
   const [uploadedImages, setUploadedImages] = useState<GalleryItem[] | null>(null);
   const [isPublishing, setIsPublishing] = useState(false);
   const [editingImage, setEditingImage] = useState<GalleryItem | null>(null);
@@ -159,8 +175,8 @@ const Gallery = () => {
 
   const getImageAltText = useCallback(
     (image: GalleryItem) => {
-      if (typeof image.id === "number") {
-        return t(`gallery.placeholderAlts.${image.id}`, { defaultValue: image.alt });
+      if (image.isDemo && image.demoId) {
+        return t(`gallery.placeholderAlts.${image.demoId}`, { defaultValue: image.alt });
       }
       return image.alt;
     },
@@ -227,23 +243,52 @@ const Gallery = () => {
     };
   }, [fetchGallery]);
 
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(DEMO_GALLERY_STORAGE_KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw) as unknown;
+      if (!Array.isArray(parsed) || parsed.length === 0) return;
+      const normalized = parsed
+        .map((item, index) => {
+          const row = item as Partial<GalleryItem>;
+          const fallbackDemoId = Number(row.demoId || index + 1);
+          return {
+            id: String(row.id || `placeholder-${fallbackDemoId}`),
+            demoId: fallbackDemoId,
+            isDemo: true,
+            src: String(row.src || ""),
+            alt: String(row.alt || row.title || "Demo image"),
+            title: String(row.title || row.alt || "Demo image"),
+            category: String(row.category || "general"),
+            tags: Array.isArray(row.tags) ? row.tags.map((tag) => String(tag)) : [],
+            description: String(row.description || ""),
+            published: row.published !== false,
+          } satisfies GalleryItem;
+        })
+        .filter((item) => Boolean(item.src));
+
+      if (normalized.length > 0) {
+        setDemoImages(normalized);
+      }
+    } catch {
+      // Ignore invalid local cache and use defaults.
+    }
+  }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(DEMO_GALLERY_STORAGE_KEY, JSON.stringify(demoImages));
+    } catch {
+      // Ignore storage errors in restricted environments.
+    }
+  }, [demoImages]);
+
   const usingUploads = (uploadedImages?.length ?? 0) > 0;
 
-  const placeholderItems = useMemo(
-    () =>
-      galleryImages.map((item) => ({
-        ...item,
-        id: `placeholder-${item.id}`,
-        title: item.alt,
-        tags: [],
-        published: true,
-      })),
-    []
-  );
-
   const categories = useMemo(() => {
-    if (!usingUploads) return ["all", "destinations", "nature", "landmarks", "travel"];
-    const source = [...placeholderItems, ...(uploadedImages || [])];
+    const source = [...demoImages, ...(uploadedImages || [])];
+    if (!source.length) return ["all", "destinations", "nature", "landmarks", "travel"];
     const dynamic = Array.from(
       new Set(
         source
@@ -252,7 +297,7 @@ const Gallery = () => {
       )
     );
     return ["all", ...dynamic];
-  }, [placeholderItems, uploadedImages, usingUploads]);
+  }, [demoImages, uploadedImages]);
 
   useEffect(() => {
     if (!categories.includes(selectedCategory)) {
@@ -261,14 +306,22 @@ const Gallery = () => {
   }, [categories, selectedCategory]);
 
   const galleryItems: GalleryItem[] = useMemo(
-    () => [...(uploadedImages || []), ...placeholderItems],
-    [uploadedImages, placeholderItems]
+    () => [...(uploadedImages || []), ...demoImages],
+    [demoImages, uploadedImages]
+  );
+
+  const visibleGalleryItems = useMemo(
+    () =>
+      user?.role === "ADMIN"
+        ? galleryItems
+        : galleryItems.filter((item) => item.published !== false),
+    [galleryItems, user?.role]
   );
 
   const filteredImages =
     selectedCategory === "all"
-      ? galleryItems
-      : galleryItems.filter((img) => img.category === selectedCategory);
+      ? visibleGalleryItems
+      : visibleGalleryItems.filter((img) => img.category === selectedCategory);
   const selectedImageAlt = selectedImage ? getImageAltText(selectedImage) : "";
   const selectedImageCategory = selectedImage ? getCategoryLabel(selectedImage.category) : "";
 
@@ -314,7 +367,7 @@ const Gallery = () => {
   };
 
   const openEditDialog = (image: GalleryItem) => {
-    if (user?.role !== "ADMIN" || !image.filename) return;
+    if (user?.role !== "ADMIN") return;
     setEditingImage(image);
     setEditForm({
       title: image.title || image.alt || "",
@@ -327,9 +380,55 @@ const Gallery = () => {
   };
 
   const handleSaveMeta = async () => {
-    if (!editingImage?.filename) return;
+    if (!editingImage) return;
     setIsSavingMeta(true);
     try {
+      if (editingImage.isDemo) {
+        const normalizedTags = editForm.tags
+          .split(",")
+          .map((tag) => tag.trim())
+          .filter(Boolean)
+          .slice(0, 20);
+        setDemoImages((prev) =>
+          prev.map((item) =>
+            item.id === editingImage.id
+              ? {
+                  ...item,
+                  title: editForm.title || item.title,
+                  alt: editForm.title || item.alt,
+                  category: (editForm.category || item.category || "general").trim().toLowerCase(),
+                  tags: normalizedTags,
+                  description: editForm.description || "",
+                  published: editForm.published,
+                }
+              : item
+          )
+        );
+
+        if (selectedImage?.id === editingImage.id) {
+          setSelectedImage((prev) =>
+            prev
+              ? {
+                  ...prev,
+                  title: editForm.title || prev.title,
+                  alt: editForm.title || prev.alt,
+                  category: (editForm.category || prev.category || "general").trim().toLowerCase(),
+                  tags: normalizedTags,
+                  description: editForm.description || "",
+                  published: editForm.published,
+                }
+              : prev
+          );
+        }
+
+        toast.success(t("gallery.metaSaved", { defaultValue: "Gallery image updated" }));
+        setIsEditing(false);
+        setEditingImage(null);
+        return;
+      }
+
+      if (!editingImage.filename) return;
+
       const updated = await updateGalleryImageMeta(editingImage.filename, {
         title: editForm.title,
         category: editForm.category,
@@ -370,9 +469,30 @@ const Gallery = () => {
   };
 
   const handleTogglePublish = async (image: GalleryItem) => {
-    if (user?.role !== "ADMIN" || !image.filename) return;
+    if (user?.role !== "ADMIN") return;
     const nextPublished = image.published === false;
     try {
+      if (image.isDemo) {
+        setDemoImages((prev) =>
+          prev.map((item) =>
+            item.id === image.id ? { ...item, published: nextPublished } : item
+          )
+        );
+        if (selectedImage?.id === image.id) {
+          setSelectedImage((prev) =>
+            prev ? { ...prev, published: nextPublished } : prev
+          );
+        }
+        toast.success(
+          nextPublished
+            ? t("gallery.nowPublished", { defaultValue: "Image published" })
+            : t("gallery.nowDraft", { defaultValue: "Image moved to draft" })
+        );
+        return;
+      }
+
+      if (!image.filename) return;
+
       const updated = await setGalleryImagePublish(image.filename, nextPublished);
       if (updated) {
         setUploadedImages((prev) =>
@@ -397,9 +517,20 @@ const Gallery = () => {
   };
 
   const handleDeleteImage = async (image: GalleryItem) => {
-    if (user?.role !== "ADMIN" || !image.filename) return;
+    if (user?.role !== "ADMIN") return;
     if (!window.confirm(t("gallery.deleteConfirm", { defaultValue: "Delete this image?" }))) return;
     try {
+      if (image.isDemo) {
+        setDemoImages((prev) => prev.filter((item) => item.id !== image.id));
+        if (selectedImage?.id === image.id) {
+          setSelectedImage(null);
+        }
+        toast.success(t("gallery.deleted", { defaultValue: "Image deleted" }));
+        return;
+      }
+
+      if (!image.filename) return;
+
       await deleteImage(image.filename);
       setUploadedImages((prev) => (prev || []).filter((item) => item.filename !== image.filename));
       if (selectedImage?.filename === image.filename) {
@@ -412,14 +543,14 @@ const Gallery = () => {
   };
 
   const triggerReplacePhoto = (image: GalleryItem) => {
-    if (user?.role !== "ADMIN" || !image.filename || isReplacingPhoto) return;
+    if (user?.role !== "ADMIN" || isReplacingPhoto) return;
     setReplacingImage(image);
     replaceInputRef.current?.click();
   };
 
   const handleReplacePhoto = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file || user?.role !== "ADMIN" || !replacingImage?.filename) {
+    if (!file || user?.role !== "ADMIN" || !replacingImage) {
       event.target.value = "";
       return;
     }
@@ -429,7 +560,41 @@ const Gallery = () => {
     try {
       const uploadResult = await uploadImage(file);
       const nextFilename = uploadResult?.data?.filename;
+      const nextUrl = getFullImageUrl(uploadResult?.data?.url || "");
       if (!nextFilename) {
+        throw new Error(t("gallery.replaceFailed", { defaultValue: "Failed to replace image" }));
+      }
+
+      if (replacingImage.isDemo) {
+        setDemoImages((prev) =>
+          prev.map((item) =>
+            item.id === replacingImage.id
+              ? {
+                  ...item,
+                  src: nextUrl || item.src,
+                  alt: replacingImage.title || replacingImage.alt,
+                }
+              : item
+          )
+        );
+
+        if (selectedImage?.id === replacingImage.id) {
+          setSelectedImage((prev) =>
+            prev
+              ? {
+                  ...prev,
+                  src: nextUrl || prev.src,
+                  alt: replacingImage.title || prev.alt,
+                }
+              : prev
+          );
+        }
+
+        toast.success(t("gallery.replacedSuccess", { defaultValue: "Image replaced" }));
+        return;
+      }
+
+      if (!replacingImage.filename) {
         throw new Error(t("gallery.replaceFailed", { defaultValue: "Failed to replace image" }));
       }
 
@@ -607,7 +772,7 @@ const Gallery = () => {
                         </span>
                       ) : null}
                     </div>
-                        {user?.role === "ADMIN" && image.filename ? (
+                        {user?.role === "ADMIN" ? (
                           <div className="mt-2 flex flex-wrap gap-2">
                             <Button
                               size="sm"
@@ -701,7 +866,7 @@ const Gallery = () => {
           <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white text-center">
             <p className="text-lg font-medium">{selectedImageAlt}</p>
             <p className="text-sm text-white/80 mt-1">{selectedImageCategory}</p>
-            {user?.role === "ADMIN" && selectedImage.filename ? (
+            {user?.role === "ADMIN" ? (
               <div className="mt-3 flex items-center justify-center gap-2">
                 <Button
                   size="sm"

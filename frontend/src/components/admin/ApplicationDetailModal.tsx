@@ -286,6 +286,17 @@ const getStatusBadge = (status: string) => {
   return styles[status] || styles.DRAFT;
 };
 
+const sectionTabs = [
+  { value: 'personal', label: 'Personal', icon: User, hint: 'Identity & profile' },
+  { value: 'contact', label: 'Contact', icon: Phone, hint: 'Email, phone, address' },
+  { value: 'passport', label: 'Passport', icon: BookOpen, hint: 'Document identity' },
+  { value: 'travel', label: 'Travel', icon: Plane, hint: 'Trip plan & support' },
+  { value: 'family', label: 'Family', icon: Users, hint: 'Parents, spouse, children' },
+  { value: 'work', label: 'Work', icon: Briefcase, hint: 'Work & education history' },
+  { value: 'security', label: 'Security', icon: Shield, hint: 'Security answers' },
+  { value: 'docs', label: 'Documents', icon: FileText, hint: 'Uploaded files' },
+] as const;
+
 function parseFormData<T>(value?: unknown): T | null {
   if (!value) return null;
   if (typeof value === 'object') return value as T;
@@ -321,7 +332,7 @@ const InfoRow = ({ label, value, icon: Icon }: { label: string; value?: string |
     {Icon && <Icon className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />}
     <div className="flex-1 min-w-0">
       <p className="text-xs text-muted-foreground">{label}</p>
-      <p className="text-sm font-medium truncate">{value || '-'}</p>
+      <p className="text-sm font-medium whitespace-pre-wrap break-words">{value || '-'}</p>
     </div>
   </div>
 );
@@ -343,6 +354,7 @@ export default function ApplicationDetailModal({
   onOpenChange,
   onStatusUpdate,
 }: ApplicationDetailModalProps) {
+  const [activeTab, setActiveTab] = useState('personal');
   const [selectedStatus, setSelectedStatus] = useState(application?.status || 'DRAFT');
   const [adminNotes, setAdminNotes] = useState(application?.adminNotes || '');
   const [isUpdating, setIsUpdating] = useState(false);
@@ -353,6 +365,7 @@ export default function ApplicationDetailModal({
   useEffect(() => {
     setSelectedStatus(application?.status || 'DRAFT');
     setAdminNotes(application?.adminNotes || '');
+    setActiveTab('personal');
   }, [application]);
 
   useEffect(() => {
@@ -561,14 +574,28 @@ export default function ApplicationDetailModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[100vw] sm:w-[98vw] max-w-[100vw] sm:max-w-[96vw] h-[100dvh] sm:h-[96vh] p-0 flex flex-col">
-        <DialogHeader className="p-4 sm:p-6 pb-3 sm:pb-4">
+      <DialogContent className="w-[100vw] sm:w-[98vw] max-w-[100vw] sm:max-w-[96vw] h-[100dvh] sm:h-[96vh] p-0 flex flex-col overflow-hidden">
+        <DialogHeader className="p-4 sm:p-6 pb-4 border-b bg-gradient-to-r from-primary/10 via-background to-background">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0">
-              <DialogTitle className="text-xl">Application Details</DialogTitle>
+              <DialogTitle className="text-xl sm:text-2xl">Application Details</DialogTitle>
               <DialogDescription className="mt-1 font-mono text-xs break-all">
                 Application ID: {app.id}
               </DialogDescription>
+              <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                <span className="inline-flex items-center gap-1 rounded-full bg-secondary px-2.5 py-1">
+                  <Globe className="w-3 h-3" />
+                  {app.visaType} Visa
+                </span>
+                <span className="inline-flex items-center gap-1 rounded-full bg-secondary px-2.5 py-1">
+                  <Calendar className="w-3 h-3" />
+                  Created {formatDate(app.createdAt)}
+                </span>
+                <span className="inline-flex items-center gap-1 rounded-full bg-secondary px-2.5 py-1">
+                  <Clock className="w-3 h-3" />
+                  Step {app.currentStep || 1}
+                </span>
+              </div>
             </div>
             <div className="flex flex-wrap items-center justify-start sm:justify-end gap-2">
               <Badge className={getStatusBadge(safeStatus)}>{safeStatus}</Badge>
@@ -581,93 +608,74 @@ export default function ApplicationDetailModal({
         </DialogHeader>
 
         <ScrollArea className="flex-1 min-h-0">
-          {detailsError && (
-            <div className="px-6 pt-6">
-              <div className="rounded-lg border border-destructive/20 bg-destructive/10 p-4 text-sm text-destructive">
-                {detailsError}
-              </div>
-            </div>
-          )}
-          {!detailsLoading && !detailsError && hasEncryptedSections && !hasAnyDecryptedSection && (
-            <div className="px-6 pt-6">
-              <div className="rounded-lg border border-amber-500/20 bg-amber-500/10 p-4 text-sm text-amber-700 dark:text-amber-300">
-                Application sections could not be decrypted. This can happen if the server encryption key was
-                changed after the application was saved. Metadata is still available.
-              </div>
-            </div>
-          )}
-          {detailsLoading && (
-            <div className="p-6 flex items-center gap-2 text-sm text-muted-foreground">
-              <Loader2 className="w-4 h-4 animate-spin" />
-              Loading application details…
-            </div>
-          )}
           <div className="p-4 sm:p-6 pt-3 sm:pt-4">
-            {/* Applicant Info Header */}
-            <Card className="mb-6">
-              <CardContent className="pt-6">
-                <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                  <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
-                    <User className="w-8 h-8 text-primary" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-lg font-semibold">
-                      {personalInfo?.givenNames || app.user?.name || '-'} {personalInfo?.surnames || ''}
-                    </h3>
-                    <p className="text-muted-foreground break-all">{app.user?.email || '-'}</p>
-                    <div className="flex flex-wrap items-center gap-3 mt-2 text-sm text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <Globe className="w-4 h-4" />
-                        {app.visaType} Visa
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Calendar className="w-4 h-4" />
-                        Created {formatDate(app.createdAt)}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <div className="grid grid-cols-1 xl:grid-cols-[290px_minmax(0,1fr)] gap-4 xl:gap-6">
+                <div className="space-y-4 xl:sticky xl:top-0 self-start">
+                  <Card className="border-dashed">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-sm">Applicant Snapshot</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-1">
+                      <InfoRow
+                        label="Applicant"
+                        value={`${personalInfo?.givenNames || app.user?.name || '-'} ${personalInfo?.surnames || ''}`.trim()}
+                        icon={User}
+                      />
+                      <InfoRow label="Email" value={app.user?.email || '-'} icon={Mail} />
+                      <InfoRow label="Visa Type" value={`${app.visaType} Visa`} icon={Globe} />
+                      <InfoRow label="Submitted" value={formatDate(app.submittedAt || app.createdAt)} icon={Calendar} />
+                      <InfoRow label="Current Step" value={String(app.currentStep || 1)} icon={Clock} />
+                    </CardContent>
+                  </Card>
 
-            {/* Tabs for different sections */}
-            <Tabs defaultValue="personal" className="w-full">
-              <div className="mb-4">
-                <TabsList className="w-full h-auto gap-1 p-1 justify-start overflow-x-auto flex-nowrap">
-                <TabsTrigger value="personal" className="text-xs whitespace-nowrap flex-none shrink-0">
-                  <User className="w-3 h-3 mr-1" />
-                  Personal
-                </TabsTrigger>
-                <TabsTrigger value="contact" className="text-xs whitespace-nowrap flex-none shrink-0">
-                  <Phone className="w-3 h-3 mr-1" />
-                  Contact
-                </TabsTrigger>
-                <TabsTrigger value="passport" className="text-xs whitespace-nowrap flex-none shrink-0">
-                  <BookOpen className="w-3 h-3 mr-1" />
-                  Passport
-                </TabsTrigger>
-                <TabsTrigger value="travel" className="text-xs whitespace-nowrap flex-none shrink-0">
-                  <Plane className="w-3 h-3 mr-1" />
-                  Travel
-                </TabsTrigger>
-                <TabsTrigger value="family" className="text-xs whitespace-nowrap flex-none shrink-0">
-                  <Users className="w-3 h-3 mr-1" />
-                  Family
-                </TabsTrigger>
-                <TabsTrigger value="work" className="text-xs whitespace-nowrap flex-none shrink-0">
-                  <Briefcase className="w-3 h-3 mr-1" />
-                  Work
-                </TabsTrigger>
-                <TabsTrigger value="security" className="text-xs whitespace-nowrap flex-none shrink-0">
-                  <Shield className="w-3 h-3 mr-1" />
-                  Security
-                </TabsTrigger>
-                <TabsTrigger value="docs" className="text-xs whitespace-nowrap flex-none shrink-0">
-                  <FileText className="w-3 h-3 mr-1" />
-                  Docs
-                </TabsTrigger>
-                </TabsList>
-              </div>
+                  <Card className="border-dashed">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-sm">Sections</CardTitle>
+                    </CardHeader>
+                    <CardContent className="pt-0">
+                      <TabsList className="w-full h-auto grid grid-cols-2 xl:grid-cols-1 gap-2 bg-transparent p-0">
+                        {sectionTabs.map((tab) => {
+                          const Icon = tab.icon;
+                          return (
+                            <TabsTrigger
+                              key={tab.value}
+                              value={tab.value}
+                              className="h-auto rounded-lg border border-border bg-background data-[state=active]:bg-primary/10 data-[state=active]:border-primary/30 data-[state=active]:text-primary px-3 py-2.5 text-left justify-start"
+                            >
+                              <div className="flex items-start gap-2">
+                                <Icon className="w-4 h-4 mt-0.5" />
+                                <div className="min-w-0">
+                                  <div className="text-xs font-semibold">{tab.label}</div>
+                                  <div className="text-[11px] text-muted-foreground leading-tight">{tab.hint}</div>
+                                </div>
+                              </div>
+                            </TabsTrigger>
+                          );
+                        })}
+                      </TabsList>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                <div className="space-y-4">
+                  {detailsError && (
+                    <div className="rounded-lg border border-destructive/20 bg-destructive/10 p-4 text-sm text-destructive">
+                      {detailsError}
+                    </div>
+                  )}
+                  {!detailsLoading && !detailsError && hasEncryptedSections && !hasAnyDecryptedSection && (
+                    <div className="rounded-lg border border-amber-500/20 bg-amber-500/10 p-4 text-sm text-amber-700 dark:text-amber-300">
+                      Application sections could not be decrypted. This can happen if the server encryption key was
+                      changed after the application was saved. Metadata is still available.
+                    </div>
+                  )}
+                  {detailsLoading && (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground rounded-lg border border-border p-4">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Loading application details…
+                    </div>
+                  )}
 
               {/* Personal Information */}
               <TabsContent value="personal">
@@ -1387,13 +1395,15 @@ export default function ApplicationDetailModal({
                   </CardContent>
                 </Card>
               </TabsContent>
+                </div>
+              </div>
             </Tabs>
           </div>
         </ScrollArea>
 
-        <DialogFooter className="p-6 pt-0 border-t">
-          <div className="flex items-end gap-4 w-full">
-            <div className="flex-1 space-y-2">
+        <DialogFooter className="p-4 sm:p-6 pt-4 border-t bg-background">
+          <div className="w-full grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_auto] gap-4 items-end">
+            <div className="space-y-2">
               <Label>Admin Notes</Label>
               <Textarea
                 value={adminNotes}
@@ -1402,11 +1412,11 @@ export default function ApplicationDetailModal({
                 rows={2}
               />
             </div>
-            <div className="space-y-2">
+            <div className="space-y-2 lg:min-w-[270px]">
               <Label>Update Status</Label>
               <div className="flex items-center gap-2">
                 <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-                  <SelectTrigger className="w-[180px]">
+                  <SelectTrigger className="w-full lg:w-[180px]">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>

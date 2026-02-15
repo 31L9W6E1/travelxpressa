@@ -12,7 +12,6 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import {
@@ -574,7 +573,7 @@ export default function ApplicationDetailModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[100vw] sm:w-[98vw] max-w-[100vw] sm:max-w-[96vw] h-[100dvh] sm:h-[96vh] p-0 flex flex-col overflow-hidden">
+      <DialogContent className="w-[100vw] sm:w-[94vw] max-w-[1200px] h-[100dvh] sm:h-[92vh] p-0 flex flex-col overflow-hidden">
         <DialogHeader className="p-4 sm:p-6 pb-4 border-b bg-gradient-to-r from-primary/10 via-background to-background">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0">
@@ -607,11 +606,11 @@ export default function ApplicationDetailModal({
           </div>
         </DialogHeader>
 
-        <ScrollArea className="flex-1 min-h-0">
+        <div className="flex-1 min-h-0 overflow-y-auto">
           <div className="p-4 sm:p-6 pt-3 sm:pt-4">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <div className="grid grid-cols-1 xl:grid-cols-[290px_minmax(0,1fr)] gap-4 xl:gap-6">
-                <div className="space-y-4 xl:sticky xl:top-0 self-start">
+              <div className="grid grid-cols-1 xl:grid-cols-[250px_minmax(0,1fr)] gap-4 xl:gap-6">
+                <div className="space-y-4 self-start">
                   <Card className="border-dashed">
                     <CardHeader className="pb-3">
                       <CardTitle className="text-sm">Applicant Snapshot</CardTitle>
@@ -1399,7 +1398,7 @@ export default function ApplicationDetailModal({
               </div>
             </Tabs>
           </div>
-        </ScrollArea>
+        </div>
 
         <DialogFooter className="p-4 sm:p-6 pt-4 border-t bg-background">
           <div className="w-full grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_auto] gap-4 items-end">

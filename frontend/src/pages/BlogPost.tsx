@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { Calendar, Clock, ArrowLeft, User, Loader2 } from 'lucide-react';
-import { getPostBySlug, formatPostDate, calculateReadTime, getDefaultImage, updatePost, upsertPostTranslation } from '@/api/posts';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { Calendar, Clock, ArrowLeft, User, Loader2, Globe, Trash2 } from 'lucide-react';
+import { getPostBySlug, formatPostDate, calculateReadTime, getDefaultImage, updatePost, upsertPostTranslation, deletePost, togglePostPublish } from '@/api/posts';
 import type { Post } from '@/api/posts';
 import { Button } from '@/components/ui/button';
 import { normalizeImageUrl } from '@/api/upload';
@@ -24,12 +24,15 @@ import { Textarea } from '@/components/ui/textarea';
 const BlogPost = () => {
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const { slug } = useParams<{ slug: string }>();
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [editOpen, setEditOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [togglingPublish, setTogglingPublish] = useState(false);
   const [draftTitle, setDraftTitle] = useState('');
   const [draftExcerpt, setDraftExcerpt] = useState('');
   const [draftTags, setDraftTags] = useState('');
@@ -72,6 +75,51 @@ const BlogPost = () => {
     setDraftTags(post.tags || '');
     setDraftContent(post.content || '');
   }, [editOpen, post]);
+
+  const isActionBusy = saving || deleting || togglingPublish;
+
+  const handleDeletePost = async () => {
+    if (!post) return;
+
+    const confirmed = window.confirm(
+      t('blogPostPage.adminEditor.deleteConfirm', {
+        defaultValue: 'Delete this post permanently? This action cannot be undone.',
+      }),
+    );
+    if (!confirmed) return;
+
+    setDeleting(true);
+    try {
+      await deletePost(post.id);
+      toast.success(t('blogPostPage.adminEditor.deleted', { defaultValue: 'Post deleted' }));
+      setEditOpen(false);
+      navigate('/blog');
+    } catch (err: any) {
+      toast.error(err?.message || t('common.deleteFailed', { defaultValue: 'Failed to delete post' }));
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const handleTogglePublish = async () => {
+    if (!post) return;
+    setTogglingPublish(true);
+    try {
+      const response = await togglePostPublish(post.id);
+      setPost(response.data);
+      toast.success(
+        response.data.status === 'published'
+          ? t('blogPostPage.adminEditor.published', { defaultValue: 'Post published' })
+          : t('blogPostPage.adminEditor.unpublished', { defaultValue: 'Post moved to draft' }),
+      );
+    } catch (err: any) {
+      toast.error(
+        err?.message || t('blogPostPage.adminEditor.publishFailed', { defaultValue: 'Failed to update publish status' }),
+      );
+    } finally {
+      setTogglingPublish(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -212,11 +260,37 @@ const BlogPost = () => {
                     </p>
                   </div>
 
-                  <DialogFooter className="gap-2 sm:gap-2">
+                  <DialogFooter className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Button
+                        variant="destructive"
+                        onClick={() => void handleDeletePost()}
+                        disabled={isActionBusy}
+                      >
+                        {deleting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Trash2 className="w-4 h-4 mr-2" />}
+                        {t('common.delete', { defaultValue: 'Delete' })}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => void handleTogglePublish()}
+                        disabled={isActionBusy}
+                      >
+                        {togglingPublish ? (
+                          <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                        ) : (
+                          <Globe className="w-4 h-4 mr-2" />
+                        )}
+                        {post?.status === 'published'
+                          ? t('content.actions.unpublish', { defaultValue: 'Unpublish' })
+                          : t('content.actions.publish', { defaultValue: 'Publish' })}
+                      </Button>
+                    </div>
+
+                    <div className="flex flex-wrap items-center justify-end gap-2">
                     <Button
                       variant="outline"
                       onClick={() => setEditOpen(false)}
-                      disabled={saving}
+                      disabled={isActionBusy}
                     >
                       {t('common.cancel', { defaultValue: 'Cancel' })}
                     </Button>
@@ -261,11 +335,12 @@ const BlogPost = () => {
                           setSaving(false);
                         }
                       }}
-                      disabled={saving}
+                      disabled={isActionBusy}
                     >
                       {saving && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
                       {t('common.save', { defaultValue: 'Save' })}
                     </Button>
+                    </div>
                   </DialogFooter>
                 </DialogContent>
               </Dialog>

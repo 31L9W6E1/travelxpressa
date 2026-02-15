@@ -4,6 +4,7 @@ interface RateLimitOptions {
     maxRequests?: number;
     message?: string;
     skipSuccessfulRequests?: boolean;
+    keyPrefix?: string;
     keyGenerator?: (req: Request) => string;
     onLimitReached?: (req: Request, res: Response) => void;
 }
@@ -20,5 +21,9 @@ export declare const authRateLimit: (req: Request, res: Response, next: NextFunc
  * General API rate limit
  */
 export declare const apiRateLimit: (req: Request, res: Response, next: NextFunction) => Response<any, Record<string, any>> | undefined;
+/**
+ * Chat-specific rate limit (higher throughput, separate namespace from general API).
+ */
+export declare const chatRateLimit: (req: Request, res: Response, next: NextFunction) => Response<any, Record<string, any>> | undefined;
 export {};
 //# sourceMappingURL=rateLimit.d.ts.map

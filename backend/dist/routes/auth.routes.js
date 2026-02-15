@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const crypto_1 = __importDefault(require("crypto"));
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const prisma_1 = require("../lib/prisma");
 const validate_1 = require("../middleware/validate");
 const auth_1 = require("../middleware/auth");
@@ -14,6 +15,8 @@ const schemas_1 = require("../validation/schemas");
 const types_1 = require("../types");
 const logger_1 = require("../utils/logger");
 const config_1 = require("../config");
+const encryption_1 = require("../utils/encryption");
+const email_service_1 = require("../services/email.service");
 const router = (0, express_1.Router)();
 // OAuth Configuration
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '';
@@ -23,6 +26,21 @@ const FACEBOOK_APP_SECRET = process.env.FACEBOOK_APP_SECRET || '';
 const BCRYPT_ROUNDS = 12;
 const MAX_FAILED_LOGINS = 100; // Increased for development
 const LOCKOUT_DURATION_MS = 1 * 60 * 1000; // 1 minute in development
+const PASSWORD_RESET_EXPIRES_IN = '30m';
+const PASSWORD_RESET_EXPIRES_MINUTES = 30;
+const PASSWORD_RESET_PURPOSE = 'PASSWORD_RESET';
+function getPasswordResetSecret(passwordHash) {
+    return `${config_1.config.jwt.secret}:${passwordHash}`;
+}
+function generatePasswordResetToken(userId, passwordHash) {
+    const payload = {
+        userId,
+        purpose: PASSWORD_RESET_PURPOSE,
+    };
+    return jsonwebtoken_1.default.sign(payload, getPasswordResetSecret(passwordHash), {
+        expiresIn: PASSWORD_RESET_EXPIRES_IN,
+    });
+}
 function toOrigin(url) {
     try {
         return new URL(url).origin;
@@ -50,21 +68,28 @@ function getAllowedFrontendOrigins() {
     return origins;
 }
 function getFrontendBaseUrl(req) {
-    if (process.env.FRONTEND_URL) {
-        return process.env.FRONTEND_URL.replace(/\/+$/, '');
-    }
+    const allowedOrigins = getAllowedFrontendOrigins();
     const origin = req.get('origin');
     if (origin) {
-        return origin.replace(/\/+$/, '');
+        const normalizedOrigin = origin.replace(/\/+$/, '');
+        if (allowedOrigins.has(normalizedOrigin)) {
+            return normalizedOrigin;
+        }
     }
     const referer = req.get('referer');
     if (referer) {
         try {
-            return new URL(referer).origin;
+            const refererOrigin = new URL(referer).origin;
+            if (allowedOrigins.has(refererOrigin)) {
+                return refererOrigin;
+            }
         }
         catch {
             // Ignore malformed referer and continue to fallback.
         }
+    }
+    if (process.env.FRONTEND_URL) {
+        return process.env.FRONTEND_URL.replace(/\/+$/, '');
     }
     const firstCorsOrigin = config_1.config.corsOrigin
         .split(',')
@@ -110,6 +135,124 @@ function getBackendBaseUrl(req) {
     }
     return `${req.protocol}://${req.get('host')}`;
 }
+function sendBrowserRedirect(res, redirectUrl) {
+    // Some reverse proxies can behave inconsistently with Set-Cookie on 302 responses.
+    // Returning a 200 HTML redirect page ensures the refresh cookie is reliably set.
+    const safeUrl = String(redirectUrl || '').trim();
+    res.status(200);
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.setHeader('Cache-Control', 'no-store');
+    res.send(`<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Redirecting...</title>
+    <meta http-equiv="refresh" content="0; url=${safeUrl}" />
+    <style>html,body{height:100%;margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#fff;color:#111}main{display:flex;align-items:center;justify-content:center;height:100%}p{margin:0 16px;text-align:center}</style>
+  </head>
+  <body>
+    <main>
+      <p>Redirecting… If you are not redirected, <a href="${safeUrl}">click here</a>.</p>
+    </main>
+    <script>
+      try { window.location.replace(${JSON.stringify(safeUrl)}); } catch (e) {}
+    </script>
+  </body>
+</html>`);
+}
+function getCookieDomain() {
+    const explicitDomain = (process.env.COOKIE_DOMAIN || '').trim();
+    if (explicitDomain) {
+        const normalized = explicitDomain.replace(/^\./, '').toLowerCase();
+        if (!normalized || normalized === 'localhost' || normalized === '127.0.0.1') {
+            return undefined;
+        }
+        return `.${normalized}`;
+    }
+    const candidateUrls = [
+        process.env.FRONTEND_URL,
+        process.env.BACKEND_URL,
+        ...config_1.config.corsOrigin
+            .split(',')
+            .map((value) => value.trim())
+            .filter(Boolean),
+    ].filter(Boolean);
+    for (const value of candidateUrls) {
+        try {
+            const hostname = new URL(value).hostname.toLowerCase();
+            if (hostname.endsWith('travelxpressa.com')) {
+                return '.travelxpressa.com';
+            }
+            if (hostname.endsWith('visamn.com')) {
+                return '.visamn.com';
+            }
+        }
+        catch {
+            // Ignore malformed URL and continue.
+        }
+    }
+    return undefined;
+}
+const REFRESH_TOKEN_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
+function hashRefreshToken(token) {
+    return (0, encryption_1.hash)(token);
+}
+function refreshTokenLookupCandidates(token) {
+    const hashedToken = hashRefreshToken(token);
+    return hashedToken === token ? [token] : [hashedToken, token];
+}
+function getRefreshTokenCandidates(req) {
+    const candidates = [];
+    const pushCandidate = (value) => {
+        if (typeof value !== 'string')
+            return;
+        const token = value.trim();
+        if (!token)
+            return;
+        if (!candidates.includes(token)) {
+            candidates.push(token);
+        }
+    };
+    // Parse raw cookie header to capture duplicate refreshToken entries.
+    const cookieHeader = req.headers.cookie;
+    if (typeof cookieHeader === 'string' && cookieHeader.length > 0) {
+        cookieHeader.split(';').forEach((segment) => {
+            const trimmed = segment.trim();
+            if (!trimmed.startsWith('refreshToken='))
+                return;
+            const rawValue = trimmed.slice('refreshToken='.length);
+            try {
+                pushCandidate(decodeURIComponent(rawValue));
+            }
+            catch {
+                pushCandidate(rawValue);
+            }
+        });
+    }
+    pushCandidate(req.cookies?.refreshToken);
+    pushCandidate(req.body?.refreshToken);
+    return candidates;
+}
+function setRefreshTokenCookie(res, token) {
+    const cookieDomain = getCookieDomain();
+    res.cookie('refreshToken', token, {
+        httpOnly: true,
+        secure: config_1.config.isProduction,
+        sameSite: 'lax',
+        ...(cookieDomain ? { domain: cookieDomain } : {}),
+        maxAge: REFRESH_TOKEN_MAX_AGE_MS,
+    });
+}
+function clearRefreshTokenCookie(res) {
+    const cookieDomain = getCookieDomain();
+    res.clearCookie('refreshToken', {
+        httpOnly: true,
+        secure: config_1.config.isProduction,
+        sameSite: 'lax',
+        ...(cookieDomain ? { domain: cookieDomain } : {}),
+    });
+}
 /**
  * Register a new user
  */
@@ -138,24 +281,16 @@ router.post('/register', (0, validate_1.validate)({ body: schemas_1.registerSche
     const accessToken = (0, auth_1.generateAccessToken)(tokenPayload);
     const refreshToken = (0, auth_1.generateRefreshToken)(tokenPayload);
     // Store refresh token
-    const refreshTokenExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
+    const refreshTokenExpiry = new Date(Date.now() + REFRESH_TOKEN_MAX_AGE_MS);
     await prisma_1.prisma.refreshToken.create({
         data: {
-            token: refreshToken,
+            token: hashRefreshToken(refreshToken),
             userId: user.id,
             expiresAt: refreshTokenExpiry,
         },
     });
     logger_1.logger.info('User registered', { userId: user.id, email: user.email });
-    // Set refresh token as httpOnly cookie in production
-    if (config_1.config.isProduction) {
-        res.cookie('refreshToken', refreshToken, {
-            httpOnly: true,
-            secure: true,
-            sameSite: 'strict',
-            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-        });
-    }
+    setRefreshTokenCookie(res, refreshToken);
     res.status(201).json({
         success: true,
         message: 'Registration successful',
@@ -169,6 +304,118 @@ router.post('/register', (0, validate_1.validate)({ body: schemas_1.registerSche
             accessToken,
             refreshToken: config_1.config.isProduction ? undefined : refreshToken,
         },
+    });
+}));
+/**
+ * Request password reset link
+ */
+router.post('/forgot-password', (0, validate_1.validate)({ body: schemas_1.forgotPasswordSchema }), (0, errorHandler_1.asyncHandler)(async (req, res) => {
+    const { email } = req.body;
+    const normalizedEmail = email.toLowerCase();
+    const genericMessage = 'If an account exists for this email, a password reset link has been sent';
+    const user = await prisma_1.prisma.user.findUnique({
+        where: { email: normalizedEmail },
+        select: {
+            id: true,
+            email: true,
+            name: true,
+            password: true,
+        },
+    });
+    if (!user) {
+        logger_1.logger.info('Password reset requested for non-existent account', {
+            email: normalizedEmail,
+        });
+        return res.json({
+            success: true,
+            message: genericMessage,
+        });
+    }
+    const token = generatePasswordResetToken(user.id, user.password);
+    const frontendBaseUrl = getFrontendBaseUrl(req);
+    const resetLink = `${frontendBaseUrl}/reset-password?token=${encodeURIComponent(token)}`;
+    const sent = await email_service_1.emailService.sendPasswordReset(user.email, {
+        userName: user.name || 'there',
+        resetLink,
+        expiresInMinutes: PASSWORD_RESET_EXPIRES_MINUTES,
+    });
+    if (!sent) {
+        logger_1.logger.warn('Password reset email could not be sent', {
+            userId: user.id,
+            email: user.email,
+        });
+    }
+    logger_1.logger.info('Password reset link generated', {
+        userId: user.id,
+        email: user.email,
+    });
+    return res.json({
+        success: true,
+        message: genericMessage,
+    });
+}));
+/**
+ * Reset password using email token
+ */
+router.post('/reset-password', (0, validate_1.validate)({ body: schemas_1.resetPasswordSchema }), (0, errorHandler_1.asyncHandler)(async (req, res) => {
+    const { token, newPassword } = req.body;
+    const decoded = jsonwebtoken_1.default.decode(token);
+    if (!decoded || typeof decoded !== 'object') {
+        throw new errorHandler_1.BadRequestError('Invalid or expired reset token');
+    }
+    const tokenPayload = decoded;
+    if (typeof tokenPayload.userId !== 'string' ||
+        tokenPayload.purpose !== PASSWORD_RESET_PURPOSE) {
+        throw new errorHandler_1.BadRequestError('Invalid or expired reset token');
+    }
+    const user = await prisma_1.prisma.user.findUnique({
+        where: { id: tokenPayload.userId },
+        select: {
+            id: true,
+            email: true,
+            password: true,
+        },
+    });
+    if (!user) {
+        throw new errorHandler_1.BadRequestError('Invalid or expired reset token');
+    }
+    try {
+        jsonwebtoken_1.default.verify(token, getPasswordResetSecret(user.password));
+    }
+    catch (error) {
+        if (error instanceof jsonwebtoken_1.default.TokenExpiredError || error instanceof jsonwebtoken_1.default.JsonWebTokenError) {
+            throw new errorHandler_1.BadRequestError('Invalid or expired reset token');
+        }
+        throw error;
+    }
+    const isSamePassword = await bcryptjs_1.default.compare(newPassword, user.password);
+    if (isSamePassword) {
+        throw new errorHandler_1.BadRequestError('New password must be different from current password');
+    }
+    const hashedPassword = await bcryptjs_1.default.hash(newPassword, BCRYPT_ROUNDS);
+    const now = new Date();
+    await prisma_1.prisma.$transaction([
+        prisma_1.prisma.user.update({
+            where: { id: user.id },
+            data: {
+                password: hashedPassword,
+                failedLogins: 0,
+                lockedUntil: null,
+            },
+        }),
+        prisma_1.prisma.refreshToken.updateMany({
+            where: {
+                userId: user.id,
+                revokedAt: null,
+            },
+            data: { revokedAt: now },
+        }),
+    ]);
+    clearRefreshTokenCookie(res);
+    logger_1.logger.info('Password reset completed', { userId: user.id });
+    res.json({
+        success: true,
+        message: 'Password has been reset successfully',
     });
 }));
 /**
@@ -225,24 +472,16 @@ router.post('/login', (0, validate_1.validate)({ body: schemas_1.loginSchema }),
     const accessToken = (0, auth_1.generateAccessToken)(tokenPayload);
     const refreshToken = (0, auth_1.generateRefreshToken)(tokenPayload);
     // Store refresh token
-    const refreshTokenExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+    const refreshTokenExpiry = new Date(Date.now() + REFRESH_TOKEN_MAX_AGE_MS);
     await prisma_1.prisma.refreshToken.create({
         data: {
-            token: refreshToken,
+            token: hashRefreshToken(refreshToken),
             userId: user.id,
             expiresAt: refreshTokenExpiry,
         },
     });
     logger_1.logger.info('User logged in', { userId: user.id, email: user.email, ip: clientIp });
-    // Set refresh token as httpOnly cookie in production
-    if (config_1.config.isProduction) {
-        res.cookie('refreshToken', refreshToken, {
-            httpOnly: true,
-            secure: true,
-            sameSite: 'strict',
-            maxAge: 7 * 24 * 60 * 60 * 1000,
-        });
-    }
+    setRefreshTokenCookie(res, refreshToken);
     res.json({
         success: true,
         message: 'Login successful',
@@ -262,51 +501,70 @@ router.post('/login', (0, validate_1.validate)({ body: schemas_1.loginSchema }),
  * Refresh access token
  */
 router.post('/refresh', (0, errorHandler_1.asyncHandler)(async (req, res) => {
-    // Get refresh token from cookie or body
-    const refreshToken = req.cookies?.refreshToken || req.body?.refreshToken;
-    if (!refreshToken) {
+    const refreshTokenCandidates = getRefreshTokenCandidates(req);
+    if (refreshTokenCandidates.length === 0) {
         throw new errorHandler_1.UnauthorizedError('Refresh token required');
     }
-    // Verify token signature
-    let decoded;
-    try {
-        decoded = (0, auth_1.verifyRefreshToken)(refreshToken);
+    let matchedRefreshToken = null;
+    let storedToken = null;
+    let decodedUserIdForSecurity = null;
+    let sawRevokedToken = false;
+    const now = new Date();
+    for (const candidate of refreshTokenCandidates) {
+        let decoded;
+        try {
+            decoded = (0, auth_1.verifyRefreshToken)(candidate);
+        }
+        catch {
+            continue;
+        }
+        decodedUserIdForSecurity = decoded.userId;
+        const tokenRow = await prisma_1.prisma.refreshToken.findFirst({
+            where: {
+                token: {
+                    in: refreshTokenLookupCandidates(candidate),
+                },
+            },
+            include: { user: true },
+        });
+        if (!tokenRow) {
+            continue;
+        }
+        if (tokenRow.revokedAt) {
+            sawRevokedToken = true;
+            logger_1.logger.security('Revoked refresh token candidate ignored', {
+                userId: decoded.userId,
+                tokenId: tokenRow.id,
+                candidateCount: refreshTokenCandidates.length,
+            });
+            continue;
+        }
+        if (tokenRow.expiresAt < now) {
+            continue;
+        }
+        matchedRefreshToken = candidate;
+        storedToken = tokenRow;
+        break;
     }
-    catch {
+    if (!matchedRefreshToken || !storedToken) {
+        // Maintain strict token reuse protection for single-token requests.
+        if (refreshTokenCandidates.length === 1 && decodedUserIdForSecurity) {
+            if (sawRevokedToken) {
+                logger_1.logger.security('Revoked refresh token used', {
+                    userId: decodedUserIdForSecurity,
+                });
+            }
+            else {
+                logger_1.logger.security('Refresh token not found - possible reuse', {
+                    userId: decodedUserIdForSecurity,
+                });
+            }
+            await prisma_1.prisma.refreshToken.updateMany({
+                where: { userId: decodedUserIdForSecurity },
+                data: { revokedAt: new Date() },
+            });
+        }
         throw new errorHandler_1.UnauthorizedError('Invalid refresh token');
-    }
-    // Find token in database
-    const storedToken = await prisma_1.prisma.refreshToken.findUnique({
-        where: { token: refreshToken },
-        include: { user: true },
-    });
-    if (!storedToken) {
-        // Token not found - possible token reuse attack
-        logger_1.logger.security('Refresh token not found - possible reuse', {
-            userId: decoded.userId,
-        });
-        // Revoke all tokens for this user
-        await prisma_1.prisma.refreshToken.updateMany({
-            where: { userId: decoded.userId },
-            data: { revokedAt: new Date() },
-        });
-        throw new errorHandler_1.UnauthorizedError('Invalid refresh token');
-    }
-    if (storedToken.revokedAt) {
-        // Token was revoked - possible token reuse attack
-        logger_1.logger.security('Revoked refresh token used', {
-            userId: decoded.userId,
-            tokenId: storedToken.id,
-        });
-        // Revoke all tokens for this user
-        await prisma_1.prisma.refreshToken.updateMany({
-            where: { userId: decoded.userId },
-            data: { revokedAt: new Date() },
-        });
-        throw new errorHandler_1.UnauthorizedError('Invalid refresh token');
-    }
-    if (storedToken.expiresAt < new Date()) {
-        throw new errorHandler_1.UnauthorizedError('Refresh token expired');
     }
     // Generate new tokens
     const user = storedToken.user;
@@ -314,32 +572,24 @@ router.post('/refresh', (0, errorHandler_1.asyncHandler)(async (req, res) => {
     const newAccessToken = (0, auth_1.generateAccessToken)(tokenPayload);
     const newRefreshToken = (0, auth_1.generateRefreshToken)(tokenPayload);
     // Revoke old token and create new one (token rotation)
-    const refreshTokenExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+    const refreshTokenExpiry = new Date(Date.now() + REFRESH_TOKEN_MAX_AGE_MS);
     await prisma_1.prisma.$transaction([
         prisma_1.prisma.refreshToken.update({
             where: { id: storedToken.id },
             data: {
                 revokedAt: new Date(),
-                replacedBy: newRefreshToken,
+                replacedBy: hashRefreshToken(newRefreshToken),
             },
         }),
         prisma_1.prisma.refreshToken.create({
             data: {
-                token: newRefreshToken,
+                token: hashRefreshToken(newRefreshToken),
                 userId: user.id,
                 expiresAt: refreshTokenExpiry,
             },
         }),
     ]);
-    // Set new refresh token as httpOnly cookie in production
-    if (config_1.config.isProduction) {
-        res.cookie('refreshToken', newRefreshToken, {
-            httpOnly: true,
-            secure: true,
-            sameSite: 'strict',
-            maxAge: 7 * 24 * 60 * 60 * 1000,
-        });
-    }
+    setRefreshTokenCookie(res, newRefreshToken);
     res.json({
         success: true,
         data: {
@@ -357,16 +607,16 @@ router.post('/logout', auth_1.authenticateToken, (0, errorHandler_1.asyncHandler
     // Revoke refresh token if provided
     if (refreshToken) {
         await prisma_1.prisma.refreshToken.updateMany({
-            where: { token: refreshToken, userId },
+            where: {
+                userId,
+                token: {
+                    in: refreshTokenLookupCandidates(refreshToken),
+                },
+            },
             data: { revokedAt: new Date() },
         });
     }
-    // Clear cookie
-    res.clearCookie('refreshToken', {
-        httpOnly: true,
-        secure: config_1.config.isProduction,
-        sameSite: 'strict',
-    });
+    clearRefreshTokenCookie(res);
     logger_1.logger.info('User logged out', { userId });
     res.json({
         success: true,
@@ -383,12 +633,7 @@ router.post('/logout-all', auth_1.authenticateToken, (0, errorHandler_1.asyncHan
         where: { userId, revokedAt: null },
         data: { revokedAt: new Date() },
     });
-    // Clear cookie
-    res.clearCookie('refreshToken', {
-        httpOnly: true,
-        secure: config_1.config.isProduction,
-        sameSite: 'strict',
-    });
+    clearRefreshTokenCookie(res);
     logger_1.logger.info('User logged out from all devices', { userId });
     res.json({
         success: true,
@@ -492,12 +737,7 @@ router.post('/change-password', auth_1.authenticateToken, (0, errorHandler_1.asy
         }),
     ]);
     logger_1.logger.info('User changed password', { userId });
-    // Clear cookie
-    res.clearCookie('refreshToken', {
-        httpOnly: true,
-        secure: config_1.config.isProduction,
-        sameSite: 'strict',
-    });
+    clearRefreshTokenCookie(res);
     res.json({
         success: true,
         message: 'Password changed successfully. Please login again.',
@@ -531,7 +771,7 @@ router.get('/google/callback', (0, errorHandler_1.asyncHandler)(async (req, res)
     const { code, error } = req.query;
     const frontendBaseUrl = getFrontendBaseUrlFromState(req.query.state, req);
     if (error || !code) {
-        return res.redirect(`${frontendBaseUrl}/oauth/callback?error=google_auth_failed`);
+        return sendBrowserRedirect(res, `${frontendBaseUrl}/oauth/callback?error=google_auth_failed`);
     }
     try {
         const redirectUri = `${getBackendBaseUrl(req)}/api/auth/google/callback`;
@@ -578,19 +818,18 @@ router.get('/google/callback', (0, errorHandler_1.asyncHandler)(async (req, res)
             });
             logger_1.logger.info('User created via Google OAuth', { userId: user.id, email: user.email });
         }
-        // Generate tokens
+        // Generate refresh token and persist a hashed value for rotation.
         const tokenPayload = { userId: user.id, email: user.email, role: user.role };
-        const accessToken = (0, auth_1.generateAccessToken)(tokenPayload);
         const refreshToken = (0, auth_1.generateRefreshToken)(tokenPayload);
-        // Store refresh token
-        const refreshTokenExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+        const refreshTokenExpiry = new Date(Date.now() + REFRESH_TOKEN_MAX_AGE_MS);
         await prisma_1.prisma.refreshToken.create({
             data: {
-                token: refreshToken,
+                token: hashRefreshToken(refreshToken),
                 userId: user.id,
                 expiresAt: refreshTokenExpiry,
             },
         });
+        setRefreshTokenCookie(res, refreshToken);
         // Update last login
         await prisma_1.prisma.user.update({
             where: { id: user.id },
@@ -600,20 +839,16 @@ router.get('/google/callback', (0, errorHandler_1.asyncHandler)(async (req, res)
             },
         });
         logger_1.logger.info('User logged in via Google', { userId: user.id, email: user.email });
-        // Redirect to frontend with tokens
+        // Redirect without tokens in URL. Frontend exchanges refresh cookie for access token.
         const params = new URLSearchParams({
-            accessToken,
-            refreshToken,
-            userId: user.id,
-            email: user.email,
-            name: user.name || '',
+            oauth: 'success',
             role: user.role,
         });
-        res.redirect(`${frontendBaseUrl}/oauth/callback?${params}`);
+        sendBrowserRedirect(res, `${frontendBaseUrl}/oauth/callback?${params}`);
     }
     catch (err) {
         logger_1.logger.error('Google OAuth error', { error: err });
-        res.redirect(`${frontendBaseUrl}/oauth/callback?error=google_auth_failed`);
+        sendBrowserRedirect(res, `${frontendBaseUrl}/oauth/callback?error=google_auth_failed`);
     }
 }));
 /**
@@ -642,7 +877,7 @@ router.get('/facebook/callback', (0, errorHandler_1.asyncHandler)(async (req, re
     const { code, error } = req.query;
     const frontendBaseUrl = getFrontendBaseUrlFromState(req.query.state, req);
     if (error || !code) {
-        return res.redirect(`${frontendBaseUrl}/oauth/callback?error=facebook_auth_failed`);
+        return sendBrowserRedirect(res, `${frontendBaseUrl}/oauth/callback?error=facebook_auth_failed`);
     }
     try {
         const redirectUri = `${getBackendBaseUrl(req)}/api/auth/facebook/callback`;
@@ -663,7 +898,7 @@ router.get('/facebook/callback', (0, errorHandler_1.asyncHandler)(async (req, re
         const userInfo = await userInfoResponse.json();
         if (!userInfo.email) {
             // Facebook doesn't always provide email
-            return res.redirect(`${frontendBaseUrl}/oauth/callback?error=facebook_no_email`);
+            return sendBrowserRedirect(res, `${frontendBaseUrl}/oauth/callback?error=facebook_no_email`);
         }
         // Find or create user
         let user = await prisma_1.prisma.user.findUnique({
@@ -684,19 +919,18 @@ router.get('/facebook/callback', (0, errorHandler_1.asyncHandler)(async (req, re
             });
             logger_1.logger.info('User created via Facebook OAuth', { userId: user.id, email: user.email });
         }
-        // Generate tokens
+        // Generate refresh token and persist a hashed value for rotation.
         const tokenPayload = { userId: user.id, email: user.email, role: user.role };
-        const accessToken = (0, auth_1.generateAccessToken)(tokenPayload);
         const refreshToken = (0, auth_1.generateRefreshToken)(tokenPayload);
-        // Store refresh token
-        const refreshTokenExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+        const refreshTokenExpiry = new Date(Date.now() + REFRESH_TOKEN_MAX_AGE_MS);
         await prisma_1.prisma.refreshToken.create({
             data: {
-                token: refreshToken,
+                token: hashRefreshToken(refreshToken),
                 userId: user.id,
                 expiresAt: refreshTokenExpiry,
             },
         });
+        setRefreshTokenCookie(res, refreshToken);
         // Update last login
         await prisma_1.prisma.user.update({
             where: { id: user.id },
@@ -706,20 +940,16 @@ router.get('/facebook/callback', (0, errorHandler_1.asyncHandler)(async (req, re
             },
         });
         logger_1.logger.info('User logged in via Facebook', { userId: user.id, email: user.email });
-        // Redirect to frontend with tokens
+        // Redirect without tokens in URL. Frontend exchanges refresh cookie for access token.
         const params = new URLSearchParams({
-            accessToken,
-            refreshToken,
-            userId: user.id,
-            email: user.email,
-            name: user.name || '',
+            oauth: 'success',
             role: user.role,
         });
-        res.redirect(`${frontendBaseUrl}/oauth/callback?${params}`);
+        sendBrowserRedirect(res, `${frontendBaseUrl}/oauth/callback?${params}`);
     }
     catch (err) {
         logger_1.logger.error('Facebook OAuth error', { error: err });
-        res.redirect(`${frontendBaseUrl}/oauth/callback?error=facebook_auth_failed`);
+        sendBrowserRedirect(res, `${frontendBaseUrl}/oauth/callback?error=facebook_auth_failed`);
     }
 }));
 exports.default = router;

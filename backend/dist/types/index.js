@@ -24,6 +24,7 @@ var ServiceType;
     ServiceType["TOURISM_PACKAGE"] = "TOURISM_PACKAGE";
     ServiceType["CONSULTATION"] = "CONSULTATION";
     ServiceType["DOCUMENT_REVIEW"] = "DOCUMENT_REVIEW";
+    ServiceType["TRANSLATION_SERVICE"] = "TRANSLATION_SERVICE";
 })(ServiceType || (exports.ServiceType = ServiceType = {}));
 // Visa types enum
 var VisaType;

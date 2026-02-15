@@ -9,12 +9,29 @@ const dotenv_1 = __importDefault(require("dotenv"));
 if (process.env.NODE_ENV !== 'production') {
     dotenv_1.default.config();
 }
-function requireEnv(name, defaultValue) {
-    const value = process.env[name] || defaultValue;
-    if (!value && process.env.NODE_ENV === 'production') {
+function requireEnv(name, defaultValue, options) {
+    const rawValue = process.env[name]?.trim();
+    const isProduction = process.env.NODE_ENV === 'production';
+    const allowDefaultInProduction = options?.allowDefaultInProduction ?? true;
+    if (rawValue) {
+        if (isProduction &&
+            !allowDefaultInProduction &&
+            defaultValue !== undefined &&
+            rawValue === defaultValue) {
+            throw new Error(`Insecure default value detected for environment variable: ${name}`);
+        }
+        return rawValue;
+    }
+    if (defaultValue !== undefined) {
+        if (isProduction && !allowDefaultInProduction) {
+            throw new Error(`Missing required environment variable: ${name}`);
+        }
+        return defaultValue;
+    }
+    if (isProduction) {
         throw new Error(`Missing required environment variable: ${name}`);
     }
-    return value || '';
+    return '';
 }
 function parseOptionalInt(value) {
     if (!value)
@@ -26,11 +43,17 @@ exports.config = {
     env: process.env.NODE_ENV || 'development',
     port: parseInt(process.env.PORT || '3000', 10),
     // Database
-    databaseUrl: requireEnv('DATABASE_URL', 'postgresql://ds160user:ds160pass@localhost:5432/ds160_db?schema=public'),
+    databaseUrl: requireEnv('DATABASE_URL', 'postgresql://ds160user:ds160pass@localhost:5432/ds160_db?schema=public', {
+        allowDefaultInProduction: false,
+    }),
     // JWT
     jwt: {
-        secret: requireEnv('JWT_SECRET', 'dev-secret-change-in-production'),
-        refreshSecret: requireEnv('JWT_REFRESH_SECRET', 'dev-refresh-secret-change-in-production'),
+        secret: requireEnv('JWT_SECRET', 'dev-secret-change-in-production', {
+            allowDefaultInProduction: false,
+        }),
+        refreshSecret: requireEnv('JWT_REFRESH_SECRET', 'dev-refresh-secret-change-in-production', {
+            allowDefaultInProduction: false,
+        }),
         expiresIn: process.env.JWT_EXPIRES_IN || '15m',
         refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
     },
@@ -45,7 +68,9 @@ exports.config = {
         authMaxRequests: parseInt(process.env.AUTH_RATE_LIMIT_MAX || '200', 10), // Increased from 50 to 200
     },
     // Session
-    sessionSecret: process.env.SESSION_SECRET || 'dev-session-secret',
+    sessionSecret: requireEnv('SESSION_SECRET', 'dev-session-secret', {
+        allowDefaultInProduction: false,
+    }),
     // Redis
     redisUrl: process.env.REDIS_URL,
     // Email
@@ -54,12 +79,13 @@ exports.config = {
         port: parseInt(process.env.SMTP_PORT || '587', 10),
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,
-        from: process.env.EMAIL_FROM || 'noreply@ds160helper.com',
+        from: process.env.EMAIL_FROM || 'noreply@visamn.com',
     },
     // File Upload
     upload: {
         maxFileSize: parseInt(process.env.MAX_FILE_SIZE || '5242880', 10), // 5MB
-        uploadDir: process.env.UPLOAD_DIR || './uploads',
+        uploadDir: process.env.UPLOAD_DIR ||
+            (process.env.NODE_ENV === 'production' ? '/app/uploads' : './uploads'),
     },
     // Logging
     logging: {
@@ -70,6 +96,15 @@ exports.config = {
     sentryDsn: process.env.SENTRY_DSN,
     // Frontend URL
     frontendUrl: process.env.FRONTEND_URL || 'http://localhost:5173',
+    // Kiwi Tequila Flight API
+    kiwiApiKey: process.env.KIWI_API_KEY || '',
+    // CMS auto-translation
+    cmsAutoTranslate: {
+        enabled: !['0', 'false', 'no', 'off'].includes((process.env.CMS_AUTO_TRANSLATE_ENABLED || 'true').trim().toLowerCase()),
+        locales: process.env.CMS_AUTO_TRANSLATE_LOCALES || 'mn',
+        openAiApiKey: process.env.OPENAI_API_KEY || '',
+        openAiModel: process.env.OPENAI_TRANSLATION_MODEL || 'gpt-4.1-mini',
+    },
     // Telegram Notifications
     telegram: {
         botToken: process.env.TELEGRAM_BOT_TOKEN || '',

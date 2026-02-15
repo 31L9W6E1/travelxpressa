@@ -10,6 +10,7 @@ const schemas_1 = require("../validation/schemas");
 const types_1 = require("../types");
 const encryption_1 = require("../utils/encryption");
 const logger_1 = require("../utils/logger");
+const siteSettings_service_1 = require("../services/siteSettings.service");
 // Helper to safely extract string param
 const getIdParam = (req) => {
     const id = req.params.id;
@@ -50,11 +51,24 @@ router.use(auth_1.isAdmin);
 /**
  * Get all inquiries (admin only)
  */
-router.get('/inquiries', (0, validate_1.validate)({ query: schemas_1.paginationSchema }), (0, errorHandler_1.asyncHandler)(async (req, res) => {
-    const { page = 1, limit = 20, sortOrder = 'desc' } = req.query;
-    const status = req.query.status;
+router.get('/inquiries', (0, validate_1.validate)({ query: schemas_1.adminInquiriesQuerySchema }), (0, errorHandler_1.asyncHandler)(async (req, res) => {
+    // Always read parsed query from validation middleware to avoid Prisma type errors.
+    const validatedQuery = req.validatedQuery ?? {};
+    const page = typeof validatedQuery.page === 'number' ? validatedQuery.page : 1;
+    const limit = typeof validatedQuery.limit === 'number' ? validatedQuery.limit : 20;
+    const sortOrder = validatedQuery.sortOrder === 'asc' ? 'asc' : 'desc';
+    const status = typeof validatedQuery.status === 'string' && validatedQuery.status.trim()
+        ? validatedQuery.status.trim()
+        : undefined;
+    const serviceType = typeof validatedQuery.serviceType === 'string' && validatedQuery.serviceType.trim()
+        ? validatedQuery.serviceType.trim()
+        : undefined;
     const skip = (page - 1) * limit;
-    const whereClause = status ? { status } : {};
+    const whereClause = {};
+    if (status)
+        whereClause.status = status;
+    if (serviceType)
+        whereClause.serviceType = serviceType;
     const [inquiries, total] = await Promise.all([
         prisma_1.prisma.inquiry.findMany({
             where: whereClause,
@@ -314,6 +328,163 @@ router.get('/stats', (0, errorHandler_1.asyncHandler)(async (_req, res) => {
                 }).reverse(),
             },
         },
+    });
+}));
+/**
+ * Get website traffic stats (admin only)
+ */
+router.get('/traffic', (0, errorHandler_1.asyncHandler)(async (_req, res) => {
+    const [lastHour, last24h, hourlyBuckets, topPages, countries24h] = await Promise.all([
+        prisma_1.prisma.$queryRaw `
+        SELECT
+          COUNT(*)::int AS views,
+          COUNT(DISTINCT COALESCE("userId", "ipAddress"))::int AS visitors
+        FROM "AuditLog"
+        WHERE action = 'PAGE_VIEW'
+          AND entity = 'PAGE'
+          AND "createdAt" >= NOW() - INTERVAL '1 hour'
+          AND ("entityId" IS NULL OR "entityId" NOT LIKE '/admin%')
+      `,
+        prisma_1.prisma.$queryRaw `
+        SELECT
+          COUNT(*)::int AS views,
+          COUNT(DISTINCT COALESCE("userId", "ipAddress"))::int AS visitors
+        FROM "AuditLog"
+        WHERE action = 'PAGE_VIEW'
+          AND entity = 'PAGE'
+          AND "createdAt" >= NOW() - INTERVAL '24 hours'
+          AND ("entityId" IS NULL OR "entityId" NOT LIKE '/admin%')
+      `,
+        prisma_1.prisma.$queryRaw `
+        SELECT
+          date_trunc('hour', "createdAt") AS bucket,
+          COUNT(*)::int AS views,
+          COUNT(DISTINCT COALESCE("userId", "ipAddress"))::int AS visitors
+        FROM "AuditLog"
+        WHERE action = 'PAGE_VIEW'
+          AND entity = 'PAGE'
+          AND "createdAt" >= NOW() - INTERVAL '24 hours'
+          AND ("entityId" IS NULL OR "entityId" NOT LIKE '/admin%')
+        GROUP BY bucket
+        ORDER BY bucket ASC
+      `,
+        prisma_1.prisma.$queryRaw `
+        SELECT
+          "entityId" AS path,
+          COUNT(*)::int AS views
+        FROM "AuditLog"
+        WHERE action = 'PAGE_VIEW'
+          AND entity = 'PAGE'
+          AND "createdAt" >= NOW() - INTERVAL '7 days'
+          AND ("entityId" IS NULL OR "entityId" NOT LIKE '/admin%')
+        GROUP BY "entityId"
+        ORDER BY views DESC
+        LIMIT 8
+      `,
+        prisma_1.prisma.$queryRaw `
+        SELECT
+          COALESCE(
+            (NULLIF(metadata, '')::jsonb -> 'geo' ->> 'countryCode'),
+            (NULLIF(metadata, '')::jsonb -> 'geo' ->> 'country_code'),
+            'Unknown'
+          ) AS countryCode,
+          COALESCE(
+            (NULLIF(metadata, '')::jsonb -> 'geo' ->> 'country'),
+            'Unknown'
+          ) AS country,
+          COUNT(*)::int AS views,
+          COUNT(DISTINCT COALESCE("userId", "ipAddress"))::int AS visitors
+        FROM "AuditLog"
+        WHERE action = 'PAGE_VIEW'
+          AND entity = 'PAGE'
+          AND "createdAt" >= NOW() - INTERVAL '24 hours'
+          AND ("entityId" IS NULL OR "entityId" NOT LIKE '/admin%')
+        GROUP BY countryCode, country
+        ORDER BY views DESC
+        LIMIT 8
+      `,
+    ]);
+    const lastHourRow = lastHour?.[0] || { views: 0, visitors: 0 };
+    const last24hRow = last24h?.[0] || { views: 0, visitors: 0 };
+    // Normalize to a stable 24-point series (hourly).
+    const now = new Date();
+    const start = new Date(now);
+    start.setMinutes(0, 0, 0);
+    start.setHours(start.getHours() - 23);
+    const byIsoHour = new Map();
+    for (const row of hourlyBuckets || []) {
+        const bucket = row.bucket instanceof Date ? row.bucket : new Date(row.bucket);
+        byIsoHour.set(bucket.toISOString(), { views: Number(row.views) || 0, visitors: Number(row.visitors) || 0 });
+    }
+    const series24h = [];
+    for (let i = 0; i < 24; i++) {
+        const d = new Date(start);
+        d.setHours(start.getHours() + i);
+        const iso = d.toISOString();
+        const data = byIsoHour.get(iso) || { views: 0, visitors: 0 };
+        series24h.push({
+            hour: d.toISOString(),
+            views: data.views,
+            visitors: data.visitors,
+        });
+    }
+    res.setHeader('Cache-Control', 'no-store');
+    res.json({
+        success: true,
+        data: {
+            lastHour: {
+                views: Number(lastHourRow.views) || 0,
+                uniqueVisitors: Number(lastHourRow.visitors) || 0,
+            },
+            last24h: {
+                views: Number(last24hRow.views) || 0,
+                uniqueVisitors: Number(last24hRow.visitors) || 0,
+            },
+            series24h,
+            topPages7d: (topPages || []).map((row) => ({
+                path: row.path || '/',
+                views: Number(row.views) || 0,
+            })),
+            countries24h: (countries24h || []).map((row) => ({
+                countryCode: row.countrycode || row.countryCode || 'Unknown',
+                country: row.country || 'Unknown',
+                views: Number(row.views) || 0,
+                visitors: Number(row.visitors) || 0,
+            })),
+        },
+    });
+}));
+/**
+ * Get site settings (admin only)
+ */
+router.get('/site-settings', (0, errorHandler_1.asyncHandler)(async (_req, res) => {
+    const settings = await (0, siteSettings_service_1.getSiteSettings)();
+    res.setHeader('Cache-Control', 'no-store');
+    res.json({ success: true, data: settings });
+}));
+/**
+ * Update site settings (admin only)
+ */
+router.put('/site-settings', (0, validate_1.validate)({ body: schemas_1.siteSettingsSchema }), (0, errorHandler_1.asyncHandler)(async (req, res) => {
+    const adminId = req.user.userId;
+    const nextSettings = req.body;
+    const prevSettings = await (0, siteSettings_service_1.getSiteSettings)();
+    await prisma_1.prisma.auditLog.create({
+        data: {
+            userId: adminId,
+            action: 'SITE_SETTINGS_UPDATE',
+            entity: 'SITE_SETTINGS',
+            entityId: 'global',
+            ipAddress: req.ip,
+            userAgent: req.headers['user-agent'],
+            oldData: JSON.stringify(prevSettings),
+            newData: JSON.stringify(nextSettings),
+        },
+    });
+    res.setHeader('Cache-Control', 'no-store');
+    res.json({
+        success: true,
+        data: nextSettings,
     });
 }));
 /**

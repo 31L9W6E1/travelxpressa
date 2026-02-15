@@ -34,6 +34,13 @@ export declare const config: {
     };
     sentryDsn: string | undefined;
     frontendUrl: string;
+    kiwiApiKey: string;
+    cmsAutoTranslate: {
+        enabled: boolean;
+        locales: string;
+        openAiApiKey: string;
+        openAiModel: string;
+    };
     telegram: {
         botToken: string;
         chatId: string;

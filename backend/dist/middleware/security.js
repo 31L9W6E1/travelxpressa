@@ -16,6 +16,31 @@ const config_1 = require("../config");
 const logger_1 = require("../utils/logger");
 // CSRF token store (use Redis in production)
 const csrfTokens = new Map();
+function toOrigin(url) {
+    try {
+        return new URL(url).origin;
+    }
+    catch {
+        return null;
+    }
+}
+function getTrustedOrigins() {
+    const origins = new Set();
+    config_1.config.corsOrigin
+        .split(',')
+        .map((origin) => origin.trim())
+        .filter(Boolean)
+        .forEach((origin) => {
+        const parsed = toOrigin(origin);
+        if (parsed)
+            origins.add(parsed);
+    });
+    const frontendOrigin = toOrigin(config_1.config.frontendUrl);
+    if (frontendOrigin) {
+        origins.add(frontendOrigin);
+    }
+    return origins;
+}
 /**
  * Security headers middleware
  */
@@ -82,21 +107,41 @@ function csrfProtection(req, res, next) {
     if (authHeader?.startsWith('Bearer ')) {
         return next();
     }
-    const sessionId = req.cookies?.sessionId || req.headers['x-session-id'];
-    const csrfToken = req.headers['x-csrf-token'] || req.body?._csrf;
-    if (!sessionId || !csrfToken) {
-        logger_1.logger.security('CSRF token missing', { ip: req.ip, path: req.path });
-        res.status(403).json({
-            success: false,
-            error: 'CSRF token required',
-        });
-        return;
+    // Only enforce CSRF checks for cookie-authenticated requests.
+    // This prevents breaking non-cookie API flows (e.g., login/register forms).
+    const sessionId = req.cookies?.sessionId ||
+        req.cookies?.refreshToken ||
+        req.headers['x-session-id'];
+    if (!sessionId) {
+        return next();
     }
-    if (!verifyCSRFToken(sessionId, csrfToken)) {
-        logger_1.logger.security('CSRF token invalid', { ip: req.ip, path: req.path });
+    const csrfToken = req.headers['x-csrf-token'] || req.body?._csrf;
+    if (csrfToken) {
+        if (!verifyCSRFToken(sessionId, csrfToken)) {
+            logger_1.logger.security('CSRF token invalid', { ip: req.ip, path: req.path });
+            res.status(403).json({
+                success: false,
+                error: 'Invalid CSRF token',
+            });
+            return;
+        }
+        return next();
+    }
+    // Fallback hardening for browsers: require trusted Origin/Referer for cookie auth requests.
+    const originHeader = req.get('origin');
+    const refererHeader = req.get('referer');
+    const requestOrigin = originHeader || (refererHeader ? toOrigin(refererHeader) : null);
+    const trustedOrigins = getTrustedOrigins();
+    if (!requestOrigin || !trustedOrigins.has(requestOrigin)) {
+        logger_1.logger.security('CSRF origin check failed', {
+            ip: req.ip,
+            path: req.path,
+            method: req.method,
+            requestOrigin: requestOrigin || 'missing',
+        });
         res.status(403).json({
             success: false,
-            error: 'Invalid CSRF token',
+            error: 'Invalid request origin',
         });
         return;
     }
@@ -144,12 +189,16 @@ function auditLog(action) {
  */
 function detectSuspiciousActivity(req, res, next) {
     const suspiciousPatterns = [
-        /(\%27)|(\')|(\-\-)|(\%23)|(#)/i, // SQL injection
+        /(\%27)|(\')|(\%23)|(#)/i, // SQL injection (avoid false positives on OAuth/base64url query params)
         /((\%3C)|<)((\%2F)|\/)*[a-z0-9\%]+((\%3E)|>)/i, // XSS
         /(\%00)/i, // Null byte injection
         /(\.\.\/)/i, // Path traversal
     ];
-    const checkString = JSON.stringify(req.body) + JSON.stringify(req.query) + req.url;
+    // IMPORTANT:
+    // Do not scan the request body for "suspicious" characters (like apostrophes).
+    // Legitimate user-generated content (chat, CMS posts, names like O'Connor) will otherwise be blocked.
+    // We only apply lightweight checks on the URL/query string here.
+    const checkString = req.url;
     for (const pattern of suspiciousPatterns) {
         if (pattern.test(checkString)) {
             logger_1.logger.security('Suspicious request detected', {

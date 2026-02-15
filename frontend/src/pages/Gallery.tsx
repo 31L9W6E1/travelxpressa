@@ -690,21 +690,24 @@ const Gallery = () => {
   };
 
   return (
-    <div className="relative min-h-screen bg-background text-foreground overflow-hidden">
-      <div
-        className="pointer-events-none absolute inset-0 z-0 bg-cover bg-center opacity-[0.14]"
-        style={{ backgroundImage: `url(${galleryHeroBackground})` }}
-      />
-      <div className="pointer-events-none absolute inset-0 z-0 bg-gradient-to-b from-background/70 via-background/90 to-background" />
+    <div className="min-h-screen bg-background text-foreground">
+      <div className="relative overflow-hidden">
+        <div className="pointer-events-none absolute inset-0 h-[420px]">
+          <img
+            src={galleryHeroBackground}
+            alt="Gallery background"
+            className="h-full w-full object-cover"
+          />
+        </div>
+        <div className="pointer-events-none absolute inset-0 h-[420px] bg-gradient-to-b from-background/30 via-background/75 to-background" />
 
-      <PageHeader
-        title={t("gallery.title", { defaultValue: "Travel Gallery" })}
-        subtitle={t("gallery.subtitle", {
-          defaultValue: "Discover the beauty of destinations awaiting your journey.",
-        })}
-        backgroundImageUrl={galleryHeroBackground}
-        className="relative z-10 border-b-0"
-        actions={
+        <PageHeader
+          title={t("gallery.title", { defaultValue: "Travel Gallery" })}
+          subtitle={t("gallery.subtitle", {
+            defaultValue: "Discover the beauty of destinations awaiting your journey.",
+          })}
+          className="relative z-10 border-b-0"
+          actions={
           user?.role === "ADMIN" ? (
             <>
               <input
@@ -743,43 +746,49 @@ const Gallery = () => {
               </Button>
             </>
           ) : null
-        }
-      >
-        {categories.length > 1 ? (
-          <div className="flex flex-wrap items-center justify-start gap-2">
-            {categories.map((category) => (
-              <button
-                key={category}
-                onClick={() => setSelectedCategory(category)}
-                className={topicChipClass(selectedCategory === category)}
-              >
-                {getCategoryLabel(category)}
-              </button>
-            ))}
-            {usingUploads ? (
-              <>
-                <Badge variant="secondary" className="ml-auto">
-                  {t("gallery.publishedCount", {
-                    defaultValue: "Published: {{count}}",
-                    count: (uploadedImages || []).filter((img) => img.published !== false).length,
-                  })}
-                </Badge>
-                {user?.role === "ADMIN" ? (
-                  <Badge variant="outline">
-                    {t("gallery.draftCount", {
-                      defaultValue: "Draft: {{count}}",
-                      count: (uploadedImages || []).filter((img) => img.published === false).length,
+          }
+        >
+          {categories.length > 1 ? (
+            <div className="flex flex-wrap items-center justify-start gap-2">
+              {categories.map((category) => (
+                <button
+                  key={category}
+                  onClick={() => setSelectedCategory(category)}
+                  className={topicChipClass(selectedCategory === category)}
+                >
+                  {getCategoryLabel(category)}
+                </button>
+              ))}
+              {usingUploads ? (
+                <>
+                  <Badge variant="secondary" className="ml-auto">
+                    {t("gallery.publishedCount", {
+                      defaultValue: "Published: {{count}}",
+                      count: (uploadedImages || []).filter((img) => img.published !== false).length,
                     })}
                   </Badge>
-                ) : null}
-              </>
-            ) : null}
-          </div>
-        ) : null}
-      </PageHeader>
+                  {user?.role === "ADMIN" ? (
+                    <Badge variant="outline">
+                      {t("gallery.draftCount", {
+                        defaultValue: "Draft: {{count}}",
+                        count: (uploadedImages || []).filter((img) => img.published === false).length,
+                      })}
+                    </Badge>
+                  ) : null}
+                </>
+              ) : null}
+            </div>
+          ) : null}
+        </PageHeader>
+      </div>
 
       {/* Gallery Grid */}
-      <section className="relative z-10 py-12">
+      <section className="relative py-12 overflow-hidden">
+        <div
+          className="pointer-events-none absolute inset-0 -z-10 bg-cover bg-center opacity-[0.12] blur-[1px]"
+          style={{ backgroundImage: `url(${galleryHeroBackground})` }}
+        />
+        <div className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b from-background/10 via-background/75 to-background" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
               <div className="grid grid-cols-2 min-[500px]:grid-cols-3 md:grid-cols-4 gap-2 md:gap-6">
                 {filteredImages.map((image, index) => {

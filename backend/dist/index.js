@@ -59,6 +59,8 @@ const posts_routes_1 = __importDefault(require("./routes/posts.routes"));
 const chat_routes_1 = __importDefault(require("./routes/chat.routes"));
 const upload_routes_1 = __importDefault(require("./routes/upload.routes"));
 const payment_routes_1 = __importDefault(require("./routes/payment.routes"));
+const flights_routes_1 = __importDefault(require("./routes/flights.routes"));
+const site_routes_1 = __importDefault(require("./routes/site.routes"));
 const app = (0, express_1.default)();
 // Trust proxy (for rate limiting behind reverse proxy)
 app.set('trust proxy', 1);
@@ -86,7 +88,14 @@ app.use((0, cookie_parser_1.default)(config_1.config.sessionSecret));
 // Compression
 app.use((0, compression_1.default)());
 // Serve uploaded images statically
-app.use('/uploads', express_1.default.static(path_1.default.join(process.cwd(), 'uploads')));
+const uploadsRootDir = path_1.default.isAbsolute(config_1.config.upload.uploadDir)
+    ? config_1.config.upload.uploadDir
+    : path_1.default.join(process.cwd(), config_1.config.upload.uploadDir);
+app.use('/uploads', express_1.default.static(uploadsRootDir, {
+    maxAge: '7d',
+    immutable: true,
+    etag: true,
+}));
 // Security checks
 app.use(security_1.preventParamPollution);
 app.use(security_1.detectSuspiciousActivity);
@@ -129,27 +138,32 @@ app.get('/ready', async (_req, res) => {
 });
 // API routes with rate limiting (disabled in development)
 if (config_1.config.isProduction) {
-    app.use('/api/auth', rateLimit_1.authRateLimit, auth_routes_1.default);
-    app.use('/api', rateLimit_1.apiRateLimit, inquiry_routes_1.default);
-    app.use('/api/admin', rateLimit_1.apiRateLimit, admin_routes_1.default);
-    app.use('/api', rateLimit_1.apiRateLimit, user_routes_1.default);
+    app.use('/api/auth', rateLimit_1.authRateLimit, security_1.csrfProtection, auth_routes_1.default);
+    app.use('/api/site', site_routes_1.default);
     app.use('/api/applications', rateLimit_1.apiRateLimit, application_routes_1.default);
+    app.use('/api/admin', rateLimit_1.apiRateLimit, admin_routes_1.default);
     app.use('/api/posts', rateLimit_1.apiRateLimit, posts_routes_1.default);
-    app.use('/api/chat', rateLimit_1.apiRateLimit, chat_routes_1.default);
+    app.use('/api/chat', rateLimit_1.chatRateLimit, chat_routes_1.default);
     app.use('/api/upload', rateLimit_1.apiRateLimit, upload_routes_1.default);
     app.use('/api/payments', rateLimit_1.apiRateLimit, payment_routes_1.default);
+    app.use('/api/flights', flights_routes_1.default);
+    // NOTE: Mount the generic /api routers last so they don't rate-limit every /api/* endpoint.
+    app.use('/api', rateLimit_1.apiRateLimit, inquiry_routes_1.default);
+    app.use('/api', rateLimit_1.apiRateLimit, user_routes_1.default);
 }
 else {
     // Development - no rate limiting
-    app.use('/api/auth', auth_routes_1.default);
-    app.use('/api', inquiry_routes_1.default);
+    app.use('/api/auth', security_1.csrfProtection, auth_routes_1.default);
+    app.use('/api/site', site_routes_1.default);
     app.use('/api/admin', admin_routes_1.default);
-    app.use('/api', user_routes_1.default);
     app.use('/api/applications', application_routes_1.default);
     app.use('/api/posts', posts_routes_1.default);
     app.use('/api/chat', chat_routes_1.default);
     app.use('/api/upload', upload_routes_1.default);
     app.use('/api/payments', payment_routes_1.default);
+    app.use('/api/flights', flights_routes_1.default);
+    app.use('/api', inquiry_routes_1.default);
+    app.use('/api', user_routes_1.default);
 }
 // 404 handler
 app.use(errorHandler_1.notFoundHandler);

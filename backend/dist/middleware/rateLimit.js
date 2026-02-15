@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.apiRateLimit = exports.authRateLimit = void 0;
+exports.chatRateLimit = exports.apiRateLimit = exports.authRateLimit = void 0;
 exports.rateLimit = rateLimit;
 const config_1 = require("../config");
 const logger_1 = require("../utils/logger");
@@ -25,9 +25,9 @@ function getClientIdentifier(req) {
  * Rate limiting middleware factory
  */
 function rateLimit(options = {}) {
-    const { windowMs = config_1.config.rateLimit.windowMs, maxRequests = config_1.config.rateLimit.maxRequests, message = 'Too many requests, please try again later', skipSuccessfulRequests = false, keyGenerator = getClientIdentifier, onLimitReached, } = options;
+    const { windowMs = config_1.config.rateLimit.windowMs, maxRequests = config_1.config.rateLimit.maxRequests, message = 'Too many requests, please try again later', skipSuccessfulRequests = false, keyPrefix = '', keyGenerator = getClientIdentifier, onLimitReached, } = options;
     return (req, res, next) => {
-        const key = keyGenerator(req);
+        const key = `${keyPrefix}${keyGenerator(req)}`;
         const now = Date.now();
         let entry = rateLimitStore.get(key);
         // Check if blocked
@@ -104,6 +104,7 @@ exports.authRateLimit = rateLimit({
     maxRequests: config_1.config.rateLimit.authMaxRequests,
     message: 'Too many authentication attempts, please try again later',
     skipSuccessfulRequests: true, // Don't count successful requests (2xx/3xx)
+    keyPrefix: 'auth:',
     onLimitReached: (req) => {
         logger_1.logger.security('Auth rate limit exceeded', {
             ip: req.ip,
@@ -118,5 +119,15 @@ exports.authRateLimit = rateLimit({
 exports.apiRateLimit = rateLimit({
     windowMs: config_1.config.rateLimit.windowMs,
     maxRequests: config_1.config.rateLimit.maxRequests,
+    keyPrefix: 'api:',
+});
+/**
+ * Chat-specific rate limit (higher throughput, separate namespace from general API).
+ */
+exports.chatRateLimit = rateLimit({
+    windowMs: 60 * 1000, // 1 minute
+    maxRequests: 60,
+    message: 'Too many chat requests, please slow down',
+    keyPrefix: 'chat:',
 });
 //# sourceMappingURL=rateLimit.js.map

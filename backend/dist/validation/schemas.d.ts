@@ -30,6 +30,269 @@ export declare const refreshTokenSchema: z.ZodObject<{
 }, {
     refreshToken: string;
 }>;
+export declare const forgotPasswordSchema: z.ZodObject<{
+    email: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    email: string;
+}, {
+    email: string;
+}>;
+export declare const resetPasswordSchema: z.ZodObject<{
+    token: z.ZodString;
+    newPassword: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    token: string;
+    newPassword: string;
+}, {
+    token: string;
+    newPassword: string;
+}>;
+export declare const pageViewSchema: z.ZodObject<{
+    path: z.ZodEffects<z.ZodEffects<z.ZodString, string, string>, string, string>;
+    title: z.ZodOptional<z.ZodString>;
+    referrer: z.ZodOptional<z.ZodString>;
+    locale: z.ZodOptional<z.ZodString>;
+}, "strip", z.ZodTypeAny, {
+    path: string;
+    title?: string | undefined;
+    referrer?: string | undefined;
+    locale?: string | undefined;
+}, {
+    path: string;
+    title?: string | undefined;
+    referrer?: string | undefined;
+    locale?: string | undefined;
+}>;
+export declare const siteSettingsSchema: z.ZodObject<{
+    maintenance: z.ZodObject<{
+        enabled: z.ZodBoolean;
+        message: z.ZodUnion<[z.ZodOptional<z.ZodString>, z.ZodLiteral<"">]>;
+    }, "strip", z.ZodTypeAny, {
+        enabled: boolean;
+        message?: string | undefined;
+    }, {
+        enabled: boolean;
+        message?: string | undefined;
+    }>;
+    visibility: z.ZodObject<{
+        about: z.ZodBoolean;
+        learnMore: z.ZodBoolean;
+        translationService: z.ZodBoolean;
+        gallery: z.ZodBoolean;
+        news: z.ZodBoolean;
+        blog: z.ZodBoolean;
+        flight: z.ZodBoolean;
+        insurance: z.ZodBoolean;
+        helpCenter: z.ZodBoolean;
+        qAndA: z.ZodBoolean;
+        feedback: z.ZodBoolean;
+    }, "strip", z.ZodTypeAny, {
+        about: boolean;
+        learnMore: boolean;
+        translationService: boolean;
+        gallery: boolean;
+        news: boolean;
+        blog: boolean;
+        flight: boolean;
+        insurance: boolean;
+        helpCenter: boolean;
+        qAndA: boolean;
+        feedback: boolean;
+    }, {
+        about: boolean;
+        learnMore: boolean;
+        translationService: boolean;
+        gallery: boolean;
+        news: boolean;
+        blog: boolean;
+        flight: boolean;
+        insurance: boolean;
+        helpCenter: boolean;
+        qAndA: boolean;
+        feedback: boolean;
+    }>;
+    agreement: z.ZodOptional<z.ZodObject<{
+        template: z.ZodString;
+        version: z.ZodUnion<[z.ZodOptional<z.ZodString>, z.ZodLiteral<"">]>;
+    }, "strip", z.ZodTypeAny, {
+        template: string;
+        version?: string | undefined;
+    }, {
+        template: string;
+        version?: string | undefined;
+    }>>;
+    quickHelp: z.ZodOptional<z.ZodObject<{
+        title: z.ZodUnion<[z.ZodOptional<z.ZodString>, z.ZodLiteral<"">]>;
+        description: z.ZodUnion<[z.ZodOptional<z.ZodString>, z.ZodLiteral<"">]>;
+        facebookUrl: z.ZodUnion<[z.ZodOptional<z.ZodString>, z.ZodLiteral<"">]>;
+        phone: z.ZodUnion<[z.ZodOptional<z.ZodString>, z.ZodLiteral<"">]>;
+        email: z.ZodUnion<[z.ZodOptional<z.ZodString>, z.ZodLiteral<"">]>;
+        branch1Title: z.ZodUnion<[z.ZodOptional<z.ZodString>, z.ZodLiteral<"">]>;
+        branch1Hours: z.ZodUnion<[z.ZodOptional<z.ZodString>, z.ZodLiteral<"">]>;
+        headOfficeTitle: z.ZodUnion<[z.ZodOptional<z.ZodString>, z.ZodLiteral<"">]>;
+        headOfficeHours: z.ZodUnion<[z.ZodOptional<z.ZodString>, z.ZodLiteral<"">]>;
+        onlineHours: z.ZodUnion<[z.ZodOptional<z.ZodString>, z.ZodLiteral<"">]>;
+    }, "strip", z.ZodTypeAny, {
+        email?: string | undefined;
+        phone?: string | undefined;
+        title?: string | undefined;
+        description?: string | undefined;
+        facebookUrl?: string | undefined;
+        branch1Title?: string | undefined;
+        branch1Hours?: string | undefined;
+        headOfficeTitle?: string | undefined;
+        headOfficeHours?: string | undefined;
+        onlineHours?: string | undefined;
+    }, {
+        email?: string | undefined;
+        phone?: string | undefined;
+        title?: string | undefined;
+        description?: string | undefined;
+        facebookUrl?: string | undefined;
+        branch1Title?: string | undefined;
+        branch1Hours?: string | undefined;
+        headOfficeTitle?: string | undefined;
+        headOfficeHours?: string | undefined;
+        onlineHours?: string | undefined;
+    }>>;
+    galleryHeroImageUrl: z.ZodUnion<[z.ZodOptional<z.ZodString>, z.ZodLiteral<"">]>;
+    qAndAItems: z.ZodOptional<z.ZodArray<z.ZodObject<{
+        q: z.ZodString;
+        a: z.ZodString;
+    }, "strip", z.ZodTypeAny, {
+        q: string;
+        a: string;
+    }, {
+        q: string;
+        a: string;
+    }>, "many">>;
+    galleryDemoItems: z.ZodOptional<z.ZodArray<z.ZodObject<{
+        id: z.ZodOptional<z.ZodNumber>;
+        src: z.ZodString;
+        alt: z.ZodString;
+        title: z.ZodUnion<[z.ZodOptional<z.ZodString>, z.ZodLiteral<"">]>;
+        category: z.ZodString;
+        tags: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+        description: z.ZodUnion<[z.ZodOptional<z.ZodString>, z.ZodLiteral<"">]>;
+        published: z.ZodOptional<z.ZodBoolean>;
+    }, "strip", z.ZodTypeAny, {
+        src: string;
+        alt: string;
+        category: string;
+        id?: number | undefined;
+        title?: string | undefined;
+        description?: string | undefined;
+        tags?: string[] | undefined;
+        published?: boolean | undefined;
+    }, {
+        src: string;
+        alt: string;
+        category: string;
+        id?: number | undefined;
+        title?: string | undefined;
+        description?: string | undefined;
+        tags?: string[] | undefined;
+        published?: boolean | undefined;
+    }>, "many">>;
+}, "strip", z.ZodTypeAny, {
+    maintenance: {
+        enabled: boolean;
+        message?: string | undefined;
+    };
+    visibility: {
+        about: boolean;
+        learnMore: boolean;
+        translationService: boolean;
+        gallery: boolean;
+        news: boolean;
+        blog: boolean;
+        flight: boolean;
+        insurance: boolean;
+        helpCenter: boolean;
+        qAndA: boolean;
+        feedback: boolean;
+    };
+    agreement?: {
+        template: string;
+        version?: string | undefined;
+    } | undefined;
+    quickHelp?: {
+        email?: string | undefined;
+        phone?: string | undefined;
+        title?: string | undefined;
+        description?: string | undefined;
+        facebookUrl?: string | undefined;
+        branch1Title?: string | undefined;
+        branch1Hours?: string | undefined;
+        headOfficeTitle?: string | undefined;
+        headOfficeHours?: string | undefined;
+        onlineHours?: string | undefined;
+    } | undefined;
+    galleryHeroImageUrl?: string | undefined;
+    qAndAItems?: {
+        q: string;
+        a: string;
+    }[] | undefined;
+    galleryDemoItems?: {
+        src: string;
+        alt: string;
+        category: string;
+        id?: number | undefined;
+        title?: string | undefined;
+        description?: string | undefined;
+        tags?: string[] | undefined;
+        published?: boolean | undefined;
+    }[] | undefined;
+}, {
+    maintenance: {
+        enabled: boolean;
+        message?: string | undefined;
+    };
+    visibility: {
+        about: boolean;
+        learnMore: boolean;
+        translationService: boolean;
+        gallery: boolean;
+        news: boolean;
+        blog: boolean;
+        flight: boolean;
+        insurance: boolean;
+        helpCenter: boolean;
+        qAndA: boolean;
+        feedback: boolean;
+    };
+    agreement?: {
+        template: string;
+        version?: string | undefined;
+    } | undefined;
+    quickHelp?: {
+        email?: string | undefined;
+        phone?: string | undefined;
+        title?: string | undefined;
+        description?: string | undefined;
+        facebookUrl?: string | undefined;
+        branch1Title?: string | undefined;
+        branch1Hours?: string | undefined;
+        headOfficeTitle?: string | undefined;
+        headOfficeHours?: string | undefined;
+        onlineHours?: string | undefined;
+    } | undefined;
+    galleryHeroImageUrl?: string | undefined;
+    qAndAItems?: {
+        q: string;
+        a: string;
+    }[] | undefined;
+    galleryDemoItems?: {
+        src: string;
+        alt: string;
+        category: string;
+        id?: number | undefined;
+        title?: string | undefined;
+        description?: string | undefined;
+        tags?: string[] | undefined;
+        published?: boolean | undefined;
+    }[] | undefined;
+}>;
 export declare const updateUserSchema: z.ZodObject<{
     name: z.ZodOptional<z.ZodString>;
     role: z.ZodOptional<z.ZodNativeEnum<typeof UserRole>>;
@@ -50,7 +313,7 @@ export declare const updateRoleSchema: z.ZodObject<{
 export declare const createInquirySchema: z.ZodObject<{
     name: z.ZodString;
     email: z.ZodString;
-    phone: z.ZodString;
+    phone: z.ZodEffects<z.ZodString, string, string>;
     message: z.ZodString;
     serviceType: z.ZodNativeEnum<typeof ServiceType>;
 }, "strip", z.ZodTypeAny, {
@@ -177,9 +440,9 @@ export declare const contactInfoSchema: z.ZodObject<{
         state?: string | undefined;
         postalCode?: string | undefined;
     }>>;
-    phone: z.ZodString;
-    secondaryPhone: z.ZodOptional<z.ZodString>;
-    workPhone: z.ZodOptional<z.ZodString>;
+    phone: z.ZodEffects<z.ZodString, string, string>;
+    secondaryPhone: z.ZodOptional<z.ZodEffects<z.ZodString, string, string>>;
+    workPhone: z.ZodOptional<z.ZodEffects<z.ZodString, string, string>>;
     email: z.ZodString;
 }, "strip", z.ZodTypeAny, {
     email: string;
@@ -2890,6 +3153,52 @@ export declare const updateApplicationSchema: z.ZodObject<{
         }>, "many">>;
     }, z.ZodTypeAny, "passthrough"> | undefined;
 }>;
+export declare const flightSearchSchema: z.ZodEffects<z.ZodObject<{
+    from: z.ZodString;
+    to: z.ZodString;
+    departDate: z.ZodString;
+    returnDate: z.ZodOptional<z.ZodString>;
+    adults: z.ZodDefault<z.ZodNumber>;
+    children: z.ZodDefault<z.ZodNumber>;
+    infants: z.ZodDefault<z.ZodNumber>;
+    cabinClass: z.ZodDefault<z.ZodEnum<["ECONOMY", "PREMIUM_ECONOMY", "BUSINESS", "FIRST"]>>;
+}, "strip", z.ZodTypeAny, {
+    children: number;
+    from: string;
+    to: string;
+    departDate: string;
+    adults: number;
+    infants: number;
+    cabinClass: "ECONOMY" | "PREMIUM_ECONOMY" | "BUSINESS" | "FIRST";
+    returnDate?: string | undefined;
+}, {
+    from: string;
+    to: string;
+    departDate: string;
+    children?: number | undefined;
+    returnDate?: string | undefined;
+    adults?: number | undefined;
+    infants?: number | undefined;
+    cabinClass?: "ECONOMY" | "PREMIUM_ECONOMY" | "BUSINESS" | "FIRST" | undefined;
+}>, {
+    children: number;
+    from: string;
+    to: string;
+    departDate: string;
+    adults: number;
+    infants: number;
+    cabinClass: "ECONOMY" | "PREMIUM_ECONOMY" | "BUSINESS" | "FIRST";
+    returnDate?: string | undefined;
+}, {
+    from: string;
+    to: string;
+    departDate: string;
+    children?: number | undefined;
+    returnDate?: string | undefined;
+    adults?: number | undefined;
+    infants?: number | undefined;
+    cabinClass?: "ECONOMY" | "PREMIUM_ECONOMY" | "BUSINESS" | "FIRST" | undefined;
+}>;
 export declare const paginationSchema: z.ZodObject<{
     page: z.ZodDefault<z.ZodNumber>;
     limit: z.ZodDefault<z.ZodNumber>;
@@ -2901,6 +3210,29 @@ export declare const paginationSchema: z.ZodObject<{
     sortOrder: "asc" | "desc";
     sortBy?: string | undefined;
 }, {
+    page?: number | undefined;
+    limit?: number | undefined;
+    sortBy?: string | undefined;
+    sortOrder?: "asc" | "desc" | undefined;
+}>;
+export declare const adminInquiriesQuerySchema: z.ZodObject<{
+    page: z.ZodDefault<z.ZodNumber>;
+    limit: z.ZodDefault<z.ZodNumber>;
+    sortBy: z.ZodOptional<z.ZodString>;
+    sortOrder: z.ZodDefault<z.ZodEnum<["asc", "desc"]>>;
+} & {
+    status: z.ZodOptional<z.ZodString>;
+    serviceType: z.ZodOptional<z.ZodString>;
+}, "strip", z.ZodTypeAny, {
+    page: number;
+    limit: number;
+    sortOrder: "asc" | "desc";
+    status?: string | undefined;
+    serviceType?: string | undefined;
+    sortBy?: string | undefined;
+}, {
+    status?: string | undefined;
+    serviceType?: string | undefined;
     page?: number | undefined;
     limit?: number | undefined;
     sortBy?: string | undefined;
@@ -2923,5 +3255,6 @@ export type PassportInfoInput = z.infer<typeof passportInfoSchema>;
 export type TravelInfoInput = z.infer<typeof travelInfoSchema>;
 export type CreateApplicationInput = z.infer<typeof createApplicationSchema>;
 export type UpdateApplicationInput = z.infer<typeof updateApplicationSchema>;
+export type FlightSearchInput = z.infer<typeof flightSearchSchema>;
 export type PaginationInput = z.infer<typeof paginationSchema>;
 //# sourceMappingURL=schemas.d.ts.map

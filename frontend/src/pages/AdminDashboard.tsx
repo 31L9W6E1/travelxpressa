@@ -33,6 +33,7 @@ import {
   FolderOpen,
   TrendingDown,
   MessageSquare,
+  Languages,
 } from "lucide-react";
 import {
   ChartContainer,
@@ -103,8 +104,10 @@ import {
   updatePost,
   deletePost,
   togglePostPublish,
+  upsertPostTranslation,
   formatPostDate,
 } from "@/api/posts";
+import { normalizeImageUrl } from "@/api/upload";
 import { UserAvatar } from "@/components/UserAvatar";
 import api from "@/api/client";
 import ApplicationDetailModal from "@/components/admin/ApplicationDetailModal";
@@ -205,6 +208,21 @@ type TrafficStats = {
   topPages7d: Array<{ path: string; views: number }>;
   countries24h: Array<{ countryCode: string; country: string; views: number; visitors: number }>;
 };
+
+const CMS_FALLBACK_IMAGE_BY_CATEGORY: Record<"blog" | "news", string> = {
+  blog: "https://images.unsplash.com/photo-1488085061387-422e29b40080?w=300&auto=format&fit=crop&q=60",
+  news: "https://images.unsplash.com/photo-1551836022-deb4988cc6c0?w=300&auto=format&fit=crop&q=60",
+};
+
+const CMS_TRANSLATION_LOCALES = [
+  { code: "mn", label: "Монгол" },
+  { code: "ru", label: "Русский" },
+  { code: "zh", label: "中文" },
+  { code: "ja", label: "日本語" },
+  { code: "ko", label: "한국어" },
+] as const;
+
+type CmsTranslationLocale = (typeof CMS_TRANSLATION_LOCALES)[number]["code"];
 
 // Chart configurations are defined inside the component so labels can be localized.
 
@@ -410,6 +428,17 @@ const AdminDashboard = () => {
     tags: "",
     status: "draft",
   });
+  const [translationDialogOpen, setTranslationDialogOpen] = useState(false);
+  const [translationPost, setTranslationPost] = useState<Post | null>(null);
+  const [translationLocale, setTranslationLocale] = useState<CmsTranslationLocale>("mn");
+  const [translationDraft, setTranslationDraft] = useState({
+    title: "",
+    excerpt: "",
+    content: "",
+    tags: "",
+    status: "draft" as "draft" | "published",
+  });
+  const [savingTranslation, setSavingTranslation] = useState(false);
 
   // Site Settings + Traffic
   const [draftSiteSettings, setDraftSiteSettings] = useState<SiteSettings>(siteSettings || DEFAULT_SITE_SETTINGS);
@@ -673,17 +702,36 @@ const AdminDashboard = () => {
     }
   };
 
-  const fetchPosts = async () => {
+  const fetchPosts = async (): Promise<Post[]> => {
     setCmsLoading(true);
     try {
       const response = await getAdminPosts();
-      setPosts(response.data || []);
+      const nextPosts = response.data || [];
+      setPosts(nextPosts);
+      return nextPosts;
     } catch (error) {
       console.error("Error fetching posts:", error);
       toast.error("Failed to load posts");
+      return [];
     } finally {
       setCmsLoading(false);
     }
+  };
+
+  const getTranslationByLocale = (post: Post | null, locale: CmsTranslationLocale) =>
+    post?.translations?.find((translation) => translation.locale === locale) || null;
+
+  const buildTranslationDraft = (post: Post, locale: CmsTranslationLocale) => {
+    const existingTranslation = getTranslationByLocale(post, locale);
+    return {
+      title: existingTranslation?.title || post.title,
+      excerpt: existingTranslation?.excerpt || post.excerpt || "",
+      content: existingTranslation?.content || post.content,
+      tags: existingTranslation?.tags || post.tags || "",
+      status:
+        existingTranslation?.status ||
+        (post.status === "published" ? "published" : "draft"),
+    };
   };
 
   const fetchTraffic = async () => {
@@ -784,6 +832,21 @@ const AdminDashboard = () => {
     setIsDialogOpen(true);
   };
 
+  const handleOpenTranslationDialog = (
+    post: Post,
+    preferredLocale: CmsTranslationLocale = "mn",
+  ) => {
+    setTranslationPost(post);
+    setTranslationLocale(preferredLocale);
+    setTranslationDraft(buildTranslationDraft(post, preferredLocale));
+    setTranslationDialogOpen(true);
+  };
+
+  useEffect(() => {
+    if (!translationDialogOpen || !translationPost) return;
+    setTranslationDraft(buildTranslationDraft(translationPost, translationLocale));
+  }, [translationDialogOpen, translationLocale, translationPost]);
+
   const handleEditPost = (post: Post) => {
     setEditingPost(post);
     setNewPost({
@@ -859,6 +922,47 @@ const AdminDashboard = () => {
       await fetchPosts();
     } catch (error) {
       toast.error("Failed to update publish status");
+    }
+  };
+
+  const handleSaveTranslation = async () => {
+    if (!translationPost) return;
+    if (!translationDraft.title.trim() || !translationDraft.content.trim()) {
+      toast.error("Translation title and content are required");
+      return;
+    }
+
+    setSavingTranslation(true);
+    try {
+      const response = await upsertPostTranslation(
+        translationPost.id,
+        translationLocale,
+        {
+          title: translationDraft.title.trim(),
+          excerpt: translationDraft.excerpt.trim() || null,
+          content: translationDraft.content.trim(),
+          tags: translationDraft.tags.trim() || null,
+          status: translationDraft.status,
+        },
+      );
+      toast.success(response.message || "Translation saved");
+
+      const refreshedPosts = await fetchPosts();
+      const refreshedCurrentPost = refreshedPosts.find(
+        (post) => post.id === translationPost.id,
+      );
+      if (refreshedCurrentPost) {
+        setTranslationPost(refreshedCurrentPost);
+      }
+    } catch (error: any) {
+      const message =
+        error?.response?.data?.message ||
+        error?.response?.data?.error ||
+        error?.message ||
+        "Failed to save translation";
+      toast.error(message);
+    } finally {
+      setSavingTranslation(false);
     }
   };
 
@@ -2701,7 +2805,19 @@ const AdminDashboard = () => {
                             key={post.id}
                             className="p-4 border rounded-lg hover:bg-muted/50 transition-colors"
                           >
-                            <div className="flex items-start justify-between gap-4">
+                            <div className="flex items-start gap-3">
+                              <div className="h-16 w-16 shrink-0 overflow-hidden rounded-md border bg-muted">
+                                <img
+                                  src={
+                                    post.imageUrl
+                                      ? normalizeImageUrl(post.imageUrl)
+                                      : CMS_FALLBACK_IMAGE_BY_CATEGORY.blog
+                                  }
+                                  alt={post.title}
+                                  className="h-full w-full object-cover"
+                                  loading="lazy"
+                                />
+                              </div>
                               <div className="flex-1 min-w-0">
                                 <h4 className="font-medium truncate">
                                   {post.title}
@@ -2726,8 +2842,43 @@ const AdminDashboard = () => {
                                     )}
                                   </span>
                                 </div>
+                                <div className="flex flex-wrap items-center gap-1.5 mt-2">
+                                  {CMS_TRANSLATION_LOCALES.map((localeItem) => {
+                                    const translation = getTranslationByLocale(
+                                      post,
+                                      localeItem.code,
+                                    );
+                                    return (
+                                      <button
+                                        key={`${post.id}-${localeItem.code}`}
+                                        type="button"
+                                        onClick={() =>
+                                          handleOpenTranslationDialog(
+                                            post,
+                                            localeItem.code,
+                                          )
+                                        }
+                                        className={`px-2 py-0.5 rounded-full text-[11px] font-medium transition-colors ${
+                                          translation
+                                            ? "bg-primary/10 text-primary hover:bg-primary/20"
+                                            : "bg-secondary text-muted-foreground hover:text-foreground"
+                                        }`}
+                                      >
+                                        {localeItem.code.toUpperCase()}
+                                      </button>
+                                    );
+                                  })}
+                                </div>
                               </div>
-                              <div className="flex flex-col gap-1">
+                              <div className="flex flex-col gap-1 shrink-0">
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => handleOpenTranslationDialog(post)}
+                                  title={t("dashboard.cms.translations", "Translations")}
+                                >
+                                  <Languages className="w-4 h-4" />
+                                </Button>
                                 <Button
                                   variant="ghost"
                                   size="icon"
@@ -2817,7 +2968,19 @@ const AdminDashboard = () => {
                             key={post.id}
                             className="p-4 border rounded-lg hover:bg-muted/50 transition-colors"
                           >
-                            <div className="flex items-start justify-between gap-4">
+                            <div className="flex items-start gap-3">
+                              <div className="h-16 w-16 shrink-0 overflow-hidden rounded-md border bg-muted">
+                                <img
+                                  src={
+                                    post.imageUrl
+                                      ? normalizeImageUrl(post.imageUrl)
+                                      : CMS_FALLBACK_IMAGE_BY_CATEGORY.news
+                                  }
+                                  alt={post.title}
+                                  className="h-full w-full object-cover"
+                                  loading="lazy"
+                                />
+                              </div>
                               <div className="flex-1 min-w-0">
                                 <h4 className="font-medium truncate">
                                   {post.title}
@@ -2842,8 +3005,43 @@ const AdminDashboard = () => {
                                     )}
                                   </span>
                                 </div>
+                                <div className="flex flex-wrap items-center gap-1.5 mt-2">
+                                  {CMS_TRANSLATION_LOCALES.map((localeItem) => {
+                                    const translation = getTranslationByLocale(
+                                      post,
+                                      localeItem.code,
+                                    );
+                                    return (
+                                      <button
+                                        key={`${post.id}-${localeItem.code}`}
+                                        type="button"
+                                        onClick={() =>
+                                          handleOpenTranslationDialog(
+                                            post,
+                                            localeItem.code,
+                                          )
+                                        }
+                                        className={`px-2 py-0.5 rounded-full text-[11px] font-medium transition-colors ${
+                                          translation
+                                            ? "bg-primary/10 text-primary hover:bg-primary/20"
+                                            : "bg-secondary text-muted-foreground hover:text-foreground"
+                                        }`}
+                                      >
+                                        {localeItem.code.toUpperCase()}
+                                      </button>
+                                    );
+                                  })}
+                                </div>
                               </div>
-                              <div className="flex flex-col gap-1">
+                              <div className="flex flex-col gap-1 shrink-0">
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => handleOpenTranslationDialog(post)}
+                                  title={t("dashboard.cms.translations", "Translations")}
+                                >
+                                  <Languages className="w-4 h-4" />
+                                </Button>
                                 <Button
                                   variant="ghost"
                                   size="icon"
@@ -3029,6 +3227,184 @@ const AdminDashboard = () => {
               <Button onClick={handleSavePost} disabled={saving}>
                 {saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                 {editingPost ? t('common.saveChanges', 'Save Changes') : t('dashboard.cms.createPost', 'Create Post')}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Translations Dialog */}
+        <Dialog
+          open={translationDialogOpen}
+          onOpenChange={(open) => {
+            setTranslationDialogOpen(open);
+            if (!open) {
+              setTranslationPost(null);
+              setTranslationLocale("mn");
+              setSavingTranslation(false);
+            }
+          }}
+        >
+          <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>{t("dashboard.cms.translations", "Translations")}</DialogTitle>
+              <DialogDescription>
+                {translationPost
+                  ? t(
+                      "dashboard.cms.translationDescription",
+                      "Edit language versions for: {{title}}",
+                      { title: translationPost.title },
+                    )
+                  : t(
+                      "dashboard.cms.translationDescriptionFallback",
+                      "Select a post to manage translations.",
+                    )}
+              </DialogDescription>
+            </DialogHeader>
+
+            {translationPost ? (
+              <div className="grid gap-5 py-2">
+                <div className="flex flex-wrap gap-2">
+                  {CMS_TRANSLATION_LOCALES.map((localeItem) => {
+                    const isActive = translationLocale === localeItem.code;
+                    const translation = getTranslationByLocale(
+                      translationPost,
+                      localeItem.code,
+                    );
+                    return (
+                      <button
+                        key={`editor-${localeItem.code}`}
+                        type="button"
+                        onClick={() => setTranslationLocale(localeItem.code)}
+                        className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                          isActive
+                            ? "bg-primary text-primary-foreground"
+                            : translation
+                              ? "bg-primary/10 text-primary hover:bg-primary/20"
+                              : "bg-secondary text-muted-foreground hover:text-foreground"
+                        }`}
+                      >
+                        {localeItem.label}
+                        {translation ? " • saved" : ""}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="translation-title">
+                    {t("dashboard.cms.form.title", "Title")} *
+                  </Label>
+                  <Input
+                    id="translation-title"
+                    value={translationDraft.title}
+                    onChange={(e) =>
+                      setTranslationDraft((prev) => ({
+                        ...prev,
+                        title: e.target.value,
+                      }))
+                    }
+                    placeholder={t(
+                      "dashboard.cms.translationTitlePlaceholder",
+                      "Write translated title...",
+                    )}
+                  />
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="translation-excerpt">
+                    {t("dashboard.cms.form.shortDescription", "Short Description")}
+                  </Label>
+                  <Textarea
+                    id="translation-excerpt"
+                    value={translationDraft.excerpt}
+                    onChange={(e) =>
+                      setTranslationDraft((prev) => ({
+                        ...prev,
+                        excerpt: e.target.value,
+                      }))
+                    }
+                    rows={2}
+                  />
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="translation-content">
+                    {t("dashboard.cms.form.content", "Content")} *
+                  </Label>
+                  <Textarea
+                    id="translation-content"
+                    value={translationDraft.content}
+                    onChange={(e) =>
+                      setTranslationDraft((prev) => ({
+                        ...prev,
+                        content: e.target.value,
+                      }))
+                    }
+                    rows={12}
+                    className="font-mono text-sm"
+                  />
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="translation-tags">
+                    {t("dashboard.cms.form.tags", "Tags")}
+                  </Label>
+                  <Input
+                    id="translation-tags"
+                    value={translationDraft.tags}
+                    onChange={(e) =>
+                      setTranslationDraft((prev) => ({
+                        ...prev,
+                        tags: e.target.value,
+                      }))
+                    }
+                  />
+                </div>
+
+                <div className="flex items-center justify-between rounded-md border p-3">
+                  <div>
+                    <Label>
+                      {t("dashboard.cms.translationPublish", "Publish this translation")}
+                    </Label>
+                    <p className="text-sm text-muted-foreground">
+                      {t(
+                        "dashboard.cms.translationPublishDescription",
+                        "Published translations are visible on language-specific pages.",
+                      )}
+                    </p>
+                  </div>
+                  <Switch
+                    checked={translationDraft.status === "published"}
+                    onCheckedChange={(checked) =>
+                      setTranslationDraft((prev) => ({
+                        ...prev,
+                        status: checked ? "published" : "draft",
+                      }))
+                    }
+                  />
+                </div>
+              </div>
+            ) : null}
+
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setTranslationDialogOpen(false)}
+              >
+                {t("common.cancel", "Cancel")}
+              </Button>
+              <Button
+                onClick={handleSaveTranslation}
+                disabled={!translationPost || savingTranslation}
+              >
+                {savingTranslation ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    {t("common.saving", "Saving...")}
+                  </>
+                ) : (
+                  t("common.saveChanges", "Save Changes")
+                )}
               </Button>
             </DialogFooter>
           </DialogContent>

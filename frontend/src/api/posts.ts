@@ -16,6 +16,7 @@ export interface Post {
   authorName: string | null;
   metaTitle: string | null;
   metaDescription: string | null;
+  translations?: PostTranslation[];
   createdAt: string;
   updatedAt: string;
 }

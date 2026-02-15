@@ -544,6 +544,11 @@ router.get('/admin/all', authenticateToken, requireRole(UserRole.ADMIN), async (
     const posts = await prisma.post.findMany({
       where,
       orderBy: { createdAt: 'desc' },
+      include: {
+        translations: {
+          orderBy: { updatedAt: 'desc' },
+        },
+      },
     });
 
     res.json({

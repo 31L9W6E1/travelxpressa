@@ -33,6 +33,11 @@ type DemoSettingItem = {
   published?: boolean;
 };
 
+const LEGACY_GALLERY_HERO_URL =
+  "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=1800&auto=format&fit=crop&q=80";
+const RECOMMENDED_GALLERY_HERO_URL =
+  "https://images.unsplash.com/photo-1483546416237-76fd26bbcdd1?w=1800&auto=format&fit=crop&q=80";
+
 // Demo gallery images shown by default
 const defaultGalleryImages: DemoSettingItem[] = [
   {
@@ -355,7 +360,14 @@ const Gallery = () => {
       : visibleGalleryItems.filter((img) => img.category === selectedCategory);
   const selectedImageAlt = selectedImage ? getImageAltText(selectedImage) : "";
   const selectedImageCategory = selectedImage ? getCategoryLabel(selectedImage.category) : "";
-  const galleryHeroBackground = settings.galleryHeroImageUrl || undefined;
+  const galleryHeroBackground =
+    !settings.galleryHeroImageUrl || settings.galleryHeroImageUrl === LEGACY_GALLERY_HERO_URL
+      ? RECOMMENDED_GALLERY_HERO_URL
+      : settings.galleryHeroImageUrl;
+  const topicChipClass = (active: boolean) =>
+    active
+      ? "px-3 py-1 text-xs font-medium bg-primary/10 text-primary rounded-full"
+      : "px-3 py-1 text-xs font-medium bg-secondary/70 text-muted-foreground rounded-full hover:bg-primary/5 hover:text-primary transition-colors";
 
   const handlePublishPhotos = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -678,13 +690,20 @@ const Gallery = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="relative min-h-screen bg-background text-foreground overflow-hidden">
+      <div
+        className="pointer-events-none absolute inset-0 z-0 bg-cover bg-center opacity-[0.14]"
+        style={{ backgroundImage: `url(${galleryHeroBackground})` }}
+      />
+      <div className="pointer-events-none absolute inset-0 z-0 bg-gradient-to-b from-background/70 via-background/90 to-background" />
+
       <PageHeader
         title={t("gallery.title", { defaultValue: "Travel Gallery" })}
         subtitle={t("gallery.subtitle", {
           defaultValue: "Discover the beauty of destinations awaiting your journey.",
         })}
         backgroundImageUrl={galleryHeroBackground}
+        className="relative z-10 border-b-0"
         actions={
           user?.role === "ADMIN" ? (
             <>
@@ -732,11 +751,7 @@ const Gallery = () => {
               <button
                 key={category}
                 onClick={() => setSelectedCategory(category)}
-                className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all duration-200 ${
-                  selectedCategory === category
-                    ? "bg-gradient-to-r from-primary to-primary/80 text-primary-foreground border-primary"
-                    : "bg-background text-muted-foreground border-border hover:bg-secondary/80"
-                }`}
+                className={topicChipClass(selectedCategory === category)}
               >
                 {getCategoryLabel(category)}
               </button>
@@ -764,7 +779,7 @@ const Gallery = () => {
       </PageHeader>
 
       {/* Gallery Grid */}
-      <section className="py-12">
+      <section className="relative z-10 py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
               <div className="grid grid-cols-2 min-[500px]:grid-cols-3 md:grid-cols-4 gap-2 md:gap-6">
                 {filteredImages.map((image, index) => {

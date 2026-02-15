@@ -41,6 +41,10 @@ const Blog = () => {
     () => posts.filter((post) => matchesTopic(selectedTopic, post)),
     [posts, selectedTopic]
   );
+  const topicChipClass = (active: boolean) =>
+    active
+      ? 'px-3 py-1 text-xs font-medium bg-primary/10 text-primary rounded-full'
+      : 'px-3 py-1 text-xs font-medium bg-secondary/70 text-muted-foreground rounded-full hover:bg-primary/5 hover:text-primary transition-colors';
 
   if (loading) {
     return (
@@ -79,11 +83,7 @@ const Blog = () => {
                   key={topic.id}
                   type="button"
                   onClick={() => setSelectedTopic(topic.id)}
-                  className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
-                    active
-                      ? 'bg-gradient-to-r from-primary to-primary/80 text-primary-foreground border-primary'
-                      : 'bg-background text-muted-foreground border-border hover:bg-secondary'
-                  }`}
+                  className={topicChipClass(active)}
                 >
                   {topic.label}
                 </button>
@@ -166,11 +166,11 @@ const Blog = () => {
                   <button
                     onClick={() => setPage(p => Math.max(1, p - 1))}
                     disabled={page === 1}
-                    className="px-4 py-2 border border-border rounded-lg hover:bg-secondary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-3 py-1 text-xs font-medium bg-primary/10 text-primary rounded-full hover:bg-primary/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     {t('common.previous', { defaultValue: 'Previous' })}
                   </button>
-                  <span className="px-4 py-2 text-sm text-muted-foreground">
+                  <span className="px-3 py-1 text-xs font-medium bg-secondary/70 text-muted-foreground rounded-full">
                     {t('common.pageOf', {
                       defaultValue: 'Page {{page}} of {{total}}',
                       page,
@@ -180,7 +180,7 @@ const Blog = () => {
                   <button
                     onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                     disabled={page === totalPages}
-                    className="px-4 py-2 border border-border rounded-lg hover:bg-secondary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-3 py-1 text-xs font-medium bg-primary/10 text-primary rounded-full hover:bg-primary/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     {t('common.next', { defaultValue: 'Next' })}
                   </button>

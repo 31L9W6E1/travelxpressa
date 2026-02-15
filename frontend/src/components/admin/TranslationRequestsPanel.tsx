@@ -51,6 +51,70 @@ const parseMessageLines = (message: string) => {
   return fields;
 };
 
+type UploadedFile = {
+  label: string;
+  url: string;
+};
+
+const extractUrls = (value: string): string[] => {
+  const matches = value.match(/https?:\/\/[^\s)]+/gi);
+  const urls = matches ? [...matches] : [];
+  const relativeMatches = value.match(/\/uploads\/[^\s)]+/gi);
+  if (relativeMatches) {
+    const origin = typeof window !== "undefined" ? window.location.origin : "";
+    for (const relative of relativeMatches) {
+      urls.push(origin ? `${origin}${relative}` : relative);
+    }
+  }
+  return urls;
+};
+
+const parseUploadedFileLine = (line: string): UploadedFile | null => {
+  const urls = extractUrls(line);
+  if (!urls.length) return null;
+  const url = urls[0];
+  const label = line.replace(url, "").replace(/:\s*$/, "").trim();
+  return {
+    label: label || "Uploaded file",
+    url,
+  };
+};
+
+const extractUploadedFiles = (message: string): UploadedFile[] => {
+  const lines = message.split("\n");
+  const files: UploadedFile[] = [];
+  let inUploadedFilesSection = false;
+
+  for (const rawLine of lines) {
+    const line = rawLine.trim();
+    const lower = line.toLowerCase();
+
+    if (lower.startsWith("uploaded files:")) {
+      inUploadedFilesSection = true;
+      const inline = line.slice("uploaded files:".length).trim();
+      if (inline && inline !== "-") {
+        const parsed = parseUploadedFileLine(inline);
+        if (parsed) files.push(parsed);
+      }
+      continue;
+    }
+
+    if (inUploadedFilesSection && /^[a-z][\w\s-]*:/i.test(line) && !line.startsWith("-")) {
+      break;
+    }
+
+    if (!inUploadedFilesSection || !line || line === "-") continue;
+
+    const normalizedLine = line.startsWith("-") ? line.slice(1).trim() : line;
+    const parsed = parseUploadedFileLine(normalizedLine);
+    if (parsed) {
+      files.push(parsed);
+    }
+  }
+
+  return files;
+};
+
 const TranslationRequestsPanel = () => {
   const [requests, setRequests] = useState<InquiryItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -155,6 +219,8 @@ const TranslationRequestsPanel = () => {
         ) : (
           requests.map((request) => {
             const parsed = parseMessageLines(request.message || "");
+            const uploadedFiles = extractUploadedFiles(request.message || "");
+            const manualFileLinks = extractUrls(parsed["file links"] || "");
             const row = editing[request.id] || { status: request.status, notes: request.adminNotes || "" };
             return (
               <div key={request.id} className="border rounded-xl p-4 space-y-4">
@@ -199,8 +265,45 @@ const TranslationRequestsPanel = () => {
                 </div>
 
                 <div className="space-y-2">
+                  <Label className="text-xs text-muted-foreground">Uploaded Files</Label>
+                  {uploadedFiles.length > 0 ? (
+                    <div className="space-y-1">
+                      {uploadedFiles.map((file, index) => (
+                        <a
+                          key={`${request.id}-uploaded-${index}`}
+                          href={file.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block text-sm text-primary hover:underline break-all"
+                        >
+                          {file.label}
+                        </a>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm break-all">-</p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
                   <Label className="text-xs text-muted-foreground">File Links</Label>
-                  <p className="text-sm break-all">{parsed["file links"] || "-"}</p>
+                  {manualFileLinks.length > 0 ? (
+                    <div className="space-y-1">
+                      {manualFileLinks.map((url, index) => (
+                        <a
+                          key={`${request.id}-manual-${index}`}
+                          href={url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block text-sm text-primary hover:underline break-all"
+                        >
+                          {url}
+                        </a>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm break-all">{parsed["file links"] || "-"}</p>
+                  )}
                 </div>
 
                 <div className="grid md:grid-cols-[220px_1fr_auto] gap-3 items-end">

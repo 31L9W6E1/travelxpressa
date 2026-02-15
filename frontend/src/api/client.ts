@@ -50,6 +50,7 @@ const resolveApiUrl = (): string => {
 
 const API_URL = resolveApiUrl();
 export const getApiBaseUrl = () => API_URL;
+const AUTH_SESSION_MARKER_KEY = 'hasAuthSession';
 
 // Token storage
 let accessToken: string | null = null;
@@ -65,6 +66,7 @@ if (typeof window !== 'undefined') {
 export const setTokens = (access: string, refresh?: string | null) => {
   accessToken = access;
   localStorage.setItem('accessToken', access);
+  localStorage.setItem(AUTH_SESSION_MARKER_KEY, '1');
 
   // `refresh` handling:
   // - string: store it (dev/non-prod)
@@ -84,10 +86,13 @@ export const clearTokens = () => {
   refreshToken = null;
   localStorage.removeItem('accessToken');
   localStorage.removeItem('refreshToken');
+  localStorage.removeItem(AUTH_SESSION_MARKER_KEY);
 };
 
 export const getAccessToken = () => accessToken;
 export const getRefreshToken = () => refreshToken;
+export const hasStoredAuthSession = () =>
+  typeof window !== 'undefined' && localStorage.getItem(AUTH_SESSION_MARKER_KEY) === '1';
 
 const isHtmlPayload = (payload: unknown): boolean => {
   if (typeof payload !== 'string') return false;

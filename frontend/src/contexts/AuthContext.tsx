@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { authApi, type User } from '../api/auth';
-import { getAccessToken, clearTokens } from '../api/client';
+import { getAccessToken, clearTokens, hasStoredAuthSession } from '../api/client';
 
 interface AuthContextType {
   user: User | null;
@@ -47,7 +47,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         //
         // Skip this call on auth pages to avoid noisy expected 401s in browser console
         // for fresh visitors who are just opening the login form.
-        if (!getAccessToken() && !isAuthScreen) {
+        if (!getAccessToken() && !isAuthScreen && hasStoredAuthSession()) {
           try {
             await authApi.refreshToken();
           } catch {

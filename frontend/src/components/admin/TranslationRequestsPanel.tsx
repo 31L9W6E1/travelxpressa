@@ -1,8 +1,18 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
-import { FileText, Loader2, MessageSquare, RefreshCw } from "lucide-react";
 import {
+  CheckCircle2,
+  ChevronDown,
+  ChevronRight,
+  FileText,
+  Loader2,
+  MessageSquare,
+  RefreshCw,
+  Trash2,
+} from "lucide-react";
+import {
+  deleteAdminInquiry,
   fetchAdminInquiries,
   type InquiryItem,
   type InquiryStatus,
@@ -120,7 +130,9 @@ const TranslationRequestsPanel = () => {
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [editing, setEditing] = useState<Record<string, { status: string; notes: string }>>({});
+  const [collapsedById, setCollapsedById] = useState<Record<string, boolean>>({});
   const [savingId, setSavingId] = useState<string>("");
+  const [deletingId, setDeletingId] = useState<string>("");
 
   const loadRequests = useCallback(async () => {
     setLoading(true);
@@ -138,6 +150,15 @@ const TranslationRequestsPanel = () => {
         for (const row of res.data) {
           if (!next[row.id]) {
             next[row.id] = { status: row.status, notes: row.adminNotes || "" };
+          }
+        }
+        return next;
+      });
+      setCollapsedById((prev) => {
+        const next = { ...prev };
+        for (const row of res.data) {
+          if (typeof next[row.id] === "undefined") {
+            next[row.id] = row.status === "COMPLETED";
           }
         }
         return next;
@@ -170,6 +191,65 @@ const TranslationRequestsPanel = () => {
       toast.error("Failed to update request");
     } finally {
       setSavingId("");
+    }
+  };
+
+  const setCollapsed = (id: string, collapsed: boolean) => {
+    setCollapsedById((prev) => ({ ...prev, [id]: collapsed }));
+  };
+
+  const markCompleted = async (request: InquiryItem, notes: string) => {
+    setEditing((prev) => ({
+      ...prev,
+      [request.id]: {
+        status: "COMPLETED",
+        notes: prev[request.id]?.notes || request.adminNotes || "",
+      },
+    }));
+
+    setSavingId(request.id);
+    try {
+      await updateAdminInquiryStatus(request.id, {
+        status: "COMPLETED",
+        adminNotes: notes,
+      });
+      setCollapsed(request.id, true);
+      toast.success("Request marked as completed");
+      await loadRequests();
+    } catch (error) {
+      console.error("Failed to mark translation request completed", error);
+      toast.error("Failed to update request");
+    } finally {
+      setSavingId("");
+    }
+  };
+
+  const removeRequest = async (request: InquiryItem) => {
+    const confirmed = window.confirm(
+      `Delete translation request from ${request.name} (${request.email})? This cannot be undone.`,
+    );
+    if (!confirmed) return;
+
+    setDeletingId(request.id);
+    try {
+      await deleteAdminInquiry(request.id);
+      toast.success("Translation request removed");
+      setRequests((prev) => prev.filter((item) => item.id !== request.id));
+      setEditing((prev) => {
+        const next = { ...prev };
+        delete next[request.id];
+        return next;
+      });
+      setCollapsedById((prev) => {
+        const next = { ...prev };
+        delete next[request.id];
+        return next;
+      });
+    } catch (error) {
+      console.error("Failed to delete translation request", error);
+      toast.error("Failed to remove request");
+    } finally {
+      setDeletingId("");
     }
   };
 
@@ -222,135 +302,188 @@ const TranslationRequestsPanel = () => {
             const uploadedFiles = extractUploadedFiles(request.message || "");
             const manualFileLinks = extractUrls(parsed["file links"] || "");
             const row = editing[request.id] || { status: request.status, notes: request.adminNotes || "" };
+            const isCollapsed = collapsedById[request.id] ?? request.status === "COMPLETED";
+
             return (
               <div key={request.id} className="border rounded-xl p-4 space-y-4">
                 <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-3">
-                  <div>
-                    <p className="font-medium">{request.name}</p>
-                    <p className="text-sm text-muted-foreground">{request.email}</p>
+                  <div className="min-w-0">
+                    <p className="font-medium truncate">{request.name}</p>
+                    <p className="text-sm text-muted-foreground truncate">{request.email}</p>
                     <p className="text-xs text-muted-foreground mt-1">
                       {new Date(request.createdAt).toLocaleString()}
                     </p>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <Badge className={getBadgeClass(request.status)}>{request.status}</Badge>
-                    {request.user?.id && (
+                    {request.status !== "COMPLETED" ? (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => void markCompleted(request, row.notes)}
+                        disabled={savingId === request.id}
+                      >
+                        <CheckCircle2 className="w-4 h-4 mr-1" />
+                        Complete
+                      </Button>
+                    ) : null}
+                    {request.user?.id ? (
                       <Button asChild size="sm" variant="outline">
                         <Link to={`/contactsupport?userId=${request.user.id}`}>
                           <MessageSquare className="w-4 h-4 mr-1" />
                           Open Chat
                         </Link>
                       </Button>
-                    )}
-                  </div>
-                </div>
-
-                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-3 text-sm">
-                  <div className="rounded-lg border p-2">
-                    <p className="text-xs text-muted-foreground">Source</p>
-                    <p className="font-medium">{parsed["source language"] || "-"}</p>
-                  </div>
-                  <div className="rounded-lg border p-2">
-                    <p className="text-xs text-muted-foreground">Target</p>
-                    <p className="font-medium">{parsed["target language"] || "-"}</p>
-                  </div>
-                  <div className="rounded-lg border p-2">
-                    <p className="text-xs text-muted-foreground">Pages</p>
-                    <p className="font-medium">{parsed["pages"] || "-"}</p>
-                  </div>
-                  <div className="rounded-lg border p-2">
-                    <p className="text-xs text-muted-foreground">Estimated Fee</p>
-                    <p className="font-medium">{parsed["estimated fee"] || "-"}</p>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label className="text-xs text-muted-foreground">Uploaded Files</Label>
-                  {uploadedFiles.length > 0 ? (
-                    <div className="space-y-1">
-                      {uploadedFiles.map((file, index) => (
-                        <a
-                          key={`${request.id}-uploaded-${index}`}
-                          href={file.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="block text-sm text-primary hover:underline break-all"
-                        >
-                          {file.label}
-                        </a>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-sm break-all">-</p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label className="text-xs text-muted-foreground">File Links</Label>
-                  {manualFileLinks.length > 0 ? (
-                    <div className="space-y-1">
-                      {manualFileLinks.map((url, index) => (
-                        <a
-                          key={`${request.id}-manual-${index}`}
-                          href={url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="block text-sm text-primary hover:underline break-all"
-                        >
-                          {url}
-                        </a>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-sm break-all">{parsed["file links"] || "-"}</p>
-                  )}
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-[220px_1fr_auto] gap-3 items-end">
-                  <div className="space-y-2">
-                    <Label>Status</Label>
-                    <Select
-                      value={row.status}
-                      onValueChange={(value) =>
-                        setEditing((prev) => ({ ...prev, [request.id]: { ...row, status: value } }))
-                      }
+                    ) : null}
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setCollapsed(request.id, !isCollapsed)}
                     >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {statusOptions.map((item) => (
-                          <SelectItem key={item} value={item}>
-                            {item}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                      {isCollapsed ? (
+                        <>
+                          <ChevronRight className="w-4 h-4 mr-1" />
+                          Expand
+                        </>
+                      ) : (
+                        <>
+                          <ChevronDown className="w-4 h-4 mr-1" />
+                          Collapse
+                        </>
+                      )}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => void removeRequest(request)}
+                      disabled={deletingId === request.id}
+                    >
+                      {deletingId === request.id ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <>
+                          <Trash2 className="w-4 h-4 mr-1" />
+                          Remove
+                        </>
+                      )}
+                    </Button>
                   </div>
-                  <div className="space-y-2">
-                    <Label>Admin Notes</Label>
-                    <Textarea
-                      rows={2}
-                      value={row.notes}
-                      onChange={(e) =>
-                        setEditing((prev) => ({
-                          ...prev,
-                          [request.id]: { ...row, notes: e.target.value },
-                        }))
-                      }
-                    />
-                  </div>
-                  <Button
-                    onClick={() => void saveStatus(request)}
-                    disabled={savingId === request.id}
-                  >
-                    {savingId === request.id ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      "Save"
-                    )}
-                  </Button>
                 </div>
+
+                {isCollapsed ? (
+                  <p className="text-sm text-muted-foreground">
+                    Completed request is collapsed. Click <span className="font-medium">Expand</span> to view details.
+                  </p>
+                ) : (
+                  <>
+                    <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-3 text-sm">
+                      <div className="rounded-lg border p-2">
+                        <p className="text-xs text-muted-foreground">Source</p>
+                        <p className="font-medium">{parsed["source language"] || "-"}</p>
+                      </div>
+                      <div className="rounded-lg border p-2">
+                        <p className="text-xs text-muted-foreground">Target</p>
+                        <p className="font-medium">{parsed["target language"] || "-"}</p>
+                      </div>
+                      <div className="rounded-lg border p-2">
+                        <p className="text-xs text-muted-foreground">Pages</p>
+                        <p className="font-medium">{parsed["pages"] || "-"}</p>
+                      </div>
+                      <div className="rounded-lg border p-2">
+                        <p className="text-xs text-muted-foreground">Estimated Fee</p>
+                        <p className="font-medium">{parsed["estimated fee"] || "-"}</p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="text-xs text-muted-foreground">Uploaded Files</Label>
+                      {uploadedFiles.length > 0 ? (
+                        <div className="space-y-1">
+                          {uploadedFiles.map((file, index) => (
+                            <a
+                              key={`${request.id}-uploaded-${index}`}
+                              href={file.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="block text-sm text-primary hover:underline break-all"
+                            >
+                              {file.label}
+                            </a>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-sm break-all">-</p>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="text-xs text-muted-foreground">File Links</Label>
+                      {manualFileLinks.length > 0 ? (
+                        <div className="space-y-1">
+                          {manualFileLinks.map((url, index) => (
+                            <a
+                              key={`${request.id}-manual-${index}`}
+                              href={url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="block text-sm text-primary hover:underline break-all"
+                            >
+                              {url}
+                            </a>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-sm break-all">{parsed["file links"] || "-"}</p>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-[220px_1fr_auto] gap-3 items-end">
+                      <div className="space-y-2">
+                        <Label>Status</Label>
+                        <Select
+                          value={row.status}
+                          onValueChange={(value) =>
+                            setEditing((prev) => ({ ...prev, [request.id]: { ...row, status: value } }))
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {statusOptions.map((item) => (
+                              <SelectItem key={item} value={item}>
+                                {item}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Admin Notes</Label>
+                        <Textarea
+                          rows={2}
+                          value={row.notes}
+                          onChange={(e) =>
+                            setEditing((prev) => ({
+                              ...prev,
+                              [request.id]: { ...row, notes: e.target.value },
+                            }))
+                          }
+                        />
+                      </div>
+                      <Button
+                        onClick={() => void saveStatus(request)}
+                        disabled={savingId === request.id}
+                      >
+                        {savingId === request.id ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          "Save"
+                        )}
+                      </Button>
+                    </div>
+                  </>
+                )}
               </div>
             );
           })

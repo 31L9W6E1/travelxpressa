@@ -868,6 +868,9 @@ const AdminDashboard = () => {
       u.email.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
+  const filteredAdminUsers = filteredUsers.filter((u) => u.role === "ADMIN");
+  const filteredNonAdminUsers = filteredUsers.filter((u) => u.role !== "ADMIN");
+
   const filteredApplications = applications.filter((app) => {
     const matchesSearch =
       app.user?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -1485,6 +1488,38 @@ const AdminDashboard = () => {
                 </div>
               </CardHeader>
               <CardContent>
+                {filteredAdminUsers.length > 0 ? (
+                  <div className="mb-6">
+                    <div className="flex items-center justify-between gap-2 mb-3">
+                      <p className="text-sm font-semibold text-foreground">
+                        {t("dashboard.users.admins", "Administrators")}
+                      </p>
+                      <Badge variant="secondary">{filteredAdminUsers.length}</Badge>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+                      {filteredAdminUsers.map((u) => (
+                        <div
+                          key={u.id}
+                          className="rounded-lg border border-dashed border-primary/30 bg-primary/5 px-4 py-3"
+                        >
+                          <div className="flex items-center justify-between gap-3">
+                            <div className="flex items-center gap-3 min-w-0">
+                              <UserAvatar seed={u.id} name={u.name} email={u.email} size="md" />
+                              <div className="min-w-0">
+                                <p className="font-medium truncate">
+                                  {u.name || t("common.noName", "No name")}
+                                </p>
+                                <p className="text-sm text-muted-foreground truncate">{u.email}</p>
+                              </div>
+                            </div>
+                            <Badge>ADMIN</Badge>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[920px]">
                     <thead>
@@ -1510,111 +1545,113 @@ const AdminDashboard = () => {
                       </tr>
                     </thead>
                     <tbody className="divide-y">
-                      {filteredUsers.map((u) => (
-                        <tr
-                          key={u.id}
-                          className="hover:bg-muted/50 transition-colors"
-                        >
-                          <td className="px-4 py-3">
-                            <div className="flex items-center gap-3">
-                              <UserAvatar seed={u.id} name={u.name} email={u.email} size="md" />
-                              <div>
-                                <p className="font-medium">
-                                  {u.name || t('common.noName', 'No name')}
-                                </p>
-                                <p className="text-sm text-muted-foreground">
-                                  {u.email}
-                                </p>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="px-4 py-3">
-                            <Badge
-                              variant={
-                                u.role === "ADMIN" ? "default" : "secondary"
-                              }
-                            >
-                              {u.role}
-                            </Badge>
-                          </td>
-                          <td className="px-4 py-3">
-                            {u.emailVerified ? (
-                              <div className="flex items-center gap-2">
-                                <CheckCircle className="w-4 h-4 text-green-500" />
-                                <span className="text-sm">{t('dashboard.users.verified', 'Verified')}</span>
-                              </div>
-                            ) : (
-                              <div className="flex items-center gap-2">
-                                <XCircle className="w-4 h-4 text-muted-foreground" />
-                                <span className="text-sm text-muted-foreground">
-                                  {t('dashboard.users.unverified', 'Unverified')}
-                                </span>
-                              </div>
-                            )}
-                          </td>
-                          <td className="px-4 py-3 text-muted-foreground">
-                            {u._count.applications}
-                          </td>
-                          <td className="px-4 py-3 text-sm text-muted-foreground">
-                            {u.lastLoginAt
-                              ? new Date(u.lastLoginAt).toLocaleDateString()
-                              : t('common.never', 'Never')}
-                          </td>
-                          <td className="px-4 py-3">
-                            <div className="flex items-center gap-2">
-                              <Button variant="ghost" size="icon" asChild>
-                                <Link to={`/admin/users/${u.id}`}>
-                                  <Eye className="w-4 h-4" />
-                                </Link>
-                              </Button>
-                              <Button variant="ghost" size="icon" asChild>
-                                <Link to={`/contactsupport?userId=${u.id}`}>
-                                  <MessageSquare className="w-4 h-4" />
-                                </Link>
-                              </Button>
-                              <div className="flex items-center gap-1">
-                                <UserCog className="w-4 h-4 text-muted-foreground" />
-                                <Select
-                                  value={u.role}
-                                  onValueChange={(value) =>
-                                    handleUserRoleChange(
-                                      u.id,
-                                      value as UserData["role"],
-                                    )
-                                  }
-                                  disabled={
-                                    updatingRoleUserId === u.id ||
-                                    u.id === user?.id
-                                  }
-                                >
-                                  <SelectTrigger className="h-8 w-[128px]">
-                                    {updatingRoleUserId === u.id ? (
-                                      <span className="inline-flex items-center gap-2 text-xs text-muted-foreground">
-                                        <Loader2 className="w-3 h-3 animate-spin" />
-                                        {t("common.saving", "Saving")}
-                                      </span>
-                                    ) : (
-                                      <SelectValue />
-                                    )}
-                                  </SelectTrigger>
-                                  <SelectContent align="end">
-                                    <SelectItem value="USER">USER</SelectItem>
-                                    <SelectItem value="AGENT">AGENT</SelectItem>
-                                    <SelectItem value="ADMIN">ADMIN</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                              </div>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="text-destructive hover:text-destructive"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
-                            </div>
+                      {filteredNonAdminUsers.length === 0 ? (
+                        <tr>
+                          <td colSpan={6} className="px-4 py-10 text-center text-sm text-muted-foreground">
+                            {t("dashboard.users.noUsers", "No non-admin users found")}
                           </td>
                         </tr>
-                      ))}
+                      ) : (
+                        filteredNonAdminUsers.map((u) => (
+                          <tr
+                            key={u.id}
+                            className="hover:bg-muted/50 transition-colors"
+                          >
+                            <td className="px-4 py-3">
+                              <div className="flex items-center gap-3">
+                                <UserAvatar seed={u.id} name={u.name} email={u.email} size="md" />
+                                <div>
+                                  <p className="font-medium">
+                                    {u.name || t('common.noName', 'No name')}
+                                  </p>
+                                  <p className="text-sm text-muted-foreground">
+                                    {u.email}
+                                  </p>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-4 py-3">
+                              <Badge variant="secondary">{u.role}</Badge>
+                            </td>
+                            <td className="px-4 py-3">
+                              {u.emailVerified ? (
+                                <div className="flex items-center gap-2">
+                                  <CheckCircle className="w-4 h-4 text-green-500" />
+                                  <span className="text-sm">{t('dashboard.users.verified', 'Verified')}</span>
+                                </div>
+                              ) : (
+                                <div className="flex items-center gap-2">
+                                  <XCircle className="w-4 h-4 text-muted-foreground" />
+                                  <span className="text-sm text-muted-foreground">
+                                    {t('dashboard.users.unverified', 'Unverified')}
+                                  </span>
+                                </div>
+                              )}
+                            </td>
+                            <td className="px-4 py-3 text-muted-foreground">
+                              {u._count.applications}
+                            </td>
+                            <td className="px-4 py-3 text-sm text-muted-foreground">
+                              {u.lastLoginAt
+                                ? new Date(u.lastLoginAt).toLocaleDateString()
+                                : t('common.never', 'Never')}
+                            </td>
+                            <td className="px-4 py-3">
+                              <div className="flex items-center gap-2">
+                                <Button variant="ghost" size="icon" asChild>
+                                  <Link to={`/admin/users/${u.id}`}>
+                                    <Eye className="w-4 h-4" />
+                                  </Link>
+                                </Button>
+                                <Button variant="ghost" size="icon" asChild>
+                                  <Link to={`/contactsupport?userId=${u.id}`}>
+                                    <MessageSquare className="w-4 h-4" />
+                                  </Link>
+                                </Button>
+                                <div className="flex items-center gap-1">
+                                  <UserCog className="w-4 h-4 text-muted-foreground" />
+                                  <Select
+                                    value={u.role}
+                                    onValueChange={(value) =>
+                                      handleUserRoleChange(
+                                        u.id,
+                                        value as UserData["role"],
+                                      )
+                                    }
+                                    disabled={
+                                      updatingRoleUserId === u.id ||
+                                      u.id === user?.id
+                                    }
+                                  >
+                                    <SelectTrigger className="h-8 w-[128px]">
+                                      {updatingRoleUserId === u.id ? (
+                                        <span className="inline-flex items-center gap-2 text-xs text-muted-foreground">
+                                          <Loader2 className="w-3 h-3 animate-spin" />
+                                          {t("common.saving", "Saving")}
+                                        </span>
+                                      ) : (
+                                        <SelectValue />
+                                      )}
+                                    </SelectTrigger>
+                                    <SelectContent align="end">
+                                      <SelectItem value="USER">USER</SelectItem>
+                                      <SelectItem value="AGENT">AGENT</SelectItem>
+                                      <SelectItem value="ADMIN">ADMIN</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="text-destructive hover:text-destructive"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))
+                      )}
                     </tbody>
                   </table>
                 </div>

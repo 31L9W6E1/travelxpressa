@@ -115,6 +115,7 @@ export const siteSettingsSchema = z.object({
       onlineHours: z.string().max(1000).optional().or(z.literal('')),
     })
     .optional(),
+  galleryHeroImageUrl: z.string().max(2000).optional().or(z.literal('')),
   qAndAItems: z
     .array(
       z.object({

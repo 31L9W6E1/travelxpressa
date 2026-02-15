@@ -35,6 +35,7 @@ export type SiteSettings = {
     headOfficeHours?: string;
     onlineHours?: string;
   };
+  galleryHeroImageUrl?: string;
   galleryDemoItems: Array<{
     id: number;
     src: string;
@@ -128,6 +129,8 @@ VII. Е-ГЭРЭЭНИЙ ХҮЧИН ТӨГӨЛДӨР БАЙДАЛ
     headOfficeHours: 'Даваа-Баасан: 08:00-18:00\nБямба, Ням: Амарна',
     onlineHours: 'Онлайнаар амралтын өдрүүдэд 10:00-19:00 ажиллана',
   },
+  galleryHeroImageUrl:
+    'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=1800&auto=format&fit=crop&q=80',
   galleryDemoItems: [
     {
       id: 1,
@@ -351,6 +354,10 @@ const mergeSiteSettings = (raw: Partial<SiteSettings> | null | undefined): SiteS
     ...DEFAULT_SITE_SETTINGS.quickHelp,
     ...(raw?.quickHelp || {}),
   },
+  galleryHeroImageUrl:
+    typeof raw?.galleryHeroImageUrl === 'string' && raw.galleryHeroImageUrl.trim().length > 0
+      ? raw.galleryHeroImageUrl.trim()
+      : DEFAULT_SITE_SETTINGS.galleryHeroImageUrl,
   galleryDemoItems:
     Array.isArray(raw?.galleryDemoItems) && raw?.galleryDemoItems.length > 0
       ? raw.galleryDemoItems

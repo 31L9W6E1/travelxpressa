@@ -158,6 +158,15 @@
       "cta": "Start Your Application",
       "learnMore": "Learn More"
     },
+    "install": {
+      "cta": "Install App",
+      "pitch": "Install for faster access, one-tap tracking, and instant support updates.",
+      "success": "App added. You can now open Visamn from your home screen.",
+      "iosTitle": "Install on iPhone",
+      "iosSteps": "Tap Share in Safari, then choose 'Add to Home Screen'.",
+      "unavailableTitle": "Install option not available",
+      "unavailableDesc": "Open this site in Safari or Chrome and use browser menu → Add to Home Screen."
+    },
     "stats": {
       "applicationsCompleted": "Applications Completed",
       "successRate": "Success Rate",
@@ -275,7 +284,8 @@
       "titleLine2": "Requirements",
       "subtitle": "Compare typical government fees, interview requirements, and processing timelines for popular destinations. Service pricing depends on destination complexity and support level.",
       "cta": "Choose Destination",
-      "secondaryCta": "Continue Application"
+      "secondaryCta": "Continue Application",
+      "translationCta": "Translation Service"
     },
     "mongoliaStats": {
       "totalApplications": "Total Applications (2023)",
@@ -304,6 +314,28 @@
           "processing": "Processing time",
           "interview": "Interview"
         },
+        "destinations": {
+          "USA": "United States",
+          "SCHENGEN": "Schengen Area",
+          "CANADA": "Canada",
+          "JAPAN": "Japan",
+          "IRELAND": "Ireland",
+          "UK": "United Kingdom",
+          "AUSTRALIA": "Australia",
+          "NEW_ZEALAND": "New Zealand"
+        },
+        "processingByCountry": {
+          "USA": "Appointment availability varies by location; visa processing is typically 1-2 weeks after interview",
+          "SCHENGEN": "Usually 15-30 calendar days, may extend to 60 days in peak season",
+          "CANADA": "Usually 2-8 weeks depending on visa type and country of residence",
+          "JAPAN": "Usually 5-7 business days for tourist visa, longer for work/student visas",
+          "IRELAND": "Usually 8-12 weeks standard processing",
+          "UK": "Usually 3-6 weeks standard, priority service available",
+          "AUSTRALIA": "Usually 20-30 days for visitor visa, varies by visa type",
+          "NEW_ZEALAND": "Usually 20-25 working days for visitor visa"
+        },
+        "interviewModeInterview": "Interview",
+        "interviewModeOnline": "Online",
         "interviewYes": "Usually yes",
         "interviewNo": "Usually no",
         "disclaimer": "We are not affiliated with any government agency. Fees and timelines may change. Converted amounts are estimates (FX updated: {{date}})."

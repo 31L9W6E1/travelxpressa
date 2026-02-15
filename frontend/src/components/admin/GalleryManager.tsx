@@ -62,8 +62,11 @@ import {
   type GalleryImageItem as GalleryImage,
   type GalleryStats,
 } from '@/api/upload';
+import api from '@/api/client';
+import { useSiteSettings } from '@/contexts/SiteSettingsContext';
 
 const GalleryManager = () => {
+  const { settings, refresh: refreshSiteSettings } = useSiteSettings();
   const [images, setImages] = useState<GalleryImage[]>([]);
   const [stats, setStats] = useState<GalleryStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -86,7 +89,13 @@ const GalleryManager = () => {
     description: '',
     published: true,
   });
+  const [heroImageUrl, setHeroImageUrl] = useState(settings.galleryHeroImageUrl || '');
+  const [savingHeroImage, setSavingHeroImage] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setHeroImageUrl(settings.galleryHeroImageUrl || '');
+  }, [settings.galleryHeroImageUrl]);
 
   const fetchGallery = async () => {
     setLoading(true);
@@ -117,6 +126,39 @@ const GalleryManager = () => {
   useEffect(() => {
     fetchGallery();
   }, []);
+
+  const saveHeroBackground = useCallback(
+    async (nextUrl: string) => {
+      const trimmedUrl = nextUrl.trim();
+      setSavingHeroImage(true);
+      try {
+        const currentRes = await api.get('/api/admin/site-settings');
+        const currentSettings = currentRes.data?.data || settings;
+
+        await api.put('/api/admin/site-settings', {
+          ...currentSettings,
+          galleryHeroImageUrl: trimmedUrl,
+        });
+
+        await refreshSiteSettings();
+        setHeroImageUrl(trimmedUrl);
+        toast.success('Gallery background image updated');
+      } catch (error: any) {
+        toast.error(error?.message || 'Failed to update gallery background image');
+      } finally {
+        setSavingHeroImage(false);
+      }
+    },
+    [refreshSiteSettings, settings]
+  );
+
+  const setHeroFromGalleryImage = useCallback(
+    async (image: GalleryImage) => {
+      const fullUrl = getFullImageUrl(image.url);
+      await saveHeroBackground(fullUrl);
+    },
+    [saveHeroBackground]
+  );
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -311,6 +353,61 @@ const GalleryManager = () => {
         className="hidden"
         disabled={uploading}
       />
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Gallery Header Background</CardTitle>
+          <CardDescription>
+            This image is used as the public gallery page header background.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex flex-col md:flex-row gap-2">
+            <Input
+              value={heroImageUrl}
+              onChange={(e) => setHeroImageUrl(e.target.value)}
+              placeholder="https://example.com/gallery-hero.jpg"
+              className="font-mono text-xs"
+            />
+            <Button
+              onClick={() => void saveHeroBackground(heroImageUrl)}
+              disabled={savingHeroImage}
+            >
+              {savingHeroImage ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+              Save Background
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => {
+                const fallback = settings.galleryHeroImageUrl || '';
+                setHeroImageUrl(fallback);
+              }}
+              disabled={savingHeroImage}
+            >
+              Reset
+            </Button>
+          </div>
+
+          <div className="relative w-full overflow-hidden rounded-lg border bg-muted aspect-[21/7]">
+            {heroImageUrl ? (
+              <img
+                src={heroImageUrl}
+                alt="Gallery header background preview"
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  const element = e.currentTarget as HTMLImageElement;
+                  element.style.display = 'none';
+                }}
+              />
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center text-sm text-muted-foreground">
+                No background image selected
+              </div>
+            )}
+            <div className="absolute inset-0 bg-gradient-to-r from-black/50 to-black/25 pointer-events-none" />
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -534,6 +631,18 @@ const GalleryManager = () => {
                         className="h-8 w-8"
                         onClick={(e) => {
                           e.stopPropagation();
+                          void setHeroFromGalleryImage(image);
+                        }}
+                        title="Use as header background"
+                      >
+                        <ImageIcon className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={(e) => {
+                          e.stopPropagation();
                           copyToClipboard(image.url);
                         }}
                       >
@@ -630,6 +739,16 @@ const GalleryManager = () => {
                         onClick={() => togglePublish(image)}
                       >
                         <Globe className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {
+                          void setHeroFromGalleryImage(image);
+                        }}
+                        title="Use as header background"
+                      >
+                        <ImageIcon className="w-4 h-4" />
                       </Button>
                       <Button
                         variant="ghost"
@@ -753,6 +872,16 @@ const GalleryManager = () => {
               >
                 <Globe className="w-4 h-4 mr-2" />
                 {selectedImage?.published === false ? 'Publish' : 'Draft'}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  if (!selectedImage) return;
+                  void setHeroFromGalleryImage(selectedImage);
+                }}
+              >
+                <ImageIcon className="w-4 h-4 mr-2" />
+                Use as Header
               </Button>
               <Button
                 variant="destructive"

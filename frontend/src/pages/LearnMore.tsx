@@ -39,6 +39,17 @@ const LearnMore = () => {
   const destinations = useMemo(() => getAvailableCountries(), []);
   const displayCurrency = getCurrencyForLanguage(i18n.language);
 
+  const getDestinationLabel = (code: string, fallback: string): string =>
+    t(`learnMorePage.sections.fees.destinations.${code}`, { defaultValue: fallback });
+
+  const getProcessingTimelineLabel = (
+    code: string,
+    fallback: string,
+  ): string =>
+    t(`learnMorePage.sections.fees.processingByCountry.${code}`, {
+      defaultValue: fallback,
+    });
+
   const toDisplayCurrency = (amount: number, fromCurrency: string): string => {
     const rounded = Math.round(amount);
     if (!isFxCurrencySupported(fromCurrency) || !isFxCurrencySupported(displayCurrency)) {
@@ -161,9 +172,10 @@ const LearnMore = () => {
                 <p className="text-sm text-muted-foreground mt-3">
                   {t("learnMorePage.sections.fees.selectedDestination", {
                     defaultValue: "Selected destination: {{country}}",
-                    country:
-                      countryConfigs[selectedCountryCode]?.name ||
+                    country: getDestinationLabel(
                       selectedCountryCode,
+                      countryConfigs[selectedCountryCode]?.name || selectedCountryCode,
+                    ),
                   })}
                 </p>
               )}
@@ -187,7 +199,10 @@ const LearnMore = () => {
                     <p className="text-xs text-muted-foreground mt-1">
                       {t("learnMorePage.sections.fees.currentDestination", {
                         defaultValue: "For {{country}}",
-                        country: selectedDestination.name,
+                        country: getDestinationLabel(
+                          selectedDestination.code,
+                          selectedDestination.name,
+                        ),
                       })}
                     </p>
                   )}
@@ -237,6 +252,11 @@ const LearnMore = () => {
                 <tbody>
                   {destinations.map((dest) => {
                     const isSelected = dest.code === selectedCountryCode;
+                    const destinationLabel = getDestinationLabel(dest.code, dest.name);
+                    const processingTimelineLabel = getProcessingTimelineLabel(
+                      dest.code,
+                      dest.processingTimeline,
+                    );
                     const governmentFee = toDisplayCurrency(
                       dest.paymentPricing.baseFee,
                       dest.paymentPricing.currency,
@@ -262,22 +282,22 @@ const LearnMore = () => {
                           <div className="flex items-center gap-2">
                             <span className="text-lg">{dest.flag}</span>
                             <span className={isSelected ? "font-semibold" : ""}>
-                              {dest.name}
+                              {destinationLabel}
                             </span>
                           </div>
                         </td>
                         <td className="p-3 md:p-4 font-mono text-xs md:text-sm">{governmentFee}</td>
                         <td className="p-3 md:p-4 font-mono text-xs md:text-sm">{serviceFee}</td>
                         <td className="p-3 md:p-4 text-xs md:text-sm text-muted-foreground">
-                          {dest.processingTimeline}
+                          {processingTimelineLabel}
                         </td>
                         <td className="p-3 md:p-4 text-xs md:text-sm">
                           {dest.interviewRequired
-                            ? t("learnMorePage.sections.fees.interviewYes", {
-                                defaultValue: "Usually yes",
+                            ? t("learnMorePage.sections.fees.interviewModeInterview", {
+                                defaultValue: "Interview",
                               })
-                            : t("learnMorePage.sections.fees.interviewNo", {
-                                defaultValue: "Usually no",
+                            : t("learnMorePage.sections.fees.interviewModeOnline", {
+                                defaultValue: "Online",
                               })}
                         </td>
                       </tr>

@@ -355,6 +355,7 @@ const Gallery = () => {
       : visibleGalleryItems.filter((img) => img.category === selectedCategory);
   const selectedImageAlt = selectedImage ? getImageAltText(selectedImage) : "";
   const selectedImageCategory = selectedImage ? getCategoryLabel(selectedImage.category) : "";
+  const galleryHeroBackground = settings.galleryHeroImageUrl || undefined;
 
   const handlePublishPhotos = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -683,6 +684,7 @@ const Gallery = () => {
         subtitle={t("gallery.subtitle", {
           defaultValue: "Discover the beauty of destinations awaiting your journey.",
         })}
+        backgroundImageUrl={galleryHeroBackground}
         actions={
           user?.role === "ADMIN" ? (
             <>

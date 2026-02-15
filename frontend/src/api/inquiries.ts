@@ -101,3 +101,7 @@ export const updateAdminInquiryStatus = async (
   const res = await api.put(`/api/admin/inquiries/${id}/status`, payload);
   return res.data?.data as InquiryItem;
 };
+
+export const deleteAdminInquiry = async (id: string): Promise<void> => {
+  await api.delete(`/api/admin/inquiries/${id}`);
+};

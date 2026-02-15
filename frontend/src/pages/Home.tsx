@@ -9,6 +9,7 @@ import {
   Shield,
   Users,
   Zap,
+  Download,
 } from "lucide-react";
 import {
   getPosts,
@@ -24,6 +25,12 @@ import {
 } from "@/components/ui/card";
 import { useTranslation } from "react-i18next";
 import SiteFooter from "@/components/SiteFooter";
+import { toast } from "sonner";
+
+interface BeforeInstallPromptEvent extends Event {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
+}
 
 const HOME_GRID_LIMIT = 16;
 
@@ -67,6 +74,9 @@ const Home = () => {
   const [blogPosts, setBlogPosts] = useState<PostSummary[]>([]);
   const [newsItems, setNewsItems] = useState<PostSummary[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deferredInstallPrompt, setDeferredInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [isInstalled, setIsInstalled] = useState(false);
+  const [isIosInstallable, setIsIosInstallable] = useState(false);
 
   useEffect(() => {
     const fetchContent = async () => {
@@ -91,6 +101,77 @@ const Home = () => {
 
     fetchContent();
   }, [i18n.language]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const standalone =
+      window.matchMedia("(display-mode: standalone)").matches ||
+      (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
+    setIsInstalled(standalone);
+
+    const ua = window.navigator.userAgent.toLowerCase();
+    const isIos = /iphone|ipad|ipod/.test(ua);
+    setIsIosInstallable(isIos && !standalone);
+
+    const onBeforeInstallPrompt = (event: Event) => {
+      event.preventDefault();
+      setDeferredInstallPrompt(event as BeforeInstallPromptEvent);
+    };
+
+    const onInstalled = () => {
+      setIsInstalled(true);
+      setDeferredInstallPrompt(null);
+    };
+
+    window.addEventListener("beforeinstallprompt", onBeforeInstallPrompt);
+    window.addEventListener("appinstalled", onInstalled);
+
+    return () => {
+      window.removeEventListener("beforeinstallprompt", onBeforeInstallPrompt);
+      window.removeEventListener("appinstalled", onInstalled);
+    };
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (isInstalled) return;
+
+    if (deferredInstallPrompt) {
+      await deferredInstallPrompt.prompt();
+      const choice = await deferredInstallPrompt.userChoice;
+      if (choice.outcome === "accepted") {
+        setDeferredInstallPrompt(null);
+        toast.success(
+          t("home.install.success", {
+            defaultValue: "App added. You can now open Visamn from your home screen.",
+          })
+        );
+      }
+      return;
+    }
+
+    if (isIosInstallable) {
+      toast.message(
+        t("home.install.iosTitle", { defaultValue: "Install on iPhone" }),
+        {
+          description: t("home.install.iosSteps", {
+            defaultValue: "Tap Share in Safari, then choose 'Add to Home Screen'.",
+          }),
+        }
+      );
+      return;
+    }
+
+    toast.message(
+      t("home.install.unavailableTitle", { defaultValue: "Install option not available" }),
+      {
+        description: t("home.install.unavailableDesc", {
+          defaultValue:
+            "Open this site in Safari or Chrome and use browser menu → Add to Home Screen.",
+        }),
+      }
+    );
+  };
 
   const features = [
     {
@@ -138,6 +219,18 @@ const Home = () => {
                   <ArrowRight className="w-5 h-5" />
                 </Link>
               </Button>
+              {!isInstalled && (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="lg"
+                  className="px-8 font-semibold"
+                  onClick={() => void handleInstallClick()}
+                >
+                  <Download className="w-5 h-5 mr-2" />
+                  {t("home.install.cta", { defaultValue: "Install App" })}
+                </Button>
+              )}
               <Button
                 asChild
                 variant="outline"
@@ -147,6 +240,14 @@ const Home = () => {
                 <Link to="/learn-more">{t("home.hero.learnMore")}</Link>
               </Button>
             </div>
+            {!isInstalled && (
+              <p className="mt-3 text-sm text-muted-foreground">
+                {t("home.install.pitch", {
+                  defaultValue:
+                    "Install for faster access, one-tap tracking, and instant support updates.",
+                })}
+              </p>
+            )}
           </div>
         </div>
       </section>

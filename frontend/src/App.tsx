@@ -145,6 +145,7 @@ function AppRoutes() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const { settings } = useSiteSettings();
+  const showNewsTicker = settings.visibility.news;
 
   const shouldShowMaintenance =
     settings.maintenance.enabled &&
@@ -156,9 +157,13 @@ function AppRoutes() {
       <Navbar />
       <PageViewTracker />
       <RouteSeo />
+      {showNewsTicker && <NewsTicker />}
 
-      <main className="pt-16 md:pt-16 md:pl-[var(--sidebar-width,240px)] transition-[padding] duration-300">
-        {settings.visibility.news && <NewsTicker />}
+      <main
+        className={`md:pl-[var(--sidebar-width,240px)] transition-[padding] duration-300 ${
+          showNewsTicker ? "pt-[6.5rem]" : "pt-16"
+        }`}
+      >
         <Suspense
           fallback={
             <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center text-muted-foreground">

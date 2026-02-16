@@ -363,18 +363,22 @@ const Home = () => {
             {features.map((feature, index) => (
               <Card
                 key={index}
-                className="bg-card border-border hover:bg-secondary/40 transition-colors duration-200 group"
+                className="group relative overflow-hidden rounded-2xl border border-primary/25 bg-gradient-to-br from-primary/15 via-background to-background shadow-sm transition-colors duration-200 hover:border-primary/45"
               >
                 <CardContent className="p-4 md:p-6">
-                  <div className="w-9 h-9 md:w-10 md:h-10 bg-secondary rounded-lg flex items-center justify-center mb-3 md:mb-4">
-                    <feature.icon className="w-4 h-4 md:w-5 md:h-5 text-foreground" />
+                  <div className="pointer-events-none absolute -top-7 -right-7 h-16 w-16 rounded-full bg-primary/15 blur-xl" />
+                  <div className="pointer-events-none absolute -bottom-8 -left-8 h-16 w-16 rounded-full bg-primary/10 blur-xl" />
+                  <div className="relative">
+                    <div className="w-9 h-9 md:w-10 md:h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-3 md:mb-4">
+                      <feature.icon className="w-4 h-4 md:w-5 md:h-5 text-primary" />
+                    </div>
+                    <h3 className="font-semibold text-foreground mb-2 text-base md:text-lg">
+                      {feature.title}
+                    </h3>
+                    <p className="text-xs md:text-sm text-muted-foreground leading-relaxed">
+                      {feature.description}
+                    </p>
                   </div>
-                  <h3 className="font-semibold text-foreground mb-2 text-base md:text-lg">
-                    {feature.title}
-                  </h3>
-                  <p className="text-xs md:text-sm text-muted-foreground leading-relaxed">
-                    {feature.description}
-                  </p>
                 </CardContent>
               </Card>
             ))}

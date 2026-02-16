@@ -4,6 +4,7 @@ import { Calendar, ArrowLeft, Loader2 } from 'lucide-react';
 import { getPosts, formatPostDate, getDefaultImage } from '@/api/posts';
 import type { PostSummary } from '@/api/posts';
 import { normalizeImageUrl } from '@/api/upload';
+import { handleImageFallback } from '@/lib/imageFallback';
 import { useTranslation } from 'react-i18next';
 import PageHeader from "@/components/PageHeader";
 import { CONTENT_TOPICS, matchesTopic } from '@/lib/contentTopics';
@@ -140,6 +141,7 @@ const News = () => {
                           src={item.imageUrl ? normalizeImageUrl(item.imageUrl) : getDefaultImage('news')}
                           alt={item.title}
                           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          onError={(event) => handleImageFallback(event, getDefaultImage('news'))}
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                         <div className="absolute bottom-0 left-0 right-0 p-2 md:p-4">

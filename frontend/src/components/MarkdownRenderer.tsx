@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { normalizeImageUrl } from "@/api/upload";
+import { handleImageFallback } from "@/lib/imageFallback";
 import { cn } from "@/lib/utils";
 
 type Block =
@@ -17,6 +18,25 @@ const isSafeUrl = (url: string): boolean => {
   if (!trimmed) return false;
   if (trimmed.startsWith("/") || trimmed.startsWith("#")) return true;
   return /^https?:\/\//i.test(trimmed) || /^mailto:/i.test(trimmed) || /^tel:/i.test(trimmed);
+};
+
+const extractMarkdownUrl = (rawTarget: string): string => {
+  if (!rawTarget) return "";
+
+  let value = rawTarget.trim();
+
+  // Remove optional markdown title: (url "title")
+  const titleSeparatorIndex = value.search(/\s+(?=["'(])/);
+  if (titleSeparatorIndex > 0) {
+    value = value.slice(0, titleSeparatorIndex).trim();
+  }
+
+  if (value.startsWith("<") && value.endsWith(">")) {
+    value = value.slice(1, -1).trim();
+  }
+
+  value = value.replace(/^['"]|['"]$/g, "");
+  return value.trim();
 };
 
 const parseInline = (text: string): ReactNode[] => {
@@ -40,7 +60,8 @@ const parseInline = (text: string): ReactNode[] => {
       out.push(<strong key={`b-${match.index}`}>{boldText}</strong>);
     } else if (token.startsWith("![") && token.includes("](") && token.endsWith(")")) {
       const alt = token.slice(2, token.indexOf("]("));
-      const url = token.slice(token.indexOf("](") + 2, -1);
+      const rawTarget = token.slice(token.indexOf("](") + 2, -1);
+      const url = extractMarkdownUrl(rawTarget);
       const safe = isSafeUrl(url);
       out.push(
         safe ? (
@@ -51,6 +72,7 @@ const parseInline = (text: string): ReactNode[] => {
             loading="lazy"
             decoding="async"
             className="inline-block max-w-full rounded-lg border border-border/60"
+            onError={(event) => handleImageFallback(event)}
           />
         ) : (
           token
@@ -58,7 +80,8 @@ const parseInline = (text: string): ReactNode[] => {
       );
     } else if (token.startsWith("[") && token.includes("](") && token.endsWith(")")) {
       const label = token.slice(1, token.indexOf("]("));
-      const url = token.slice(token.indexOf("](") + 2, -1);
+      const rawTarget = token.slice(token.indexOf("](") + 2, -1);
+      const url = extractMarkdownUrl(rawTarget);
       const safe = isSafeUrl(url);
       out.push(
         safe ? (
@@ -156,10 +179,14 @@ const parseBlocks = (content: string): Block[] => {
     }
 
     // Block image (single line)
-    const imageMatch = trimmed.match(/^!\[([^\]]*)]\(([^)]+)\)$/);
+    const imageMatch = trimmed.match(/^!\[([^\]]*)]\((.+)\)$/);
     if (imageMatch) {
       flushParagraph();
-      blocks.push({ type: "image", alt: imageMatch[1] || "", url: imageMatch[2] || "" });
+      blocks.push({
+        type: "image",
+        alt: imageMatch[1] || "",
+        url: extractMarkdownUrl(imageMatch[2] || ""),
+      });
       continue;
     }
 
@@ -240,9 +267,11 @@ const headingClass = (level: number): string => {
 export default function MarkdownRenderer({
   content,
   className,
+  fallbackImageUrl,
 }: {
   content: string;
   className?: string;
+  fallbackImageUrl?: string;
 }) {
   const blocks = parseBlocks(content || "");
 
@@ -272,6 +301,7 @@ export default function MarkdownRenderer({
                 loading="lazy"
                 decoding="async"
                 className="w-full rounded-xl border border-border/60"
+                onError={(event) => handleImageFallback(event, fallbackImageUrl)}
               />
             );
           }

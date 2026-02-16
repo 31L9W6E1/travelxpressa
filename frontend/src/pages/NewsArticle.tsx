@@ -5,6 +5,7 @@ import { getPostBySlug, formatPostDate, getDefaultImage, updatePost, upsertPostT
 import type { Post } from '@/api/posts';
 import { Button } from '@/components/ui/button';
 import { normalizeImageUrl } from '@/api/upload';
+import { handleImageFallback } from '@/lib/imageFallback';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import { toast } from 'sonner';
@@ -134,6 +135,7 @@ const NewsArticle = () => {
               src={article.imageUrl ? normalizeImageUrl(article.imageUrl) : getDefaultImage('news')}
               alt={article.title}
               className="w-full h-full object-cover"
+              onError={(event) => handleImageFallback(event, getDefaultImage('news'))}
             />
             <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/80 to-background" />
           </div>
@@ -314,7 +316,10 @@ const NewsArticle = () => {
 
       {/* Content */}
       <article className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
-        <MarkdownRenderer content={articleContent} />
+        <MarkdownRenderer
+          content={articleContent}
+          fallbackImageUrl={getDefaultImage('news')}
+        />
       </article>
 
       {/* Related News CTA */}

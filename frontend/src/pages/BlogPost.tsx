@@ -5,6 +5,7 @@ import { getPostBySlug, formatPostDate, calculateReadTime, getDefaultImage, upda
 import type { Post } from '@/api/posts';
 import { Button } from '@/components/ui/button';
 import { normalizeImageUrl } from '@/api/upload';
+import { handleImageFallback } from '@/lib/imageFallback';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import { toast } from 'sonner';
@@ -172,6 +173,7 @@ const BlogPost = () => {
               src={post.imageUrl ? normalizeImageUrl(post.imageUrl) : getDefaultImage('blog')}
               alt={post.title}
               className="w-full h-full object-cover"
+              onError={(event) => handleImageFallback(event, getDefaultImage('blog'))}
             />
             <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/80 to-background" />
           </div>
@@ -408,7 +410,10 @@ const BlogPost = () => {
           </p>
       )}
 
-      <MarkdownRenderer content={post.content || ""} />
+      <MarkdownRenderer
+        content={post.content || ""}
+        fallbackImageUrl={getDefaultImage('blog')}
+      />
       </article>
 
       {/* Footer CTA */}

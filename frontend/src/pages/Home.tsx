@@ -18,6 +18,7 @@ import {
 } from "@/api/posts";
 import type { PostSummary } from "@/api/posts";
 import { normalizeImageUrl } from "@/api/upload";
+import { handleImageFallback } from "@/lib/imageFallback";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -310,15 +311,17 @@ const Home = () => {
                     selected={selectedAppointmentDate}
                     onSelect={setSelectedAppointmentDate}
                     defaultMonth={appointmentCandidates[0]}
-                    captionLayout="dropdown"
-                    className="mx-auto w-full max-w-[320px] rounded-xl border border-border bg-background/85 shadow-[inset_0_1px_0_rgba(255,255,255,0.5)] [--cell-size:2rem] sm:[--cell-size:2.2rem]"
+                    captionLayout="label"
+                    className="mx-auto w-full max-w-[292px] rounded-xl border border-border/80 bg-background/95 p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] [--cell-size:1.9rem] sm:max-w-[320px] sm:p-3 sm:[--cell-size:2.15rem]"
                     classNames={{
                       root: "w-full",
                       month: "w-full",
                       table: "w-full",
-                      dropdowns: "h-8 text-xs sm:text-sm",
-                      caption_label: "text-xs sm:text-sm",
-                      weekday: "text-[0.7rem] sm:text-[0.8rem]",
+                      nav: "top-1",
+                      month_caption: "mb-1",
+                      caption_label: "text-sm font-semibold",
+                      weekday: "text-[0.65rem] sm:text-[0.75rem] font-medium",
+                      week: "mt-1.5 sm:mt-2",
                     }}
                     modifiers={{ appointment: appointmentCandidates }}
                     modifiersClassNames={{
@@ -327,7 +330,7 @@ const Home = () => {
                     }}
                   />
 
-                  <div className="mt-3 grid grid-cols-2 gap-2">
+                  <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
                     {appointmentCandidates.map((date, index) => {
                       const active = selectedAppointmentDate?.toDateString() === date.toDateString();
                       return (
@@ -431,6 +434,7 @@ const Home = () => {
                         loading="lazy"
                         decoding="async"
                         sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                        onError={(event) => handleImageFallback(event, getDefaultImage("blog"))}
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                       <div className="absolute bottom-0 left-0 right-0 p-2 md:p-4">
@@ -497,6 +501,7 @@ const Home = () => {
                         loading="lazy"
                         decoding="async"
                         sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                        onError={(event) => handleImageFallback(event, getDefaultImage("news"))}
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                       <div className="absolute bottom-0 left-0 right-0 p-2 md:p-4">

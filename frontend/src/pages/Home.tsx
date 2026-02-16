@@ -171,7 +171,7 @@ const Home = () => {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    const mediaQuery = window.matchMedia("(min-width: 1280px)");
+    const mediaQuery = window.matchMedia("(min-width: 1536px)");
     const syncMonths = () => setCalendarMonths(mediaQuery.matches ? 2 : 1);
     syncMonths();
 
@@ -252,7 +252,7 @@ const Home = () => {
       {/* Hero */}
       <section className="py-8 md:py-10 border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="grid gap-7 lg:grid-cols-[minmax(0,1fr)_minmax(320px,430px)] xl:grid-cols-[minmax(0,1fr)_minmax(320px,700px)] items-start">
+          <div className="grid gap-7 lg:grid-cols-[minmax(0,1fr)_minmax(320px,430px)] 2xl:grid-cols-[minmax(0,1fr)_minmax(320px,760px)] items-start">
             <div className="max-w-3xl">
               <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight mb-4 leading-[1.1]">
                 {t("home.hero.titleLine1")}
@@ -305,7 +305,7 @@ const Home = () => {
               )}
             </div>
 
-            <div className="w-full lg:justify-self-end">
+            <div className="w-full min-w-0 lg:justify-self-end">
               <div className="relative overflow-hidden rounded-2xl border border-primary/25 bg-gradient-to-br from-primary/15 via-background to-background p-4 md:p-5 shadow-sm">
                 <div className="pointer-events-none absolute -top-10 -right-10 h-28 w-28 rounded-full bg-primary/20 blur-2xl" />
                 <div className="pointer-events-none absolute -bottom-10 -left-10 h-24 w-24 rounded-full bg-primary/15 blur-2xl" />
@@ -324,29 +324,35 @@ const Home = () => {
                     </div>
                   </div>
 
-                  <AppointmentCalendar
-                    mode="range"
-                    selected={appointmentRange}
-                    onSelect={setAppointmentRange}
-                    defaultMonth={appointmentFrom}
-                    numberOfMonths={calendarMonths}
-                    captionLayout="label"
-                    className={`mx-auto w-full rounded-xl border border-border/80 bg-background/95 p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] [--cell-size:1.9rem] sm:p-3 sm:[--cell-size:2.15rem] ${
-                      calendarMonths > 1 ? "xl:max-w-[680px]" : "max-w-[320px] sm:max-w-[360px]"
-                    }`}
-                    classNames={{
-                      root: "w-full",
-                      month: "w-full",
-                      table: "w-full",
-                      caption_label: "text-sm font-semibold",
-                      weekday: "text-[0.65rem] sm:text-[0.75rem] font-medium",
-                    }}
-                    modifiers={{ appointment: [appointmentFrom, appointmentTo] }}
-                    modifiersClassNames={{
-                      appointment:
-                        "bg-primary/20 text-primary font-semibold rounded-md border border-primary/30",
-                    }}
-                  />
+                  <div className="w-full overflow-hidden">
+                    <AppointmentCalendar
+                      mode="range"
+                      selected={appointmentRange}
+                      onSelect={setAppointmentRange}
+                      defaultMonth={appointmentFrom}
+                      numberOfMonths={calendarMonths}
+                      captionLayout="label"
+                      className={`mx-auto w-full rounded-xl border border-border/80 bg-background/95 p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] [--cell-size:1.72rem] min-[380px]:[--cell-size:1.9rem] sm:p-3 sm:[--cell-size:2.15rem] ${
+                        calendarMonths > 1 ? "2xl:max-w-[730px]" : "max-w-[300px] min-[380px]:max-w-[320px] sm:max-w-[360px]"
+                      }`}
+                      classNames={{
+                        root: "w-full",
+                        months:
+                          calendarMonths > 1
+                            ? "flex flex-col gap-3 2xl:flex-row"
+                            : "flex flex-col gap-3",
+                        month: "w-full",
+                        table: "w-full",
+                        caption_label: "text-sm font-semibold",
+                        weekday: "text-[0.65rem] sm:text-[0.75rem] font-medium",
+                      }}
+                      modifiers={{ appointment: [appointmentFrom, appointmentTo] }}
+                      modifiersClassNames={{
+                        appointment:
+                          "bg-primary/20 text-primary font-semibold rounded-md border border-primary/30",
+                      }}
+                    />
+                  </div>
 
                   <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <div className="rounded-lg border border-primary/50 bg-primary/10 px-2.5 py-2 text-left">

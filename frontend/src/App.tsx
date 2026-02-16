@@ -150,6 +150,7 @@ function AppRoutes() {
     settings.maintenance.enabled &&
     !isMaintenanceAllowedPath(location.pathname) &&
     user?.role !== "ADMIN";
+  const mainTopPaddingClass = settings.visibility.news ? "pt-[6.5rem]" : "pt-16";
 
   return (
     <div className="min-h-screen bg-background">
@@ -157,7 +158,7 @@ function AppRoutes() {
       <PageViewTracker />
       <RouteSeo />
 
-      <main className="pt-16 md:pl-[var(--sidebar-width,240px)] transition-[padding] duration-300">
+      <main className={`${mainTopPaddingClass} md:pl-[var(--sidebar-width,240px)] transition-[padding] duration-300`}>
         {settings.visibility.news && <NewsTicker />}
         <Suspense
           fallback={

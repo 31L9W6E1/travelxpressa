@@ -60,9 +60,9 @@ export default function NewsTicker() {
   const tickerLoop = [...tickerItems, ...tickerItems];
 
   return (
-    <section className="ticker-bar sticky top-16 z-20 border-b border-dashed border-border/70">
-      <div className="ticker-wrapper py-2.5">
-        <div className="animate-ticker gap-10 pr-10">
+    <section className="ticker-bar fixed top-16 left-0 right-0 md:left-[var(--sidebar-width,240px)] z-20 h-10 border-b border-dashed border-border/70">
+      <div className="ticker-wrapper h-full">
+        <div className="animate-ticker h-full items-center gap-10 pr-10">
           {tickerLoop.map((item, index) => (
             <Link
               key={`${item.id}-${index}`}

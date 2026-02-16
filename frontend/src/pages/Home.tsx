@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   ArrowRight,
@@ -26,6 +26,7 @@ import {
 import { useTranslation } from "react-i18next";
 import SiteFooter from "@/components/SiteFooter";
 import { toast } from "sonner";
+import { Calendar as AppointmentCalendar } from "@/components/ui/calendar";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -71,12 +72,43 @@ const fallbackNewsItems: PostSummary[] = [
 
 const Home = () => {
   const { t, i18n } = useTranslation();
+  const isMongolian = i18n.resolvedLanguage?.toLowerCase().startsWith("mn") ?? false;
   const [blogPosts, setBlogPosts] = useState<PostSummary[]>([]);
   const [newsItems, setNewsItems] = useState<PostSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [deferredInstallPrompt, setDeferredInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isInstalled, setIsInstalled] = useState(false);
   const [isIosInstallable, setIsIosInstallable] = useState(false);
+  const appointmentCandidates = useMemo(() => {
+    const now = new Date();
+    const day = Math.min(now.getDate(), 26);
+    const candidateDates = [
+      new Date(now.getFullYear(), now.getMonth() + 2, day),
+      new Date(now.getFullYear(), now.getMonth() + 2, Math.min(day + 10, 28)),
+      new Date(now.getFullYear(), now.getMonth() + 3, day),
+      new Date(now.getFullYear(), now.getMonth() + 3, Math.min(day + 10, 28)),
+    ];
+
+    return Array.from(new Map(candidateDates.map((item) => [item.toDateString(), item])).values());
+  }, []);
+  const [selectedAppointmentDate, setSelectedAppointmentDate] = useState<Date | undefined>(
+    appointmentCandidates[0]
+  );
+
+  const formatAppointmentDate = (date: Date) =>
+    new Intl.DateTimeFormat(i18n.language, {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    }).format(date);
+
+  const monthFormatter = new Intl.DateTimeFormat(i18n.language, { month: "long" });
+  const appointmentMonthRange =
+    appointmentCandidates.length >= 2
+      ? `${monthFormatter.format(appointmentCandidates[0])} - ${monthFormatter.format(
+          appointmentCandidates[appointmentCandidates.length - 1]
+        )}`
+      : "";
 
   useEffect(() => {
     const fetchContent = async () => {
@@ -201,53 +233,122 @@ const Home = () => {
       {/* Hero */}
       <section className="py-8 md:py-10 border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="max-w-3xl">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight mb-4 leading-[1.1]">
-              {t("home.hero.titleLine1")}
-              <span className="block text-muted-foreground">
-                {t("home.hero.titleLine2")}
-              </span>
-              {t("home.hero.titleLine3")}
-            </h1>
-            <p className="text-base md:text-lg text-muted-foreground mb-6 leading-relaxed">
-              {t("home.hero.subtitle")}
-            </p>
-            <div className="flex flex-wrap gap-3">
-              <Button asChild size="lg" className="px-8 font-semibold">
-                <Link to="/login" className="gap-2">
-                  {t("home.hero.cta")}
-                  <ArrowRight className="w-5 h-5" />
-                </Link>
-              </Button>
-              {!isInstalled && (
+          <div className="grid gap-7 lg:grid-cols-[minmax(0,1fr)_minmax(320px,390px)] items-start">
+            <div className="max-w-3xl">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight mb-4 leading-[1.1]">
+                {t("home.hero.titleLine1")}
+                <span className="block text-muted-foreground">
+                  {t("home.hero.titleLine2")}
+                </span>
+                {t("home.hero.titleLine3")}
+              </h1>
+              <p className="text-base md:text-lg text-muted-foreground mb-6 leading-relaxed">
+                {t("home.hero.subtitle")}
+              </p>
+              <div className="flex flex-wrap gap-3">
+                <Button asChild size="lg" className="px-8 font-semibold">
+                  <Link to="/login" className="gap-2">
+                    {t("home.hero.cta")}
+                    <ArrowRight className="w-5 h-5" />
+                  </Link>
+                </Button>
+                {!isInstalled && (
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="lg"
+                    className="px-8 font-semibold"
+                    onClick={() => void handleInstallClick()}
+                  >
+                    <Download className="w-5 h-5 mr-2" />
+                    {t("home.install.cta", { defaultValue: "Install App" })}
+                  </Button>
+                )}
                 <Button
-                  type="button"
-                  variant="secondary"
+                  asChild
+                  variant="outline"
                   size="lg"
                   className="px-8 font-semibold"
-                  onClick={() => void handleInstallClick()}
                 >
-                  <Download className="w-5 h-5 mr-2" />
-                  {t("home.install.cta", { defaultValue: "Install App" })}
+                  <Link to="/learn-more">{t("home.hero.learnMore")}</Link>
                 </Button>
+              </div>
+              {!isInstalled && (
+                <p className="mt-3 text-sm text-muted-foreground">
+                  {t("home.install.pitch", {
+                    defaultValue:
+                      "Install for faster access, one-tap tracking, and instant support updates.",
+                  })}
+                </p>
               )}
-              <Button
-                asChild
-                variant="outline"
-                size="lg"
-                className="px-8 font-semibold"
-              >
-                <Link to="/learn-more">{t("home.hero.learnMore")}</Link>
-              </Button>
             </div>
-            {!isInstalled && (
-              <p className="mt-3 text-sm text-muted-foreground">
-                {t("home.install.pitch", {
-                  defaultValue:
-                    "Install for faster access, one-tap tracking, and instant support updates.",
-                })}
-              </p>
-            )}
+
+            <div className="w-full lg:justify-self-end">
+              <div className="relative overflow-hidden rounded-2xl border border-primary/25 bg-gradient-to-br from-primary/15 via-background to-background p-4 md:p-5 shadow-sm">
+                <div className="pointer-events-none absolute -top-10 -right-10 h-28 w-28 rounded-full bg-primary/20 blur-2xl" />
+                <div className="pointer-events-none absolute -bottom-10 -left-10 h-24 w-24 rounded-full bg-primary/15 blur-2xl" />
+                <div className="relative">
+                  <div className="mb-3 md:mb-4">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-primary">
+                      {isMongolian ? "АНУ-ЫН ЯРИЛЦЛАГЫН ЦАГ" : "U.S. APPOINTMENT OUTLOOK"}
+                    </p>
+                    <div className="mt-1 flex flex-wrap items-center gap-2">
+                      <h3 className="text-base md:text-lg font-semibold text-foreground">
+                        {isMongolian ? "Боломжит ярилцлагын цонх" : "Likely interview windows"}
+                      </h3>
+                      <span className="rounded-full border border-primary/25 bg-primary/10 px-2.5 py-0.5 text-[11px] font-medium text-primary">
+                        {appointmentMonthRange}
+                      </span>
+                    </div>
+                  </div>
+
+                  <AppointmentCalendar
+                    mode="single"
+                    selected={selectedAppointmentDate}
+                    onSelect={setSelectedAppointmentDate}
+                    defaultMonth={appointmentCandidates[0]}
+                    captionLayout="dropdown"
+                    className="w-full rounded-xl border border-border bg-background/85 shadow-[inset_0_1px_0_rgba(255,255,255,0.5)]"
+                    modifiers={{ appointment: appointmentCandidates }}
+                    modifiersClassNames={{
+                      appointment:
+                        "bg-primary/20 text-primary font-semibold rounded-md border border-primary/30",
+                    }}
+                  />
+
+                  <div className="mt-3 grid grid-cols-2 gap-2">
+                    {appointmentCandidates.map((date, index) => {
+                      const active = selectedAppointmentDate?.toDateString() === date.toDateString();
+                      return (
+                        <button
+                          key={date.toISOString()}
+                          type="button"
+                          onClick={() => setSelectedAppointmentDate(date)}
+                          className={`rounded-lg border px-2.5 py-2 text-left transition-colors ${
+                            active
+                              ? "border-primary/50 bg-primary/15"
+                              : "border-border bg-background/80 hover:border-primary/35 hover:bg-primary/5"
+                          }`}
+                        >
+                          <p className="text-[11px] font-medium text-muted-foreground">
+                            {isMongolian ? `Боломжит цонх ${index + 1}` : `Possible slot ${index + 1}`}
+                          </p>
+                          <p className="text-xs font-semibold text-foreground mt-0.5">
+                            {formatAppointmentDate(date)}
+                          </p>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <p className="mt-3 text-xs text-muted-foreground leading-relaxed">
+                    {isMongolian
+                      ? "Өнөөдрийн огноонд тулгуурлан АНУ-ын ярилцлагын боломжит 2-3 сарын цонхыг онцолж харууллаа. Бодит цаг нээлтийн өөрчлөлтийг баг маань өдөр бүр шалгаж, шуурхай захиалга хийж өгнө."
+                      : "Based on today's date, this shows a likely 2-3 month U.S. interview window. Our team tracks real-time slot releases and books quickly when openings appear."}
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>

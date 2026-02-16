@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import {
   Bell,
@@ -25,13 +25,21 @@ import {
   User,
   X,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { UserAvatar } from "./UserAvatar";
 import { useTranslation } from "react-i18next";
 import LanguageSwitcher from "./LanguageSwitcher";
 import api from "@/api/client";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useSiteSettings } from "@/contexts/SiteSettingsContext";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 
 type NotificationItem = {
   id: string;
@@ -48,6 +56,7 @@ const BRAND_LOGO_TEXT = "/branding/logo-visamn.png";
 
 const Navbar = () => {
   const { user, logout } = useAuth();
+  const location = useLocation();
   const { theme, toggleTheme } = useTheme();
   const { t, i18n } = useTranslation();
   const { settings } = useSiteSettings();
@@ -413,6 +422,62 @@ const Navbar = () => {
       .split("\n")
       .map((line) => line.trim())
       .filter(Boolean);
+  const pathSegments = location.pathname.split("/").filter(Boolean);
+  const staticBreadcrumbLabels: Record<string, string> = {
+    about: t("nav.about", { defaultValue: "About" }),
+    "learn-more": t("nav.learnMore", { defaultValue: "Learn More" }),
+    "translation-service": t("nav.translationService", { defaultValue: "Translation Service" }),
+    gallery: t("nav.gallery", { defaultValue: "Gallery" }),
+    news: t("nav.news", { defaultValue: "News" }),
+    blog: t("nav.articles", { defaultValue: "Articles" }),
+    feedback: t("nav.feedback", { defaultValue: "Feedback" }),
+    "q-and-a": t("nav.qAndA", { defaultValue: "Q&A" }),
+    faq: t("nav.qAndA", { defaultValue: "Q&A" }),
+    "help-center": t("nav.helpCenter", { defaultValue: "Help Center" }),
+    flight: t("nav.flight", { defaultValue: "Flight" }),
+    insurance: t("nav.insurance", { defaultValue: "Insurance" }),
+    profile: t("nav.profile", { defaultValue: "Profile" }),
+    inbox: t("profile.inbox", { defaultValue: "Inbox" }),
+    security: t("profile.security", { defaultValue: "Security" }),
+    application: t("nav.applications", { defaultValue: "Applications" }),
+    admin: t("nav.admin", { defaultValue: "Admin" }),
+    overview: t("admin.overview", { defaultValue: "Overview" }),
+    users: t("admin.users", { defaultValue: "Users" }),
+    applications: t("nav.applications", { defaultValue: "Applications" }),
+    requests: t("admin.requests", { defaultValue: "Requests" }),
+    tracking: t("admin.tracking", { defaultValue: "Tracking" }),
+    payments: t("nav.payments", { defaultValue: "Payments" }),
+    analytics: t("admin.analytics", { defaultValue: "Analytics" }),
+    cms: "CMS",
+    "contactsupport": t("nav.support", { defaultValue: "Support" }),
+    "select-country": t("nav.apply", { defaultValue: "Apply" }),
+    ready: t("ready.pageTitle", { defaultValue: "Ready" }),
+  };
+  const toTitleCase = (value: string) =>
+    value
+      .split(/[-_]+/)
+      .filter(Boolean)
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+  const breadcrumbItems = pathSegments.map((segment, index) => {
+    const href = `/${pathSegments.slice(0, index + 1).join("/")}`;
+    const decoded = decodeURIComponent(segment);
+    const normalized = decoded.toLowerCase();
+    const previous = pathSegments[index - 1]?.toLowerCase();
+
+    let label = staticBreadcrumbLabels[normalized];
+    if (!label && (previous === "news" || previous === "blog")) {
+      label = t("common.article", { defaultValue: "Article" });
+    }
+    if (!label && normalized.length > 30) {
+      label = t("common.details", { defaultValue: "Details" });
+    }
+    if (!label) {
+      label = toTitleCase(decoded);
+    }
+
+    return { href, label };
+  });
 
   return (
     <>
@@ -593,15 +658,52 @@ const Navbar = () => {
       </aside>
 
       <header className="hidden md:flex fixed top-0 left-[var(--sidebar-width,240px)] right-0 z-30 h-16 bg-background/90 backdrop-blur-md border-b border-dashed border-border/70 px-6 items-center justify-between transition-[left] duration-300">
-        <button
-          type="button"
-          onClick={() => setIsSidebarCollapsed((prev) => !prev)}
-          className="h-9 w-9 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors flex items-center justify-center"
-          aria-label={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-          title={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-        >
-          {isSidebarCollapsed ? <PanelLeftOpen className="w-4 h-4" /> : <PanelLeftClose className="w-4 h-4" />}
-        </button>
+        <div className="flex min-w-0 items-center gap-3">
+          <button
+            type="button"
+            onClick={() => setIsSidebarCollapsed((prev) => !prev)}
+            className="h-9 w-9 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors flex items-center justify-center"
+            aria-label={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+            title={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          >
+            {isSidebarCollapsed ? <PanelLeftOpen className="w-4 h-4" /> : <PanelLeftClose className="w-4 h-4" />}
+          </button>
+
+          <div className="min-w-0">
+            <Breadcrumb>
+              <BreadcrumbList className="flex-nowrap gap-2">
+                <BreadcrumbItem>
+                  {breadcrumbItems.length === 0 ? (
+                    <BreadcrumbPage>{t("nav.home", { defaultValue: "Home" })}</BreadcrumbPage>
+                  ) : (
+                    <BreadcrumbLink asChild>
+                      <Link to="/">{t("nav.home", { defaultValue: "Home" })}</Link>
+                    </BreadcrumbLink>
+                  )}
+                </BreadcrumbItem>
+                {breadcrumbItems.map((item, index) => {
+                  const isLast = index === breadcrumbItems.length - 1;
+                  return (
+                    <Fragment key={item.href}>
+                      <BreadcrumbSeparator />
+                      <BreadcrumbItem className="min-w-0 max-w-[180px]">
+                        {isLast ? (
+                          <BreadcrumbPage className="truncate">{item.label}</BreadcrumbPage>
+                        ) : (
+                          <BreadcrumbLink asChild>
+                            <Link to={item.href} className="truncate">
+                              {item.label}
+                            </Link>
+                          </BreadcrumbLink>
+                        )}
+                      </BreadcrumbItem>
+                    </Fragment>
+                  );
+                })}
+              </BreadcrumbList>
+            </Breadcrumb>
+          </div>
+        </div>
 
         <div className="flex items-center gap-2">
           {user && (

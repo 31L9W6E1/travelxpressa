@@ -51,7 +51,7 @@ type NotificationItem = {
 };
 
 const navItemBaseClass =
-  "flex items-center gap-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors";
+  "flex w-full items-center gap-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors";
 
 const BRAND_LOGO_ICON = "/branding/logo-icon.png";
 const BRAND_LOGO_TEXT = "/branding/logo-visamn.png";
@@ -666,8 +666,8 @@ const Navbar = () => {
       </aside>
 
       <header className="hidden md:flex fixed top-0 left-[var(--sidebar-width,240px)] right-0 z-30 h-16 bg-background/90 backdrop-blur-md border-b border-dashed border-border/70 px-4 lg:px-6 transition-[left] duration-300">
-        <div className="relative mx-auto flex w-full max-w-7xl items-center gap-3">
-          <div className="z-10 flex min-w-0 flex-1 items-center gap-3">
+        <div className="mx-auto grid w-full max-w-7xl grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3">
+          <div className="z-10 flex min-w-0 items-center gap-3">
             <button
               type="button"
               onClick={() => setIsSidebarCollapsed((prev) => !prev)}
@@ -716,7 +716,7 @@ const Navbar = () => {
 
           <Link
             to="/"
-            className="absolute left-1/2 -translate-x-[54%] hidden xl:flex items-center justify-center"
+            className="z-0 hidden xl:flex items-center justify-center"
             aria-label="Visamn home"
           >
             <img
@@ -727,7 +727,7 @@ const Navbar = () => {
             />
           </Link>
 
-          <div className="z-10 ml-auto flex shrink-0 items-center gap-2">
+          <div className="z-10 flex shrink-0 items-center justify-self-end gap-2">
           {user && (
             <div className="relative" ref={notificationDesktopRef}>
               <button

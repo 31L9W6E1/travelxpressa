@@ -1,4 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import PageHeader from "@/components/PageHeader";
 import { useSiteSettings } from "@/contexts/SiteSettingsContext";
 
@@ -14,24 +20,32 @@ const QAndA = () => {
       />
 
       <section className="py-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6">
           {items.length === 0 ? (
-            <Card className="xl:col-span-4">
+            <Card>
               <CardContent className="py-8 text-sm text-muted-foreground">
                 Одоогоор асуулт, хариултын мэдээлэл алга.
               </CardContent>
             </Card>
           ) : (
-            items.map((item) => (
-              <Card key={`${item.q}-${item.a.slice(0, 24)}`}>
-                <CardHeader>
-                  <CardTitle className="text-lg">{item.q}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground leading-relaxed">{item.a}</p>
-                </CardContent>
-              </Card>
-            ))
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-xl">Түгээмэл асуултууд</CardTitle>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <Accordion type="single" collapsible className="w-full">
+                  {items.map((item, index) => (
+                    <AccordionItem
+                      key={`${item.q}-${item.a.slice(0, 24)}-${index}`}
+                      value={`item-${index}`}
+                    >
+                      <AccordionTrigger>{item.q}</AccordionTrigger>
+                      <AccordionContent>{item.a}</AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
+              </CardContent>
+            </Card>
           )}
         </div>
       </section>

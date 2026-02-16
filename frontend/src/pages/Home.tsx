@@ -28,6 +28,7 @@ import { useTranslation } from "react-i18next";
 import SiteFooter from "@/components/SiteFooter";
 import { toast } from "sonner";
 import { Calendar as AppointmentCalendar } from "@/components/ui/calendar";
+import type { DateRange } from "react-day-picker";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -71,6 +72,12 @@ const fallbackNewsItems: PostSummary[] = [
   },
 ];
 
+const addDays = (date: Date, days: number): Date => {
+  const next = new Date(date);
+  next.setDate(next.getDate() + days);
+  return next;
+};
+
 const Home = () => {
   const { t, i18n } = useTranslation();
   const isMongolian = i18n.resolvedLanguage?.toLowerCase().startsWith("mn") ?? false;
@@ -80,20 +87,16 @@ const Home = () => {
   const [deferredInstallPrompt, setDeferredInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isInstalled, setIsInstalled] = useState(false);
   const [isIosInstallable, setIsIosInstallable] = useState(false);
-  const appointmentCandidates = useMemo(() => {
+  const [calendarMonths, setCalendarMonths] = useState(2);
+  const appointmentDefaultRange = useMemo<DateRange>(() => {
     const now = new Date();
     const day = Math.min(now.getDate(), 26);
-    const candidateDates = [
-      new Date(now.getFullYear(), now.getMonth() + 2, day),
-      new Date(now.getFullYear(), now.getMonth() + 2, Math.min(day + 10, 28)),
-      new Date(now.getFullYear(), now.getMonth() + 3, day),
-      new Date(now.getFullYear(), now.getMonth() + 3, Math.min(day + 10, 28)),
-    ];
-
-    return Array.from(new Map(candidateDates.map((item) => [item.toDateString(), item])).values());
+    const from = new Date(now.getFullYear(), now.getMonth() + 2, day);
+    const to = addDays(from, 30);
+    return { from, to };
   }, []);
-  const [selectedAppointmentDate, setSelectedAppointmentDate] = useState<Date | undefined>(
-    appointmentCandidates[0]
+  const [appointmentRange, setAppointmentRange] = useState<DateRange | undefined>(
+    appointmentDefaultRange
   );
 
   const formatAppointmentDate = (date: Date) =>
@@ -103,13 +106,12 @@ const Home = () => {
       year: "numeric",
     }).format(date);
 
+  const appointmentFrom = appointmentRange?.from ?? appointmentDefaultRange.from ?? new Date();
+  const appointmentTo = appointmentRange?.to ?? appointmentDefaultRange.to ?? addDays(appointmentFrom, 30);
   const monthFormatter = new Intl.DateTimeFormat(i18n.language, { month: "long" });
-  const appointmentMonthRange =
-    appointmentCandidates.length >= 2
-      ? `${monthFormatter.format(appointmentCandidates[0])} - ${monthFormatter.format(
-          appointmentCandidates[appointmentCandidates.length - 1]
-        )}`
-      : "";
+  const appointmentMonthRange = `${monthFormatter.format(appointmentFrom)} - ${monthFormatter.format(
+    appointmentTo
+  )}`;
 
   useEffect(() => {
     const fetchContent = async () => {
@@ -164,6 +166,22 @@ const Home = () => {
       window.removeEventListener("beforeinstallprompt", onBeforeInstallPrompt);
       window.removeEventListener("appinstalled", onInstalled);
     };
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const mediaQuery = window.matchMedia("(max-width: 640px)");
+    const syncMonths = () => setCalendarMonths(mediaQuery.matches ? 1 : 2);
+    syncMonths();
+
+    if (typeof mediaQuery.addEventListener === "function") {
+      mediaQuery.addEventListener("change", syncMonths);
+      return () => mediaQuery.removeEventListener("change", syncMonths);
+    }
+
+    mediaQuery.addListener(syncMonths);
+    return () => mediaQuery.removeListener(syncMonths);
   }, []);
 
   const handleInstallClick = async () => {
@@ -307,14 +325,16 @@ const Home = () => {
                   </div>
 
                   <AppointmentCalendar
-                    mode="single"
-                    selected={selectedAppointmentDate}
-                    onSelect={setSelectedAppointmentDate}
-                    defaultMonth={appointmentCandidates[0]}
+                    mode="range"
+                    selected={appointmentRange}
+                    onSelect={setAppointmentRange}
+                    defaultMonth={appointmentFrom}
+                    numberOfMonths={calendarMonths}
                     captionLayout="label"
-                    className="mx-auto w-full max-w-[292px] rounded-xl border border-border/80 bg-background/95 p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] [--cell-size:1.9rem] sm:max-w-[320px] sm:p-3 sm:[--cell-size:2.15rem]"
+                    className="mx-auto w-full rounded-xl border border-border/80 bg-background/95 p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] [--cell-size:1.9rem] sm:max-w-[360px] sm:p-3 sm:[--cell-size:2.15rem]"
                     classNames={{
                       root: "w-full",
+                      months: "flex flex-col gap-3",
                       month: "w-full",
                       table: "w-full",
                       nav: "top-1",
@@ -323,7 +343,7 @@ const Home = () => {
                       weekday: "text-[0.65rem] sm:text-[0.75rem] font-medium",
                       week: "mt-1.5 sm:mt-2",
                     }}
-                    modifiers={{ appointment: appointmentCandidates }}
+                    modifiers={{ appointment: [appointmentFrom, appointmentTo] }}
                     modifiersClassNames={{
                       appointment:
                         "bg-primary/20 text-primary font-semibold rounded-md border border-primary/30",
@@ -331,28 +351,22 @@ const Home = () => {
                   />
 
                   <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    {appointmentCandidates.map((date, index) => {
-                      const active = selectedAppointmentDate?.toDateString() === date.toDateString();
-                      return (
-                        <button
-                          key={date.toISOString()}
-                          type="button"
-                          onClick={() => setSelectedAppointmentDate(date)}
-                          className={`rounded-lg border px-2.5 py-2 text-left transition-colors ${
-                            active
-                              ? "border-primary/50 bg-primary/15"
-                              : "border-border bg-background/80 hover:border-primary/35 hover:bg-primary/5"
-                          }`}
-                        >
-                          <p className="text-[11px] font-medium text-muted-foreground">
-                            {isMongolian ? `Боломжит цонх ${index + 1}` : `Possible slot ${index + 1}`}
-                          </p>
-                          <p className="text-xs font-semibold text-foreground mt-0.5">
-                            {formatAppointmentDate(date)}
-                          </p>
-                        </button>
-                      );
-                    })}
+                    <div className="rounded-lg border border-primary/50 bg-primary/10 px-2.5 py-2 text-left">
+                      <p className="text-[11px] font-medium text-muted-foreground">
+                        {isMongolian ? "Эхлэх боломжит огноо" : "Estimated earliest slot"}
+                      </p>
+                      <p className="text-xs font-semibold text-foreground mt-0.5">
+                        {formatAppointmentDate(appointmentFrom)}
+                      </p>
+                    </div>
+                    <div className="rounded-lg border border-border bg-background/80 px-2.5 py-2 text-left">
+                      <p className="text-[11px] font-medium text-muted-foreground">
+                        {isMongolian ? "Эцсийн боломжит огноо" : "Estimated latest slot"}
+                      </p>
+                      <p className="text-xs font-semibold text-foreground mt-0.5">
+                        {formatAppointmentDate(appointmentTo)}
+                      </p>
+                    </div>
                   </div>
 
                   <p className="mt-3 text-xs text-muted-foreground leading-relaxed">

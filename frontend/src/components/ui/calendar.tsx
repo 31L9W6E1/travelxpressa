@@ -26,6 +26,34 @@ function Calendar({
   buttonVariant?: React.ComponentProps<typeof Button>["variant"]
 }) {
   const defaultClassNames = getDefaultClassNames()
+  const {
+    root: rootClassName,
+    months: monthsClassName,
+    month: monthClassName,
+    nav: navClassName,
+    button_previous: buttonPreviousClassName,
+    button_next: buttonNextClassName,
+    month_caption: monthCaptionClassName,
+    dropdowns: dropdownsClassName,
+    dropdown_root: dropdownRootClassName,
+    dropdown: dropdownClassName,
+    caption_label: captionLabelClassName,
+    table: tableClassName,
+    weekdays: weekdaysClassName,
+    weekday: weekdayClassName,
+    week: weekClassName,
+    week_number_header: weekNumberHeaderClassName,
+    week_number: weekNumberClassName,
+    day: dayClassName,
+    range_start: rangeStartClassName,
+    range_middle: rangeMiddleClassName,
+    range_end: rangeEndClassName,
+    today: todayClassName,
+    outside: outsideClassName,
+    disabled: disabledClassName,
+    hidden: hiddenClassName,
+    ...restClassNames
+  } = classNames ?? {}
 
   return (
     <DayPicker
@@ -43,91 +71,108 @@ function Calendar({
         ...formatters,
       }}
       classNames={{
-        root: cn("w-fit", defaultClassNames.root),
+        root: cn("w-fit", defaultClassNames.root, rootClassName),
         months: cn(
           "flex gap-4 flex-col md:flex-row relative",
-          defaultClassNames.months
+          defaultClassNames.months,
+          monthsClassName
         ),
-        month: cn("flex flex-col w-full gap-4", defaultClassNames.month),
+        month: cn("flex flex-col w-full gap-4", defaultClassNames.month, monthClassName),
         nav: cn(
           "flex items-center gap-1 w-full absolute top-0 inset-x-0 justify-between",
-          defaultClassNames.nav
+          defaultClassNames.nav,
+          navClassName
         ),
         button_previous: cn(
           buttonVariants({ variant: buttonVariant }),
           "size-(--cell-size) aria-disabled:opacity-50 p-0 select-none",
-          defaultClassNames.button_previous
+          defaultClassNames.button_previous,
+          buttonPreviousClassName
         ),
         button_next: cn(
           buttonVariants({ variant: buttonVariant }),
           "size-(--cell-size) aria-disabled:opacity-50 p-0 select-none",
-          defaultClassNames.button_next
+          defaultClassNames.button_next,
+          buttonNextClassName
         ),
         month_caption: cn(
           "flex items-center justify-center h-(--cell-size) w-full px-(--cell-size)",
-          defaultClassNames.month_caption
+          defaultClassNames.month_caption,
+          monthCaptionClassName
         ),
         dropdowns: cn(
           "w-full flex items-center text-sm font-medium justify-center h-(--cell-size) gap-1.5",
-          defaultClassNames.dropdowns
+          defaultClassNames.dropdowns,
+          dropdownsClassName
         ),
         dropdown_root: cn(
           "relative has-focus:border-ring border border-input shadow-xs has-focus:ring-ring/50 has-focus:ring-[3px] rounded-md",
-          defaultClassNames.dropdown_root
+          defaultClassNames.dropdown_root,
+          dropdownRootClassName
         ),
         dropdown: cn(
           "absolute bg-popover inset-0 opacity-0",
-          defaultClassNames.dropdown
+          defaultClassNames.dropdown,
+          dropdownClassName
         ),
         caption_label: cn(
           "select-none font-medium",
           captionLayout === "label"
             ? "text-sm"
             : "rounded-md pl-2 pr-1 flex items-center gap-1 text-sm h-8 [&>svg]:text-muted-foreground [&>svg]:size-3.5",
-          defaultClassNames.caption_label
+          defaultClassNames.caption_label,
+          captionLabelClassName
         ),
-        table: "w-full border-collapse",
-        weekdays: cn("flex", defaultClassNames.weekdays),
+        table: cn("w-full border-collapse", tableClassName),
+        weekdays: cn("flex", defaultClassNames.weekdays, weekdaysClassName),
         weekday: cn(
           "text-muted-foreground rounded-md flex-1 font-normal text-[0.8rem] select-none",
-          defaultClassNames.weekday
+          defaultClassNames.weekday,
+          weekdayClassName
         ),
-        week: cn("flex w-full mt-2", defaultClassNames.week),
+        week: cn("flex w-full mt-2", defaultClassNames.week, weekClassName),
         week_number_header: cn(
           "select-none w-(--cell-size)",
-          defaultClassNames.week_number_header
+          defaultClassNames.week_number_header,
+          weekNumberHeaderClassName
         ),
         week_number: cn(
           "text-[0.8rem] select-none text-muted-foreground",
-          defaultClassNames.week_number
+          defaultClassNames.week_number,
+          weekNumberClassName
         ),
         day: cn(
           "relative w-full h-full p-0 text-center [&:last-child[data-selected=true]_button]:rounded-r-md group/day aspect-square select-none",
           props.showWeekNumber
             ? "[&:nth-child(2)[data-selected=true]_button]:rounded-l-md"
             : "[&:first-child[data-selected=true]_button]:rounded-l-md",
-          defaultClassNames.day
+          defaultClassNames.day,
+          dayClassName
         ),
         range_start: cn(
           "rounded-l-md bg-accent",
-          defaultClassNames.range_start
+          defaultClassNames.range_start,
+          rangeStartClassName
         ),
-        range_middle: cn("rounded-none", defaultClassNames.range_middle),
-        range_end: cn("rounded-r-md bg-accent", defaultClassNames.range_end),
+        range_middle: cn("rounded-none", defaultClassNames.range_middle, rangeMiddleClassName),
+        range_end: cn("rounded-r-md bg-accent", defaultClassNames.range_end, rangeEndClassName),
         today: cn(
           "bg-accent text-accent-foreground rounded-md data-[selected=true]:rounded-none",
-          defaultClassNames.today
+          defaultClassNames.today,
+          todayClassName
         ),
         outside: cn(
           "text-muted-foreground aria-selected:text-muted-foreground",
-          defaultClassNames.outside
+          defaultClassNames.outside,
+          outsideClassName
         ),
         disabled: cn(
           "text-muted-foreground opacity-50",
-          defaultClassNames.disabled
+          defaultClassNames.disabled,
+          disabledClassName
         ),
-        hidden: cn("invisible", defaultClassNames.hidden),
-        ...classNames,
+        hidden: cn("invisible", defaultClassNames.hidden, hiddenClassName),
+        ...restClassNames,
       }}
       components={{
         Root: ({ className, rootRef, ...props }) => {

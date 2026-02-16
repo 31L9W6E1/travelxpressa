@@ -87,7 +87,6 @@ const Home = () => {
   const [deferredInstallPrompt, setDeferredInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isInstalled, setIsInstalled] = useState(false);
   const [isIosInstallable, setIsIosInstallable] = useState(false);
-  const [calendarMonths, setCalendarMonths] = useState(1);
   const appointmentDefaultRange = useMemo<DateRange>(() => {
     const now = new Date();
     const day = Math.min(now.getDate(), 26);
@@ -168,22 +167,6 @@ const Home = () => {
     };
   }, []);
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const mediaQuery = window.matchMedia("(min-width: 1700px)");
-    const syncMonths = () => setCalendarMonths(mediaQuery.matches ? 2 : 1);
-    syncMonths();
-
-    if (typeof mediaQuery.addEventListener === "function") {
-      mediaQuery.addEventListener("change", syncMonths);
-      return () => mediaQuery.removeEventListener("change", syncMonths);
-    }
-
-    mediaQuery.addListener(syncMonths);
-    return () => mediaQuery.removeListener(syncMonths);
-  }, []);
-
   const handleInstallClick = async () => {
     if (isInstalled) return;
 
@@ -252,7 +235,7 @@ const Home = () => {
       {/* Hero */}
       <section className="py-8 md:py-10 border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="grid gap-7 lg:grid-cols-[minmax(0,1fr)_minmax(320px,430px)] 2xl:grid-cols-[minmax(0,1fr)_minmax(320px,780px)] items-start">
+          <div className="grid gap-7 lg:grid-cols-[minmax(0,1fr)_minmax(0,360px)] items-start">
             <div className="max-w-3xl">
               <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight mb-4 leading-[1.1]">
                 {t("home.hero.titleLine1")}
@@ -305,7 +288,7 @@ const Home = () => {
               )}
             </div>
 
-            <div className="w-full min-w-0 lg:justify-self-end">
+            <div className="w-full max-w-[360px] min-w-0 mx-auto lg:mx-0 lg:justify-self-end">
               <div className="relative overflow-hidden rounded-2xl border border-primary/25 bg-gradient-to-br from-primary/15 via-background to-background p-4 md:p-5 shadow-sm">
                 <div className="pointer-events-none absolute -top-10 -right-10 h-28 w-28 rounded-full bg-primary/20 blur-2xl" />
                 <div className="pointer-events-none absolute -bottom-10 -left-10 h-24 w-24 rounded-full bg-primary/15 blur-2xl" />
@@ -330,15 +313,11 @@ const Home = () => {
                       selected={appointmentRange}
                       onSelect={setAppointmentRange}
                       defaultMonth={appointmentFrom}
-                      numberOfMonths={calendarMonths}
+                      numberOfMonths={1}
                       captionLayout="label"
                       className="w-full min-w-0 max-w-none rounded-xl border border-border/80 bg-background/95 p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] [--cell-size:1.9rem] min-[390px]:[--cell-size:2.05rem] sm:p-3 sm:[--cell-size:2.2rem]"
                       classNames={{
-                        root: "w-full",
-                        months:
-                          calendarMonths > 1
-                            ? "flex flex-col gap-3 2xl:flex-row"
-                            : "flex flex-col gap-3",
+                        months: "flex flex-col gap-3",
                         month: "w-full",
                         table: "w-full",
                         caption_label: "text-sm font-semibold",

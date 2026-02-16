@@ -20,6 +20,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import ImageUpload from '@/components/ImageUpload';
 
 const BlogPost = () => {
   const { t, i18n } = useTranslation();
@@ -37,6 +38,7 @@ const BlogPost = () => {
   const [draftExcerpt, setDraftExcerpt] = useState('');
   const [draftTags, setDraftTags] = useState('');
   const [draftContent, setDraftContent] = useState('');
+  const [draftImageUrl, setDraftImageUrl] = useState('');
 
   const locale = (i18n.language || 'en').toLowerCase().split('-')[0] || 'en';
 
@@ -74,6 +76,7 @@ const BlogPost = () => {
     setDraftExcerpt(post.excerpt || '');
     setDraftTags(post.tags || '');
     setDraftContent(post.content || '');
+    setDraftImageUrl(post.imageUrl || '');
   }, [editOpen, post]);
 
   const isActionBusy = saving || deleting || togglingPublish;
@@ -225,6 +228,13 @@ const BlogPost = () => {
                         />
                       </div>
 
+                      <ImageUpload
+                        value={draftImageUrl}
+                        onChange={setDraftImageUrl}
+                        label={t('content.fields.imageUrl', { defaultValue: 'Featured Image' })}
+                        disabled={isActionBusy}
+                      />
+
                       <div className="grid gap-2">
                         <Label htmlFor="blog-edit-tags">
                           {t('content.fields.tags', { defaultValue: 'Tags' })}
@@ -305,12 +315,15 @@ const BlogPost = () => {
 
                         setSaving(true);
                         try {
+                          const nextImageUrl = draftImageUrl.trim() || null;
+
                           if (locale === 'en') {
                             await updatePost(post.id, {
                               title: nextTitle,
                               excerpt: draftExcerpt.trim() || undefined,
                               content: nextContent,
                               tags: draftTags.trim() || undefined,
+                              imageUrl: nextImageUrl,
                             });
                           } else {
                             await upsertPostTranslation(post.id, locale, {
@@ -320,6 +333,10 @@ const BlogPost = () => {
                               tags: draftTags.trim() || null,
                               status: 'published',
                             });
+
+                            if ((post.imageUrl || '') !== (nextImageUrl || '')) {
+                              await updatePost(post.id, { imageUrl: nextImageUrl });
+                            }
                           }
 
                           const refreshed = await getPostBySlug(post.slug);

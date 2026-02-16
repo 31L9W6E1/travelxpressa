@@ -20,6 +20,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import ImageUpload from '@/components/ImageUpload';
 
 const NewsArticle = () => {
   const { t, i18n } = useTranslation();
@@ -34,6 +35,7 @@ const NewsArticle = () => {
   const [draftExcerpt, setDraftExcerpt] = useState('');
   const [draftTags, setDraftTags] = useState('');
   const [draftContent, setDraftContent] = useState('');
+  const [draftImageUrl, setDraftImageUrl] = useState('');
 
   const locale = (i18n.language || 'en').toLowerCase().split('-')[0] || 'en';
 
@@ -82,6 +84,7 @@ const NewsArticle = () => {
     setDraftExcerpt(article.excerpt || '');
     setDraftTags(article.tags || '');
     setDraftContent(article.content || '');
+    setDraftImageUrl(article.imageUrl || '');
   }, [article, editOpen]);
 
   if (loading) {
@@ -188,6 +191,13 @@ const NewsArticle = () => {
                         />
                       </div>
 
+                      <ImageUpload
+                        value={draftImageUrl}
+                        onChange={setDraftImageUrl}
+                        label={t('content.fields.imageUrl', { defaultValue: 'Featured Image' })}
+                        disabled={saving}
+                      />
+
                       <div className="grid gap-2">
                         <Label htmlFor="news-edit-tags">
                           {t('content.fields.tags', { defaultValue: 'Tags' })}
@@ -242,12 +252,15 @@ const NewsArticle = () => {
 
                         setSaving(true);
                         try {
+                          const nextImageUrl = draftImageUrl.trim() || null;
+
                           if (locale === 'en') {
                             await updatePost(article.id, {
                               title: nextTitle,
                               excerpt: draftExcerpt.trim() || undefined,
                               content: nextContent,
                               tags: draftTags.trim() || undefined,
+                              imageUrl: nextImageUrl,
                             });
                           } else {
                             await upsertPostTranslation(article.id, locale, {
@@ -257,6 +270,10 @@ const NewsArticle = () => {
                               tags: draftTags.trim() || null,
                               status: 'published',
                             });
+
+                            if ((article.imageUrl || '') !== (nextImageUrl || '')) {
+                              await updatePost(article.id, { imageUrl: nextImageUrl });
+                            }
                           }
 
                           const refreshed = await getPostBySlug(article.slug);

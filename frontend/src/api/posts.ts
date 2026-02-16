@@ -54,7 +54,7 @@ export interface CreatePostInput {
   title: string;
   excerpt?: string;
   content: string;
-  imageUrl?: string;
+  imageUrl?: string | null;
   category: 'blog' | 'news';
   tags?: string;
   status?: 'draft' | 'published';

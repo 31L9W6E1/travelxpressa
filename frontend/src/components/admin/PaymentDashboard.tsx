@@ -24,6 +24,16 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -69,6 +79,7 @@ const PaymentDashboard = () => {
   const [refundReason, setRefundReason] = useState('');
   const [refundAmount, setRefundAmount] = useState<number | undefined>(undefined);
   const [refunding, setRefunding] = useState(false);
+  const currentPageTotal = payments.reduce((sum, item) => sum + item.amount, 0);
 
   useEffect(() => {
     fetchData();
@@ -301,93 +312,79 @@ const PaymentDashboard = () => {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[980px]">
-              <thead>
-                <tr className="border-b">
-                  <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
-                    Invoice
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
-                    Service
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
-                    Amount
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
-                    Status
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
-                    Provider
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
-                    Date
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y">
-                {payments.length === 0 ? (
-                  <tr>
-                    <td colSpan={7} className="px-4 py-12 text-center">
-                      <CreditCard className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                      <p className="text-muted-foreground">No payments found</p>
-                    </td>
-                  </tr>
-                ) : (
-                  payments.map((payment) => (
-                    <tr key={payment.id} className="hover:bg-muted/50 transition-colors">
-                      <td className="px-4 py-3">
-                        <span className="font-mono text-sm">{payment.invoiceNo}</span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className="text-sm">
-                          {getServiceTypeName(payment.serviceType as PaymentServiceType)}
+          <Table className="min-w-[980px]">
+            <TableCaption>A list of your recent invoices.</TableCaption>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[150px]">Invoice</TableHead>
+                <TableHead>Service</TableHead>
+                <TableHead>Amount</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Provider</TableHead>
+                <TableHead>Date</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {payments.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="py-12 text-center">
+                    <CreditCard className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                    <p className="text-muted-foreground">No payments found</p>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                payments.map((payment) => (
+                  <TableRow key={payment.id}>
+                    <TableCell className="font-medium font-mono text-sm">{payment.invoiceNo}</TableCell>
+                    <TableCell>
+                      {getServiceTypeName(payment.serviceType as PaymentServiceType)}
+                    </TableCell>
+                    <TableCell className="font-semibold">{formatMNT(payment.amount)}</TableCell>
+                    <TableCell>
+                      <Badge className={getPaymentStatusColor(payment.status as PaymentStatus)}>
+                        <span className="flex items-center gap-1">
+                          {getStatusIcon(payment.status as PaymentStatus)}
+                          {getPaymentStatusText(payment.status as PaymentStatus)}
                         </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className="font-semibold">
-                          {formatMNT(payment.amount)}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <Badge className={getPaymentStatusColor(payment.status as PaymentStatus)}>
-                          <span className="flex items-center gap-1">
-                            {getStatusIcon(payment.status as PaymentStatus)}
-                            {getPaymentStatusText(payment.status as PaymentStatus)}
-                          </span>
-                        </Badge>
-                      </td>
-                      <td className="px-4 py-3">
-                        <Badge variant="outline">{payment.provider}</Badge>
-                      </td>
-                      <td className="px-4 py-3 text-sm text-muted-foreground">
-                        {new Date(payment.createdAt).toLocaleDateString()}
-                      </td>
-                      <td className="px-4 py-3">
-                        {payment.status === 'PAID' && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                              setRefundPayment(payment);
-                              setRefundAmount(payment.amount);
-                              setRefundModalOpen(true);
-                            }}
-                          >
-                            <RefreshCw className="w-4 h-4 mr-1" />
-                            Refund
-                          </Button>
-                        )}
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline">{payment.provider}</Badge>
+                    </TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
+                      {new Date(payment.createdAt).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell>
+                      {payment.status === 'PAID' && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setRefundPayment(payment);
+                            setRefundAmount(payment.amount);
+                            setRefundModalOpen(true);
+                          }}
+                        >
+                          <RefreshCw className="w-4 h-4 mr-1" />
+                          Refund
+                        </Button>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+            {payments.length > 0 && (
+              <TableFooter>
+                <TableRow>
+                  <TableCell colSpan={5}>Current page total</TableCell>
+                  <TableCell className="text-right font-semibold">{formatMNT(currentPageTotal)}</TableCell>
+                  <TableCell />
+                </TableRow>
+              </TableFooter>
+            )}
+          </Table>
 
           {/* Pagination */}
           {totalPages > 1 && (

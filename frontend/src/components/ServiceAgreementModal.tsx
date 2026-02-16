@@ -1,6 +1,15 @@
 import { useMemo, useState } from 'react';
+import type { CheckedState } from '@radix-ui/react-checkbox';
 import { Loader2, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Field,
+  FieldContent,
+  FieldDescription,
+  FieldGroup,
+  FieldLabel,
+} from '@/components/ui/field';
 import { useSiteSettings } from '@/contexts/SiteSettingsContext';
 
 export type ServiceAgreementAcceptance = {
@@ -99,6 +108,7 @@ export default function ServiceAgreementModal({
   }, [agreementDate, contractNumber, fullName, email, phone, registry, address, serviceFeeText, agreementTemplate]);
 
   const canSubmit = agreeMain && agreeNoRefund && agreeDigital && !!applicant.name && !!applicant.email;
+  const resolveChecked = (value: CheckedState) => value === true;
 
   const handleAccept = async () => {
     if (!canSubmit) return;
@@ -145,18 +155,58 @@ export default function ServiceAgreementModal({
 
           <div className="rounded-xl border border-border p-4 space-y-3">
             <h3 className="font-semibold">Баталгаажуулалт</h3>
-            <label className="flex items-start gap-2">
-              <input type="checkbox" className="mt-1 h-4 w-4" checked={agreeMain} onChange={(e) => setAgreeMain(e.target.checked)} />
-              <span>Гэрээний бүх заалтыг уншиж, ойлгож, хүлээн зөвшөөрч байна.</span>
-            </label>
-            <label className="flex items-start gap-2">
-              <input type="checkbox" className="mt-1 h-4 w-4" checked={agreeNoRefund} onChange={(e) => setAgreeNoRefund(e.target.checked)} />
-              <span>Үйлчилгээ эхэлсний дараах буцаан олголтын нөхцөлийг (буцаагдахгүй) зөвшөөрч байна.</span>
-            </label>
-            <label className="flex items-start gap-2">
-              <input type="checkbox" className="mt-1 h-4 w-4" checked={agreeDigital} onChange={(e) => setAgreeDigital(e.target.checked)} />
-              <span>Цахим гарын үсэг / checkbox баталгаажуулалтыг хүчинтэйд тооцохыг зөвшөөрч байна.</span>
-            </label>
+            <FieldGroup className="gap-3">
+              <Field orientation="horizontal">
+                <Checkbox
+                  id="agreement-main"
+                  name="agreement-main"
+                  checked={agreeMain}
+                  onCheckedChange={(checked) => setAgreeMain(resolveChecked(checked))}
+                />
+                <FieldContent>
+                  <FieldLabel htmlFor="agreement-main">
+                    Гэрээний бүх заалтыг уншиж, ойлгож, хүлээн зөвшөөрч байна.
+                  </FieldLabel>
+                  <FieldDescription>
+                    Заалт бүрийг уншсан эсэхээ баталгаажуулсны дараа төлбөрийн шат руу шилжинэ.
+                  </FieldDescription>
+                </FieldContent>
+              </Field>
+
+              <Field orientation="horizontal">
+                <Checkbox
+                  id="agreement-no-refund"
+                  name="agreement-no-refund"
+                  checked={agreeNoRefund}
+                  onCheckedChange={(checked) => setAgreeNoRefund(resolveChecked(checked))}
+                />
+                <FieldContent>
+                  <FieldLabel htmlFor="agreement-no-refund">
+                    Үйлчилгээ эхэлсний дараах буцаан олголтын нөхцөлийг (буцаагдахгүй) зөвшөөрч байна.
+                  </FieldLabel>
+                  <FieldDescription>
+                    Виз олгох шийдвэр нь консулын байгууллагад хамаарах тул үйлчилгээний төлбөр буцаагдахгүй.
+                  </FieldDescription>
+                </FieldContent>
+              </Field>
+
+              <Field orientation="horizontal">
+                <Checkbox
+                  id="agreement-digital-signature"
+                  name="agreement-digital-signature"
+                  checked={agreeDigital}
+                  onCheckedChange={(checked) => setAgreeDigital(resolveChecked(checked))}
+                />
+                <FieldContent>
+                  <FieldLabel htmlFor="agreement-digital-signature">
+                    Цахим гарын үсэг / checkbox баталгаажуулалтыг хүчинтэйд тооцохыг зөвшөөрч байна.
+                  </FieldLabel>
+                  <FieldDescription>
+                    Баталгаажуулалтын цаг, IP, гэрээний хувилбар системд бүртгэгдэнэ.
+                  </FieldDescription>
+                </FieldContent>
+              </Field>
+            </FieldGroup>
 
             <div className="rounded-lg border border-border bg-muted/40 p-3">
               <p>Б тал: <strong>{fullName}</strong></p>

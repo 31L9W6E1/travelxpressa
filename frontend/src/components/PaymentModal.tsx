@@ -13,7 +13,8 @@ import {
   getServiceTypeName,
 } from '@/api/payments';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import { Item, ItemContent, ItemMedia, ItemTitle } from '@/components/ui/item';
+import { Spinner } from '@/components/ui/spinner';
 
 interface PaymentModalProps {
   isOpen: boolean;
@@ -167,9 +168,20 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
         <div className="p-6">
           {/* Loading State */}
           {step === 'loading' && (
-            <div className="flex flex-col items-center py-12">
-              <Loader2 className="w-12 h-12 animate-spin text-primary mb-4" />
-              <p className="text-muted-foreground">Creating payment...</p>
+            <div className="py-10">
+              <Item variant="muted" className="max-w-sm mx-auto [--radius:1rem]">
+                <ItemMedia>
+                  <Spinner className="size-5" />
+                </ItemMedia>
+                <ItemContent>
+                  <ItemTitle className="line-clamp-1">Processing payment...</ItemTitle>
+                </ItemContent>
+                <ItemContent className="flex-none justify-end">
+                  <span className="text-sm tabular-nums text-foreground">
+                    {formatMNT(amount ?? 0)}
+                  </span>
+                </ItemContent>
+              </Item>
             </div>
           )}
 
@@ -240,11 +252,21 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
               )}
 
               {/* Status Check */}
-              <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-                <Clock className="w-4 h-4 animate-pulse" />
-                <span>Waiting for payment...</span>
-                {checkingStatus && <Loader2 className="w-4 h-4 animate-spin" />}
-              </div>
+              <Item variant="muted" className="[--radius:1rem]">
+                <ItemMedia>
+                  {checkingStatus ? (
+                    <Spinner className="size-4" />
+                  ) : (
+                    <Clock className="w-4 h-4 text-muted-foreground animate-pulse" />
+                  )}
+                </ItemMedia>
+                <ItemContent>
+                  <ItemTitle className="line-clamp-1">Processing payment...</ItemTitle>
+                </ItemContent>
+                <ItemContent className="flex-none justify-end">
+                  <span className="text-sm tabular-nums">{formatMNT(payment.amount)}</span>
+                </ItemContent>
+              </Item>
 
               {/* Actions */}
               <div className="flex gap-3">

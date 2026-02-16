@@ -329,12 +329,10 @@ const Home = () => {
                       mode="range"
                       selected={appointmentRange}
                       onSelect={setAppointmentRange}
-                    defaultMonth={appointmentFrom}
-                    numberOfMonths={calendarMonths}
-                    captionLayout="label"
-                      className={`mx-auto w-full min-w-0 rounded-xl border border-border/80 bg-background/95 p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] [--cell-size:1.9rem] min-[390px]:[--cell-size:2.05rem] sm:p-3 sm:[--cell-size:2.2rem] ${
-                        calendarMonths > 1 ? "2xl:max-w-[760px]" : "max-w-[350px]"
-                      }`}
+                      defaultMonth={appointmentFrom}
+                      numberOfMonths={calendarMonths}
+                      captionLayout="label"
+                      className="w-full min-w-0 max-w-none rounded-xl border border-border/80 bg-background/95 p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] [--cell-size:1.9rem] min-[390px]:[--cell-size:2.05rem] sm:p-3 sm:[--cell-size:2.2rem]"
                       classNames={{
                         root: "w-full",
                         months:

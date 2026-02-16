@@ -665,68 +665,69 @@ const Navbar = () => {
         </div>
       </aside>
 
-      <header className="hidden md:flex fixed top-0 left-[var(--sidebar-width,240px)] right-0 z-30 h-16 bg-background/90 backdrop-blur-md border-b border-dashed border-border/70 px-6 items-center justify-between transition-[left] duration-300 relative">
-        <div className="flex min-w-0 items-center gap-3">
-          <button
-            type="button"
-            onClick={() => setIsSidebarCollapsed((prev) => !prev)}
-            className="h-9 w-9 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors flex items-center justify-center"
-            aria-label={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-            title={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-          >
-            {isSidebarCollapsed ? <PanelLeftOpen className="w-4 h-4" /> : <PanelLeftClose className="w-4 h-4" />}
-          </button>
+      <header className="hidden md:flex fixed top-0 left-[var(--sidebar-width,240px)] right-0 z-30 h-16 bg-background/90 backdrop-blur-md border-b border-dashed border-border/70 px-4 lg:px-6 transition-[left] duration-300">
+        <div className="relative mx-auto flex w-full max-w-7xl items-center gap-3">
+          <div className="z-10 flex min-w-0 flex-1 items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setIsSidebarCollapsed((prev) => !prev)}
+              className="h-9 w-9 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors flex items-center justify-center"
+              aria-label={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+              title={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+            >
+              {isSidebarCollapsed ? <PanelLeftOpen className="w-4 h-4" /> : <PanelLeftClose className="w-4 h-4" />}
+            </button>
 
-          <div className="min-w-0">
-            <Breadcrumb>
-              <BreadcrumbList className="flex-nowrap gap-2">
-                <BreadcrumbItem>
-                  {breadcrumbItems.length === 0 ? (
-                    <BreadcrumbPage>{t("nav.home", { defaultValue: "Home" })}</BreadcrumbPage>
-                  ) : (
-                    <BreadcrumbLink asChild>
-                      <Link to="/">{t("nav.home", { defaultValue: "Home" })}</Link>
-                    </BreadcrumbLink>
-                  )}
-                </BreadcrumbItem>
-                {breadcrumbItems.map((item, index) => {
-                  const isLast = index === breadcrumbItems.length - 1;
-                  return (
-                    <Fragment key={item.href}>
-                      <BreadcrumbSeparator />
-                      <BreadcrumbItem className="min-w-0 max-w-[180px]">
-                        {isLast ? (
-                          <BreadcrumbPage className="truncate">{item.label}</BreadcrumbPage>
-                        ) : (
-                          <BreadcrumbLink asChild>
-                            <Link to={item.href} className="truncate">
-                              {item.label}
-                            </Link>
-                          </BreadcrumbLink>
-                        )}
-                      </BreadcrumbItem>
-                    </Fragment>
-                  );
-                })}
-              </BreadcrumbList>
-            </Breadcrumb>
+            <div className="min-w-0">
+              <Breadcrumb>
+                <BreadcrumbList className="flex-nowrap gap-2">
+                  <BreadcrumbItem>
+                    {breadcrumbItems.length === 0 ? (
+                      <BreadcrumbPage>{t("nav.home", { defaultValue: "Home" })}</BreadcrumbPage>
+                    ) : (
+                      <BreadcrumbLink asChild>
+                        <Link to="/">{t("nav.home", { defaultValue: "Home" })}</Link>
+                      </BreadcrumbLink>
+                    )}
+                  </BreadcrumbItem>
+                  {breadcrumbItems.map((item, index) => {
+                    const isLast = index === breadcrumbItems.length - 1;
+                    return (
+                      <Fragment key={item.href}>
+                        <BreadcrumbSeparator />
+                        <BreadcrumbItem className="min-w-0 max-w-[180px]">
+                          {isLast ? (
+                            <BreadcrumbPage className="truncate">{item.label}</BreadcrumbPage>
+                          ) : (
+                            <BreadcrumbLink asChild>
+                              <Link to={item.href} className="truncate">
+                                {item.label}
+                              </Link>
+                            </BreadcrumbLink>
+                          )}
+                        </BreadcrumbItem>
+                      </Fragment>
+                    );
+                  })}
+                </BreadcrumbList>
+              </Breadcrumb>
+            </div>
           </div>
-        </div>
 
-        <Link
-          to="/"
-          className="absolute left-1/2 -translate-x-[54%] hidden lg:flex items-center justify-center"
-          aria-label="Visamn home"
-        >
-          <img
-            src={BRAND_LOGO_DOMAIN}
-            alt="visamn.com"
-            className="h-8 w-auto max-w-[240px] object-contain"
-            loading="eager"
-          />
-        </Link>
+          <Link
+            to="/"
+            className="absolute left-1/2 -translate-x-[54%] hidden xl:flex items-center justify-center"
+            aria-label="Visamn home"
+          >
+            <img
+              src={BRAND_LOGO_DOMAIN}
+              alt="visamn.com"
+              className="h-8 w-auto max-w-[240px] object-contain"
+              loading="eager"
+            />
+          </Link>
 
-        <div className="flex items-center gap-2">
+          <div className="z-10 ml-auto flex shrink-0 items-center gap-2">
           {user && (
             <div className="relative" ref={notificationDesktopRef}>
               <button
@@ -813,28 +814,30 @@ const Navbar = () => {
             )}
           </div>
         </div>
+        </div>
       </header>
 
-      <div className="md:hidden fixed top-0 left-0 right-0 z-50 h-16 bg-background/90 backdrop-blur-md border-b border-dashed border-border/70 px-4 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <button
-            className="p-2 rounded-lg text-foreground hover:bg-secondary transition-colors"
-            onClick={() => setIsMenuOpen((prev) => !prev)}
-            aria-label="Toggle menu"
-          >
-            {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
-          <Link to="/" className="flex items-center gap-2" onClick={closeMobileMenu}>
-            <img
-              src={BRAND_LOGO_TEXT}
-              alt="Visamn"
-              className="h-8 w-auto max-w-[170px] object-contain"
-              loading="eager"
-            />
-          </Link>
-        </div>
+      <div className="md:hidden fixed top-0 left-0 right-0 z-50 h-16 bg-background/90 backdrop-blur-md border-b border-dashed border-border/70 px-4">
+        <div className="mx-auto flex h-full w-full max-w-7xl items-center justify-between">
+          <div className="flex items-center gap-2">
+            <button
+              className="p-2 rounded-lg text-foreground hover:bg-secondary transition-colors"
+              onClick={() => setIsMenuOpen((prev) => !prev)}
+              aria-label="Toggle menu"
+            >
+              {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+            <Link to="/" className="flex items-center gap-2" onClick={closeMobileMenu}>
+              <img
+                src={BRAND_LOGO_TEXT}
+                alt="Visamn"
+                className="h-8 w-auto max-w-[170px] object-contain"
+                loading="eager"
+              />
+            </Link>
+          </div>
 
-        <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1">
           {user && (
             <div className="relative" ref={notificationMobileRef}>
               <button
@@ -905,6 +908,7 @@ const Navbar = () => {
               </div>
             )}
           </div>
+        </div>
         </div>
       </div>
 

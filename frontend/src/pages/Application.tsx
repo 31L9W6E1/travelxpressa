@@ -10,7 +10,6 @@ import {
   ChevronLeft,
   Check,
   Save,
-  Send,
   User,
   Phone,
   FileText,
@@ -2683,15 +2682,10 @@ export default function Application() {
                       <CheckCircle2 className="w-5 h-5" />
                       {t('applicationPage.buttons.submitted', { defaultValue: 'Submitted' })}
                     </>
-                  ) : PAYMENT_REQUIRED ? (
-                    <>
-                      <CreditCard className="w-5 h-5" />
-                      {t('applicationPage.buttons.paySubmit', { defaultValue: 'Pay & Submit' })}
-                    </>
                   ) : (
                     <>
-                      <Send className="w-5 h-5" />
-                      {t('applicationPage.buttons.submit', { defaultValue: 'Submit Application' })}
+                      <FileText className="w-5 h-5" />
+                      {t('applicationPage.buttons.reviewAgreement', { defaultValue: 'Continue to Agreement' })}
                     </>
                   )}
                 </button>

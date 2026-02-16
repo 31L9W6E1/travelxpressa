@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import { Fragment, useEffect, useRef, useState } from "react";
 import { UserAvatar } from "./UserAvatar";
+import NewsTicker from "./NewsTicker";
 import { useTranslation } from "react-i18next";
 import LanguageSwitcher from "./LanguageSwitcher";
 import api from "@/api/client";
@@ -906,6 +907,12 @@ const Navbar = () => {
           </div>
         </div>
       </div>
+
+      {settings.visibility.news && (
+        <div className="fixed top-16 left-0 right-0 md:left-[var(--sidebar-width,240px)] z-40 md:z-20 transition-[left] duration-300">
+          <NewsTicker />
+        </div>
+      )}
 
       {isMenuOpen && <div className="md:hidden fixed inset-0 z-40 bg-black/40" onClick={closeMobileMenu} />}
 

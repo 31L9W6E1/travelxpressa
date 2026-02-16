@@ -8,7 +8,6 @@ import { SiteSettingsProvider, useSiteSettings } from "./contexts/SiteSettingsCo
 import { Toaster } from "@/components/ui/sonner";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { useTranslation } from "react-i18next";
-import NewsTicker from "./components/NewsTicker";
 import PageViewTracker from "./components/PageViewTracker";
 import RouteSeo from "./components/seo/RouteSeo";
 
@@ -155,9 +154,6 @@ function AppRoutes() {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      {settings.visibility.news && (
-        <NewsTicker className="fixed top-16 left-0 right-0 md:left-[var(--sidebar-width,240px)] z-20" />
-      )}
       <PageViewTracker />
       <RouteSeo />
 

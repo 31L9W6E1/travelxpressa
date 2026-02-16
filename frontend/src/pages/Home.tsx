@@ -329,11 +329,11 @@ const Home = () => {
                       mode="range"
                       selected={appointmentRange}
                       onSelect={setAppointmentRange}
-                      defaultMonth={appointmentFrom}
-                      numberOfMonths={calendarMonths}
-                      captionLayout="label"
-                      className={`mx-auto w-full min-w-0 rounded-xl border border-border/80 bg-background/95 p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] [--cell-size:1.52rem] min-[360px]:[--cell-size:1.7rem] min-[390px]:[--cell-size:1.85rem] sm:p-3 sm:[--cell-size:2rem] ${
-                        calendarMonths > 1 ? "2xl:max-w-[760px]" : "max-w-[285px] min-[360px]:max-w-[315px] min-[390px]:max-w-[340px] sm:max-w-[360px]"
+                    defaultMonth={appointmentFrom}
+                    numberOfMonths={calendarMonths}
+                    captionLayout="label"
+                      className={`mx-auto w-full min-w-0 rounded-xl border border-border/80 bg-background/95 p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] [--cell-size:1.9rem] min-[390px]:[--cell-size:2.05rem] sm:p-3 sm:[--cell-size:2.2rem] ${
+                        calendarMonths > 1 ? "2xl:max-w-[760px]" : "max-w-[350px]"
                       }`}
                       classNames={{
                         root: "w-full",
@@ -343,8 +343,8 @@ const Home = () => {
                             : "flex flex-col gap-3",
                         month: "w-full",
                         table: "w-full",
-                        caption_label: "text-xs sm:text-sm font-semibold",
-                        weekday: "text-[0.62rem] min-[390px]:text-[0.68rem] sm:text-[0.75rem] font-medium",
+                        caption_label: "text-sm font-semibold",
+                        weekday: "text-[0.72rem] sm:text-[0.78rem] font-medium",
                       }}
                       modifiers={{ appointment: [appointmentFrom, appointmentTo] }}
                       modifiersClassNames={{

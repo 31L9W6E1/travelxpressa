@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate, useLocation, Link } from "react-router-dom";
 import { Suspense, lazy } from "react";
+import { HelmetProvider } from "react-helmet-async";
 import Navbar from "./components/Navbar";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
@@ -9,6 +10,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { useTranslation } from "react-i18next";
 import NewsTicker from "./components/NewsTicker";
 import PageViewTracker from "./components/PageViewTracker";
+import RouteSeo from "./components/seo/RouteSeo";
 
 const Home = lazy(() => import("./pages/Home"));
 const Test = lazy(() => import("./pages/Test"));
@@ -152,6 +154,7 @@ function AppRoutes() {
     <div className="min-h-screen bg-background">
       <Navbar />
       <PageViewTracker />
+      <RouteSeo />
 
       <main className="pt-16 md:pt-16 md:pl-[var(--sidebar-width,240px)] transition-[padding] duration-300">
         {settings.visibility.news && <NewsTicker />}
@@ -335,10 +338,12 @@ function App() {
     <ThemeProvider>
       <AuthProvider>
         <SiteSettingsProvider>
-          <BrowserRouter>
-            <Toaster position="top-right" richColors closeButton />
-            <AppRoutes />
-          </BrowserRouter>
+          <HelmetProvider>
+            <BrowserRouter>
+              <Toaster position="top-right" richColors closeButton />
+              <AppRoutes />
+            </BrowserRouter>
+          </HelmetProvider>
         </SiteSettingsProvider>
       </AuthProvider>
     </ThemeProvider>

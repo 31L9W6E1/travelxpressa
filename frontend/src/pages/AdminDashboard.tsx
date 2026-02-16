@@ -118,6 +118,7 @@ import PaymentAnalytics from "@/components/admin/PaymentAnalytics";
 import GalleryManager from "@/components/admin/GalleryManager";
 import ApplicationTracker from "@/components/admin/ApplicationTracker";
 import TranslationRequestsPanel from "@/components/admin/TranslationRequestsPanel";
+import SeoManager from "@/components/admin/SeoManager";
 
 interface UserData {
   id: string;
@@ -234,6 +235,7 @@ type AdminTab =
   | "tracking"
   | "payments"
   | "analytics"
+  | "seo"
   | "site"
   | "agreement"
   | "qna"
@@ -249,6 +251,7 @@ const getAdminTabFromSection = (section?: string): AdminTab => {
     case "tracking":
     case "payments":
     case "analytics":
+    case "seo":
     case "site":
     case "agreement":
     case "qna":
@@ -1097,6 +1100,10 @@ const AdminDashboard = () => {
             <TabsTrigger value="analytics" className="gap-2 whitespace-nowrap flex-none shrink-0">
               <TrendingUp className="w-4 h-4" />
               {t('dashboard.tabs.analytics', 'Analytics')}
+            </TabsTrigger>
+            <TabsTrigger value="seo" className="gap-2 whitespace-nowrap flex-none shrink-0">
+              <Search className="w-4 h-4" />
+              {t('dashboard.tabs.seo', 'SEO')}
             </TabsTrigger>
             <TabsTrigger value="site" className="gap-2 whitespace-nowrap flex-none shrink-0">
               <Globe className="w-4 h-4" />
@@ -1963,6 +1970,11 @@ const AdminDashboard = () => {
           {/* Analytics Tab */}
           <TabsContent value="analytics">
             <PaymentAnalytics />
+          </TabsContent>
+
+          {/* SEO Tab */}
+          <TabsContent value="seo">
+            <SeoManager />
           </TabsContent>
 
           {/* Site Tab */}

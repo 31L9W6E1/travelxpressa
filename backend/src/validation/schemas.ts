@@ -548,6 +548,109 @@ export const idParamSchema = z.object({
   id: z.string().min(1, 'ID is required'),
 });
 
+const safeUrlSchema = z
+  .string()
+  .trim()
+  .url('Must be a valid URL')
+  .max(2048, 'URL is too long')
+  .refine((value) => /^https?:\/\//i.test(value), {
+    message: 'Only http/https URLs are allowed',
+  });
+
+const safeSeoTextSchema = z
+  .string()
+  .trim()
+  .max(5000, 'Value is too long')
+  .refine((value) => !/<\s*script/gi.test(value), {
+    message: 'Script tags are not allowed',
+  })
+  .refine((value) => !/on\w+\s*=/gi.test(value), {
+    message: 'Inline event handlers are not allowed',
+  })
+  .refine((value) => !/javascript:/gi.test(value), {
+    message: 'javascript: URLs are not allowed',
+  });
+
+const optionalSafeSeoTextSchema = safeSeoTextSchema.optional().or(z.literal('')).transform((value) => {
+  const nextValue = (value || '').trim();
+  return nextValue || undefined;
+});
+
+const optionalSafeUrlSchema = safeUrlSchema.optional().or(z.literal('')).transform((value) => {
+  const nextValue = (value || '').trim();
+  return nextValue || undefined;
+});
+
+const sitemapChangefreqSchema = z.enum([
+  'always',
+  'hourly',
+  'daily',
+  'weekly',
+  'monthly',
+  'yearly',
+  'never',
+]);
+
+const twitterCardSchema = z.enum(['summary', 'summary_large_image', 'app', 'player']);
+
+export const seoSlugQuerySchema = z.object({
+  slug: z
+    .string()
+    .trim()
+    .min(1, 'Slug is required')
+    .max(200, 'Slug is too long')
+    .refine((value) => value.startsWith('/'), {
+      message: 'Slug must start with /',
+    }),
+});
+
+export const listSeoPagesQuerySchema = z.object({
+  q: z.string().trim().max(200).optional(),
+});
+
+export const createSeoPageSchema = z.object({
+  slug: z
+    .string()
+    .trim()
+    .min(1, 'Slug is required')
+    .max(200, 'Slug is too long')
+    .refine((value) => value.startsWith('/'), {
+      message: 'Slug must start with /',
+    }),
+  title: optionalSafeSeoTextSchema,
+  metaDescription: optionalSafeSeoTextSchema,
+  canonicalUrl: optionalSafeUrlSchema,
+  ogTitle: optionalSafeSeoTextSchema,
+  ogDescription: optionalSafeSeoTextSchema,
+  ogImage: optionalSafeUrlSchema,
+  twitterCard: twitterCardSchema.optional(),
+  twitterTitle: optionalSafeSeoTextSchema,
+  twitterDescription: optionalSafeSeoTextSchema,
+  twitterImage: optionalSafeUrlSchema,
+  noindex: z.boolean().optional().default(false),
+  jsonLdCustom: z.string().trim().max(50000).optional().or(z.literal('')).transform((value) => {
+    const nextValue = (value || '').trim();
+    return nextValue || undefined;
+  }),
+  sitemapPriority: z.number().min(0).max(1).optional().default(0.5),
+  sitemapChangefreq: sitemapChangefreqSchema.optional().default('weekly'),
+});
+
+export const updateSeoPageSchema = createSeoPageSchema
+  .omit({ slug: true })
+  .partial()
+  .extend({
+    slug: z
+      .string()
+      .trim()
+      .min(1, 'Slug is required')
+      .max(200, 'Slug is too long')
+      .refine((value) => value.startsWith('/'), {
+        message: 'Slug must start with /',
+      })
+      .optional(),
+  });
+
 // Type exports for use in route handlers
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
@@ -561,3 +664,5 @@ export type CreateApplicationInput = z.infer<typeof createApplicationSchema>;
 export type UpdateApplicationInput = z.infer<typeof updateApplicationSchema>;
 export type FlightSearchInput = z.infer<typeof flightSearchSchema>;
 export type PaginationInput = z.infer<typeof paginationSchema>;
+export type CreateSeoPageInput = z.infer<typeof createSeoPageSchema>;
+export type UpdateSeoPageInput = z.infer<typeof updateSeoPageSchema>;

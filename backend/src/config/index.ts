@@ -143,6 +143,9 @@ export const config = {
   features: {
     enable2FA: process.env.ENABLE_2FA === 'true',
     enableAgentMode: process.env.ENABLE_AGENT_MODE === 'true',
+    enableDynamicSeo: !['0', 'false', 'no', 'off'].includes(
+      (process.env.ENABLE_DYNAMIC_SEO || 'true').trim().toLowerCase()
+    ),
   },
 
   // QPay Payment Gateway

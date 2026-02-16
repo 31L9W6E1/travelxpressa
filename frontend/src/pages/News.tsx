@@ -7,6 +7,7 @@ import { normalizeImageUrl } from '@/api/upload';
 import { useTranslation } from 'react-i18next';
 import PageHeader from "@/components/PageHeader";
 import { CONTENT_TOPICS, matchesTopic } from '@/lib/contentTopics';
+import { Button } from '@/components/ui/button';
 
 const NEWS_HERO_IMAGE_URL =
   'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=1800&auto=format&fit=crop&q=80';
@@ -72,13 +73,12 @@ const News = () => {
         className="border-b-0"
       >
         <div className="space-y-4">
-          <Link
-            to="/"
-            className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            {t('common.backToHome', { defaultValue: 'Back to Home' })}
-          </Link>
+          <Button asChild size="sm" className="shadow-sm">
+            <Link to="/">
+              <ArrowLeft className="w-4 h-4" />
+              {t('common.backToHome', { defaultValue: 'Back to Home' })}
+            </Link>
+          </Button>
           <div className="flex flex-wrap items-center gap-2">
             {CONTENT_TOPICS.map((topic) => {
               const active = topic.id === selectedTopic;

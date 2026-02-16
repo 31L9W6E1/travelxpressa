@@ -330,3 +330,28 @@ model PostTranslation {
   @@unique([locale, slug])
   @@index([locale, status])
 }
+
+// Page-level SEO metadata
+model SeoPage {
+  id                  String   @id @default(cuid())
+  slug                String   @unique
+  title               String?
+  metaDescription     String?
+  canonicalUrl        String?
+  ogTitle             String?
+  ogDescription       String?
+  ogImage             String?
+  twitterCard         String?
+  twitterTitle        String?
+  twitterDescription  String?
+  twitterImage        String?
+  noindex             Boolean  @default(false)
+  jsonLdCustom        String?  @db.Text
+  sitemapPriority     Float    @default(0.5)
+  sitemapChangefreq   String   @default("weekly")
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@index([slug])
+  @@index([updatedAt])
+}

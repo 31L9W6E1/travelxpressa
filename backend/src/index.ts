@@ -25,6 +25,7 @@ import uploadRoutes from './routes/upload.routes';
 import paymentRoutes from './routes/payment.routes';
 import flightsRoutes from './routes/flights.routes';
 import siteRoutes from './routes/site.routes';
+import { adminSeoRoutes, publicSeoRoutes, seoInfraRoutes } from './routes/seo.routes';
 
 const app = express();
 
@@ -98,6 +99,9 @@ app.get('/health', (_req, res) => {
   });
 });
 
+// SEO infrastructure routes
+app.use(seoInfraRoutes);
+
 // Ready check endpoint (for Kubernetes)
 app.get('/ready', async (_req, res) => {
   try {
@@ -121,6 +125,8 @@ app.get('/ready', async (_req, res) => {
 if (config.isProduction) {
   app.use('/api/auth', authRateLimit, csrfProtection, authRoutes);
   app.use('/api/site', siteRoutes);
+  app.use('/api/admin/seo', apiRateLimit, adminSeoRoutes);
+  app.use('/api/seo', apiRateLimit, publicSeoRoutes);
   app.use('/api/applications', apiRateLimit, applicationRoutes);
   app.use('/api/admin', apiRateLimit, adminRoutes);
   app.use('/api/posts', apiRateLimit, postsRoutes);
@@ -135,6 +141,8 @@ if (config.isProduction) {
   // Development - no rate limiting
   app.use('/api/auth', csrfProtection, authRoutes);
   app.use('/api/site', siteRoutes);
+  app.use('/api/admin/seo', adminSeoRoutes);
+  app.use('/api/seo', publicSeoRoutes);
   app.use('/api/admin', adminRoutes);
   app.use('/api/applications', applicationRoutes);
   app.use('/api/posts', postsRoutes);

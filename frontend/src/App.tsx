@@ -41,6 +41,7 @@ const OAuthCallback = lazy(() => import("./pages/OAuthCallback"));
 const Feedback = lazy(() => import("./pages/Feedback"));
 const QAndA = lazy(() => import("./pages/QAndA"));
 const HelpCenter = lazy(() => import("./pages/HelpCenter"));
+const GuidedStart = lazy(() => import("./pages/GuidedStart"));
 const Flight = lazy(() => import("./pages/Flight"));
 const Insurance = lazy(() => import("./pages/Insurance"));
 const Maintenance = lazy(() => import("./pages/Maintenance"));
@@ -197,6 +198,7 @@ function AppRoutes() {
             <Route path="/faq" element={<VisibilityRoute enabled={settings.visibility.qAndA}><QAndA /></VisibilityRoute>} />
             <Route path="/help-center" element={<VisibilityRoute enabled={settings.visibility.helpCenter}><HelpCenter /></VisibilityRoute>} />
             <Route path="/helpcenter" element={<VisibilityRoute enabled={settings.visibility.helpCenter}><HelpCenter /></VisibilityRoute>} />
+            <Route path="/guide" element={<GuidedStart />} />
             <Route path="/flight" element={<VisibilityRoute enabled={settings.visibility.flight}><Flight /></VisibilityRoute>} />
             <Route path="/insurance" element={<VisibilityRoute enabled={settings.visibility.insurance}><Insurance /></VisibilityRoute>} />
             <Route path="/privacy" element={<PrivacyPolicy />} />

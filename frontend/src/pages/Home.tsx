@@ -272,6 +272,9 @@ const Home = () => {
                 >
                   <Link to="/learn-more">{t("home.hero.learnMore")}</Link>
                 </Button>
+                <Button asChild variant="ghost" size="lg" className="px-6 font-semibold">
+                  <Link to="/guide">{t("nav.guide", { defaultValue: "Step-by-step Guide" })}</Link>
+                </Button>
               </div>
               {!isInstalled && (
                 <p className="mt-3 text-sm text-muted-foreground">

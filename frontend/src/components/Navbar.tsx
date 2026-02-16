@@ -12,6 +12,7 @@ import {
   House,
   Image,
   Info,
+  ListChecks,
   Languages,
   LogOut,
   Menu,
@@ -452,6 +453,7 @@ const Navbar = () => {
     "contactsupport": t("nav.support", { defaultValue: "Support" }),
     "select-country": t("nav.apply", { defaultValue: "Apply" }),
     ready: t("ready.pageTitle", { defaultValue: "Ready" }),
+    guide: t("nav.guide", { defaultValue: "Guide" }),
   };
   const toTitleCase = (value: string) =>
     value
@@ -508,6 +510,10 @@ const Navbar = () => {
           <Link to="/" className={desktopLinkClass} title={t("nav.home", { defaultValue: "Home" })}>
             <House className="w-4 h-4 shrink-0" />
             {!isSidebarCollapsed && <span>{t("nav.home", { defaultValue: "Home" })}</span>}
+          </Link>
+          <Link to="/guide" className={desktopLinkClass} title={t("nav.guide", { defaultValue: "Guide" })}>
+            <ListChecks className="w-4 h-4 shrink-0" />
+            {!isSidebarCollapsed && <span>{t("nav.guide", { defaultValue: "Guide" })}</span>}
           </Link>
 
           {settings.visibility.about && (
@@ -922,6 +928,10 @@ const Navbar = () => {
           <Link to="/" className={mobileLinkClass} onClick={closeMobileMenu}>
             <House className="w-4 h-4 shrink-0" />
             <span>{t("nav.home", { defaultValue: "Home" })}</span>
+          </Link>
+          <Link to="/guide" className={mobileLinkClass} onClick={closeMobileMenu}>
+            <ListChecks className="w-4 h-4 shrink-0" />
+            <span>{t("nav.guide", { defaultValue: "Guide" })}</span>
           </Link>
 
           {settings.visibility.about && (

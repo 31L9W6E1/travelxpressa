@@ -129,9 +129,14 @@ const Blog = () => {
             <>
               <div className="grid grid-cols-2 min-[500px]:grid-cols-3 md:grid-cols-4 gap-2 md:gap-6">
                 {filteredPosts.map((post) => (
-                  <article key={post.id} className="group">
-                    <Link to={`/blog/${post.slug}`} className="block">
-                      <div className="relative aspect-square overflow-hidden rounded-lg mb-2 md:mb-3">
+                  <article
+                    key={post.id}
+                    className="group relative overflow-hidden rounded-2xl border border-primary/25 bg-gradient-to-br from-primary/15 via-background to-background shadow-sm transition-colors duration-200 hover:border-primary/45"
+                  >
+                    <div className="pointer-events-none absolute -top-7 -right-7 h-16 w-16 rounded-full bg-primary/15 blur-xl" />
+                    <div className="pointer-events-none absolute -bottom-8 -left-8 h-16 w-16 rounded-full bg-primary/10 blur-xl" />
+                    <Link to={`/blog/${post.slug}`} className="relative block p-2 md:p-3">
+                      <div className="relative aspect-square overflow-hidden rounded-xl border border-primary/20 mb-2 md:mb-3">
                         <img
                           src={post.imageUrl ? normalizeImageUrl(post.imageUrl) : getDefaultImage('blog')}
                           alt={post.title}

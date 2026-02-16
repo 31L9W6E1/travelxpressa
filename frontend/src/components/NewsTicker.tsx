@@ -3,8 +3,9 @@ import { Link } from "react-router-dom";
 import { getPosts } from "@/api/posts";
 import type { PostSummary } from "@/api/posts";
 import { useTranslation } from "react-i18next";
+import { cn } from "@/lib/utils";
 
-export default function NewsTicker() {
+export default function NewsTicker({ className }: { className?: string }) {
   const { t, i18n } = useTranslation();
   const [items, setItems] = useState<PostSummary[]>([]);
 
@@ -60,7 +61,12 @@ export default function NewsTicker() {
   const tickerLoop = [...tickerItems, ...tickerItems];
 
   return (
-    <section className="ticker-bar fixed top-16 left-0 right-0 md:left-[var(--sidebar-width,240px)] z-20 h-10 border-b border-dashed border-border/70">
+    <section
+      className={cn(
+        "ticker-bar h-10 border-b border-dashed border-border/70",
+        className
+      )}
+    >
       <div className="ticker-wrapper h-full">
         <div className="animate-ticker h-full items-center gap-10 pr-10">
           {tickerLoop.map((item, index) => (

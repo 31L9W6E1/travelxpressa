@@ -155,11 +155,13 @@ function AppRoutes() {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
+      {settings.visibility.news && (
+        <NewsTicker className="fixed top-16 left-0 right-0 md:left-[var(--sidebar-width,240px)] z-20" />
+      )}
       <PageViewTracker />
       <RouteSeo />
 
       <main className={`${mainTopPaddingClass} md:pl-[var(--sidebar-width,240px)] transition-[padding] duration-300`}>
-        {settings.visibility.news && <NewsTicker />}
         <Suspense
           fallback={
             <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center text-muted-foreground">

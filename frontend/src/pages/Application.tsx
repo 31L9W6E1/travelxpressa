@@ -1085,55 +1085,10 @@ export default function Application() {
   const handleAgreementAccepted = (agreement: ServiceAgreementAcceptance) => {
     setAgreementAcceptance(agreement);
     setShowAgreementModal(false);
-
-    const targetApplicationId = pendingSubmissionId || applicationId;
-    if (!targetApplicationId) {
-      toast.error(t('applicationPage.toasts.submitFailed.title', { defaultValue: 'Submission failed' }), {
-        description: t('applicationPage.toasts.missingId', {
-          defaultValue: 'Missing application ID. Please refresh and try again.',
-        }),
-      });
-      return;
-    }
-
-    if (PAYMENT_REQUIRED) {
-      setShowPaymentModal(true);
-      return;
-    }
-
-    setIsSubmitting(true);
-    void (async () => {
-      try {
-        await applicationsApi.submit(targetApplicationId);
-        localStorage.removeItem(LOCAL_DRAFT_SNAPSHOT_KEY);
-        setPendingSubmissionId(null);
-        setPaymentComplete(true);
-        toast.success(t('applicationPage.toasts.submitted.title', { defaultValue: 'Application submitted!' }), {
-          description: t('applicationPage.toasts.submitted.description', {
-            defaultValue: 'Your application has been submitted for review.',
-          }),
-          duration: 5000,
-        });
-        setTimeout(() => {
-          navigate('/profile');
-        }, 1500);
-      } catch (error: any) {
-        const errorMessage =
-          error?.message ||
-          t('applicationPage.toasts.saveFailed.description', {
-            defaultValue: 'Failed to save application. Please try again.',
-          });
-        setSaveError(errorMessage);
-        toast.error(t('applicationPage.toasts.submitFailed.title', { defaultValue: 'Submission failed' }), {
-          description: errorMessage,
-        });
-      } finally {
-        setIsSubmitting(false);
-      }
-    })();
+    void handleSubmit(agreement);
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (acceptedAgreement?: ServiceAgreementAcceptance) => {
     // Validate all steps before submission
     for (let step = 1; step <= 7; step++) {
       if (!validateStep(step)) {
@@ -1146,6 +1101,12 @@ export default function Application() {
         });
         return;
       }
+    }
+
+    // Always require explicit agreement acceptance right before final submit.
+    if (!acceptedAgreement) {
+      setShowAgreementModal(true);
+      return;
     }
 
     setIsSubmitting(true);
@@ -1166,9 +1127,24 @@ export default function Application() {
       await applicationsApi.update(appId, apiData);
       saveLocalSnapshot(appId, 7, formData);
       setPendingSubmissionId(appId);
-      // Always show agreement right before final submission.
-      setAgreementAcceptance(null);
-      setShowAgreementModal(true);
+
+      if (PAYMENT_REQUIRED) {
+        setShowPaymentModal(true);
+      } else {
+        await applicationsApi.submit(appId);
+        localStorage.removeItem(LOCAL_DRAFT_SNAPSHOT_KEY);
+        setPendingSubmissionId(null);
+        setPaymentComplete(true);
+        toast.success(t('applicationPage.toasts.submitted.title', { defaultValue: 'Application submitted!' }), {
+          description: t('applicationPage.toasts.submitted.description', {
+            defaultValue: 'Your application has been submitted for review.',
+          }),
+          duration: 5000,
+        });
+        setTimeout(() => {
+          navigate('/profile');
+        }, 1500);
+      }
     } catch (error: any) {
       console.error('Submit error:', error);
       const errorMessage =
@@ -2693,7 +2669,7 @@ export default function Application() {
                 </button>
               ) : (
                 <button
-                  onClick={handleSubmit}
+                  onClick={() => void handleSubmit()}
                   disabled={isSubmitting || paymentComplete}
                   className="flex items-center justify-center gap-2 w-full sm:w-auto px-4 sm:px-6 py-3 bg-primary text-primary-foreground rounded-lg font-semibold hover:bg-primary/90 transition-all disabled:opacity-50"
                 >
@@ -2726,40 +2702,36 @@ export default function Application() {
         </div>
       </div>
 
-      {(applicationId || pendingSubmissionId) && (
-        <>
-          <ServiceAgreementModal
-            isOpen={showAgreementModal}
-            onClose={() => setShowAgreementModal(false)}
-            onAccept={handleAgreementAccepted}
-            applicationId={pendingSubmissionId || applicationId || ''}
-            serviceFeeMnt={serviceFeeAmountMnt}
-            applicant={{
-              name:
-                `${formData.personalInfo.surnames} ${formData.personalInfo.givenNames}`.trim() ||
-                user?.name ||
-                '',
-              email: formData.contactInfo.email || user?.email || '',
-              phone: formData.contactInfo.phone || user?.phone || '',
-              registry: formData.personalInfo.nationalId || '',
-              address:
-                `${formData.contactInfo.streetAddress} ${formData.contactInfo.city} ${formData.contactInfo.state}`.trim(),
-            }}
-          />
+      <ServiceAgreementModal
+        isOpen={showAgreementModal}
+        onClose={() => setShowAgreementModal(false)}
+        onAccept={handleAgreementAccepted}
+        applicationId={pendingSubmissionId || applicationId || ''}
+        serviceFeeMnt={serviceFeeAmountMnt}
+        applicant={{
+          name:
+            `${formData.personalInfo.surnames} ${formData.personalInfo.givenNames}`.trim() ||
+            user?.name ||
+            '',
+          email: formData.contactInfo.email || user?.email || '',
+          phone: formData.contactInfo.phone || user?.phone || '',
+          registry: formData.personalInfo.nationalId || '',
+          address:
+            `${formData.contactInfo.streetAddress} ${formData.contactInfo.city} ${formData.contactInfo.state}`.trim(),
+        }}
+      />
 
-          {PAYMENT_REQUIRED && (pendingSubmissionId || applicationId) && (
-            <PaymentModal
-              isOpen={showPaymentModal}
-              onClose={() => setShowPaymentModal(false)}
-              applicationId={pendingSubmissionId || applicationId || ''}
-              serviceType="VISA_APPLICATION"
-              amount={serviceFeeAmountMnt}
-              agreement={agreementAcceptance || undefined}
-              description={`${t('applicationPage.title', { defaultValue: 'DS-160 Visa Application' })} - ${formData.personalInfo.surnames} ${formData.personalInfo.givenNames}`}
-              onPaymentSuccess={handlePaymentSuccess}
-            />
-          )}
-        </>
+      {PAYMENT_REQUIRED && (pendingSubmissionId || applicationId) && (
+        <PaymentModal
+          isOpen={showPaymentModal}
+          onClose={() => setShowPaymentModal(false)}
+          applicationId={pendingSubmissionId || applicationId || ''}
+          serviceType="VISA_APPLICATION"
+          amount={serviceFeeAmountMnt}
+          agreement={agreementAcceptance || undefined}
+          description={`${t('applicationPage.title', { defaultValue: 'DS-160 Visa Application' })} - ${formData.personalInfo.surnames} ${formData.personalInfo.givenNames}`}
+          onPaymentSuccess={handlePaymentSuccess}
+        />
       )}
     </div>
   );

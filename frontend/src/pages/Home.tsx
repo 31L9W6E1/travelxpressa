@@ -87,7 +87,7 @@ const Home = () => {
   const [deferredInstallPrompt, setDeferredInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isInstalled, setIsInstalled] = useState(false);
   const [isIosInstallable, setIsIosInstallable] = useState(false);
-  const [calendarMonths, setCalendarMonths] = useState(2);
+  const [calendarMonths, setCalendarMonths] = useState(1);
   const appointmentDefaultRange = useMemo<DateRange>(() => {
     const now = new Date();
     const day = Math.min(now.getDate(), 26);
@@ -107,7 +107,7 @@ const Home = () => {
     }).format(date);
 
   const appointmentFrom = appointmentRange?.from ?? appointmentDefaultRange.from ?? new Date();
-  const appointmentTo = appointmentRange?.to ?? appointmentDefaultRange.to ?? addDays(appointmentFrom, 30);
+  const appointmentTo = appointmentRange?.to ?? addDays(appointmentFrom, 30);
   const monthFormatter = new Intl.DateTimeFormat(i18n.language, { month: "long" });
   const appointmentMonthRange = `${monthFormatter.format(appointmentFrom)} - ${monthFormatter.format(
     appointmentTo
@@ -171,8 +171,8 @@ const Home = () => {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    const mediaQuery = window.matchMedia("(max-width: 640px)");
-    const syncMonths = () => setCalendarMonths(mediaQuery.matches ? 1 : 2);
+    const mediaQuery = window.matchMedia("(min-width: 1280px)");
+    const syncMonths = () => setCalendarMonths(mediaQuery.matches ? 2 : 1);
     syncMonths();
 
     if (typeof mediaQuery.addEventListener === "function") {
@@ -252,7 +252,7 @@ const Home = () => {
       {/* Hero */}
       <section className="py-8 md:py-10 border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="grid gap-7 lg:grid-cols-[minmax(0,1fr)_minmax(320px,390px)] items-start">
+          <div className="grid gap-7 lg:grid-cols-[minmax(0,1fr)_minmax(320px,430px)] xl:grid-cols-[minmax(0,1fr)_minmax(320px,700px)] items-start">
             <div className="max-w-3xl">
               <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight mb-4 leading-[1.1]">
                 {t("home.hero.titleLine1")}
@@ -331,17 +331,15 @@ const Home = () => {
                     defaultMonth={appointmentFrom}
                     numberOfMonths={calendarMonths}
                     captionLayout="label"
-                    className="mx-auto w-full rounded-xl border border-border/80 bg-background/95 p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] [--cell-size:1.9rem] sm:max-w-[360px] sm:p-3 sm:[--cell-size:2.15rem]"
+                    className={`mx-auto w-full rounded-xl border border-border/80 bg-background/95 p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] [--cell-size:1.9rem] sm:p-3 sm:[--cell-size:2.15rem] ${
+                      calendarMonths > 1 ? "xl:max-w-[680px]" : "max-w-[320px] sm:max-w-[360px]"
+                    }`}
                     classNames={{
                       root: "w-full",
-                      months: "flex flex-col gap-3",
                       month: "w-full",
                       table: "w-full",
-                      nav: "top-1",
-                      month_caption: "mb-1",
                       caption_label: "text-sm font-semibold",
                       weekday: "text-[0.65rem] sm:text-[0.75rem] font-medium",
-                      week: "mt-1.5 sm:mt-2",
                     }}
                     modifiers={{ appointment: [appointmentFrom, appointmentTo] }}
                     modifiersClassNames={{

@@ -1166,26 +1166,9 @@ export default function Application() {
       await applicationsApi.update(appId, apiData);
       saveLocalSnapshot(appId, 7, formData);
       setPendingSubmissionId(appId);
-
-      if (!agreementAcceptance) {
-        setShowAgreementModal(true);
-      } else if (PAYMENT_REQUIRED) {
-        setShowPaymentModal(true);
-      } else {
-        await applicationsApi.submit(appId);
-        localStorage.removeItem(LOCAL_DRAFT_SNAPSHOT_KEY);
-        setPendingSubmissionId(null);
-        setPaymentComplete(true);
-        toast.success(t('applicationPage.toasts.submitted.title', { defaultValue: 'Application submitted!' }), {
-          description: t('applicationPage.toasts.submitted.description', {
-            defaultValue: 'Your application has been submitted for review.',
-          }),
-          duration: 5000,
-        });
-        setTimeout(() => {
-          navigate('/profile');
-        }, 1500);
-      }
+      // Always show agreement right before final submission.
+      setAgreementAcceptance(null);
+      setShowAgreementModal(true);
     } catch (error: any) {
       console.error('Submit error:', error);
       const errorMessage =
@@ -2619,21 +2602,21 @@ export default function Application() {
           <div className="pointer-events-none absolute -bottom-8 -left-8 h-16 w-16 rounded-full bg-primary/10 blur-xl" />
           <div className="relative">
           <div className="overflow-x-auto pb-2">
-            <div className="inline-flex items-center min-w-max px-1">
+            <div className="flex items-start min-w-max md:min-w-0 md:w-full md:justify-between px-1">
               {steps.map((step, index) => (
                 <div key={step.id} className="flex items-center">
                   <div className="flex flex-col items-center">
-                    <div className={`flex items-center justify-center w-10 h-10 md:w-12 md:h-12 rounded-full border-2 transition-all ${
+                    <div className={`flex items-center justify-center w-8 h-8 md:w-10 md:h-10 rounded-full border-2 transition-all ${
                       step.status === 'completed'
                         ? 'bg-primary border-primary text-primary-foreground'
                         : step.status === 'current'
                         ? 'bg-primary/20 border-primary text-foreground'
                         : 'bg-muted border-border text-muted-foreground'
                     }`}>
-                      {step.status === 'completed' ? <Check className="w-5 h-5 md:w-6 md:h-6" /> : step.icon}
+                      {step.status === 'completed' ? <Check className="w-4 h-4 md:w-5 md:h-5" /> : step.icon}
                     </div>
                     <span
-                      className={`mt-2 w-16 text-center text-[10px] md:text-xs font-medium ${
+                      className={`mt-1 w-11 md:w-14 text-center text-[9px] md:text-[10px] leading-tight line-clamp-2 font-medium ${
                         step.status === 'current' ? 'text-foreground' : 'text-muted-foreground'
                       }`}
                     >
@@ -2641,7 +2624,7 @@ export default function Application() {
                     </span>
                   </div>
                   {index < steps.length - 1 && (
-                    <div className={`w-10 sm:w-14 md:w-24 h-1 mx-2 rounded ${
+                    <div className={`w-4 sm:w-6 md:w-10 h-0.5 mx-1.5 md:mx-2 rounded ${
                       step.status === 'completed' ? 'bg-primary' : 'bg-border'
                     }`} />
                   )}

@@ -235,6 +235,8 @@ export default function Application() {
   const [paymentComplete, setPaymentComplete] = useState(false);
   const [isRestoringDraft, setIsRestoringDraft] = useState(false);
   const PAYMENT_REQUIRED = String(import.meta.env.VITE_REQUIRE_PAYMENT || 'false').toLowerCase() === 'true';
+  const premiumPanelClass =
+    'group relative overflow-hidden rounded-2xl border border-primary/25 bg-gradient-to-br from-primary/15 via-background to-background shadow-sm transition-colors duration-200 hover:border-primary/45';
 
   // Get selected country from localStorage (set in CountrySelect page)
   // Note: Korea is currently not offered, so fall back to USA if it was previously selected.
@@ -2224,7 +2226,7 @@ export default function Application() {
               )}
 
               {/* Personal Info Summary */}
-              <div className="bg-muted/50 border border-border rounded-xl p-6">
+              <div className="rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/10 via-background to-background p-6">
                 <h4 className="text-lg font-medium text-foreground mb-4 flex items-center gap-2">
                   <User className="w-5 h-5" />
                   {t('form.personal.title', { defaultValue: 'Personal Information' })}
@@ -2262,7 +2264,7 @@ export default function Application() {
               </div>
 
               {/* Contact Info Summary */}
-              <div className="bg-muted/50 border border-border rounded-xl p-6">
+              <div className="rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/10 via-background to-background p-6">
                 <h4 className="text-lg font-medium text-foreground mb-4 flex items-center gap-2">
                   <Phone className="w-5 h-5" />
                   {t('form.contact.title', { defaultValue: 'Contact Information' })}
@@ -2292,7 +2294,7 @@ export default function Application() {
               </div>
 
               {/* Passport Summary */}
-              <div className="bg-muted/50 border border-border rounded-xl p-6">
+              <div className="rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/10 via-background to-background p-6">
                 <h4 className="text-lg font-medium text-foreground mb-4 flex items-center gap-2">
                   <FileText className="w-5 h-5" />
                   {t('form.passport.title', { defaultValue: 'Passport Information' })}
@@ -2326,7 +2328,7 @@ export default function Application() {
               </div>
 
               {/* Travel Summary */}
-              <div className="bg-muted/50 border border-border rounded-xl p-6">
+              <div className="rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/10 via-background to-background p-6">
                 <h4 className="text-lg font-medium text-foreground mb-4 flex items-center gap-2">
                   <Plane className="w-5 h-5" />
                   {t('form.travel.title', { defaultValue: 'Travel Plans' })}
@@ -2381,7 +2383,7 @@ export default function Application() {
               </div>
 
               {/* Family Summary */}
-              <div className="bg-muted/50 border border-border rounded-xl p-6">
+              <div className="rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/10 via-background to-background p-6">
                 <h4 className="text-lg font-medium text-foreground mb-4 flex items-center gap-2">
                   <Users className="w-5 h-5" />
                   {t('form.family.title', { defaultValue: 'Family Information' })}
@@ -2563,7 +2565,10 @@ export default function Application() {
         )}
 
         {/* Progress Steps */}
-        <div className="mb-8">
+        <div className={`mb-8 p-4 sm:p-5 ${premiumPanelClass}`}>
+          <div className="pointer-events-none absolute -top-7 -right-7 h-16 w-16 rounded-full bg-primary/15 blur-xl" />
+          <div className="pointer-events-none absolute -bottom-8 -left-8 h-16 w-16 rounded-full bg-primary/10 blur-xl" />
+          <div className="relative">
           <div className="overflow-x-auto pb-2">
             <div className="inline-flex items-center min-w-max px-1">
               {steps.map((step, index) => (
@@ -2602,10 +2607,14 @@ export default function Application() {
               total: steps.length,
             })}
           </p>
+          </div>
         </div>
 
         {/* Form Content */}
-        <div className="bg-card border border-border rounded-2xl p-4 sm:p-6 md:p-8">
+        <div className={`${premiumPanelClass} p-4 sm:p-6 md:p-8`}>
+          <div className="pointer-events-none absolute -top-7 -right-7 h-16 w-16 rounded-full bg-primary/15 blur-xl" />
+          <div className="pointer-events-none absolute -bottom-8 -left-8 h-16 w-16 rounded-full bg-primary/10 blur-xl" />
+          <div className="relative">
           {renderStepContent()}
 
           {/* Navigation Buttons */}
@@ -2680,6 +2689,7 @@ export default function Application() {
                 </button>
               )}
             </div>
+          </div>
           </div>
         </div>
       </div>

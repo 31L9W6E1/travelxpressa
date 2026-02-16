@@ -196,6 +196,13 @@ const ReadyToBegin = () => {
     return documentName;
   };
 
+  const premiumCardClass =
+    "group relative overflow-hidden rounded-2xl border border-primary/25 bg-gradient-to-br from-primary/15 via-background to-background shadow-sm transition-colors duration-200 hover:border-primary/45";
+  const premiumGlowClass =
+    "pointer-events-none absolute -top-7 -right-7 h-16 w-16 rounded-full bg-primary/15 blur-xl";
+  const premiumGlowBottomClass =
+    "pointer-events-none absolute -bottom-8 -left-8 h-16 w-16 rounded-full bg-primary/10 blur-xl";
+
   const toDisplayCurrency = (amount: number, fromCurrency: string): string => {
     const rounded = Math.round(amount);
     if (!isFxCurrencySupported(fromCurrency) || !isFxCurrencySupported(displayCurrency)) {
@@ -260,18 +267,29 @@ const ReadyToBegin = () => {
         <section className="py-6 border-b border-border">
           <div className="max-w-6xl mx-auto px-4 sm:px-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="flex items-center gap-3 p-4 bg-secondary rounded-xl">
-                <Clock className="w-5 h-5 text-muted-foreground" />
-                <div>
+              <div className={`${premiumCardClass} p-4`}>
+                <div className={premiumGlowClass} />
+                <div className={premiumGlowBottomClass} />
+                <div className="relative flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
+                    <Clock className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
                   <p className="text-xs text-muted-foreground">
                     {t("readyPage.info.processingTime", { defaultValue: "Processing Time" })}
                   </p>
                   <p className="font-medium text-foreground text-sm">{selectedCountry.processingTimeline}</p>
                 </div>
               </div>
-              <div className="flex items-center gap-3 p-4 bg-secondary rounded-xl">
-                <DollarSign className="w-5 h-5 text-muted-foreground" />
-                <div>
+              </div>
+              <div className={`${premiumCardClass} p-4`}>
+                <div className={premiumGlowClass} />
+                <div className={premiumGlowBottomClass} />
+                <div className="relative flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
+                    <DollarSign className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
                   <p className="text-xs text-muted-foreground">
                     {t("readyPage.info.visaFee", { defaultValue: "Visa Fee" })}
                   </p>
@@ -290,9 +308,15 @@ const ReadyToBegin = () => {
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-3 p-4 bg-secondary rounded-xl">
-                <Users className="w-5 h-5 text-muted-foreground" />
-                <div>
+              </div>
+              <div className={`${premiumCardClass} p-4`}>
+                <div className={premiumGlowClass} />
+                <div className={premiumGlowBottomClass} />
+                <div className="relative flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
+                    <Users className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
                   <p className="text-xs text-muted-foreground">
                     {t("readyPage.info.interviewRequired", { defaultValue: "Interview Required" })}
                   </p>
@@ -303,6 +327,7 @@ const ReadyToBegin = () => {
                   </p>
                 </div>
               </div>
+              </div>
             </div>
           </div>
         </section>
@@ -311,9 +336,13 @@ const ReadyToBegin = () => {
       {/* Important Notice */}
       <section className="py-8 border-b border-border">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="bg-secondary border border-border rounded-xl p-6">
-            <div className="flex items-start gap-4">
-              <AlertTriangle className="w-6 h-6 text-foreground flex-shrink-0 mt-0.5" />
+          <div className={`${premiumCardClass} p-6`}>
+            <div className={premiumGlowClass} />
+            <div className={premiumGlowBottomClass} />
+            <div className="relative flex items-start gap-4">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center flex-shrink-0">
+                <AlertTriangle className="w-5 h-5 text-primary" />
+              </div>
               <div>
                 <h4 className="font-semibold text-foreground mb-1">
                   {t("readyPage.notice.title", { defaultValue: "Important Notice" })}
@@ -345,11 +374,13 @@ const ReadyToBegin = () => {
               return (
                 <div
                   key={index}
-                  className="bg-card hover:bg-secondary border border-border hover:border-muted-foreground rounded-xl p-4 md:p-6 transition-all"
+                  className={`${premiumCardClass} p-4 md:p-6`}
                 >
-                  <div className="flex items-center gap-4 mb-4">
-                    <div className="p-3 bg-secondary rounded-lg">
-                      <IconComponent className="w-5 h-5 text-foreground" />
+                  <div className={premiumGlowClass} />
+                  <div className={premiumGlowBottomClass} />
+                  <div className="relative flex items-center gap-4 mb-4">
+                    <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center">
+                      <IconComponent className="w-5 h-5 text-primary" />
                     </div>
                     <div>
                       <span className="text-xs text-muted-foreground">
@@ -382,10 +413,14 @@ const ReadyToBegin = () => {
             {selectedCountry?.requiredDocuments.map((doc, index) => (
               <div
                 key={index}
-                className="flex items-start gap-3 p-4 bg-card border border-border rounded-lg hover:bg-secondary transition-colors"
+                className={`${premiumCardClass} p-4`}
               >
-                <div className="w-5 h-5 border-2 border-border rounded flex-shrink-0 mt-0.5" />
-                <span className="text-muted-foreground text-sm">{getLocalizedDocumentName(doc)}</span>
+                <div className={premiumGlowClass} />
+                <div className={premiumGlowBottomClass} />
+                <div className="relative flex items-start gap-3">
+                  <div className="w-5 h-5 border-2 border-primary/30 rounded flex-shrink-0 mt-0.5" />
+                  <span className="text-muted-foreground text-sm">{getLocalizedDocumentName(doc)}</span>
+                </div>
               </div>
             ))}
           </div>
@@ -395,7 +430,10 @@ const ReadyToBegin = () => {
       {/* CTA Section */}
       <section className="py-20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
-          <div className="bg-secondary border border-border rounded-2xl p-12">
+          <div className={`${premiumCardClass} p-8 md:p-12`}>
+            <div className={premiumGlowClass} />
+            <div className={premiumGlowBottomClass} />
+            <div className="relative">
             <h2 className="text-3xl font-bold mb-4">
               {t("readyPage.cta.title", { defaultValue: "Ready to Begin?" })}
             </h2>
@@ -435,6 +473,7 @@ const ReadyToBegin = () => {
                 <FileText className="w-4 h-4" />
                 {t("readyPage.cta.badges.autoSaveEnabled", { defaultValue: "Auto-save enabled" })}
               </span>
+            </div>
             </div>
           </div>
         </div>

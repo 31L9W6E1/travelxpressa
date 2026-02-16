@@ -9,6 +9,8 @@ const CountrySelect = () => {
   const navigate = useNavigate();
   const [selectedCountry, setSelectedCountry] = useState<CountryCode | null>(null);
   const [hoveredCountry, setHoveredCountry] = useState<string | null>(null);
+  const premiumCardClass =
+    'group relative overflow-hidden rounded-2xl border border-primary/25 bg-gradient-to-br from-primary/15 via-background to-background shadow-sm transition-colors duration-200 hover:border-primary/45';
 
   const handleContinue = () => {
     if (selectedCountry) {
@@ -23,8 +25,10 @@ const CountrySelect = () => {
       <div className="max-w-4xl mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-12">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-secondary rounded-full mb-6">
-            <Globe className="w-8 h-8 text-foreground" />
+          <div className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-6 ${premiumCardClass}`}>
+            <div className="pointer-events-none absolute -top-7 -right-7 h-16 w-16 rounded-full bg-primary/15 blur-xl" />
+            <div className="pointer-events-none absolute -bottom-8 -left-8 h-16 w-16 rounded-full bg-primary/10 blur-xl" />
+            <Globe className="relative z-[1] w-8 h-8 text-primary" />
           </div>
           <h1 className="text-3xl md:text-4xl font-bold mb-4">{t('selectCountry.title')}</h1>
           <p className="text-base md:text-xl text-muted-foreground max-w-2xl mx-auto">
@@ -45,31 +49,33 @@ const CountrySelect = () => {
                 onMouseEnter={() => setHoveredCountry(country.code)}
                 onMouseLeave={() => setHoveredCountry(null)}
                 className={`
-                  relative p-6 rounded-xl border-2 transition-all duration-200
+                  relative p-6 rounded-2xl border transition-all duration-200 overflow-hidden
                   ${isSelected
-                    ? 'border-primary bg-primary/10'
-                    : 'border-border hover:border-muted-foreground bg-card'
+                    ? 'border-primary/45 bg-gradient-to-br from-primary/20 via-background to-background'
+                    : 'border-primary/25 bg-gradient-to-br from-primary/15 via-background to-background hover:border-primary/45'
                   }
                 `}
               >
+                <div className="pointer-events-none absolute -top-7 -right-7 h-16 w-16 rounded-full bg-primary/15 blur-xl" />
+                <div className="pointer-events-none absolute -bottom-8 -left-8 h-16 w-16 rounded-full bg-primary/10 blur-xl" />
                 {/* Selection indicator */}
                 {isSelected && (
-                  <div className="absolute top-3 right-3 w-6 h-6 bg-primary rounded-full flex items-center justify-center">
+                  <div className="absolute top-3 right-3 z-[2] w-6 h-6 bg-primary rounded-full flex items-center justify-center">
                     <Check className="w-4 h-4 text-primary-foreground" />
                   </div>
                 )}
 
                 {/* Flag */}
-                <div className="text-5xl mb-3">{country.flag}</div>
+                <div className="relative z-[1] text-5xl mb-3">{country.flag}</div>
 
                 {/* Country name */}
-                <h3 className={`font-semibold text-lg ${isSelected ? 'text-foreground' : 'text-foreground'}`}>
+                <h3 className={`relative z-[1] font-semibold text-lg ${isSelected ? 'text-foreground' : 'text-foreground'}`}>
                   {country.name}
                 </h3>
 
                 {/* Hover effect text */}
                 <p className={`
-                  text-sm text-muted-foreground mt-1 transition-opacity duration-200
+                  relative z-[1] text-sm text-muted-foreground mt-1 transition-opacity duration-200
                   ${isHovered || isSelected ? 'opacity-100' : 'opacity-0'}
                 `}>
                   {t('selectCountry.clickToSelect')}
@@ -114,10 +120,12 @@ const CountrySelect = () => {
         </div>
 
         {/* Info Section */}
-        <div className="mt-10 md:mt-16 bg-secondary rounded-2xl p-6 md:p-8 border border-border">
-          <div className="flex items-start gap-4">
-            <div className="w-12 h-12 bg-background rounded-lg flex items-center justify-center flex-shrink-0">
-              <Plane className="w-6 h-6 text-foreground" />
+        <div className={`mt-10 md:mt-16 p-6 md:p-8 ${premiumCardClass}`}>
+          <div className="pointer-events-none absolute -top-7 -right-7 h-16 w-16 rounded-full bg-primary/15 blur-xl" />
+          <div className="pointer-events-none absolute -bottom-8 -left-8 h-16 w-16 rounded-full bg-primary/10 blur-xl" />
+          <div className="relative flex items-start gap-4">
+            <div className="w-12 h-12 bg-primary/10 border border-primary/20 rounded-xl flex items-center justify-center flex-shrink-0">
+              <Plane className="w-6 h-6 text-primary" />
             </div>
             <div>
               <h3 className="font-semibold text-lg mb-2">{t('selectCountry.whyMatters')}</h3>

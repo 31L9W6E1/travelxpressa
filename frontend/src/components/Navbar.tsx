@@ -714,7 +714,7 @@ const Navbar = () => {
 
         <Link
           to="/"
-          className="absolute left-1/2 -translate-x-1/2 hidden lg:flex items-center justify-center"
+          className="absolute left-1/2 -translate-x-[54%] hidden lg:flex items-center justify-center"
           aria-label="Visamn home"
         >
           <img

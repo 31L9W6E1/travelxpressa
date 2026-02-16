@@ -54,6 +54,7 @@ const navItemBaseClass =
 
 const BRAND_LOGO_ICON = "/branding/logo-icon.png";
 const BRAND_LOGO_TEXT = "/branding/logo-visamn.png";
+const BRAND_LOGO_DOMAIN = "/branding/logo-visamn-com.png";
 
 const Navbar = () => {
   const { user, logout } = useAuth();
@@ -663,7 +664,7 @@ const Navbar = () => {
         </div>
       </aside>
 
-      <header className="hidden md:flex fixed top-0 left-[var(--sidebar-width,240px)] right-0 z-30 h-16 bg-background/90 backdrop-blur-md border-b border-dashed border-border/70 px-6 items-center justify-between transition-[left] duration-300">
+      <header className="hidden md:flex fixed top-0 left-[var(--sidebar-width,240px)] right-0 z-30 h-16 bg-background/90 backdrop-blur-md border-b border-dashed border-border/70 px-6 items-center justify-between transition-[left] duration-300 relative">
         <div className="flex min-w-0 items-center gap-3">
           <button
             type="button"
@@ -710,6 +711,19 @@ const Navbar = () => {
             </Breadcrumb>
           </div>
         </div>
+
+        <Link
+          to="/"
+          className="absolute left-1/2 -translate-x-1/2 hidden lg:flex items-center justify-center"
+          aria-label="Visamn home"
+        >
+          <img
+            src={BRAND_LOGO_DOMAIN}
+            alt="visamn.com"
+            className="h-8 w-auto max-w-[240px] object-contain"
+            loading="eager"
+          />
+        </Link>
 
         <div className="flex items-center gap-2">
           {user && (

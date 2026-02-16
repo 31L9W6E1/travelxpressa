@@ -311,7 +311,15 @@ const Home = () => {
                     onSelect={setSelectedAppointmentDate}
                     defaultMonth={appointmentCandidates[0]}
                     captionLayout="dropdown"
-                    className="w-full rounded-xl border border-border bg-background/85 shadow-[inset_0_1px_0_rgba(255,255,255,0.5)]"
+                    className="mx-auto w-full max-w-[320px] rounded-xl border border-border bg-background/85 shadow-[inset_0_1px_0_rgba(255,255,255,0.5)] [--cell-size:2rem] sm:[--cell-size:2.2rem]"
+                    classNames={{
+                      root: "w-full",
+                      month: "w-full",
+                      table: "w-full",
+                      dropdowns: "h-8 text-xs sm:text-sm",
+                      caption_label: "text-xs sm:text-sm",
+                      weekday: "text-[0.7rem] sm:text-[0.8rem]",
+                    }}
                     modifiers={{ appointment: appointmentCandidates }}
                     modifiersClassNames={{
                       appointment:

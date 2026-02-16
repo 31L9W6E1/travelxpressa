@@ -216,6 +216,7 @@ const CMS_FALLBACK_IMAGE_BY_CATEGORY: Record<"blog" | "news", string> = {
 };
 
 const CMS_TRANSLATION_LOCALES = [
+  { code: "en", label: "English" },
   { code: "mn", label: "Монгол" },
   { code: "ru", label: "Русский" },
   { code: "zh", label: "中文" },
@@ -724,6 +725,14 @@ const AdminDashboard = () => {
   const getTranslationByLocale = (post: Post | null, locale: CmsTranslationLocale) =>
     post?.translations?.find((translation) => translation.locale === locale) || null;
 
+  const hasLocaleContent = (post: Post | null, locale: CmsTranslationLocale) => {
+    if (!post) return false;
+    if (locale === "en") {
+      return Boolean(post.title?.trim() && post.content?.trim());
+    }
+    return Boolean(getTranslationByLocale(post, locale));
+  };
+
   const buildTranslationDraft = (post: Post, locale: CmsTranslationLocale) => {
     const existingTranslation = getTranslationByLocale(post, locale);
     return {
@@ -937,18 +946,29 @@ const AdminDashboard = () => {
 
     setSavingTranslation(true);
     try {
-      const response = await upsertPostTranslation(
-        translationPost.id,
-        translationLocale,
-        {
+      if (translationLocale === "en") {
+        const response = await updatePost(translationPost.id, {
           title: translationDraft.title.trim(),
-          excerpt: translationDraft.excerpt.trim() || null,
+          excerpt: translationDraft.excerpt.trim() || "",
           content: translationDraft.content.trim(),
-          tags: translationDraft.tags.trim() || null,
+          tags: translationDraft.tags.trim() || "",
           status: translationDraft.status,
-        },
-      );
-      toast.success(response.message || "Translation saved");
+        });
+        toast.success(response.message || "English content saved");
+      } else {
+        const response = await upsertPostTranslation(
+          translationPost.id,
+          translationLocale,
+          {
+            title: translationDraft.title.trim(),
+            excerpt: translationDraft.excerpt.trim() || null,
+            content: translationDraft.content.trim(),
+            tags: translationDraft.tags.trim() || null,
+            status: translationDraft.status,
+          },
+        );
+        toast.success(response.message || "Translation saved");
+      }
 
       const refreshedPosts = await fetchPosts();
       const refreshedCurrentPost = refreshedPosts.find(
@@ -2856,10 +2876,7 @@ const AdminDashboard = () => {
                                 </div>
                                 <div className="flex flex-wrap items-center gap-1.5 mt-2">
                                   {CMS_TRANSLATION_LOCALES.map((localeItem) => {
-                                    const translation = getTranslationByLocale(
-                                      post,
-                                      localeItem.code,
-                                    );
+                                    const hasContent = hasLocaleContent(post, localeItem.code);
                                     return (
                                       <button
                                         key={`${post.id}-${localeItem.code}`}
@@ -2871,7 +2888,7 @@ const AdminDashboard = () => {
                                           )
                                         }
                                         className={`px-2 py-0.5 rounded-full text-[11px] font-medium transition-colors ${
-                                          translation
+                                          hasContent
                                             ? "bg-primary/10 text-primary hover:bg-primary/20"
                                             : "bg-secondary text-muted-foreground hover:text-foreground"
                                         }`}
@@ -3019,10 +3036,7 @@ const AdminDashboard = () => {
                                 </div>
                                 <div className="flex flex-wrap items-center gap-1.5 mt-2">
                                   {CMS_TRANSLATION_LOCALES.map((localeItem) => {
-                                    const translation = getTranslationByLocale(
-                                      post,
-                                      localeItem.code,
-                                    );
+                                    const hasContent = hasLocaleContent(post, localeItem.code);
                                     return (
                                       <button
                                         key={`${post.id}-${localeItem.code}`}
@@ -3034,7 +3048,7 @@ const AdminDashboard = () => {
                                           )
                                         }
                                         className={`px-2 py-0.5 rounded-full text-[11px] font-medium transition-colors ${
-                                          translation
+                                          hasContent
                                             ? "bg-primary/10 text-primary hover:bg-primary/20"
                                             : "bg-secondary text-muted-foreground hover:text-foreground"
                                         }`}
@@ -3278,7 +3292,7 @@ const AdminDashboard = () => {
                 <div className="flex flex-wrap gap-2">
                   {CMS_TRANSLATION_LOCALES.map((localeItem) => {
                     const isActive = translationLocale === localeItem.code;
-                    const translation = getTranslationByLocale(
+                    const hasContent = hasLocaleContent(
                       translationPost,
                       localeItem.code,
                     );
@@ -3290,13 +3304,13 @@ const AdminDashboard = () => {
                         className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
                           isActive
                             ? "bg-primary text-primary-foreground"
-                            : translation
+                            : hasContent
                               ? "bg-primary/10 text-primary hover:bg-primary/20"
                               : "bg-secondary text-muted-foreground hover:text-foreground"
                         }`}
                       >
                         {localeItem.label}
-                        {translation ? " • saved" : ""}
+                        {hasContent ? " • saved" : ""}
                       </button>
                     );
                   })}

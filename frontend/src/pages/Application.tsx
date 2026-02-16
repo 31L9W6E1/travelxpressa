@@ -232,6 +232,7 @@ export default function Application() {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showAgreementModal, setShowAgreementModal] = useState(false);
   const [agreementAcceptance, setAgreementAcceptance] = useState<ServiceAgreementAcceptance | null>(null);
+  const [pendingSubmissionId, setPendingSubmissionId] = useState<string | null>(null);
   const [paymentComplete, setPaymentComplete] = useState(false);
   const [isRestoringDraft, setIsRestoringDraft] = useState(false);
   const PAYMENT_REQUIRED = String(import.meta.env.VITE_REQUIRE_PAYMENT || 'false').toLowerCase() === 'true';
@@ -254,6 +255,7 @@ export default function Application() {
   useEffect(() => {
     if (!agreementAcceptance) return;
     setAgreementAcceptance(null);
+    setPendingSubmissionId(null);
   }, [
     formData.personalInfo.surnames,
     formData.personalInfo.givenNames,
@@ -1037,7 +1039,8 @@ export default function Application() {
   const handlePaymentSuccess = async (payment: Payment) => {
     setShowPaymentModal(false);
 
-    if (!applicationId) {
+    const targetApplicationId = applicationId || pendingSubmissionId;
+    if (!targetApplicationId) {
       toast.error(t('applicationPage.toasts.submitFailed.title', { defaultValue: 'Submission failed' }), {
         description: t('applicationPage.toasts.missingId', {
           defaultValue: 'Missing application ID. Please refresh and try again.',
@@ -1049,8 +1052,9 @@ export default function Application() {
     try {
       // Payment is only half of "submit". We must explicitly submit the application
       // so it becomes visible to admins as SUBMITTED and shows up in dashboard charts.
-      await applicationsApi.submit(applicationId);
+      await applicationsApi.submit(targetApplicationId);
       localStorage.removeItem(LOCAL_DRAFT_SNAPSHOT_KEY);
+      setPendingSubmissionId(null);
 
       setPaymentComplete(true);
 
@@ -1081,7 +1085,52 @@ export default function Application() {
   const handleAgreementAccepted = (agreement: ServiceAgreementAcceptance) => {
     setAgreementAcceptance(agreement);
     setShowAgreementModal(false);
-    setShowPaymentModal(true);
+
+    const targetApplicationId = pendingSubmissionId || applicationId;
+    if (!targetApplicationId) {
+      toast.error(t('applicationPage.toasts.submitFailed.title', { defaultValue: 'Submission failed' }), {
+        description: t('applicationPage.toasts.missingId', {
+          defaultValue: 'Missing application ID. Please refresh and try again.',
+        }),
+      });
+      return;
+    }
+
+    if (PAYMENT_REQUIRED) {
+      setShowPaymentModal(true);
+      return;
+    }
+
+    setIsSubmitting(true);
+    void (async () => {
+      try {
+        await applicationsApi.submit(targetApplicationId);
+        localStorage.removeItem(LOCAL_DRAFT_SNAPSHOT_KEY);
+        setPendingSubmissionId(null);
+        setPaymentComplete(true);
+        toast.success(t('applicationPage.toasts.submitted.title', { defaultValue: 'Application submitted!' }), {
+          description: t('applicationPage.toasts.submitted.description', {
+            defaultValue: 'Your application has been submitted for review.',
+          }),
+          duration: 5000,
+        });
+        setTimeout(() => {
+          navigate('/profile');
+        }, 1500);
+      } catch (error: any) {
+        const errorMessage =
+          error?.message ||
+          t('applicationPage.toasts.saveFailed.description', {
+            defaultValue: 'Failed to save application. Please try again.',
+          });
+        setSaveError(errorMessage);
+        toast.error(t('applicationPage.toasts.submitFailed.title', { defaultValue: 'Submission failed' }), {
+          description: errorMessage,
+        });
+      } finally {
+        setIsSubmitting(false);
+      }
+    })();
   };
 
   const handleSubmit = async () => {
@@ -1116,16 +1165,16 @@ export default function Application() {
       // Save all form data before showing payment
       await applicationsApi.update(appId, apiData);
       saveLocalSnapshot(appId, 7, formData);
+      setPendingSubmissionId(appId);
 
-      if (PAYMENT_REQUIRED) {
-        if (!agreementAcceptance) {
-          setShowAgreementModal(true);
-        } else {
-          setShowPaymentModal(true);
-        }
+      if (!agreementAcceptance) {
+        setShowAgreementModal(true);
+      } else if (PAYMENT_REQUIRED) {
+        setShowPaymentModal(true);
       } else {
         await applicationsApi.submit(appId);
         localStorage.removeItem(LOCAL_DRAFT_SNAPSHOT_KEY);
+        setPendingSubmissionId(null);
         setPaymentComplete(true);
         toast.success(t('applicationPage.toasts.submitted.title', { defaultValue: 'Application submitted!' }), {
           description: t('applicationPage.toasts.submitted.description', {
@@ -2694,13 +2743,13 @@ export default function Application() {
         </div>
       </div>
 
-      {PAYMENT_REQUIRED && applicationId && (
+      {(applicationId || pendingSubmissionId) && (
         <>
           <ServiceAgreementModal
             isOpen={showAgreementModal}
             onClose={() => setShowAgreementModal(false)}
             onAccept={handleAgreementAccepted}
-            applicationId={applicationId}
+            applicationId={pendingSubmissionId || applicationId || ''}
             serviceFeeMnt={serviceFeeAmountMnt}
             applicant={{
               name:
@@ -2715,16 +2764,18 @@ export default function Application() {
             }}
           />
 
-          <PaymentModal
-            isOpen={showPaymentModal}
-            onClose={() => setShowPaymentModal(false)}
-            applicationId={applicationId}
-            serviceType="VISA_APPLICATION"
-            amount={serviceFeeAmountMnt}
-            agreement={agreementAcceptance || undefined}
-            description={`${t('applicationPage.title', { defaultValue: 'DS-160 Visa Application' })} - ${formData.personalInfo.surnames} ${formData.personalInfo.givenNames}`}
-            onPaymentSuccess={handlePaymentSuccess}
-          />
+          {PAYMENT_REQUIRED && (pendingSubmissionId || applicationId) && (
+            <PaymentModal
+              isOpen={showPaymentModal}
+              onClose={() => setShowPaymentModal(false)}
+              applicationId={pendingSubmissionId || applicationId || ''}
+              serviceType="VISA_APPLICATION"
+              amount={serviceFeeAmountMnt}
+              agreement={agreementAcceptance || undefined}
+              description={`${t('applicationPage.title', { defaultValue: 'DS-160 Visa Application' })} - ${formData.personalInfo.surnames} ${formData.personalInfo.givenNames}`}
+              onPaymentSuccess={handlePaymentSuccess}
+            />
+          )}
         </>
       )}
     </div>

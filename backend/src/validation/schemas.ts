@@ -116,6 +116,58 @@ export const siteSettingsSchema = z.object({
     })
     .optional(),
   galleryHeroImageUrl: z.string().max(2000).optional().or(z.literal('')),
+  homePage: z
+    .object({
+      sectionOrder: z
+        .array(z.enum(['hero', 'features', 'blog', 'news']))
+        .max(4)
+        .optional(),
+      sectionVisibility: z
+        .object({
+          hero: z.boolean(),
+          features: z.boolean(),
+          blog: z.boolean(),
+          news: z.boolean(),
+        })
+        .optional(),
+      hero: z
+        .object({
+          titleLine1: z.string().max(200).optional().or(z.literal('')),
+          titleLine2: z.string().max(200).optional().or(z.literal('')),
+          titleLine3: z.string().max(200).optional().or(z.literal('')),
+          subtitle: z.string().max(1200).optional().or(z.literal('')),
+          primaryCta: z.string().max(80).optional().or(z.literal('')),
+          secondaryCta: z.string().max(80).optional().or(z.literal('')),
+          guideCta: z.string().max(80).optional().or(z.literal('')),
+          installPitch: z.string().max(300).optional().or(z.literal('')),
+        })
+        .optional(),
+      featuredArticles: z
+        .object({
+          title: z.string().max(120).optional().or(z.literal('')),
+          subtitle: z.string().max(400).optional().or(z.literal('')),
+        })
+        .optional(),
+      latestNews: z
+        .object({
+          title: z.string().max(120).optional().or(z.literal('')),
+          subtitle: z.string().max(400).optional().or(z.literal('')),
+        })
+        .optional(),
+      featureItems: z
+        .array(
+          z.object({
+            id: z.enum(['secure', 'fast', 'errorPrevention', 'support']),
+            icon: z.enum(['shield', 'zap', 'checkCircle', 'users']).optional(),
+            title: z.string().max(120).optional().or(z.literal('')),
+            description: z.string().max(500).optional().or(z.literal('')),
+            enabled: z.boolean().optional(),
+          })
+        )
+        .max(8)
+        .optional(),
+    })
+    .optional(),
   qAndAItems: z
     .array(
       z.object({

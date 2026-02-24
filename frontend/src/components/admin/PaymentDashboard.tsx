@@ -53,6 +53,7 @@ import { Textarea } from '@/components/ui/textarea';
 import {
   adminGetPayments,
   adminGetPaymentSummary,
+  adminConfirmPayment,
   adminRefundPayment,
   Payment,
   PaymentSummary,
@@ -79,6 +80,7 @@ const PaymentDashboard = () => {
   const [refundReason, setRefundReason] = useState('');
   const [refundAmount, setRefundAmount] = useState<number | undefined>(undefined);
   const [refunding, setRefunding] = useState(false);
+  const [confirmingPaymentId, setConfirmingPaymentId] = useState<string | null>(null);
   const currentPageTotal = payments.reduce((sum, item) => sum + item.amount, 0);
 
   useEffect(() => {
@@ -137,12 +139,27 @@ const PaymentDashboard = () => {
     }
   };
 
+  const handleConfirmManualPayment = async (paymentId: string) => {
+    setConfirmingPaymentId(paymentId);
+    try {
+      await adminConfirmPayment(paymentId);
+      toast.success('Payment confirmed successfully');
+      fetchData();
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to confirm payment');
+    } finally {
+      setConfirmingPaymentId(null);
+    }
+  };
+
   const getStatusIcon = (status: PaymentStatus) => {
     switch (status) {
       case 'PAID':
         return <CheckCircle className="w-4 h-4 text-green-500" />;
       case 'PENDING':
         return <Clock className="w-4 h-4 text-yellow-500" />;
+      case 'PROCESSING':
+        return <Loader2 className="w-4 h-4 text-blue-500" />;
       case 'FAILED':
         return <XCircle className="w-4 h-4 text-red-500" />;
       case 'REFUNDED':
@@ -280,6 +297,7 @@ const PaymentDashboard = () => {
                 <SelectContent>
                   <SelectItem value="all">All Status</SelectItem>
                   <SelectItem value="PENDING">Pending</SelectItem>
+                  <SelectItem value="PROCESSING">Processing</SelectItem>
                   <SelectItem value="PAID">Paid</SelectItem>
                   <SelectItem value="FAILED">Failed</SelectItem>
                   <SelectItem value="REFUNDED">Refunded</SelectItem>
@@ -296,8 +314,13 @@ const PaymentDashboard = () => {
                   <SelectItem value="all">All Providers</SelectItem>
                   <SelectItem value="QPAY">QPay</SelectItem>
                   <SelectItem value="KHAN_BANK">Khan Bank</SelectItem>
+                  <SelectItem value="CARD">Card</SelectItem>
+                  <SelectItem value="PAYPAL">PayPal</SelectItem>
+                  <SelectItem value="WECHAT_PAY">WeChat Pay</SelectItem>
+                  <SelectItem value="ZHIFUBAO">Zhifubao</SelectItem>
                   <SelectItem value="MONPAY">MonPay</SelectItem>
                   <SelectItem value="SOCIALPAY">SocialPay</SelectItem>
+                  <SelectItem value="DIGIPAY">DigiPay</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -356,20 +379,38 @@ const PaymentDashboard = () => {
                       {new Date(payment.createdAt).toLocaleDateString()}
                     </TableCell>
                     <TableCell>
-                      {payment.status === 'PAID' && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            setRefundPayment(payment);
-                            setRefundAmount(payment.amount);
-                            setRefundModalOpen(true);
-                          }}
-                        >
-                          <RefreshCw className="w-4 h-4 mr-1" />
-                          Refund
-                        </Button>
-                      )}
+                      <div className="flex flex-wrap gap-2">
+                        {(payment.status === 'PROCESSING' || payment.status === 'PENDING') && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleConfirmManualPayment(payment.id)}
+                            disabled={confirmingPaymentId === payment.id}
+                          >
+                            {confirmingPaymentId === payment.id ? (
+                              <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                            ) : (
+                              <CheckCircle className="w-4 h-4 mr-1" />
+                            )}
+                            Mark Paid
+                          </Button>
+                        )}
+
+                        {payment.status === 'PAID' && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setRefundPayment(payment);
+                              setRefundAmount(payment.amount);
+                              setRefundModalOpen(true);
+                            }}
+                          >
+                            <RefreshCw className="w-4 h-4 mr-1" />
+                            Refund
+                          </Button>
+                        )}
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))

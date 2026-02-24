@@ -2,7 +2,17 @@ import api, { handleApiError, ApiResponse, PaginatedResponse } from './client';
 
 // Payment types
 export type PaymentStatus = 'PENDING' | 'PROCESSING' | 'PAID' | 'FAILED' | 'CANCELLED' | 'REFUNDED' | 'PARTIALLY_REFUNDED';
-export type PaymentProvider = 'QPAY' | 'KHAN_BANK' | 'MONPAY' | 'SOCIALPAY' | 'BANK_TRANSFER';
+export type PaymentProvider =
+  | 'QPAY'
+  | 'DIGIPAY'
+  | 'KHAN_BANK'
+  | 'MONPAY'
+  | 'SOCIALPAY'
+  | 'BANK_TRANSFER'
+  | 'CARD'
+  | 'PAYPAL'
+  | 'WECHAT_PAY'
+  | 'ZHIFUBAO';
 export type PaymentServiceType = 'VISA_APPLICATION' | 'CONSULTATION' | 'DOCUMENT_REVIEW' | 'RUSH_PROCESSING';
 
 export interface DeepLink {
@@ -51,6 +61,7 @@ export interface ServicePrice {
 
 export interface CreatePaymentParams {
   serviceType: PaymentServiceType;
+  provider?: PaymentProvider;
   amount?: number;
   description?: string;
   applicationId?: string;
@@ -200,6 +211,21 @@ export const adminRefundPayment = async (paymentId: string, params: {
 }): Promise<ApiResponse<{ refundedAmount: number }>> => {
   try {
     const response = await api.post(`/api/payments/admin/${paymentId}/refund`, params);
+    return response.data;
+  } catch (error) {
+    throw handleApiError(error);
+  }
+};
+
+/**
+ * Confirm manual payment (admin)
+ */
+export const adminConfirmPayment = async (
+  paymentId: string,
+  params?: { providerPaymentId?: string; note?: string }
+): Promise<ApiResponse<{ id: string; status: PaymentStatus; amount: number; completedAt?: string }>> => {
+  try {
+    const response = await api.post(`/api/payments/admin/${paymentId}/confirm`, params || {});
     return response.data;
   } catch (error) {
     throw handleApiError(error);

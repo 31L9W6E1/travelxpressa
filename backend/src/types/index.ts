@@ -245,10 +245,15 @@ export enum PaymentStatus {
 
 export enum PaymentProvider {
   QPAY = 'QPAY',
+  DIGIPAY = 'DIGIPAY',
   KHAN_BANK = 'KHAN_BANK',
   MONPAY = 'MONPAY',
   SOCIALPAY = 'SOCIALPAY',
   BANK_TRANSFER = 'BANK_TRANSFER',
+  CARD = 'CARD',
+  PAYPAL = 'PAYPAL',
+  WECHAT_PAY = 'WECHAT_PAY',
+  ZHIFUBAO = 'ZHIFUBAO',
 }
 
 export enum PaymentServiceType {

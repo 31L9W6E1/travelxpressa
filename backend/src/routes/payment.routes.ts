@@ -15,6 +15,18 @@ const getIdParam = (req: Request): string => {
   return Array.isArray(id) ? id[0] : id;
 };
 
+const parsePaymentMetadata = (value: string | null): Record<string, unknown> => {
+  if (!value) return {};
+  try {
+    const parsed = JSON.parse(value);
+    return parsed && typeof parsed === 'object' && !Array.isArray(parsed)
+      ? (parsed as Record<string, unknown>)
+      : {};
+  } catch {
+    return {};
+  }
+};
+
 // Service prices in MNT (Mongolian Tugrik)
 const SERVICE_PRICES: Record<string, number> = {
   VISA_APPLICATION: 150000,    // 150,000 MNT (~$44)
@@ -22,6 +34,30 @@ const SERVICE_PRICES: Record<string, number> = {
   DOCUMENT_REVIEW: 75000,       // 75,000 MNT (~$22)
   RUSH_PROCESSING: 100000,      // 100,000 MNT (~$30) - additional fee
 };
+
+const MANUAL_PAYMENT_PROVIDERS = new Set<PaymentProvider>([
+  PaymentProvider.DIGIPAY,
+  PaymentProvider.KHAN_BANK,
+  PaymentProvider.MONPAY,
+  PaymentProvider.SOCIALPAY,
+  PaymentProvider.BANK_TRANSFER,
+  PaymentProvider.CARD,
+  PaymentProvider.PAYPAL,
+  PaymentProvider.WECHAT_PAY,
+  PaymentProvider.ZHIFUBAO,
+]);
+
+const AVAILABLE_PAYMENT_PROVIDERS = new Set<string>([
+  PaymentProvider.QPAY,
+  ...Array.from(MANUAL_PAYMENT_PROVIDERS),
+]);
+
+const isQPayConfigured = (): boolean =>
+  Boolean(
+    config.qpay.username.trim() &&
+      config.qpay.password.trim() &&
+      config.qpay.invoiceCode.trim()
+  );
 
 /**
  * Helper function to process successful payment
@@ -133,7 +169,7 @@ router.post(
   async (req: Request, res: Response) => {
     try {
       const { userId } = (req as AuthenticatedRequest).user;
-      const { serviceType, description, applicationId, agreement } = req.body;
+      const { serviceType, description, applicationId, agreement, provider } = req.body;
 
       // Validate service type
       if (!SERVICE_PRICES[serviceType]) {
@@ -230,52 +266,77 @@ router.post(
         });
       }
 
+      const requestedProvider =
+        typeof provider === 'string' && provider.trim()
+          ? provider.trim().toUpperCase()
+          : PaymentProvider.KHAN_BANK;
+
+      if (!AVAILABLE_PAYMENT_PROVIDERS.has(requestedProvider)) {
+        return res.status(400).json({
+          success: false,
+          error: 'Invalid payment provider',
+        });
+      }
+
+      const paymentProvider = requestedProvider as PaymentProvider;
+
+      if (paymentProvider === PaymentProvider.QPAY && !isQPayConfigured()) {
+        return res.status(400).json({
+          success: false,
+          error: 'QPay is not configured yet. Please choose another payment method.',
+        });
+      }
+
       const amount = SERVICE_PRICES[serviceType];
       const invoiceNo = qpayService.generateInvoiceNo('TXP');
-      const qpayCallbackUrl =
-        config.qpay.callbackUrl?.trim() ||
-        `${(process.env.BACKEND_URL || config.frontendUrl).replace(/\/+$/, '')}/api/payments/webhook/qpay`;
+      let qpayInvoice: Awaited<ReturnType<typeof qpayService.createInvoice>> | null = null;
 
-      // Create QPay invoice
-      const qpayInvoice = await qpayService.createInvoice({
-        invoiceNo,
-        receiverCode: userId,
-        description: description || `${serviceType} - visamn`,
-        amount,
-        callbackUrl: qpayCallbackUrl,
-      });
+      if (paymentProvider === PaymentProvider.QPAY) {
+        const qpayCallbackUrl =
+          config.qpay.callbackUrl?.trim() ||
+          `${(process.env.BACKEND_URL || config.frontendUrl).replace(/\/+$/, '')}/api/payments/webhook/qpay`;
+
+        qpayInvoice = await qpayService.createInvoice({
+          invoiceNo,
+          receiverCode: userId,
+          description: description || `${serviceType} - visamn`,
+          amount,
+          callbackUrl: qpayCallbackUrl,
+        });
+      }
 
       // Store payment record in database
       const userAgentHeader = req.headers['user-agent'];
       const userAgent = Array.isArray(userAgentHeader) ? userAgentHeader.join('; ') : userAgentHeader;
-      const paymentMetadata =
-        agreement && typeof agreement === 'object'
-          ? JSON.stringify({
-              agreement,
-              audit: {
-                ipAddress: req.ip,
-                userAgent: userAgent || null,
-                recordedAt: new Date().toISOString(),
-              },
-            })
-          : null;
+      const paymentMetadata = JSON.stringify({
+        ...(agreement && typeof agreement === 'object' ? { agreement } : {}),
+        audit: {
+          ipAddress: req.ip,
+          userAgent: userAgent || null,
+          recordedAt: new Date().toISOString(),
+        },
+        manualVerificationRequired: MANUAL_PAYMENT_PROVIDERS.has(paymentProvider),
+      });
 
       const payment = await prisma.payment.create({
         data: {
           userId,
           amount,
           currency: 'MNT',
-          status: PaymentStatus.PENDING,
-          provider: PaymentProvider.QPAY,
+          status:
+            paymentProvider === PaymentProvider.QPAY
+              ? PaymentStatus.PENDING
+              : PaymentStatus.PROCESSING,
+          provider: paymentProvider,
           serviceType,
           description: description || `${serviceType} - visamn`,
           applicationId,
           invoiceNumber: invoiceNo,
-          qpayInvoiceId: qpayInvoice.invoice_id,
-          qpayQrText: qpayInvoice.qr_text,
-          qpayQrImage: qpayInvoice.qr_image,
-          qpayShortUrl: qpayInvoice.qPay_shortUrl,
-          qpayDeepLinks: JSON.stringify(qpayInvoice.urls),
+          qpayInvoiceId: qpayInvoice?.invoice_id,
+          qpayQrText: qpayInvoice?.qr_text,
+          qpayQrImage: qpayInvoice?.qr_image,
+          qpayShortUrl: qpayInvoice?.qPay_shortUrl,
+          qpayDeepLinks: qpayInvoice ? JSON.stringify(qpayInvoice.urls) : null,
           metadata: paymentMetadata,
           expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
         },
@@ -314,7 +375,7 @@ router.post(
             invoiceNo,
             amount,
             currency: 'MNT',
-            paymentLink: qpayInvoice.qPay_shortUrl || `${config.frontendUrl}/payment/${payment.id}`,
+            paymentLink: qpayInvoice?.qPay_shortUrl || `${config.frontendUrl}/payment/${payment.id}`,
           });
         } catch (error) {
           logger.error('Failed to send payment pending notification', error as Error);
@@ -329,10 +390,13 @@ router.post(
           amount: payment.amount,
           currency: payment.currency,
           status: payment.status,
-          qrCode: qpayInvoice.qr_text,
-          qrImage: qpayInvoice.qr_image,
-          shortUrl: qpayInvoice.qPay_shortUrl,
-          deepLinks: qpayInvoice.urls,
+          provider: payment.provider,
+          serviceType: payment.serviceType,
+          description: payment.description,
+          qrCode: qpayInvoice?.qr_text,
+          qrImage: qpayInvoice?.qr_image,
+          shortUrl: qpayInvoice?.qPay_shortUrl,
+          deepLinks: qpayInvoice?.urls || [],
           expiresAt: payment.expiresAt,
           createdAt: payment.createdAt,
         },
@@ -520,11 +584,11 @@ router.post(
         });
       }
 
-      // Can only cancel pending payments
-      if (payment.status !== PaymentStatus.PENDING) {
+      // Can only cancel pending/processing payments
+      if (![PaymentStatus.PENDING, PaymentStatus.PROCESSING].includes(payment.status as PaymentStatus)) {
         return res.status(400).json({
           success: false,
-          error: 'Can only cancel pending payments',
+          error: 'Can only cancel pending or processing payments',
         });
       }
 
@@ -610,6 +674,7 @@ router.get(
           amount: p.amount,
           currency: p.currency,
           status: p.status,
+          provider: p.provider,
           serviceType: p.serviceType,
           description: p.description,
           createdAt: p.createdAt,
@@ -791,6 +856,8 @@ router.get(
           summary.failedPayments++;
         } else if (payment.status === PaymentStatus.PENDING) {
           summary.pendingPayments++;
+        } else if (payment.status === PaymentStatus.PROCESSING) {
+          summary.pendingPayments++;
         } else if (payment.status === PaymentStatus.CANCELLED) {
           summary.cancelledPayments++;
         } else if (payment.status === PaymentStatus.REFUNDED) {
@@ -807,6 +874,110 @@ router.get(
       res.status(500).json({
         success: false,
         error: 'Failed to retrieve payment summary',
+      });
+    }
+  }
+);
+
+/**
+ * POST /api/payments/admin/:id/confirm
+ * Confirm manual payment as paid (admin only)
+ */
+router.post(
+  '/admin/:id/confirm',
+  authenticateToken,
+  requireRole(UserRole.ADMIN),
+  async (req: Request, res: Response) => {
+    try {
+      const id = getIdParam(req);
+      const { userId: adminUserId } = (req as AuthenticatedRequest).user;
+      const { providerPaymentId, note } = req.body;
+
+      const payment = await prisma.payment.findUnique({
+        where: { id },
+      });
+
+      if (!payment) {
+        return res.status(404).json({
+          success: false,
+          error: 'Payment not found',
+        });
+      }
+
+      if (payment.status === PaymentStatus.PAID) {
+        return res.json({
+          success: true,
+          message: 'Payment already confirmed',
+          data: {
+            id: payment.id,
+            status: payment.status,
+            amount: payment.amount,
+            completedAt: payment.completedAt,
+          },
+        });
+      }
+
+      if (
+        [PaymentStatus.CANCELLED, PaymentStatus.FAILED, PaymentStatus.REFUNDED].includes(
+          payment.status as PaymentStatus
+        )
+      ) {
+        return res.status(400).json({
+          success: false,
+          error: `Cannot confirm payment with status ${payment.status}`,
+        });
+      }
+
+      const confirmationReference =
+        typeof providerPaymentId === 'string' && providerPaymentId.trim()
+          ? providerPaymentId.trim().slice(0, 120)
+          : `MANUAL-${Date.now()}`;
+
+      await processSuccessfulPayment(payment.id, confirmationReference, new Date());
+
+      const latestPayment = await prisma.payment.findUnique({
+        where: { id: payment.id },
+      });
+
+      const metadata = parsePaymentMetadata(latestPayment?.metadata ?? null);
+      const nextMetadata = JSON.stringify({
+        ...metadata,
+        manualConfirmation: {
+          confirmedBy: adminUserId,
+          confirmedAt: new Date().toISOString(),
+          note: typeof note === 'string' ? note.trim().slice(0, 500) : null,
+          reference: confirmationReference,
+        },
+      });
+
+      const updatedPayment = await prisma.payment.update({
+        where: { id: payment.id },
+        data: {
+          metadata: nextMetadata,
+        },
+      });
+
+      logger.info('Manual payment confirmed', {
+        paymentId: payment.id,
+        confirmedBy: adminUserId,
+        reference: confirmationReference,
+      });
+
+      res.json({
+        success: true,
+        message: 'Payment confirmed successfully',
+        data: {
+          id: updatedPayment.id,
+          status: updatedPayment.status,
+          amount: updatedPayment.amount,
+          completedAt: updatedPayment.completedAt,
+        },
+      });
+    } catch (error) {
+      logger.error('Failed to confirm manual payment', error as Error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to confirm payment',
       });
     }
   }

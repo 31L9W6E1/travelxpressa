@@ -34,6 +34,7 @@ import {
   TrendingDown,
   MessageSquare,
   Languages,
+  GripVertical,
 } from "lucide-react";
 import {
   ChartContainer,
@@ -298,6 +299,27 @@ const OFFICIAL_REFERENCE_LINKS: OfficialReferenceLink[] = [
   },
 ];
 
+const HOME_SECTION_OPTIONS = [
+  { id: "hero", label: "Hero" },
+  { id: "features", label: "Features" },
+  { id: "blog", label: "Featured Articles" },
+  { id: "news", label: "Latest News" },
+] as const;
+
+const HOME_FEATURE_OPTIONS = [
+  { id: "secure", label: "Secure & Privacy" },
+  { id: "fast", label: "Fast Processing" },
+  { id: "errorPrevention", label: "Error Prevention" },
+  { id: "support", label: "Professional Support" },
+] as const;
+
+const HOME_FEATURE_ICON_OPTIONS = [
+  { value: "shield", label: "Shield" },
+  { value: "zap", label: "Zap" },
+  { value: "checkCircle", label: "CheckCircle" },
+  { value: "users", label: "Users" },
+] as const;
+
 const AdminDashboard = () => {
   const { t } = useTranslation();
   const { user } = useAuth();
@@ -451,6 +473,8 @@ const AdminDashboard = () => {
   const [traffic, setTraffic] = useState<TrafficStats | null>(null);
   const [trafficLoading, setTrafficLoading] = useState(false);
   const [trafficError, setTrafficError] = useState<string | null>(null);
+  const [draggingHomeSection, setDraggingHomeSection] = useState<string | null>(null);
+  const [draggingFeatureItem, setDraggingFeatureItem] = useState<string | null>(null);
 
   // Chart data - use real data from stats or fallback to sample data
   const monthlyApplicationData = stats?.charts?.monthlyApplications?.length
@@ -828,6 +852,46 @@ const AdminDashboard = () => {
     } finally {
       setSavingSiteSettings(false);
     }
+  };
+
+  const moveHomeSection = (sourceId: string, targetId: string) => {
+    if (!sourceId || !targetId || sourceId === targetId) return;
+    setDraftSiteSettings((prev) => {
+      const current = [...(prev.homePage?.sectionOrder || ["hero", "features", "blog", "news"])];
+      const fromIndex = current.indexOf(sourceId as any);
+      const toIndex = current.indexOf(targetId as any);
+      if (fromIndex < 0 || toIndex < 0) return prev;
+      const [item] = current.splice(fromIndex, 1);
+      current.splice(toIndex, 0, item);
+      return {
+        ...prev,
+        homePage: {
+          ...prev.homePage,
+          sectionOrder: current as SiteSettings["homePage"]["sectionOrder"],
+        },
+      };
+    });
+    setSiteSettingsDirty(true);
+  };
+
+  const moveHomeFeatureItem = (sourceId: string, targetId: string) => {
+    if (!sourceId || !targetId || sourceId === targetId) return;
+    setDraftSiteSettings((prev) => {
+      const current = [...(prev.homePage?.featureItems || [])];
+      const fromIndex = current.findIndex((item) => item.id === sourceId);
+      const toIndex = current.findIndex((item) => item.id === targetId);
+      if (fromIndex < 0 || toIndex < 0) return prev;
+      const [item] = current.splice(fromIndex, 1);
+      current.splice(toIndex, 0, item);
+      return {
+        ...prev,
+        homePage: {
+          ...prev.homePage,
+          featureItems: current,
+        },
+      };
+    });
+    setSiteSettingsDirty(true);
   };
 
   const handleOpenNewPost = (category: "blog" | "news") => {
@@ -2411,6 +2475,404 @@ const AdminDashboard = () => {
                       }}
                       placeholder="Онлайнаар амралтын өдрүүдэд 10:00-19:00 ажиллана"
                     />
+                  </div>
+
+                  <Separator />
+
+                  <div>
+                    <p className="font-medium">Home Page Builder</p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Edit homepage text, toggle sections, and drag to reorder blocks.
+                    </p>
+                  </div>
+
+                  <div className="space-y-3">
+                    <Label>Section order (drag to move)</Label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {(draftSiteSettings.homePage.sectionOrder || []).map((sectionId) => {
+                        const label =
+                          HOME_SECTION_OPTIONS.find((section) => section.id === sectionId)?.label || sectionId;
+                        const isVisible = draftSiteSettings.homePage.sectionVisibility[sectionId as "hero" | "features" | "blog" | "news"];
+                        return (
+                          <div
+                            key={sectionId}
+                            draggable
+                            onDragStart={() => setDraggingHomeSection(sectionId)}
+                            onDragOver={(event) => event.preventDefault()}
+                            onDrop={() => {
+                              if (draggingHomeSection) {
+                                moveHomeSection(draggingHomeSection, sectionId);
+                              }
+                              setDraggingHomeSection(null);
+                            }}
+                            onDragEnd={() => setDraggingHomeSection(null)}
+                            className="flex items-center justify-between gap-3 rounded-lg border border-dashed border-border/70 bg-card px-4 py-3"
+                          >
+                            <div className="flex items-center gap-2 min-w-0">
+                              <GripVertical className="w-4 h-4 text-muted-foreground shrink-0" />
+                              <p className="text-sm font-medium text-foreground truncate">{label}</p>
+                            </div>
+                            <Switch
+                              checked={isVisible}
+                              onCheckedChange={(checked) => {
+                                setDraftSiteSettings((prev) => ({
+                                  ...prev,
+                                  homePage: {
+                                    ...prev.homePage,
+                                    sectionVisibility: {
+                                      ...prev.homePage.sectionVisibility,
+                                      [sectionId]: checked,
+                                    },
+                                  },
+                                }));
+                                setSiteSettingsDirty(true);
+                              }}
+                            />
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <Label>Hero title line 1</Label>
+                      <Input
+                        value={draftSiteSettings.homePage.hero.titleLine1 || ""}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setDraftSiteSettings((prev) => ({
+                            ...prev,
+                            homePage: {
+                              ...prev.homePage,
+                              hero: { ...prev.homePage.hero, titleLine1: value },
+                            },
+                          }));
+                          setSiteSettingsDirty(true);
+                        }}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Hero title line 2</Label>
+                      <Input
+                        value={draftSiteSettings.homePage.hero.titleLine2 || ""}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setDraftSiteSettings((prev) => ({
+                            ...prev,
+                            homePage: {
+                              ...prev.homePage,
+                              hero: { ...prev.homePage.hero, titleLine2: value },
+                            },
+                          }));
+                          setSiteSettingsDirty(true);
+                        }}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Hero title line 3</Label>
+                      <Input
+                        value={draftSiteSettings.homePage.hero.titleLine3 || ""}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setDraftSiteSettings((prev) => ({
+                            ...prev,
+                            homePage: {
+                              ...prev.homePage,
+                              hero: { ...prev.homePage.hero, titleLine3: value },
+                            },
+                          }));
+                          setSiteSettingsDirty(true);
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Hero subtitle</Label>
+                    <Textarea
+                      value={draftSiteSettings.homePage.hero.subtitle || ""}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setDraftSiteSettings((prev) => ({
+                          ...prev,
+                          homePage: {
+                            ...prev.homePage,
+                            hero: { ...prev.homePage.hero, subtitle: value },
+                          },
+                        }));
+                        setSiteSettingsDirty(true);
+                      }}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="space-y-2">
+                      <Label>Primary CTA</Label>
+                      <Input
+                        value={draftSiteSettings.homePage.hero.primaryCta || ""}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setDraftSiteSettings((prev) => ({
+                            ...prev,
+                            homePage: {
+                              ...prev.homePage,
+                              hero: { ...prev.homePage.hero, primaryCta: value },
+                            },
+                          }));
+                          setSiteSettingsDirty(true);
+                        }}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Secondary CTA</Label>
+                      <Input
+                        value={draftSiteSettings.homePage.hero.secondaryCta || ""}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setDraftSiteSettings((prev) => ({
+                            ...prev,
+                            homePage: {
+                              ...prev.homePage,
+                              hero: { ...prev.homePage.hero, secondaryCta: value },
+                            },
+                          }));
+                          setSiteSettingsDirty(true);
+                        }}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Guide CTA</Label>
+                      <Input
+                        value={draftSiteSettings.homePage.hero.guideCta || ""}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setDraftSiteSettings((prev) => ({
+                            ...prev,
+                            homePage: {
+                              ...prev.homePage,
+                              hero: { ...prev.homePage.hero, guideCta: value },
+                            },
+                          }));
+                          setSiteSettingsDirty(true);
+                        }}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Install pitch</Label>
+                      <Input
+                        value={draftSiteSettings.homePage.hero.installPitch || ""}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setDraftSiteSettings((prev) => ({
+                            ...prev,
+                            homePage: {
+                              ...prev.homePage,
+                              hero: { ...prev.homePage.hero, installPitch: value },
+                            },
+                          }));
+                          setSiteSettingsDirty(true);
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Featured articles title</Label>
+                      <Input
+                        value={draftSiteSettings.homePage.featuredArticles.title || ""}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setDraftSiteSettings((prev) => ({
+                            ...prev,
+                            homePage: {
+                              ...prev.homePage,
+                              featuredArticles: { ...prev.homePage.featuredArticles, title: value },
+                            },
+                          }));
+                          setSiteSettingsDirty(true);
+                        }}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Featured articles subtitle</Label>
+                      <Input
+                        value={draftSiteSettings.homePage.featuredArticles.subtitle || ""}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setDraftSiteSettings((prev) => ({
+                            ...prev,
+                            homePage: {
+                              ...prev.homePage,
+                              featuredArticles: { ...prev.homePage.featuredArticles, subtitle: value },
+                            },
+                          }));
+                          setSiteSettingsDirty(true);
+                        }}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Latest news title</Label>
+                      <Input
+                        value={draftSiteSettings.homePage.latestNews.title || ""}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setDraftSiteSettings((prev) => ({
+                            ...prev,
+                            homePage: {
+                              ...prev.homePage,
+                              latestNews: { ...prev.homePage.latestNews, title: value },
+                            },
+                          }));
+                          setSiteSettingsDirty(true);
+                        }}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Latest news subtitle</Label>
+                      <Input
+                        value={draftSiteSettings.homePage.latestNews.subtitle || ""}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setDraftSiteSettings((prev) => ({
+                            ...prev,
+                            homePage: {
+                              ...prev.homePage,
+                              latestNews: { ...prev.homePage.latestNews, subtitle: value },
+                            },
+                          }));
+                          setSiteSettingsDirty(true);
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <Label>Feature cards (drag to reorder)</Label>
+                    <div className="space-y-3">
+                      {draftSiteSettings.homePage.featureItems.map((feature) => {
+                        const featureLabel =
+                          HOME_FEATURE_OPTIONS.find((item) => item.id === feature.id)?.label || feature.id;
+                        return (
+                          <div
+                            key={feature.id}
+                            draggable
+                            onDragStart={() => setDraggingFeatureItem(feature.id)}
+                            onDragOver={(event) => event.preventDefault()}
+                            onDrop={() => {
+                              if (draggingFeatureItem) {
+                                moveHomeFeatureItem(draggingFeatureItem, feature.id);
+                              }
+                              setDraggingFeatureItem(null);
+                            }}
+                            onDragEnd={() => setDraggingFeatureItem(null)}
+                            className="rounded-lg border border-dashed border-border/70 bg-card p-4"
+                          >
+                            <div className="flex items-center justify-between gap-3 mb-3">
+                              <div className="flex items-center gap-2 min-w-0">
+                                <GripVertical className="w-4 h-4 text-muted-foreground shrink-0" />
+                                <p className="text-sm font-medium truncate">{featureLabel}</p>
+                              </div>
+                              <Switch
+                                checked={feature.enabled !== false}
+                                onCheckedChange={(checked) => {
+                                  setDraftSiteSettings((prev) => ({
+                                    ...prev,
+                                    homePage: {
+                                      ...prev.homePage,
+                                      featureItems: prev.homePage.featureItems.map((item) =>
+                                        item.id === feature.id ? { ...item, enabled: checked } : item
+                                      ),
+                                    },
+                                  }));
+                                  setSiteSettingsDirty(true);
+                                }}
+                              />
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                              <div className="space-y-2">
+                                <Label>Icon</Label>
+                                <Select
+                                  value={feature.icon || "shield"}
+                                  onValueChange={(value) => {
+                                    setDraftSiteSettings((prev) => ({
+                                      ...prev,
+                                      homePage: {
+                                        ...prev.homePage,
+                                        featureItems: prev.homePage.featureItems.map((item) =>
+                                          item.id === feature.id
+                                            ? {
+                                                ...item,
+                                                icon: value as
+                                                  | "shield"
+                                                  | "zap"
+                                                  | "checkCircle"
+                                                  | "users",
+                                              }
+                                            : item
+                                        ),
+                                      },
+                                    }));
+                                    setSiteSettingsDirty(true);
+                                  }}
+                                >
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Icon" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {HOME_FEATURE_ICON_OPTIONS.map((option) => (
+                                      <SelectItem key={option.value} value={option.value}>
+                                        {option.label}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <div className="space-y-2">
+                                <Label>Title</Label>
+                                <Input
+                                  value={feature.title || ""}
+                                  onChange={(e) => {
+                                    const value = e.target.value;
+                                    setDraftSiteSettings((prev) => ({
+                                      ...prev,
+                                      homePage: {
+                                        ...prev.homePage,
+                                        featureItems: prev.homePage.featureItems.map((item) =>
+                                          item.id === feature.id ? { ...item, title: value } : item
+                                        ),
+                                      },
+                                    }));
+                                    setSiteSettingsDirty(true);
+                                  }}
+                                />
+                              </div>
+                              <div className="space-y-2 md:col-span-1">
+                                <Label>Description</Label>
+                                <Input
+                                  value={feature.description || ""}
+                                  onChange={(e) => {
+                                    const value = e.target.value;
+                                    setDraftSiteSettings((prev) => ({
+                                      ...prev,
+                                      homePage: {
+                                        ...prev.homePage,
+                                        featureItems: prev.homePage.featureItems.map((item) =>
+                                          item.id === feature.id ? { ...item, description: value } : item
+                                        ),
+                                      },
+                                    }));
+                                    setSiteSettingsDirty(true);
+                                  }}
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
 
                   <Separator />

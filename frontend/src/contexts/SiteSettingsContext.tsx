@@ -35,6 +35,40 @@ export type SiteSettings = {
     headOfficeHours?: string;
     onlineHours?: string;
   };
+  homePage: {
+    sectionOrder: Array<"hero" | "features" | "blog" | "news">;
+    sectionVisibility: {
+      hero: boolean;
+      features: boolean;
+      blog: boolean;
+      news: boolean;
+    };
+    hero: {
+      titleLine1?: string;
+      titleLine2?: string;
+      titleLine3?: string;
+      subtitle?: string;
+      primaryCta?: string;
+      secondaryCta?: string;
+      guideCta?: string;
+      installPitch?: string;
+    };
+    featuredArticles: {
+      title?: string;
+      subtitle?: string;
+    };
+    latestNews: {
+      title?: string;
+      subtitle?: string;
+    };
+    featureItems: Array<{
+      id: "secure" | "fast" | "errorPrevention" | "support";
+      icon?: "shield" | "zap" | "checkCircle" | "users";
+      title?: string;
+      description?: string;
+      enabled?: boolean;
+    }>;
+  };
   galleryHeroImageUrl?: string;
   galleryDemoItems: Array<{
     id: number;
@@ -51,6 +85,14 @@ export type SiteSettings = {
     a: string;
   }>;
 };
+
+const HOME_SECTION_IDS = ["hero", "features", "blog", "news"] as const;
+const DEFAULT_HOME_FEATURE_ITEMS: SiteSettings["homePage"]["featureItems"] = [
+  { id: "secure", icon: "shield", title: "", description: "", enabled: true },
+  { id: "fast", icon: "zap", title: "", description: "", enabled: true },
+  { id: "errorPrevention", icon: "checkCircle", title: "", description: "", enabled: true },
+  { id: "support", icon: "users", title: "", description: "", enabled: true },
+];
 
 export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   maintenance: { enabled: false, message: "" },
@@ -114,6 +156,34 @@ IV. ҮЙЛЧИЛГЭЭНИЙ ХӨЛС, ТӨЛБӨР
     headOfficeTitle: "Төв оффис",
     headOfficeHours: "Даваа-Баасан: 08:00-18:00\nБямба, Ням: Амарна",
     onlineHours: "Онлайнаар амралтын өдрүүдэд 10:00-19:00 ажиллана",
+  },
+  homePage: {
+    sectionOrder: [...HOME_SECTION_IDS],
+    sectionVisibility: {
+      hero: true,
+      features: true,
+      blog: true,
+      news: true,
+    },
+    hero: {
+      titleLine1: "",
+      titleLine2: "",
+      titleLine3: "",
+      subtitle: "",
+      primaryCta: "",
+      secondaryCta: "",
+      guideCta: "",
+      installPitch: "",
+    },
+    featuredArticles: {
+      title: "",
+      subtitle: "",
+    },
+    latestNews: {
+      title: "",
+      subtitle: "",
+    },
+    featureItems: DEFAULT_HOME_FEATURE_ITEMS,
   },
   galleryHeroImageUrl:
     "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=1800&auto=format&fit=crop&q=80",
@@ -321,6 +391,35 @@ IV. ҮЙЛЧИЛГЭЭНИЙ ХӨЛС, ТӨЛБӨР
   ],
 };
 
+const normalizeSectionOrder = (
+  sectionOrder?: Array<"hero" | "features" | "blog" | "news">
+): SiteSettings["homePage"]["sectionOrder"] => {
+  const unique = Array.from(new Set(sectionOrder || []));
+  const filtered = unique.filter((id): id is (typeof HOME_SECTION_IDS)[number] =>
+    HOME_SECTION_IDS.includes(id as (typeof HOME_SECTION_IDS)[number])
+  );
+  for (const sectionId of HOME_SECTION_IDS) {
+    if (!filtered.includes(sectionId)) filtered.push(sectionId);
+  }
+  return filtered;
+};
+
+const normalizeFeatureItems = (
+  items?: SiteSettings["homePage"]["featureItems"]
+): SiteSettings["homePage"]["featureItems"] => {
+  const byId = new Map(items?.map((item) => [item.id, item]) || []);
+  return DEFAULT_HOME_FEATURE_ITEMS.map((base) => {
+    const override = byId.get(base.id);
+    return {
+      ...base,
+      ...(override || {}),
+      id: base.id,
+      enabled: override?.enabled ?? base.enabled,
+      icon: override?.icon || base.icon,
+    };
+  });
+};
+
 const normalizeSettings = (raw?: Partial<SiteSettings> | null): SiteSettings => ({
   ...DEFAULT_SITE_SETTINGS,
   ...(raw || {}),
@@ -339,6 +438,28 @@ const normalizeSettings = (raw?: Partial<SiteSettings> | null): SiteSettings => 
   quickHelp: {
     ...DEFAULT_SITE_SETTINGS.quickHelp,
     ...(raw?.quickHelp || {}),
+  },
+  homePage: {
+    ...DEFAULT_SITE_SETTINGS.homePage,
+    ...(raw?.homePage || {}),
+    sectionOrder: normalizeSectionOrder(raw?.homePage?.sectionOrder),
+    sectionVisibility: {
+      ...DEFAULT_SITE_SETTINGS.homePage.sectionVisibility,
+      ...(raw?.homePage?.sectionVisibility || {}),
+    },
+    hero: {
+      ...DEFAULT_SITE_SETTINGS.homePage.hero,
+      ...(raw?.homePage?.hero || {}),
+    },
+    featuredArticles: {
+      ...DEFAULT_SITE_SETTINGS.homePage.featuredArticles,
+      ...(raw?.homePage?.featuredArticles || {}),
+    },
+    latestNews: {
+      ...DEFAULT_SITE_SETTINGS.homePage.latestNews,
+      ...(raw?.homePage?.latestNews || {}),
+    },
+    featureItems: normalizeFeatureItems(raw?.homePage?.featureItems),
   },
   galleryHeroImageUrl:
     typeof raw?.galleryHeroImageUrl === "string" && raw.galleryHeroImageUrl.trim().length > 0

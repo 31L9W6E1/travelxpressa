@@ -29,6 +29,7 @@ import SiteFooter from "@/components/SiteFooter";
 import { toast } from "sonner";
 import { Calendar as AppointmentCalendar } from "@/components/ui/calendar";
 import type { DateRange } from "react-day-picker";
+import { useSiteSettings } from "@/contexts/SiteSettingsContext";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -36,6 +37,14 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 const HOME_GRID_LIMIT = 16;
+const HOME_SECTION_IDS = ["hero", "features", "blog", "news"] as const;
+
+const FEATURE_ICON_MAP = {
+  shield: Shield,
+  zap: Zap,
+  checkCircle: CheckCircle,
+  users: Users,
+} as const;
 
 // Fallback data for when API fails or is empty
 const fallbackBlogPosts: PostSummary[] = [
@@ -80,6 +89,7 @@ const addDays = (date: Date, days: number): Date => {
 
 const Home = () => {
   const { t, i18n } = useTranslation();
+  const { settings } = useSiteSettings();
   const isMongolian = i18n.resolvedLanguage?.toLowerCase().startsWith("mn") ?? false;
   const [blogPosts, setBlogPosts] = useState<PostSummary[]>([]);
   const [newsItems, setNewsItems] = useState<PostSummary[]>([]);
@@ -111,6 +121,34 @@ const Home = () => {
   const appointmentMonthRange = `${monthFormatter.format(appointmentFrom)} - ${monthFormatter.format(
     appointmentTo
   )}`;
+
+  const homePageSettings = settings.homePage;
+  const heroText = {
+    titleLine1: homePageSettings.hero.titleLine1?.trim() || t("home.hero.titleLine1"),
+    titleLine2: homePageSettings.hero.titleLine2?.trim() || t("home.hero.titleLine2"),
+    titleLine3: homePageSettings.hero.titleLine3?.trim() || t("home.hero.titleLine3"),
+    subtitle: homePageSettings.hero.subtitle?.trim() || t("home.hero.subtitle"),
+    primaryCta: homePageSettings.hero.primaryCta?.trim() || t("home.hero.cta"),
+    secondaryCta: homePageSettings.hero.secondaryCta?.trim() || t("home.hero.learnMore"),
+    guideCta:
+      homePageSettings.hero.guideCta?.trim() || t("nav.guide", { defaultValue: "Step-by-step Guide" }),
+    installPitch:
+      homePageSettings.hero.installPitch?.trim() ||
+      t("home.install.pitch", {
+        defaultValue:
+          "Install for faster access, one-tap tracking, and instant support updates.",
+      }),
+  };
+
+  const featuredSectionText = {
+    title: homePageSettings.featuredArticles.title?.trim() || t("home.featuredArticles.title"),
+    subtitle: homePageSettings.featuredArticles.subtitle?.trim() || t("home.featuredArticles.subtitle"),
+  };
+
+  const newsSectionText = {
+    title: homePageSettings.latestNews.title?.trim() || t("home.latestNews.title"),
+    subtitle: homePageSettings.latestNews.subtitle?.trim() || t("home.latestNews.subtitle"),
+  };
 
   useEffect(() => {
     const fetchContent = async () => {
@@ -207,50 +245,78 @@ const Home = () => {
     );
   };
 
-  const features = [
-    {
-      icon: Shield,
+  const featureFallback: Record<
+    "secure" | "fast" | "errorPrevention" | "support",
+    { title: string; description: string }
+  > = {
+    secure: {
       title: t("home.features.secure.title"),
       description: t("home.features.secure.description"),
     },
-    {
-      icon: Zap,
+    fast: {
       title: t("home.features.fast.title"),
       description: t("home.features.fast.description"),
     },
-    {
-      icon: CheckCircle,
+    errorPrevention: {
       title: t("home.features.errorPrevention.title"),
       description: t("home.features.errorPrevention.description"),
     },
-    {
-      icon: Users,
+    support: {
       title: t("home.features.support.title"),
       description: t("home.features.support.description"),
     },
-  ];
+  };
+
+  const features = (homePageSettings.featureItems || [])
+    .filter((item) => item.enabled !== false)
+    .map((item) => ({
+      id: item.id,
+      icon: FEATURE_ICON_MAP[item.icon || "shield"] || Shield,
+      title: item.title?.trim() || featureFallback[item.id].title,
+      description: item.description?.trim() || featureFallback[item.id].description,
+    }));
+
+  const sectionOrder = (() => {
+    const configured = (homePageSettings.sectionOrder || []) as Array<(typeof HOME_SECTION_IDS)[number]>;
+    const deduped = Array.from(new Set(configured)).filter((id) => HOME_SECTION_IDS.includes(id));
+    for (const sectionId of HOME_SECTION_IDS) {
+      if (!deduped.includes(sectionId)) deduped.push(sectionId);
+    }
+    return deduped;
+  })();
+
+  const sectionVisibility = {
+    hero: homePageSettings.sectionVisibility?.hero !== false,
+    features: homePageSettings.sectionVisibility?.features !== false,
+    blog: homePageSettings.sectionVisibility?.blog !== false,
+    news: homePageSettings.sectionVisibility?.news !== false,
+  };
 
   return (
-    <div className="min-h-screen bg-background text-foreground font-sans">
+    <div className="min-h-screen bg-background text-foreground font-sans flex flex-col">
       {/* Hero */}
-      <section className="py-8 md:py-10 border-b border-border">
+      {sectionVisibility.hero && (
+      <section
+        className="py-8 md:py-10 border-b border-border"
+        style={{ order: sectionOrder.indexOf("hero") }}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="grid gap-7 lg:grid-cols-[minmax(0,1fr)_minmax(0,360px)] items-start">
             <div className="max-w-3xl">
               <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight mb-4 leading-[1.1]">
-                {t("home.hero.titleLine1")}
+                {heroText.titleLine1}
                 <span className="block text-muted-foreground">
-                  {t("home.hero.titleLine2")}
+                  {heroText.titleLine2}
                 </span>
-                {t("home.hero.titleLine3")}
+                {heroText.titleLine3}
               </h1>
               <p className="text-base md:text-lg text-muted-foreground mb-6 leading-relaxed">
-                {t("home.hero.subtitle")}
+                {heroText.subtitle}
               </p>
               <div className="flex flex-wrap gap-3">
                 <Button asChild size="lg" className="px-8 font-semibold">
                   <Link to="/login" className="gap-2">
-                    {t("home.hero.cta")}
+                    {heroText.primaryCta}
                     <ArrowRight className="w-5 h-5" />
                   </Link>
                 </Button>
@@ -272,18 +338,15 @@ const Home = () => {
                   size="lg"
                   className="px-8 font-semibold"
                 >
-                  <Link to="/learn-more">{t("home.hero.learnMore")}</Link>
+                  <Link to="/learn-more">{heroText.secondaryCta}</Link>
                 </Button>
                 <Button asChild variant="ghost" size="lg" className="px-6 font-semibold">
-                  <Link to="/guide">{t("nav.guide", { defaultValue: "Step-by-step Guide" })}</Link>
+                  <Link to="/guide">{heroText.guideCta}</Link>
                 </Button>
               </div>
               {!isInstalled && (
                 <p className="mt-3 text-sm text-muted-foreground">
-                  {t("home.install.pitch", {
-                    defaultValue:
-                      "Install for faster access, one-tap tracking, and instant support updates.",
-                  })}
+                  {heroText.installPitch}
                 </p>
               )}
             </div>
@@ -361,14 +424,19 @@ const Home = () => {
           </div>
         </div>
       </section>
+      )}
 
       {/* Features Cards */}
-      <section className="py-10 md:py-14 border-b border-border">
+      {sectionVisibility.features && (
+      <section
+        className="py-10 md:py-14 border-b border-border"
+        style={{ order: sectionOrder.indexOf("features") }}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
             {features.map((feature, index) => (
               <Card
-                key={index}
+                key={feature.id || index}
                 className="group relative overflow-hidden rounded-2xl border border-primary/25 bg-gradient-to-br from-primary/15 via-background to-background shadow-sm transition-colors duration-200 hover:border-primary/45"
               >
                 <CardContent className="p-4 md:p-6">
@@ -391,17 +459,22 @@ const Home = () => {
           </div>
         </div>
       </section>
+      )}
 
       {/* Featured Posts Section */}
-      <section className="py-12 md:py-20 border-b border-border">
+      {sectionVisibility.blog && (
+      <section
+        className="py-12 md:py-20 border-b border-border"
+        style={{ order: sectionOrder.indexOf("blog") }}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between mb-8">
             <div>
               <h2 className="text-2xl md:text-3xl font-bold mb-2">
-                {t("home.featuredArticles.title")}
+                {featuredSectionText.title}
               </h2>
               <p className="text-muted-foreground">
-                {t("home.featuredArticles.subtitle")}
+                {featuredSectionText.subtitle}
               </p>
             </div>
             <Button asChild variant="ghost" className="hidden md:flex">
@@ -463,17 +536,22 @@ const Home = () => {
           )}
         </div>
       </section>
+      )}
 
       {/* News Grid Section */}
-      <section className="py-12 md:py-20 border-b border-border">
+      {sectionVisibility.news && (
+      <section
+        className="py-12 md:py-20 border-b border-border"
+        style={{ order: sectionOrder.indexOf("news") }}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between mb-8">
             <div>
               <h2 className="text-2xl md:text-3xl font-bold mb-2">
-                {t("home.latestNews.title")}
+                {newsSectionText.title}
               </h2>
               <p className="text-muted-foreground">
-                {t("home.latestNews.subtitle")}
+                {newsSectionText.subtitle}
               </p>
             </div>
             <Button asChild variant="ghost" className="hidden md:flex">
@@ -535,20 +613,23 @@ const Home = () => {
           )}
         </div>
       </section>
+      )}
 
-      <SiteFooter
-        links={[
-          { to: "/about", label: t("footer.links.about") },
-          { to: "/blog", label: t("nav.blog") },
-          { to: "/news", label: t("home.news") },
-          { to: "/learn-more", label: t("home.hero.learnMore") },
-          { to: "/flight", label: t("nav.flight", { defaultValue: "Flight" }) },
-          { to: "/insurance", label: t("nav.insurance", { defaultValue: "Insurance" }) },
-          { to: "/help-center", label: t("nav.helpCenter", { defaultValue: "Help Center" }) },
-          { to: "/q-and-a", label: t("nav.qAndA", { defaultValue: "Q&A" }) },
-          { to: "/feedback", label: t("nav.feedback", { defaultValue: "Feedback" }) },
-        ]}
-      />
+      <div style={{ order: 99 }}>
+        <SiteFooter
+          links={[
+            { to: "/about", label: t("footer.links.about") },
+            { to: "/blog", label: t("nav.blog") },
+            { to: "/news", label: t("home.news") },
+            { to: "/learn-more", label: t("home.hero.learnMore") },
+            { to: "/flight", label: t("nav.flight", { defaultValue: "Flight" }) },
+            { to: "/insurance", label: t("nav.insurance", { defaultValue: "Insurance" }) },
+            { to: "/help-center", label: t("nav.helpCenter", { defaultValue: "Help Center" }) },
+            { to: "/q-and-a", label: t("nav.qAndA", { defaultValue: "Q&A" }) },
+            { to: "/feedback", label: t("nav.feedback", { defaultValue: "Feedback" }) },
+          ]}
+        />
+      </div>
     </div>
   );
 };

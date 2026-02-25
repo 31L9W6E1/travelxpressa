@@ -2748,6 +2748,169 @@ const AdminDashboard = () => {
                     </div>
                   </div>
 
+                  <div>
+                    <p className="font-medium">Homepage text labels</p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Click, edit, and save. These labels control every remaining static text on the home page.
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Install button</Label>
+                      <Input
+                        value={draftSiteSettings.homePage.labels?.installButton || ""}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setDraftSiteSettings((prev) => ({
+                            ...prev,
+                            homePage: {
+                              ...prev.homePage,
+                              labels: { ...(prev.homePage.labels || {}), installButton: value },
+                            },
+                          }));
+                          setSiteSettingsDirty(true);
+                        }}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>View all button</Label>
+                      <Input
+                        value={draftSiteSettings.homePage.labels?.viewAllButton || ""}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setDraftSiteSettings((prev) => ({
+                            ...prev,
+                            homePage: {
+                              ...prev.homePage,
+                              labels: { ...(prev.homePage.labels || {}), viewAllButton: value },
+                            },
+                          }));
+                          setSiteSettingsDirty(true);
+                        }}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Appointment eyebrow</Label>
+                      <Input
+                        value={draftSiteSettings.homePage.labels?.appointmentEyebrow || ""}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setDraftSiteSettings((prev) => ({
+                            ...prev,
+                            homePage: {
+                              ...prev.homePage,
+                              labels: { ...(prev.homePage.labels || {}), appointmentEyebrow: value },
+                            },
+                          }));
+                          setSiteSettingsDirty(true);
+                        }}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Appointment title</Label>
+                      <Input
+                        value={draftSiteSettings.homePage.labels?.appointmentTitle || ""}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setDraftSiteSettings((prev) => ({
+                            ...prev,
+                            homePage: {
+                              ...prev.homePage,
+                              labels: { ...(prev.homePage.labels || {}), appointmentTitle: value },
+                            },
+                          }));
+                          setSiteSettingsDirty(true);
+                        }}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Appointment start label</Label>
+                      <Input
+                        value={draftSiteSettings.homePage.labels?.appointmentStartLabel || ""}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setDraftSiteSettings((prev) => ({
+                            ...prev,
+                            homePage: {
+                              ...prev.homePage,
+                              labels: { ...(prev.homePage.labels || {}), appointmentStartLabel: value },
+                            },
+                          }));
+                          setSiteSettingsDirty(true);
+                        }}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Appointment end label</Label>
+                      <Input
+                        value={draftSiteSettings.homePage.labels?.appointmentEndLabel || ""}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setDraftSiteSettings((prev) => ({
+                            ...prev,
+                            homePage: {
+                              ...prev.homePage,
+                              labels: { ...(prev.homePage.labels || {}), appointmentEndLabel: value },
+                            },
+                          }));
+                          setSiteSettingsDirty(true);
+                        }}
+                      />
+                    </div>
+                    <div className="space-y-2 md:col-span-2">
+                      <Label>Appointment description</Label>
+                      <Textarea
+                        value={draftSiteSettings.homePage.labels?.appointmentDescription || ""}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setDraftSiteSettings((prev) => ({
+                            ...prev,
+                            homePage: {
+                              ...prev.homePage,
+                              labels: { ...(prev.homePage.labels || {}), appointmentDescription: value },
+                            },
+                          }));
+                          setSiteSettingsDirty(true);
+                        }}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Blog empty state</Label>
+                      <Input
+                        value={draftSiteSettings.homePage.labels?.blogEmptyState || ""}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setDraftSiteSettings((prev) => ({
+                            ...prev,
+                            homePage: {
+                              ...prev.homePage,
+                              labels: { ...(prev.homePage.labels || {}), blogEmptyState: value },
+                            },
+                          }));
+                          setSiteSettingsDirty(true);
+                        }}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>News empty state</Label>
+                      <Input
+                        value={draftSiteSettings.homePage.labels?.newsEmptyState || ""}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setDraftSiteSettings((prev) => ({
+                            ...prev,
+                            homePage: {
+                              ...prev.homePage,
+                              labels: { ...(prev.homePage.labels || {}), newsEmptyState: value },
+                            },
+                          }));
+                          setSiteSettingsDirty(true);
+                        }}
+                      />
+                    </div>
+                  </div>
+
                   <div className="space-y-3">
                     <Label>Feature cards (drag to reorder)</Label>
                     <div className="space-y-3">

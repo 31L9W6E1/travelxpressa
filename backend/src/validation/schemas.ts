@@ -154,6 +154,19 @@ export const siteSettingsSchema = z.object({
           subtitle: z.string().max(400).optional().or(z.literal('')),
         })
         .optional(),
+      labels: z
+        .object({
+          installButton: z.string().max(80).optional().or(z.literal('')),
+          viewAllButton: z.string().max(80).optional().or(z.literal('')),
+          appointmentEyebrow: z.string().max(120).optional().or(z.literal('')),
+          appointmentTitle: z.string().max(120).optional().or(z.literal('')),
+          appointmentStartLabel: z.string().max(120).optional().or(z.literal('')),
+          appointmentEndLabel: z.string().max(120).optional().or(z.literal('')),
+          appointmentDescription: z.string().max(800).optional().or(z.literal('')),
+          blogEmptyState: z.string().max(300).optional().or(z.literal('')),
+          newsEmptyState: z.string().max(300).optional().or(z.literal('')),
+        })
+        .optional(),
       featureItems: z
         .array(
           z.object({

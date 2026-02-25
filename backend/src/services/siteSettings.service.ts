@@ -61,6 +61,17 @@ export type SiteSettings = {
       title?: string;
       subtitle?: string;
     };
+    labels: {
+      installButton?: string;
+      viewAllButton?: string;
+      appointmentEyebrow?: string;
+      appointmentTitle?: string;
+      appointmentStartLabel?: string;
+      appointmentEndLabel?: string;
+      appointmentDescription?: string;
+      blogEmptyState?: string;
+      newsEmptyState?: string;
+    };
     featureItems: Array<{
       id: 'secure' | 'fast' | 'errorPrevention' | 'support';
       icon?: 'shield' | 'zap' | 'checkCircle' | 'users';
@@ -197,6 +208,17 @@ VII. Е-ГЭРЭЭНИЙ ХҮЧИН ТӨГӨЛДӨР БАЙДАЛ
     latestNews: {
       title: '',
       subtitle: '',
+    },
+    labels: {
+      installButton: '',
+      viewAllButton: '',
+      appointmentEyebrow: '',
+      appointmentTitle: '',
+      appointmentStartLabel: '',
+      appointmentEndLabel: '',
+      appointmentDescription: '',
+      blogEmptyState: '',
+      newsEmptyState: '',
     },
     featureItems: DEFAULT_HOME_FEATURE_ITEMS,
   },
@@ -473,6 +495,10 @@ const mergeSiteSettings = (raw: Partial<SiteSettings> | null | undefined): SiteS
     latestNews: {
       ...DEFAULT_SITE_SETTINGS.homePage.latestNews,
       ...(raw?.homePage?.latestNews || {}),
+    },
+    labels: {
+      ...DEFAULT_SITE_SETTINGS.homePage.labels,
+      ...(raw?.homePage?.labels || {}),
     },
     featureItems: normalizeFeatureItems(raw?.homePage?.featureItems),
   },

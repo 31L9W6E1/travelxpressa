@@ -55,7 +55,6 @@ const navItemBaseClass =
 
 const BRAND_LOGO_ICON = "/branding/logo-icon.png";
 const BRAND_LOGO_TEXT = "/branding/logo-visamn.png";
-const BRAND_LOGO_DOMAIN = "/branding/logo-visamn-com.png";
 
 const Navbar = () => {
   const { user, logout } = useAuth();
@@ -489,15 +488,24 @@ const Navbar = () => {
         className="hidden md:flex fixed inset-y-0 left-0 z-40 bg-background border-r border-dashed border-border/70 flex-col transition-[width] duration-300"
         style={{ width: isSidebarCollapsed ? "72px" : "240px" }}
       >
-        <div className="h-16 px-3 flex items-center border-b border-dashed border-border/70">
-          <Link to="/" className={`flex items-center ${isSidebarCollapsed ? "justify-center w-full" : "gap-2 min-w-0"}`}>
+        <div className="h-16 px-3 flex items-center justify-between gap-2 border-b border-dashed border-border/70">
+          <Link to="/" className={`flex items-center ${isSidebarCollapsed ? "justify-center" : "gap-2 min-w-0"}`}>
             <img
               src={isSidebarCollapsed ? BRAND_LOGO_ICON : BRAND_LOGO_TEXT}
               alt="Visamn"
-              className={isSidebarCollapsed ? "w-11 h-11 object-contain shrink-0" : "h-10 w-auto max-w-[180px] object-contain shrink-0"}
+              className={isSidebarCollapsed ? "w-9 h-9 object-contain shrink-0" : "h-10 w-auto max-w-[165px] object-contain shrink-0"}
               loading="eager"
             />
           </Link>
+          <button
+            type="button"
+            onClick={() => setIsSidebarCollapsed((prev) => !prev)}
+            className="h-8 w-8 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors flex items-center justify-center shrink-0"
+            aria-label={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+            title={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          >
+            {isSidebarCollapsed ? <PanelLeftOpen className="w-4 h-4" /> : <PanelLeftClose className="w-4 h-4" />}
+          </button>
         </div>
 
         <nav className="flex-1 overflow-y-auto p-3 space-y-1">
@@ -668,16 +676,6 @@ const Navbar = () => {
       <header className="hidden md:flex fixed top-0 left-[var(--sidebar-width,240px)] right-0 z-30 h-16 bg-background/90 backdrop-blur-md border-b border-dashed border-border/70 px-4 lg:px-6 transition-[left] duration-300">
         <div className="mx-auto grid w-full max-w-7xl grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3">
           <div className="z-10 flex min-w-0 items-center gap-3">
-            <button
-              type="button"
-              onClick={() => setIsSidebarCollapsed((prev) => !prev)}
-              className="h-9 w-9 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors flex items-center justify-center"
-              aria-label={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-              title={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-            >
-              {isSidebarCollapsed ? <PanelLeftOpen className="w-4 h-4" /> : <PanelLeftClose className="w-4 h-4" />}
-            </button>
-
             <div className="min-w-0">
               <Breadcrumb>
                 <BreadcrumbList className="flex-nowrap gap-2">
@@ -714,18 +712,7 @@ const Navbar = () => {
             </div>
           </div>
 
-          <Link
-            to="/"
-            className="z-0 hidden xl:flex items-center justify-center"
-            aria-label="Visamn home"
-          >
-            <img
-              src={BRAND_LOGO_DOMAIN}
-              alt="visamn.com"
-              className="h-8 w-auto max-w-[240px] object-contain"
-              loading="eager"
-            />
-          </Link>
+          <div className="z-0 hidden xl:block" />
 
           <div className="z-10 flex shrink-0 items-center justify-self-end gap-2">
           {user && (

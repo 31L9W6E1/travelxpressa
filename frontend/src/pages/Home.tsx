@@ -81,10 +81,16 @@ const fallbackNewsItems: PostSummary[] = [
   },
 ];
 
-const addDays = (date: Date, days: number): Date => {
-  const next = new Date(date);
-  next.setDate(next.getDate() + days);
-  return next;
+const dateWithClampedDay = (year: number, monthIndex: number, day: number): Date => {
+  const lastDay = new Date(year, monthIndex + 1, 0).getDate();
+  return new Date(year, monthIndex, Math.min(day, lastDay));
+};
+
+const formatWindowDate = (date: Date, withYear = true): string => {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return withYear ? `${y}.${m}.${d}` : `${m}.${d}`;
 };
 
 const Home = () => {
@@ -99,14 +105,10 @@ const Home = () => {
   const [isIosInstallable, setIsIosInstallable] = useState(false);
   const appointmentDefaultRange = useMemo<DateRange>(() => {
     const now = new Date();
-    const day = Math.min(now.getDate(), 26);
-    const from = new Date(now.getFullYear(), now.getMonth() + 2, day);
-    const to = addDays(from, 30);
+    const from = dateWithClampedDay(now.getFullYear(), now.getMonth() + 3, 20);
+    const to = dateWithClampedDay(now.getFullYear(), now.getMonth() + 4, 30);
     return { from, to };
   }, []);
-  const [appointmentRange, setAppointmentRange] = useState<DateRange | undefined>(
-    appointmentDefaultRange
-  );
 
   const formatAppointmentDate = (date: Date) =>
     new Intl.DateTimeFormat(i18n.language, {
@@ -115,11 +117,11 @@ const Home = () => {
       year: "numeric",
     }).format(date);
 
-  const appointmentFrom = appointmentRange?.from ?? appointmentDefaultRange.from ?? new Date();
-  const appointmentTo = appointmentRange?.to ?? addDays(appointmentFrom, 30);
-  const monthFormatter = new Intl.DateTimeFormat(i18n.language, { month: "long" });
-  const appointmentMonthRange = `${monthFormatter.format(appointmentFrom)} - ${monthFormatter.format(
-    appointmentTo
+  const appointmentFrom = appointmentDefaultRange.from ?? new Date();
+  const appointmentTo = appointmentDefaultRange.to ?? appointmentFrom;
+  const appointmentWindowLabel = `${formatWindowDate(appointmentFrom, true)} - ${formatWindowDate(
+    appointmentTo,
+    appointmentFrom.getFullYear() !== appointmentTo.getFullYear()
   )}`;
 
   const homePageSettings = settings.homePage;
@@ -148,6 +150,35 @@ const Home = () => {
   const newsSectionText = {
     title: homePageSettings.latestNews.title?.trim() || t("home.latestNews.title"),
     subtitle: homePageSettings.latestNews.subtitle?.trim() || t("home.latestNews.subtitle"),
+  };
+
+  const homeLabels = {
+    installButton:
+      homePageSettings.labels?.installButton?.trim() ||
+      t("home.install.cta", { defaultValue: "Install App" }),
+    viewAllButton:
+      homePageSettings.labels?.viewAllButton?.trim() || t("common.viewAll"),
+    appointmentEyebrow:
+      homePageSettings.labels?.appointmentEyebrow?.trim() ||
+      (isMongolian ? "АНУ-ЫН ЯРИЛЦЛАГЫН ЦАГ" : "U.S. APPOINTMENT OUTLOOK"),
+    appointmentTitle:
+      homePageSettings.labels?.appointmentTitle?.trim() ||
+      (isMongolian ? "Боломжит ярилцлагын цонх" : "Likely interview windows"),
+    appointmentStartLabel:
+      homePageSettings.labels?.appointmentStartLabel?.trim() ||
+      (isMongolian ? "Эхлэх боломжит огноо" : "Estimated earliest slot"),
+    appointmentEndLabel:
+      homePageSettings.labels?.appointmentEndLabel?.trim() ||
+      (isMongolian ? "Эцсийн боломжит огноо" : "Estimated latest slot"),
+    appointmentDescription:
+      homePageSettings.labels?.appointmentDescription?.trim() ||
+      (isMongolian
+        ? "АНУ-ын ярилцлагын боломжит 3-4 сарын цонхыг онцолж харууллаа. Бодит цаг нээлтийн өөрчлөлтийг баг маань өдөр бүр шалгаж, шуурхай захиалга хийж өгнө."
+        : "This highlights a likely 3-4 month U.S. interview window. Our team tracks real-time slot releases and books quickly when openings appear."),
+    blogEmptyState:
+      homePageSettings.labels?.blogEmptyState?.trim() || t("home.featuredArticles.noPosts"),
+    newsEmptyState:
+      homePageSettings.labels?.newsEmptyState?.trim() || t("home.latestNews.noNews"),
   };
 
   useEffect(() => {
@@ -329,7 +360,7 @@ const Home = () => {
                     onClick={() => void handleInstallClick()}
                   >
                     <Download className="w-5 h-5 mr-2" />
-                    {t("home.install.cta", { defaultValue: "Install App" })}
+                    {homeLabels.installButton}
                   </Button>
                 )}
                 <Button
@@ -358,14 +389,14 @@ const Home = () => {
                 <div className="relative">
                   <div className="mb-3 md:mb-4">
                     <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-primary">
-                      {isMongolian ? "АНУ-ЫН ЯРИЛЦЛАГЫН ЦАГ" : "U.S. APPOINTMENT OUTLOOK"}
+                      {homeLabels.appointmentEyebrow}
                     </p>
                     <div className="mt-1 flex flex-wrap items-center gap-2">
                       <h3 className="text-base md:text-lg font-semibold text-foreground">
-                        {isMongolian ? "Боломжит ярилцлагын цонх" : "Likely interview windows"}
+                        {homeLabels.appointmentTitle}
                       </h3>
                       <span className="rounded-full border border-primary/25 bg-primary/10 px-2.5 py-0.5 text-[11px] font-medium text-primary">
-                        {appointmentMonthRange}
+                        {appointmentWindowLabel}
                       </span>
                     </div>
                   </div>
@@ -373,8 +404,7 @@ const Home = () => {
                   <div className="w-full overflow-hidden">
                     <AppointmentCalendar
                       mode="range"
-                      selected={appointmentRange}
-                      onSelect={setAppointmentRange}
+                      selected={appointmentDefaultRange}
                       defaultMonth={appointmentFrom}
                       numberOfMonths={1}
                       captionLayout="label"
@@ -391,13 +421,14 @@ const Home = () => {
                         appointment:
                           "bg-primary/20 text-primary font-semibold rounded-md border border-primary/30",
                       }}
+                      disabled={(date) => date < appointmentFrom || date > appointmentTo}
                     />
                   </div>
 
                   <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <div className="rounded-lg border border-primary/50 bg-primary/10 px-2.5 py-2 text-left">
                       <p className="text-[11px] font-medium text-muted-foreground">
-                        {isMongolian ? "Эхлэх боломжит огноо" : "Estimated earliest slot"}
+                        {homeLabels.appointmentStartLabel}
                       </p>
                       <p className="text-xs font-semibold text-foreground mt-0.5">
                         {formatAppointmentDate(appointmentFrom)}
@@ -405,7 +436,7 @@ const Home = () => {
                     </div>
                     <div className="rounded-lg border border-border bg-background/80 px-2.5 py-2 text-left">
                       <p className="text-[11px] font-medium text-muted-foreground">
-                        {isMongolian ? "Эцсийн боломжит огноо" : "Estimated latest slot"}
+                        {homeLabels.appointmentEndLabel}
                       </p>
                       <p className="text-xs font-semibold text-foreground mt-0.5">
                         {formatAppointmentDate(appointmentTo)}
@@ -414,9 +445,7 @@ const Home = () => {
                   </div>
 
                   <p className="mt-3 text-xs text-muted-foreground leading-relaxed">
-                    {isMongolian
-                      ? "Өнөөдрийн огноонд тулгуурлан АНУ-ын ярилцлагын боломжит 2-3 сарын цонхыг онцолж харууллаа. Бодит цаг нээлтийн өөрчлөлтийг баг маань өдөр бүр шалгаж, шуурхай захиалга хийж өгнө."
-                      : "Based on today's date, this shows a likely 2-3 month U.S. interview window. Our team tracks real-time slot releases and books quickly when openings appear."}
+                    {homeLabels.appointmentDescription}
                   </p>
                 </div>
               </div>
@@ -479,7 +508,7 @@ const Home = () => {
             </div>
             <Button asChild variant="ghost" className="hidden md:flex">
               <Link to="/blog" className="gap-2">
-                {t("common.viewAll")}
+                {homeLabels.viewAllButton}
                 <ChevronRight className="w-4 h-4" />
               </Link>
             </Button>
@@ -530,7 +559,7 @@ const Home = () => {
           ) : (
             <Card className="p-12 text-center">
               <p className="text-muted-foreground">
-                {t("home.featuredArticles.noPosts")}
+                {homeLabels.blogEmptyState}
               </p>
             </Card>
           )}
@@ -556,7 +585,7 @@ const Home = () => {
             </div>
             <Button asChild variant="ghost" className="hidden md:flex">
               <Link to="/news" className="gap-2">
-                {t("common.viewAll")}
+                {homeLabels.viewAllButton}
                 <ChevronRight className="w-4 h-4" />
               </Link>
             </Button>
@@ -607,7 +636,7 @@ const Home = () => {
           ) : (
             <Card className="p-12 text-center">
               <p className="text-muted-foreground">
-                {t("home.latestNews.noNews")}
+                {homeLabels.newsEmptyState}
               </p>
             </Card>
           )}
